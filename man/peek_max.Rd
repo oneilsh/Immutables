@@ -4,13 +4,13 @@
 \alias{peek_max}
 \title{Peek maximum-priority element}
 \usage{
-peek_max(q)
+peek_max(x)
 }
 \arguments{
-\item{q}{A `priority_queue`.}
+\item{x}{A `priority_queue`.}
 }
 \value{
-Element with maximum priority (stable on ties).
+Element with maximum priority (stable on ties), or `NULL` when empty.
 }
 \description{
 Peek maximum-priority element

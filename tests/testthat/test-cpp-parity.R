@@ -407,21 +407,21 @@ testthat::test_that("backend parity: interval_index insert and queries", {
     )
     y <- insert(x, "d", start = 2, end = 5)
 
-    p0 <- pop_point(y, 2, which = "first")
-    p1 <- pop_overlaps(y, 2, 3, which = "first")
-    p2 <- pop_within(y, 2, 5, which = "all")
+    p0 <- pop_point(y, 2)
+    p1 <- pop_overlaps(y, 2, 3)
+    p2 <- pop_all_within(y, 2, 5)
     bounds_tokens <- c("[)", "[]", "()", "(]")
     bounds_matrix <- lapply(bounds_tokens, function(bt) {
       list(
         token = bt,
-        point = as.list(peek_point(y, 2, which = "all", bounds = bt)),
-        overlaps = as.list(peek_overlaps(y, 2, 3, which = "all", bounds = bt)),
-        containing = as.list(peek_containing(y, 2, 3, which = "all", bounds = bt)),
-        within = as.list(peek_within(y, 2, 3, which = "all", bounds = bt)),
-        pop_point = as.list(pop_point(y, 2, which = "all", bounds = bt)$element),
-        pop_overlaps = as.list(pop_overlaps(y, 2, 3, which = "all", bounds = bt)$element),
-        pop_containing = as.list(pop_containing(y, 2, 3, which = "all", bounds = bt)$element),
-        pop_within = as.list(pop_within(y, 2, 3, which = "all", bounds = bt)$element)
+        point = as.list(peek_all_point(y, 2, bounds = bt)),
+        overlaps = as.list(peek_all_overlaps(y, 2, 3, bounds = bt)),
+        containing = as.list(peek_all_containing(y, 2, 3, bounds = bt)),
+        within = as.list(peek_all_within(y, 2, 3, bounds = bt)),
+        pop_point = as.list(pop_all_point(y, 2, bounds = bt)$elements),
+        pop_overlaps = as.list(pop_all_overlaps(y, 2, 3, bounds = bt)$elements),
+        pop_containing = as.list(pop_all_containing(y, 2, 3, bounds = bt)$elements),
+        pop_within = as.list(pop_all_within(y, 2, 3, bounds = bt)$elements)
       )
     })
 
@@ -429,14 +429,14 @@ testthat::test_that("backend parity: interval_index insert and queries", {
       values = as.list(y),
       bounds = interval_bounds(y),
       bounds_matrix = bounds_matrix,
-      point_first = peek_point(y, 2, which = "first"),
-      point = as.list(peek_point(y, 2, which = "all")),
-      overlaps_first = peek_overlaps(y, 2, 3, which = "first"),
-      overlaps = as.list(peek_overlaps(y, 2, 3, which = "all")),
-      containing_first = peek_containing(y, 2, 3, which = "first"),
-      containing = as.list(peek_containing(y, 2, 3, which = "all")),
-      within_first = peek_within(y, 2, 5, which = "first"),
-      within = as.list(peek_within(y, 2, 5, which = "all")),
+      point_first = peek_point(y, 2),
+      point = as.list(peek_all_point(y, 2)),
+      overlaps_first = peek_overlaps(y, 2, 3),
+      overlaps = as.list(peek_all_overlaps(y, 2, 3)),
+      containing_first = peek_containing(y, 2, 3),
+      containing = as.list(peek_all_containing(y, 2, 3)),
+      within_first = peek_within(y, 2, 5),
+      within = as.list(peek_all_within(y, 2, 5)),
       pop_point_first = list(
         element = p0$element,
         start = p0$start,
@@ -450,7 +450,7 @@ testthat::test_that("backend parity: interval_index insert and queries", {
         remaining = as.list(p1$remaining)
       ),
       pop_all = list(
-        element = as.list(p2$element),
+        elements = as.list(p2$elements),
         remaining = as.list(p2$remaining)
       )
     )
@@ -469,8 +469,8 @@ testthat::test_that("backend parity: interval_index user monoid recomputation", 
     ), list(sum_item = sum_item, width_sum = width_sum))
     y <- insert(x, 40, start = 3, end = 4)
     z <- fapply(y, function(item, start, end, name) item + 1)
-    s <- peek_overlaps(z, 2, 3, which = "all", bounds = "[)")
-    p <- pop_overlaps(z, 2, 3, which = "all", bounds = "[)")
+    s <- peek_all_overlaps(z, 2, 3, bounds = "[)")
+    p <- pop_all_overlaps(z, 2, 3, bounds = "[)")
 
     list(
       base = c(sum_item = node_measure(x, "sum_item"), width_sum = node_measure(x, "width_sum")),
@@ -478,15 +478,15 @@ testthat::test_that("backend parity: interval_index user monoid recomputation", 
       applied = c(sum_item = node_measure(z, "sum_item"), width_sum = node_measure(z, "width_sum")),
       slice = c(sum_item = node_measure(s, "sum_item"), width_sum = node_measure(s, "width_sum")),
       pop_element = c(
-        sum_item = node_measure(p$element, "sum_item"),
-        width_sum = node_measure(p$element, "width_sum")
+        sum_item = node_measure(p$elements, "sum_item"),
+        width_sum = node_measure(p$elements, "width_sum")
       ),
       pop_remaining = c(
         sum_item = node_measure(p$remaining, "sum_item"),
         width_sum = node_measure(p$remaining, "width_sum")
       ),
       slice_values = as.list(s),
-      pop_values = as.list(p$element),
+      pop_values = as.list(p$elements),
       remaining_values = as.list(p$remaining)
     )
   })

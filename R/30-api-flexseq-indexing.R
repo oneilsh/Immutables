@@ -488,15 +488,25 @@
 }
 
 # Runtime: O(k), where k = length(pos).
-.ord_assert_positions_strict <- function(pos) {
-  if(length(pos) <= 1L) {
-    return(as.integer(pos))
-  }
+.ord_normalize_selector_positions <- function(pos) {
   pos <- as.integer(pos)
-  if(any(is.na(pos)) || any(diff(pos) <= 0L)) {
-    stop("Ordered subsetting requires strictly increasing indices (no duplicates or reordering).")
+  if(length(pos) == 0L) {
+    return(pos)
   }
-  pos
+  if(any(is.na(pos))) {
+    stop("Ordered subsetting does not allow missing indices.")
+  }
+  if(anyDuplicated(pos) > 0L) {
+    stop("Ordered subsetting does not allow duplicate indices.")
+  }
+  sorted <- sort(pos)
+  if(length(sorted) > 1L && !identical(pos, sorted)) {
+    warning(
+      "Ordered subsetting canonicalizes selector order; pre-sort and unique selectors to silence this warning.",
+      call. = FALSE
+    )
+  }
+  sorted
 }
 
 #' @rdname sub-.flexseq

@@ -83,46 +83,107 @@ insert.priority_queue <- function(x, element, priority, name = NULL, ...) {
   .pq_append_entry(q, entry)
 }
 
+# Runtime: O(1).
+.pq_empty_like <- function(x) {
+  ms <- resolve_tree_monoids(x, required = TRUE)
+  .pq_wrap_like(x, empty_tree(monoids = ms))
+}
+
+# Runtime: O(k), where k = number of requested positions.
+.pq_slice_positions <- function(x, positions) {
+  if(length(positions) == 0L) {
+    return(.pq_empty_like(x))
+  }
+  .pq_wrap_like(x, `[.flexseq`(x, as.integer(positions)))
+}
+
+# Runtime: O(log n) for single deletion; O(n log n) for multi-position rebuild.
+.pq_remove_positions <- function(x, positions) {
+  n <- length(x)
+  if(length(positions) == 0L) {
+    return(x)
+  }
+  pos <- sort(unique(as.integer(positions)))
+  if(length(pos) >= n) {
+    return(.pq_empty_like(x))
+  }
+  if(length(pos) == 1L) {
+    idx <- pos[[1L]]
+    s <- split_around_by_predicate(x, function(v) v >= idx, ".size")
+    return(.pq_wrap_like(x, concat_trees(s$left, s$right)))
+  }
+  keep <- setdiff(seq_len(n), pos)
+  .pq_wrap_like(x, `[.flexseq`(x, as.integer(keep)))
+}
+
+# Runtime: O(n) scan to collect all tie positions for one extrema value.
+.pq_extreme_positions <- function(x, monoid_name) {
+  .pq_assert_queue(x)
+  if(length(x) == 0L) {
+    return(integer(0))
+  }
+  target <- node_measure(x, monoid_name)
+  if(!isTRUE(target$has)) {
+    return(integer(0))
+  }
+  target_priority <- target$priority
+  domain <- .ft_scalar_domain(target_priority)
+  entries <- .ft_to_list(x)
+  idx <- which(vapply(
+    entries,
+    function(e) {
+      .ft_scalar_equal_fast(
+        e$priority,
+        target_priority,
+        domain = domain,
+        error_message = "Priority values must support scalar ordering with `<` and `>`."
+      )
+    },
+    logical(1)
+  ))
+  as.integer(idx)
+}
+
 # Runtime: O(log n) near locate point depth.
-.pq_peek <- function(q, monoid_name) {
-  .pq_assert_queue(q)
-  if(length(q) == 0L) {
-    stop("Cannot peek from an empty priority_queue.")
+.pq_peek <- function(x, monoid_name) {
+  .pq_assert_queue(x)
+  if(length(x) == 0L) {
+    return(NULL)
   }
 
-  target <- node_measure(q, monoid_name)
+  target <- node_measure(x, monoid_name)
   pred <- function(v) .pq_measure_equal(v, target)
-  ctx <- resolve_named_monoid(q, monoid_name)
+  ctx <- resolve_named_monoid(x, monoid_name)
   ms <- ctx$monoids
   mr <- ctx$monoid
   loc <- if(.ft_cpp_can_use(ms)) {
-    .ft_cpp_locate(q, pred, ms, monoid_name, mr$i)
+    .ft_cpp_locate(x, pred, ms, monoid_name, mr$i)
   } else {
-    locate_tree_impl_fast(pred, mr$i, q, ms, mr, monoid_name, 0L)
+    locate_tree_impl_fast(pred, mr$i, x, ms, mr, monoid_name, 0L)
   }
   loc$elem[["item"]]
 }
 
 # Runtime: O(log n) near split point depth.
-.pq_extract <- function(q, monoid_name) {
-  .pq_assert_queue(q)
-  if(length(q) == 0L) {
-    stop("Cannot pop from an empty priority_queue.")
+.pq_extract <- function(x, monoid_name) {
+  .pq_assert_queue(x)
+  if(length(x) == 0L) {
+    return(list(element = NULL, priority = NULL, remaining = x))
   }
 
-  target <- node_measure(q, monoid_name)
+  target <- node_measure(x, monoid_name)
   pred <- function(v) .pq_measure_equal(v, target)
-  ctx <- resolve_named_monoid(q, monoid_name)
+  ctx <- resolve_named_monoid(x, monoid_name)
   ms <- ctx$monoids
   mr <- ctx$monoid
   s <- if(.ft_cpp_can_use(ms)) {
-    .ft_cpp_split_tree(q, pred, ms, monoid_name, mr$i)
+    .ft_cpp_split_tree(x, pred, ms, monoid_name, mr$i)
   } else {
-    split_tree_impl_fast(pred, mr$i, q, ms, mr, monoid_name)
+    split_tree_impl_fast(pred, mr$i, x, ms, mr, monoid_name)
   }
 
   rest <- concat_trees(s$left, s$right)
-  rest <- .pq_wrap_like(q, rest)
+  rest <- .pq_wrap_like(x, rest)
 
   list(
     element = s$elem[["item"]],
@@ -131,38 +192,80 @@ insert.priority_queue <- function(x, element, priority, name = NULL, ...) {
   )
 }
 
+# Runtime: O(n) due tie-run position scan.
+.pq_peek_all <- function(x, monoid_name) {
+  .pq_assert_queue(x)
+  pos <- .pq_extreme_positions(x, monoid_name)
+  .pq_slice_positions(x, pos)
+}
+
+# Runtime: O(n log n) worst-case from tie-run extraction + remainder rebuild.
+.pq_extract_all <- function(x, monoid_name) {
+  .pq_assert_queue(x)
+  pos <- .pq_extreme_positions(x, monoid_name)
+  if(length(pos) == 0L) {
+    return(list(elements = .pq_empty_like(x), remaining = x))
+  }
+  list(
+    elements = .pq_slice_positions(x, pos),
+    remaining = .pq_remove_positions(x, pos)
+  )
+}
+
 # Runtime: O(log n) near locate point depth.
 #' Peek minimum-priority element
 #'
-#' @param q A `priority_queue`.
-#' @return Element with minimum priority (stable on ties).
+#' @param x A `priority_queue`.
+#' @return Element with minimum priority (stable on ties), or `NULL` when empty.
 #' @examples
 #' x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
 #' x
 #' peek_min(x)
 #' @export
-peek_min <- function(q) {
-  .pq_peek(q, ".pq_min")
+peek_min <- function(x) {
+  .pq_peek(x, ".pq_min")
 }
 
 # Runtime: O(log n) near locate point depth.
 #' Peek maximum-priority element
 #'
-#' @param q A `priority_queue`.
-#' @return Element with maximum priority (stable on ties).
+#' @param x A `priority_queue`.
+#' @return Element with maximum priority (stable on ties), or `NULL` when empty.
 #' @examples
 #' x <- priority_queue("a", "b", "c", priorities = c(2, 3, 3))
 #' x
 #' peek_max(x)
 #' @export
-peek_max <- function(q) {
-  .pq_peek(q, ".pq_max")
+peek_max <- function(x) {
+  .pq_peek(x, ".pq_max")
+}
+
+# Runtime: O(n) due tie-run scan.
+#' Peek all minimum-priority elements
+#'
+#' @param x A `priority_queue`.
+#' @return A `priority_queue` containing all minimum-priority elements in stable
+#'   FIFO order.
+#' @export
+peek_all_min <- function(x) {
+  .pq_peek_all(x, ".pq_min")
+}
+
+# Runtime: O(n) due tie-run scan.
+#' Peek all maximum-priority elements
+#'
+#' @param x A `priority_queue`.
+#' @return A `priority_queue` containing all maximum-priority elements in stable
+#'   FIFO order.
+#' @export
+peek_all_max <- function(x) {
+  .pq_peek_all(x, ".pq_max")
 }
 
 # Runtime: O(log n) near split point depth.
 #' Pop minimum-priority element
 #'
-#' @param q A `priority_queue`.
+#' @param x A `priority_queue`.
 #' @return List with `element`, `priority`, and updated `remaining`.
 #' @examples
 #' x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
@@ -171,14 +274,14 @@ peek_max <- function(q) {
 #' out$priority
 #' out$remaining
 #' @export
-pop_min <- function(q) {
-  .pq_extract(q, ".pq_min")
+pop_min <- function(x) {
+  .pq_extract(x, ".pq_min")
 }
 
 # Runtime: O(log n) near split point depth.
 #' Pop maximum-priority element
 #'
-#' @param q A `priority_queue`.
+#' @param x A `priority_queue`.
 #' @return List with `element`, `priority`, and updated `remaining`.
 #' @examples
 #' x <- priority_queue("a", "b", "c", priorities = c(2, 3, 3))
@@ -187,6 +290,26 @@ pop_min <- function(q) {
 #' out$priority
 #' out$remaining
 #' @export
-pop_max <- function(q) {
-  .pq_extract(q, ".pq_max")
+pop_max <- function(x) {
+  .pq_extract(x, ".pq_max")
+}
+
+# Runtime: O(n log n) worst-case.
+#' Pop all minimum-priority elements
+#'
+#' @param x A `priority_queue`.
+#' @return List with `elements` and updated `remaining`.
+#' @export
+pop_all_min <- function(x) {
+  .pq_extract_all(x, ".pq_min")
+}
+
+# Runtime: O(n log n) worst-case.
+#' Pop all maximum-priority elements
+#'
+#' @param x A `priority_queue`.
+#' @return List with `elements` and updated `remaining`.
+#' @export
+pop_all_max <- function(x) {
+  .pq_extract_all(x, ".pq_max")
 }

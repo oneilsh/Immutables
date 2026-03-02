@@ -43,5 +43,6 @@ No return value; always errors because replacement indexing is unsupported.
 }
 \description{
 Read indexing returns `interval_index` subsets while preserving interval/key
-order. Replacement indexing is blocked.
+order; out-of-order selectors are canonicalized with a warning. Replacement
+indexing is blocked.
 }

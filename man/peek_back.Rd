@@ -10,7 +10,7 @@ peek_back(x)
 \item{x}{A `flexseq`.}
 }
 \value{
-Back element.
+Back element, or `NULL` when `x` is empty.
 }
 \description{
 Peek at the back element

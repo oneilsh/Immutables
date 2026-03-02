@@ -2,24 +2,20 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{peek_point}
 \alias{peek_point}
-\title{Peek intervals containing a point}
+\title{Peek first interval containing a point}
 \usage{
-peek_point(x, point, which = c("first", "all"), bounds = NULL)
+peek_point(x, point, bounds = NULL)
 }
 \arguments{
 \item{x}{An `interval_index`.}
 
 \item{point}{Query point.}
 
-\item{which}{One of `"first"` or `"all"`.}
-
 \item{bounds}{Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
 }
 \value{
-For `which = "first"`, the payload item from the first match (or
-  `NULL` on no match). For `which = "all"`, an `interval_index` slice
-  of matches.
+The payload item from the first match, or `NULL` on no match.
 }
 \description{
-Peek intervals containing a point
+Peek first interval containing a point
 }

@@ -38,6 +38,7 @@ Read methods return ordered payload values/subsets; replacement forms
   always error.
 }
 \description{
-Read indexing returns `ordered_sequence` subsets while preserving key order.
+Read indexing treats vectors as selectors and returns subsets in key order.
+Out-of-order selectors are canonicalized with a warning.
 Replacement indexing is blocked to prevent order-breaking writes.
 }

@@ -4,10 +4,10 @@
 \alias{pop_max}
 \title{Pop maximum-priority element}
 \usage{
-pop_max(q)
+pop_max(x)
 }
 \arguments{
-\item{q}{A `priority_queue`.}
+\item{x}{A `priority_queue`.}
 }
 \value{
 List with `element`, `priority`, and updated `remaining`.

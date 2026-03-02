@@ -3,7 +3,8 @@
 #' Indexing for Interval Indexes
 #'
 #' Read indexing returns `interval_index` subsets while preserving interval/key
-#' order. Replacement indexing is blocked.
+#' order; out-of-order selectors are canonicalized with a warning. Replacement
+#' indexing is blocked.
 #'
 #' @name sub-.interval_index
 #' @param x An `interval_index`.
@@ -14,7 +15,7 @@
 #'   always error.
 NULL
 
-# Runtime: O(k log n) for reads + O(k) strict-order validation.
+# Runtime: O(k log n) for reads + O(k log k) selector normalization.
 # Subset method preserving interval-index wrapper semantics.
 # **Inputs:** `x` interval_index; `i` integer/logical/character index.
 # **Outputs:** interval_index subset (empty-like when no positions selected).
@@ -47,7 +48,7 @@ NULL
       return(.ivx_wrap_like(x, empty_tree(monoids = ms)))
     }
     pos <- .ft_match_name_indices(x, idx, strict_missing = TRUE)
-    pos <- .ord_assert_positions_strict(pos)
+    pos <- .ord_normalize_selector_positions(pos)
     out <- .ft_prepare_subset_entries(.ft_get_elems_at(x, pos))
     return(.ivx_wrap_like(x, tree_from(out, monoids = ms)))
   }
@@ -56,7 +57,7 @@ NULL
   if(length(idx) == 0L) {
     return(.ivx_wrap_like(x, empty_tree(monoids = ms)))
   }
-  idx <- .ord_assert_positions_strict(idx)
+  idx <- .ord_normalize_selector_positions(idx)
   out <- .ft_prepare_subset_entries(.ft_get_elems_at(x, idx))
   .ivx_wrap_like(x, tree_from(out, monoids = ms))
 }

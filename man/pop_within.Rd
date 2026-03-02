@@ -2,9 +2,9 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{pop_within}
 \alias{pop_within}
-\title{Pop intervals within a query interval}
+\title{Pop first interval within a query interval}
 \usage{
-pop_within(x, start, end, which = c("first", "all"), bounds = NULL)
+pop_within(x, start, end, bounds = NULL)
 }
 \arguments{
 \item{x}{An `interval_index`.}
@@ -13,15 +13,12 @@ pop_within(x, start, end, which = c("first", "all"), bounds = NULL)
 
 \item{end}{Query interval end.}
 
-\item{which}{One of `"first"` or `"all"`.}
-
 \item{bounds}{Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
 }
 \value{
-For `which = "first"`, a list with `element`, `start`, `end`, `remaining`.
-  For `which = "all"`, `element` is an `interval_index` slice and
-  `start`/`end` are `NULL`.
+A list with `element`, `start`, `end`, and `remaining`.
+  On miss: `element`, `start`, and `end` are `NULL`.
 }
 \description{
-Pop intervals within a query interval
+Pop first interval within a query interval
 }

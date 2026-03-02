@@ -43,6 +43,26 @@ x2$priority
 x2$remaining
 ```
 
+## Bulk extrema (tie runs)
+
+Use bulk helpers to read/remove all elements tied at the current minimum or
+maximum priority.
+
+```{r}
+peek_all_min(x)
+pop_all_min(x)
+```
+
+## Empty queues
+
+Scalar peek/pop helpers are non-throwing on empty queues.
+
+```{r}
+empty_q <- priority_queue()
+peek_min(empty_q)
+pop_min(empty_q)
+```
+
 ## Inserting elements
 
 ```{r}

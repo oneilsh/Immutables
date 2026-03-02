@@ -2,44 +2,20 @@
 % Please edit documentation in R/50-ordered_sequence-ops.R
 \name{pop_key}
 \alias{pop_key}
-\title{Pop elements for one key}
+\title{Pop first element for one key}
 \usage{
-pop_key(x, key, which = c("first", "all"))
+pop_key(x, key)
 }
 \arguments{
 \item{x}{An `ordered_sequence`.}
 
 \item{key}{Query key.}
-
-\item{which}{One of `"first"` or `"all"`.}
 }
 \value{
-A named list with components \code{element}, \code{key}, and
-  \code{remaining}.
-  \itemize{
-  \item For \code{which = "first"}:
-  \itemize{
-  \item On match: \code{element} is the first matching item and \code{key}
-  is its key.
-  \item On miss: \code{element = NULL}, \code{key = NULL},
-  \code{remaining = x}.
-  }
-  \item For \code{which = "all"}:
-  \itemize{
-  \item \code{element} is an \code{ordered_sequence} of all matching items in
-  stable order. It may have size 0 (miss), 1 (single match), or greater than
-  1 (multiple matches).
-  \item \code{key} is the normalized key on match, otherwise \code{NULL}.
-  \item \code{remaining} is the original sequence with that full key-run
-  removed (or unchanged on miss).
-  }
-  }
+A named list with components `element`, `key`, and `remaining`.
+  On miss: `element = NULL`, `key = NULL`, `remaining = x`.
 }
 \description{
-For `which = "first"`, removes and returns the first (leftmost) sequence
-element among entries whose key equals `key`.
-}
-\details{
-For `which = "all"`, removes and returns all matching entries as an ordered
-sequence.
+Removes and returns the first (leftmost) sequence element among entries
+whose key equals `key`.
 }

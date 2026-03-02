@@ -142,7 +142,7 @@ insert.ordered_sequence <- function(x, element, key, ...) {
 
 # Runtime: O(log n) near split points.
 # Extract and remove the positional span [start, end_excl) using .size splits.
-# Used by: peek_key(which="all") and pop_key(which="all").
+# Used by: peek_all_key() and pop_all_key().
 .oms_slice_key_span <- function(x, start, end_excl) {
   .oms_assert_set(x)
   if(end_excl <= start) {
@@ -206,98 +206,93 @@ upper_bound <- function(x, key) {
   list(found = TRUE, index = idx, element = entry$item, key = entry$key)
 }
 
-# Runtime: O(log n) for `which = "first"`; O(log n) for `which = "all"`.
-#' Peek elements for one key
+# Runtime: O(log n).
+#' Peek first element for one key
 #'
-#' For `which = "first"`, returns the first (leftmost) sequence element among
-#' entries whose key equals `key`.
-#'
-#' For `which = "all"`, returns an ordered sequence containing exactly the
-#' entries whose key equals `key`.
+#' Returns the first (leftmost) sequence element among entries whose key equals
+#' `key`.
 #'
 #' @param x An `ordered_sequence`.
 #' @param key Query key.
-#' @param which One of `"first"` or `"all"`.
-#' @return For `which = "first"`, raw stored element.
-#'   For `which = "all"`, an ordered sequence with matching elements.
-#'   Throws when no matching key exists.
+#' @return Raw stored element on match, or `NULL` when no matching key exists.
 #' @export
-# Public key lookup API: one element or full duplicate-key run.
-peek_key <- function(x, key, which = c("first", "all")) {
+peek_key <- function(x, key) {
   .oms_stop_interval_index(x, "peek_key")
-  which <- match.arg(which)
   span <- .oms_key_span(x, key)
-
   if(!isTRUE(span$found)) {
-    stop("No matching key found.")
+    return(NULL)
   }
+  s <- split_around_by_predicate(x, function(v) v >= span$start, ".size")
+  s$elem$item
+}
 
-  if(!identical(which, "all")) {
-    s <- split_around_by_predicate(x, function(v) v >= span$start, ".size")
-    return(s$elem$item)
+# Runtime: O(log n) near split points.
+#' Peek all elements for one key
+#'
+#' Returns an ordered sequence containing exactly the entries whose key equals
+#' `key`.
+#'
+#' @param x An `ordered_sequence`.
+#' @param key Query key.
+#' @return An `ordered_sequence` with all matching elements; empty on miss.
+#' @export
+peek_all_key <- function(x, key) {
+  .oms_stop_interval_index(x, "peek_all_key")
+  span <- .oms_key_span(x, key)
+  if(!isTRUE(span$found)) {
+    return(.ord_wrap_like(x, .oms_empty_tree_like(x)))
   }
-
   parts <- .oms_slice_key_span(x, span$start, span$end_excl)
   .ord_wrap_like(x, parts$matched)
 }
 
 # Runtime: O(log n) near split point depth.
-#' Pop elements for one key
+#' Pop first element for one key
 #'
-#' For `which = "first"`, removes and returns the first (leftmost) sequence
-#' element among entries whose key equals `key`.
-#'
-#' For `which = "all"`, removes and returns all matching entries as an ordered
-#' sequence.
+#' Removes and returns the first (leftmost) sequence element among entries
+#' whose key equals `key`.
 #'
 #' @param x An `ordered_sequence`.
 #' @param key Query key.
-#' @param which One of `"first"` or `"all"`.
-#' @return A named list with components \code{element}, \code{key}, and
-#'   \code{remaining}.
-#'   \itemize{
-#'   \item For \code{which = "first"}:
-#'   \itemize{
-#'   \item On match: \code{element} is the first matching item and \code{key}
-#'   is its key.
-#'   \item On miss: \code{element = NULL}, \code{key = NULL},
-#'   \code{remaining = x}.
-#'   }
-#'   \item For \code{which = "all"}:
-#'   \itemize{
-#'   \item \code{element} is an \code{ordered_sequence} of all matching items in
-#'   stable order. It may have size 0 (miss), 1 (single match), or greater than
-#'   1 (multiple matches).
-#'   \item \code{key} is the normalized key on match, otherwise \code{NULL}.
-#'   \item \code{remaining} is the original sequence with that full key-run
-#'   removed (or unchanged on miss).
-#'   }
-#'   }
+#' @return A named list with components `element`, `key`, and `remaining`.
+#'   On miss: `element = NULL`, `key = NULL`, `remaining = x`.
 #' @export
-# Public key removal API: one element or full duplicate-key run, returning
-# persistent remainder sequence.
-pop_key <- function(x, key, which = c("first", "all")) {
+pop_key <- function(x, key) {
   .oms_stop_interval_index(x, "pop_key")
-  which <- match.arg(which)
   span <- .oms_key_span(x, key)
 
   if(!isTRUE(span$found)) {
-    if(identical(which, "all")) {
-      return(list(element = .ord_wrap_like(x, .oms_empty_tree_like(x)), key = NULL, remaining = x))
-    }
     return(list(element = NULL, key = NULL, remaining = x))
   }
 
-  if(!identical(which, "all")) {
-    s <- split_around_by_predicate(x, function(v) v >= span$start, ".size")
-    out <- concat_trees(s$left, s$right)
-    seq_out <- .ord_wrap_like(x, out)
-    return(list(element = s$elem$item, key = s$elem$key, remaining = seq_out))
+  s <- split_around_by_predicate(x, function(v) v >= span$start, ".size")
+  out <- concat_trees(s$left, s$right)
+  seq_out <- .ord_wrap_like(x, out)
+  list(element = s$elem$item, key = s$elem$key, remaining = seq_out)
+}
+
+# Runtime: O(log n) near split point depth.
+#' Pop all elements for one key
+#'
+#' Removes and returns all matching entries for `key` as an ordered sequence.
+#'
+#' @param x An `ordered_sequence`.
+#' @param key Query key.
+#' @return A named list with components `elements` and `remaining`. Both are
+#'   `ordered_sequence` objects. On miss, `elements` is empty and `remaining`
+#'   is unchanged.
+#' @export
+pop_all_key <- function(x, key) {
+  .oms_stop_interval_index(x, "pop_all_key")
+  span <- .oms_key_span(x, key)
+
+  if(!isTRUE(span$found)) {
+    return(list(elements = .ord_wrap_like(x, .oms_empty_tree_like(x)), remaining = x))
   }
+
   parts <- .oms_slice_key_span(x, span$start, span$end_excl)
   list(
-    element = .ord_wrap_like(x, parts$matched),
-    key = span$key,
+    elements = .ord_wrap_like(x, parts$matched),
     remaining = .ord_wrap_like(x, parts$rest)
   )
 }

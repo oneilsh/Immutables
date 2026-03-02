@@ -10,6 +10,22 @@ testthat::test_that("priority_queue constructor and length", {
   testthat::expect_equal(peek_max(q), "a")
 })
 
+testthat::test_that("empty priority_queue scalar peek/pop are non-throwing misses", {
+  x <- priority_queue()
+
+  testthat::expect_null(peek_min(x))
+  testthat::expect_null(peek_max(x))
+
+  pmin <- pop_min(x)
+  pmax <- pop_max(x)
+  testthat::expect_null(pmin$element)
+  testthat::expect_null(pmin$priority)
+  testthat::expect_identical(length(pmin$remaining), 0L)
+  testthat::expect_null(pmax$element)
+  testthat::expect_null(pmax$priority)
+  testthat::expect_identical(length(pmax$remaining), 0L)
+})
+
 testthat::test_that("min/max pop uses sequence order on ties", {
   q <- priority_queue("a", "b", "c", "d", priorities = c(2, 1, 1, 2))
 
@@ -28,6 +44,29 @@ testthat::test_that("min/max pop uses sequence order on ties", {
   x2 <- pop_max(x1$remaining)
   testthat::expect_equal(x2$element, "d")
   testthat::expect_equal(x2$priority, 2)
+})
+
+testthat::test_that("bulk extrema helpers return full tie runs", {
+  q <- priority_queue("a", "b", "c", "d", priorities = c(2, 1, 1, 2))
+
+  pmin <- peek_all_min(q)
+  pmax <- peek_all_max(q)
+  testthat::expect_s3_class(pmin, "priority_queue")
+  testthat::expect_s3_class(pmax, "priority_queue")
+  testthat::expect_equal(lapply(as.list(pmin), function(e) e$item), list("b", "c"))
+  testthat::expect_equal(lapply(as.list(pmax), function(e) e$item), list("a", "d"))
+
+  out_min <- pop_all_min(q)
+  testthat::expect_s3_class(out_min$elements, "priority_queue")
+  testthat::expect_s3_class(out_min$remaining, "priority_queue")
+  testthat::expect_equal(lapply(as.list(out_min$elements), function(e) e$item), list("b", "c"))
+  testthat::expect_equal(lapply(as.list(out_min$remaining), function(e) e$item), list("a", "d"))
+
+  out_max <- pop_all_max(q)
+  testthat::expect_s3_class(out_max$elements, "priority_queue")
+  testthat::expect_s3_class(out_max$remaining, "priority_queue")
+  testthat::expect_equal(lapply(as.list(out_max$elements), function(e) e$item), list("a", "d"))
+  testthat::expect_equal(lapply(as.list(out_max$remaining), function(e) e$item), list("b", "c"))
 })
 
 testthat::test_that("insert is persistent and supports names", {

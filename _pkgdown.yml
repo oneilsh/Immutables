@@ -44,8 +44,12 @@ reference:
       - insert.priority_queue
       - peek_min
       - peek_max
+      - peek_all_min
+      - peek_all_max
       - pop_min
       - pop_max
+      - pop_all_min
+      - pop_all_max
       - "[.priority_queue"
       - "[[.priority_queue"
       - "print.priority_queue"
@@ -63,7 +67,9 @@ reference:
       - as_ordered_sequence
       - insert.ordered_sequence
       - peek_key
+      - peek_all_key
       - pop_key
+      - pop_all_key
       - lower_bound
       - upper_bound
       - elements_between
@@ -85,13 +91,21 @@ reference:
       - as_interval_index
       - insert.interval_index
       - peek_point
+      - peek_all_point
       - pop_point
+      - pop_all_point
       - peek_overlaps
+      - peek_all_overlaps
       - peek_containing
+      - peek_all_containing
       - peek_within
+      - peek_all_within
       - pop_overlaps
+      - pop_all_overlaps
       - pop_containing
+      - pop_all_containing
       - pop_within
+      - pop_all_within
       - interval_bounds
       - "[.interval_index"
       - "print.interval_index"

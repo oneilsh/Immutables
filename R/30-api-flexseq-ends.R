@@ -223,6 +223,29 @@ push_front <- function(x, value) {
   resolved
 }
 
+# validate one positional index for miss-aware public peek/pop-at helpers.
+# Returns NULL when index is a valid positive integer but out of bounds.
+# Runtime: O(1).
+.ft_validate_scalar_position_missable <- function(index, n) {
+  if(is.null(index)) {
+    stop("Index is required.")
+  }
+  if(!is.numeric(index) || any(is.na(index)) || any(index != as.integer(index))) {
+    stop("Only non-missing integer indices are supported.")
+  }
+  idx <- as.integer(index)
+  if(length(idx) != 1L) {
+    stop("`index` must be a single positive integer.")
+  }
+  if(idx <= 0L) {
+    stop("Only positive integer indices are supported.")
+  }
+  if(idx > n) {
+    return(NULL)
+  }
+  idx
+}
+
 # validate one insertion index in [1, n + 1].
 # Runtime: O(1).
 .ft_validate_scalar_insert_position <- function(index, n) {
@@ -284,7 +307,7 @@ push_front <- function(x, value) {
 #' Peek at the front element
 #'
 #' @param x A `flexseq`.
-#' @return Front element.
+#' @return Front element, or `NULL` when `x` is empty.
 #' @export
 # Runtime: O(log n) lookup by scalar index.
 peek_front <- function(x) {
@@ -298,7 +321,7 @@ peek_front <- function(x) {
     stop("`x` must be a flexseq.")
   }
   if(length(x) == 0L) {
-    stop("Cannot `peek_front()` from an empty sequence.")
+    return(NULL)
   }
   .ft_unwrap_public_value(x, x[[1L]])
 }
@@ -306,7 +329,7 @@ peek_front <- function(x) {
 #' Peek at the back element
 #'
 #' @param x A `flexseq`.
-#' @return Back element.
+#' @return Back element, or `NULL` when `x` is empty.
 #' @export
 # Runtime: O(log n) lookup by scalar index.
 peek_back <- function(x) {
@@ -321,7 +344,7 @@ peek_back <- function(x) {
   }
   n <- length(x)
   if(n == 0L) {
-    stop("Cannot `peek_back()` from an empty sequence.")
+    return(NULL)
   }
   .ft_unwrap_public_value(x, x[[n]])
 }
@@ -330,7 +353,7 @@ peek_back <- function(x) {
 #'
 #' @param x A `flexseq`.
 #' @param index One-based position to read.
-#' @return Element at `index`.
+#' @return Element at `index`, or `NULL` when `index` is out of bounds.
 #' @export
 # Runtime: O(log n) lookup by scalar index.
 peek_at <- function(x, index) {
@@ -344,10 +367,10 @@ peek_at <- function(x, index) {
     stop("`x` must be a flexseq.")
   }
   n <- length(x)
-  if(n == 0L) {
-    stop("Cannot `peek_at()` from an empty sequence.")
+  idx <- .ft_validate_scalar_position_missable(index, n)
+  if(is.null(idx)) {
+    return(NULL)
   }
-  idx <- .ft_validate_scalar_position(index, n)
   element <- .ft_strip_name(.ft_get_elem_at(x, idx))
   .ft_unwrap_public_value(x, element)
 }
@@ -377,7 +400,7 @@ pop_front <- function(x) {
   }
   n <- length(x)
   if(n == 0L) {
-    stop("Cannot `pop_front()` from an empty sequence.")
+    return(list(element = NULL, remaining = x))
   }
   element <- .ft_unwrap_public_value(x, x[[1L]])
   remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_front()") else x[seq.int(2L, n)]
@@ -409,7 +432,7 @@ pop_back <- function(x) {
   }
   n <- length(x)
   if(n == 0L) {
-    stop("Cannot `pop_back()` from an empty sequence.")
+    return(list(element = NULL, remaining = x))
   }
   element <- .ft_unwrap_public_value(x, x[[n]])
   remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_back()") else x[seq_len(n - 1L)]
@@ -441,10 +464,10 @@ pop_at <- function(x, index) {
     stop("`x` must be a flexseq.")
   }
   n <- length(x)
-  if(n == 0L) {
-    stop("Cannot `pop_at()` from an empty sequence.")
+  idx <- .ft_validate_scalar_position_missable(index, n)
+  if(is.null(idx)) {
+    return(list(element = NULL, remaining = x))
   }
-  idx <- .ft_validate_scalar_position(index, n)
   selected <- .ft_strip_name(.ft_get_elem_at(x, idx))
   element <- .ft_unwrap_public_value(x, selected)
 

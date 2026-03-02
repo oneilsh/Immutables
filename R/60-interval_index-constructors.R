@@ -190,7 +190,7 @@
 #' @examples
 #' ix <- as_interval_index(c("a", "b", "c"), start = c(1, 2, 2), end = c(3, 2, 4))
 #' ix
-#' as.list(peek_point(ix, 2, which = "all"))
+#' as.list(peek_all_point(ix, 2))
 #' @export
 as_interval_index <- function(x, start, end, bounds = "[)") {
   .as_interval_index_build(x, start = start, end = end, bounds = bounds, monoids = NULL)

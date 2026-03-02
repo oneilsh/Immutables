@@ -10,7 +10,7 @@ peek_front(x)
 \item{x}{A `flexseq`.}
 }
 \value{
-Front element.
+Front element, or `NULL` when `x` is empty.
 }
 \description{
 Peek at the front element

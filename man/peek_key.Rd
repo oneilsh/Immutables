@@ -2,27 +2,19 @@
 % Please edit documentation in R/50-ordered_sequence-ops.R
 \name{peek_key}
 \alias{peek_key}
-\title{Peek elements for one key}
+\title{Peek first element for one key}
 \usage{
-peek_key(x, key, which = c("first", "all"))
+peek_key(x, key)
 }
 \arguments{
 \item{x}{An `ordered_sequence`.}
 
 \item{key}{Query key.}
-
-\item{which}{One of `"first"` or `"all"`.}
 }
 \value{
-For `which = "first"`, raw stored element.
-  For `which = "all"`, an ordered sequence with matching elements.
-  Throws when no matching key exists.
+Raw stored element on match, or `NULL` when no matching key exists.
 }
 \description{
-For `which = "first"`, returns the first (leftmost) sequence element among
-entries whose key equals `key`.
-}
-\details{
-For `which = "all"`, returns an ordered sequence containing exactly the
-entries whose key equals `key`.
+Returns the first (leftmost) sequence element among entries whose key equals
+`key`.
 }

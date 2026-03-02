@@ -2,9 +2,9 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{peek_within}
 \alias{peek_within}
-\title{Peek intervals within a query interval}
+\title{Peek first interval within a query interval}
 \usage{
-peek_within(x, start, end, which = c("first", "all"), bounds = NULL)
+peek_within(x, start, end, bounds = NULL)
 }
 \arguments{
 \item{x}{An `interval_index`.}
@@ -13,15 +13,11 @@ peek_within(x, start, end, which = c("first", "all"), bounds = NULL)
 
 \item{end}{Query interval end.}
 
-\item{which}{One of `"first"` or `"all"`.}
-
 \item{bounds}{Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
 }
 \value{
-For `which = "first"`, the payload item from the first match (or
-  `NULL` on no match). For `which = "all"`, an `interval_index` slice
-  of matches.
+The payload item from the first match, or `NULL` on no match.
 }
 \description{
-Peek intervals within a query interval
+Peek first interval within a query interval
 }

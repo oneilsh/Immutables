@@ -84,11 +84,11 @@
 
     step("insert", insert(x_oms, "newer", key = 2))
     step("insert_interval_index", insert(x_ivx, "newer", start = 2, end = 5))
-    step("peek_point_interval_index", peek_point(x_ivx, 2, which = "all"))
-    step("pop_point_interval_index", pop_point(x_ivx, 2, which = "all"))
-    step("peek_overlaps_interval_index", peek_overlaps(x_ivx, 2, 3, which = "all"))
-    step("peek_containing_interval_index", peek_containing(x_ivx, 2, 3, which = "all"))
-    step("peek_within_interval_index", peek_within(x_ivx, 2, 3, which = "all"))
+    step("peek_point_interval_index", peek_all_point(x_ivx, 2))
+    step("pop_point_interval_index", pop_all_point(x_ivx, 2))
+    step("peek_overlaps_interval_index", peek_all_overlaps(x_ivx, 2, 3))
+    step("peek_containing_interval_index", peek_all_containing(x_ivx, 2, 3))
+    step("peek_within_interval_index", peek_all_within(x_ivx, 2, 3))
 
     step("pq_numeric_peek_min_max", {
       invisible(peek_min(q_num))

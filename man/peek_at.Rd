@@ -12,7 +12,7 @@ peek_at(x, index)
 \item{index}{One-based position to read.}
 }
 \value{
-Element at `index`.
+Element at `index`, or `NULL` when `index` is out of bounds.
 }
 \description{
 Peek at an element by position

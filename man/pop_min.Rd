@@ -4,10 +4,10 @@
 \alias{pop_min}
 \title{Pop minimum-priority element}
 \usage{
-pop_min(q)
+pop_min(x)
 }
 \arguments{
-\item{q}{A `priority_queue`.}
+\item{x}{A `priority_queue`.}
 }
 \value{
 List with `element`, `priority`, and updated `remaining`.

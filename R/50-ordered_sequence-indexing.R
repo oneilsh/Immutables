@@ -2,7 +2,8 @@
 
 #' Indexing for Ordered Sequences
 #'
-#' Read indexing returns `ordered_sequence` subsets while preserving key order.
+#' Read indexing treats vectors as selectors and returns subsets in key order.
+#' Out-of-order selectors are canonicalized with a warning.
 #' Replacement indexing is blocked to prevent order-breaking writes.
 #'
 #' @name sub-.ordered_sequence
@@ -15,7 +16,7 @@
 #' @rdname sub-.ordered_sequence
 #' @method [ ordered_sequence
 #' @export
-# Runtime: O(k log n) for reads + O(k) strict-order validation and rebuild
+# Runtime: O(k log n) for reads + O(k log k) selector normalization and rebuild
 #          but for name access O(n + k log n) due to how name indexing works
 `[.ordered_sequence` <- function(x, i, ...) {
   if(missing(i)) {
@@ -40,7 +41,7 @@
       return(.ord_wrap_like(x, empty_tree(monoids = ms)))
     }
     pos <- .ft_match_name_indices(x, idx, strict_missing = TRUE)
-    pos <- .ord_assert_positions_strict(pos)
+    pos <- .ord_normalize_selector_positions(pos)
     out <- .ft_prepare_subset_entries(.ft_get_elems_at(x, pos))
     return(.ord_wrap_like(x, tree_from(out, monoids = ms)))
   }
@@ -49,7 +50,7 @@
   if(length(idx) == 0L) {
     return(.ord_wrap_like(x, empty_tree(monoids = ms)))
   }
-  idx <- .ord_assert_positions_strict(idx)
+  idx <- .ord_normalize_selector_positions(idx)
   out <- .ft_prepare_subset_entries(.ft_get_elems_at(x, idx))
   .ord_wrap_like(x, tree_from(out, monoids = ms))
 }

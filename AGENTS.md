@@ -133,6 +133,7 @@ API or underlying implementations change.
   - like this
   - and this
 - Keep notes short and concrete (commit SHA + impact + risk).
+- `local`: API ergonomics redesign landed across ordered/interval/priority/flexseq: removed public `which="first|all"` selectors in favor of explicit `peek_all_*`/`pop_all_*`, standardized scalar misses (`peek_*` returns `NULL`; scalar `pop_*` returns non-throwing miss object), and canonicalized ordered/interval vector `[` selectors to sorted unique positions (duplicates now error). Risk: intentional breaking changes for callers using old `which` signatures, bulk pop `$element`, or strict-increasing selector assumptions.
 - `eb493fd`: ordered_sequence key APIs aligned around `key`/`from_key`/`to_key`, `extract_key` renamed to `pop_key`, and missing-key reads are non-throwing (`peek_key(..., if_missing=...)`, `pop_key()` null-returns on miss). Risk: callers relying on previous argument names/error behavior need updates.
 - `eb493fd`: removed `delete_one`/`delete_all`; `peek_key()` and `pop_key()` now support `which = "first"|"all"` where `"all"` operates on full duplicate-key runs and returns an ordered slice. Risk: code using deleted functions or assuming `pop_key()` always pops one element must migrate.
 - `eb493fd`: `pop_front()`/`pop_back()` now return `element` (not `value`) plus `rest`; tests/docs/vignette updated. Risk: callers using `$value` must switch to `$element`.

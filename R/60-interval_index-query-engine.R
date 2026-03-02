@@ -208,12 +208,12 @@
 # Runtime: O(1).
 # Standardized miss return for pop relation endpoints.
 # **Inputs:** `x` interval_index; `which` in {"first","all"}.
-# **Outputs:** list(element,start,end,remaining) with empty/NULL element by `which`.
+# **Outputs:** scalar miss for first; bulk miss for all with empty elements slice.
 # **Used by:** .ivx_run_relation_query() miss branches.
 .ivx_query_pop_miss <- function(x, which = c("first", "all")) {
   which <- match.arg(which)
   if(identical(which, "all")) {
-    return(list(element = .ivx_empty_like(x), start = NULL, end = NULL, remaining = x))
+    return(list(elements = .ivx_empty_like(x), remaining = x))
   }
   list(element = NULL, start = NULL, end = NULL, remaining = x)
 }
@@ -356,7 +356,7 @@
 # - peek/first: element item or NULL.
 # - peek/all: interval_index slice of matches (possibly empty).
 # - pop/first: list(element,start,end,remaining).
-# - pop/all: list(element=<interval_index>, start=NULL, end=NULL, remaining=<interval_index>).
+# - pop/all: list(elements=<interval_index>, remaining=<interval_index>).
 #
 # **Used by:** public query API (peek_*/pop_* endpoints).
 .ivx_run_relation_query <- function(x, spec, mode = c("peek", "pop"), which = c("first", "all")) {
@@ -504,7 +504,7 @@
   unmatched <- .ivx_slice_entries(x, hit$unmatched_entries)
   remaining <- .ivx_concat3_like(x, parts$left, unmatched, parts$right)
 
-  list(element = matched, start = NULL, end = NULL, remaining = remaining)
+  list(elements = matched, remaining = remaining)
 }
 
 # Returns a slice by positions as interval_index, preserving class metadata.
@@ -547,7 +547,7 @@
 # **Outputs:**
 #
 # - which = "first": list(element=<payload item>, start=<scalar>, end=<scalar>, remaining=<interval_index>).
-# - which = "all": list(element=<interval_index slice at `positions`>, start=NULL, end=NULL,
+# - which = "all": list(elements=<interval_index slice at `positions`>,
 #   remaining=<interval_index with those positions removed>).
 #
 # **Used by:** .ivx_run_relation_query() fast path and first-hit pop path.
@@ -556,7 +556,7 @@
 
   if(length(positions) == 0L) {
     if(identical(which, "all")) {
-      return(list(element = .ivx_empty_like(x), start = NULL, end = NULL, remaining = x))
+      return(list(elements = .ivx_empty_like(x), remaining = x))
     }
     return(list(element = NULL, start = NULL, end = NULL, remaining = x))
   }
@@ -570,5 +570,5 @@
 
   matched <- .ivx_slice_positions(x, positions)
   remaining <- .ivx_remove_positions(x, positions)
-  list(element = matched, start = NULL, end = NULL, remaining = remaining)
+  list(elements = matched, remaining = remaining)
 }

@@ -42,11 +42,11 @@ testthat::test_that("peek_point honors boundary modes", {
     bounds = "[)"
   )
 
-  testthat::expect_equal(peek_point(ix, 2, which = "first", bounds = "[)"), "B")
-  testthat::expect_equal(as.list(peek_point(ix, 2, which = "all", bounds = "[]")), list("A", "B", "D"))
-  testthat::expect_null(peek_point(ix, 2, which = "first", bounds = "()"))
-  testthat::expect_identical(length(peek_point(ix, 2, which = "all", bounds = "()")), 0L)
-  testthat::expect_equal(as.list(peek_point(ix, 2, which = "all", bounds = "(]")), list("A"))
+  testthat::expect_equal(peek_point(ix, 2, bounds = "[)"), "B")
+  testthat::expect_equal(as.list(peek_all_point(ix, 2, bounds = "[]")), list("A", "B", "D"))
+  testthat::expect_null(peek_point(ix, 2, bounds = "()"))
+  testthat::expect_identical(length(peek_all_point(ix, 2, bounds = "()")), 0L)
+  testthat::expect_equal(as.list(peek_all_point(ix, 2, bounds = "(]")), list("A"))
 })
 
 testthat::test_that("peek overlap/contain/within queries are deterministic", {
@@ -57,8 +57,8 @@ testthat::test_that("peek overlap/contain/within queries are deterministic", {
     bounds = "[)"
   )
 
-  testthat::expect_equal(peek_overlaps(ix, 2, 3, which = "first", bounds = "[)"), "B")
-  testthat::expect_equal(as.list(peek_overlaps(ix, 2, 3, which = "all", bounds = "[]")), list("A", "B", "D", "C"))
+  testthat::expect_equal(peek_overlaps(ix, 2, 3, bounds = "[)"), "B")
+  testthat::expect_equal(as.list(peek_all_overlaps(ix, 2, 3, bounds = "[]")), list("A", "B", "D", "C"))
 
   jy <- as_interval_index(
     list("outer", "inner", "tail", "point"),
@@ -67,13 +67,13 @@ testthat::test_that("peek overlap/contain/within queries are deterministic", {
     bounds = "[]"
   )
 
-  testthat::expect_equal(peek_containing(jy, 2, 3, which = "first"), "outer")
-  testthat::expect_equal(as.list(peek_containing(jy, 2, 3, which = "all")), list("outer", "inner", "tail"))
-  testthat::expect_equal(peek_within(jy, 2, 3, which = "first"), "inner")
-  testthat::expect_equal(as.list(peek_within(jy, 2, 3, which = "all")), list("inner", "point"))
+  testthat::expect_equal(peek_containing(jy, 2, 3), "outer")
+  testthat::expect_equal(as.list(peek_all_containing(jy, 2, 3)), list("outer", "inner", "tail"))
+  testthat::expect_equal(peek_within(jy, 2, 3), "inner")
+  testthat::expect_equal(as.list(peek_all_within(jy, 2, 3)), list("inner", "point"))
 
-  testthat::expect_null(peek_overlaps(ix, 9, 10, which = "first"))
-  miss <- peek_overlaps(ix, 9, 10, which = "all")
+  testthat::expect_null(peek_overlaps(ix, 9, 10))
+  miss <- peek_all_overlaps(ix, 9, 10)
   testthat::expect_s3_class(miss, "interval_index")
   testthat::expect_identical(length(miss), 0L)
 })
@@ -141,38 +141,36 @@ testthat::test_that("relation query/pop contracts hold across all bounds tokens"
         testthat::expect_equal(as.list(pop_first$remaining), vals[-i])
       }
 
-      testthat::expect_equal(as.list(pop_all$element), expect_all)
-      testthat::expect_null(pop_all$start)
-      testthat::expect_null(pop_all$end)
+      testthat::expect_equal(as.list(pop_all$elements), expect_all)
       testthat::expect_equal(as.list(pop_all$remaining), expect_rest)
     }
 
     expect_relation(
-      peek_first = peek_point(ix, 2, which = "first", bounds = bt),
-      peek_all = peek_point(ix, 2, which = "all", bounds = bt),
-      pop_first = pop_point(ix, 2, which = "first", bounds = bt),
-      pop_all = pop_point(ix, 2, which = "all", bounds = bt),
+      peek_first = peek_point(ix, 2, bounds = bt),
+      peek_all = peek_all_point(ix, 2, bounds = bt),
+      pop_first = pop_point(ix, 2, bounds = bt),
+      pop_all = pop_all_point(ix, 2, bounds = bt),
       idx = idx_point
     )
     expect_relation(
-      peek_first = peek_overlaps(ix, 2, 3, which = "first", bounds = bt),
-      peek_all = peek_overlaps(ix, 2, 3, which = "all", bounds = bt),
-      pop_first = pop_overlaps(ix, 2, 3, which = "first", bounds = bt),
-      pop_all = pop_overlaps(ix, 2, 3, which = "all", bounds = bt),
+      peek_first = peek_overlaps(ix, 2, 3, bounds = bt),
+      peek_all = peek_all_overlaps(ix, 2, 3, bounds = bt),
+      pop_first = pop_overlaps(ix, 2, 3, bounds = bt),
+      pop_all = pop_all_overlaps(ix, 2, 3, bounds = bt),
       idx = idx_over
     )
     expect_relation(
-      peek_first = peek_containing(ix, 2, 3, which = "first", bounds = bt),
-      peek_all = peek_containing(ix, 2, 3, which = "all", bounds = bt),
-      pop_first = pop_containing(ix, 2, 3, which = "first", bounds = bt),
-      pop_all = pop_containing(ix, 2, 3, which = "all", bounds = bt),
+      peek_first = peek_containing(ix, 2, 3, bounds = bt),
+      peek_all = peek_all_containing(ix, 2, 3, bounds = bt),
+      pop_first = pop_containing(ix, 2, 3, bounds = bt),
+      pop_all = pop_all_containing(ix, 2, 3, bounds = bt),
       idx = idx_cont
     )
     expect_relation(
-      peek_first = peek_within(ix, 2, 3, which = "first", bounds = bt),
-      peek_all = peek_within(ix, 2, 3, which = "all", bounds = bt),
-      pop_first = pop_within(ix, 2, 3, which = "first", bounds = bt),
-      pop_all = pop_within(ix, 2, 3, which = "all", bounds = bt),
+      peek_first = peek_within(ix, 2, 3, bounds = bt),
+      peek_all = peek_all_within(ix, 2, 3, bounds = bt),
+      pop_first = pop_within(ix, 2, 3, bounds = bt),
+      pop_all = pop_all_within(ix, 2, 3, bounds = bt),
       idx = idx_with
     )
   }
@@ -192,24 +190,20 @@ testthat::test_that("pop helpers follow first/all contracts and preserve persist
   testthat::expect_equal(first$end, 2)
   testthat::expect_s3_class(first$remaining, "interval_index")
 
-  all <- pop_overlaps(ix, 2, 3, which = "all")
-  testthat::expect_s3_class(all$element, "interval_index")
-  testthat::expect_null(all$start)
-  testthat::expect_null(all$end)
-  testthat::expect_equal(as.list(all$element), list("A", "B", "D", "C"))
+  all <- pop_all_overlaps(ix, 2, 3)
+  testthat::expect_s3_class(all$elements, "interval_index")
+  testthat::expect_equal(as.list(all$elements), list("A", "B", "D", "C"))
   testthat::expect_identical(length(all$remaining), 0L)
 
-  point_first <- pop_point(ix, 2, which = "first")
+  point_first <- pop_point(ix, 2)
   testthat::expect_equal(point_first$element, "A")
   testthat::expect_equal(point_first$start, 1)
   testthat::expect_equal(point_first$end, 2)
   testthat::expect_equal(as.list(point_first$remaining), list("B", "D", "C"))
 
-  point_all <- pop_point(ix, 2, which = "all")
-  testthat::expect_s3_class(point_all$element, "interval_index")
-  testthat::expect_null(point_all$start)
-  testthat::expect_null(point_all$end)
-  testthat::expect_equal(as.list(point_all$element), list("A", "B", "D"))
+  point_all <- pop_all_point(ix, 2)
+  testthat::expect_s3_class(point_all$elements, "interval_index")
+  testthat::expect_equal(as.list(point_all$elements), list("A", "B", "D"))
   testthat::expect_equal(as.list(point_all$remaining), list("C"))
 
   miss_first <- pop_within(ix, 9, 10)
@@ -218,20 +212,20 @@ testthat::test_that("pop helpers follow first/all contracts and preserve persist
   testthat::expect_null(miss_first$end)
   testthat::expect_equal(as.list(miss_first$remaining), as.list(ix))
 
-  miss_all <- pop_containing(ix, 9, 10, which = "all")
-  testthat::expect_s3_class(miss_all$element, "interval_index")
-  testthat::expect_identical(length(miss_all$element), 0L)
+  miss_all <- pop_all_containing(ix, 9, 10)
+  testthat::expect_s3_class(miss_all$elements, "interval_index")
+  testthat::expect_identical(length(miss_all$elements), 0L)
   testthat::expect_equal(as.list(miss_all$remaining), as.list(ix))
 
-  miss_point_first <- pop_point(ix, 9, which = "first")
+  miss_point_first <- pop_point(ix, 9)
   testthat::expect_null(miss_point_first$element)
   testthat::expect_null(miss_point_first$start)
   testthat::expect_null(miss_point_first$end)
   testthat::expect_equal(as.list(miss_point_first$remaining), as.list(ix))
 
-  miss_point_all <- pop_point(ix, 9, which = "all")
-  testthat::expect_s3_class(miss_point_all$element, "interval_index")
-  testthat::expect_identical(length(miss_point_all$element), 0L)
+  miss_point_all <- pop_all_point(ix, 9)
+  testthat::expect_s3_class(miss_point_all$elements, "interval_index")
+  testthat::expect_identical(length(miss_point_all$elements), 0L)
   testthat::expect_equal(as.list(miss_point_all$remaining), as.list(ix))
 })
 
@@ -263,8 +257,22 @@ testthat::test_that("interval_index indexing preserves class and blocks replacem
   testthat::expect_equal(ix[["c"]], "xc")
   testthat::expect_equal(ix$b, "xb")
 
-  testthat::expect_error(ix[c(3, 1)], "strictly increasing")
-  testthat::expect_error(ix[c("b", "a")], "strictly increasing")
+  reordered <- NULL
+  testthat::expect_warning(
+    { reordered <- ix[c(3, 1)] },
+    "canonicalizes selector order"
+  )
+  testthat::expect_equal(as.list(reordered), list(a = "xa", c = "xc"))
+
+  reordered_name <- NULL
+  testthat::expect_warning(
+    { reordered_name <- ix[c("b", "a")] },
+    "canonicalizes selector order"
+  )
+  testthat::expect_equal(as.list(reordered_name), list(a = "xa", b = "xb"))
+
+  testthat::expect_error(ix[c(2, 2)], "duplicate indices")
+  testthat::expect_error(ix[c("a", "a")], "duplicate indices")
 
   testthat::expect_error({ ix[[1]] <- "qq" }, "not supported")
   testthat::expect_error({ ix[1] <- list("qq") }, "not supported")
@@ -336,18 +344,18 @@ testthat::test_that("interval_index recomputes user monoids across insert, fappl
   testthat::expect_equal(node_measure(ix3, "sum_item"), 104)
   testthat::expect_equal(node_measure(ix3, "width_sum"), 8)
 
-  overlaps <- peek_overlaps(ix3, 2, 3, which = "all", bounds = "[)")
+  overlaps <- peek_all_overlaps(ix3, 2, 3, bounds = "[)")
   testthat::expect_s3_class(overlaps, "interval_index")
   testthat::expect_equal(as.list(overlaps), as.list(c(11, 21)))
   testthat::expect_equal(node_measure(overlaps, "sum_item"), 32)
   testthat::expect_equal(node_measure(overlaps, "width_sum"), 5)
 
-  popped <- pop_overlaps(ix3, 2, 3, which = "all", bounds = "[)")
-  testthat::expect_s3_class(popped$element, "interval_index")
+  popped <- pop_all_overlaps(ix3, 2, 3, bounds = "[)")
+  testthat::expect_s3_class(popped$elements, "interval_index")
   testthat::expect_s3_class(popped$remaining, "interval_index")
-  testthat::expect_equal(node_measure(popped$element, "sum_item"), 32)
+  testthat::expect_equal(node_measure(popped$elements, "sum_item"), 32)
   testthat::expect_equal(node_measure(popped$remaining, "sum_item"), 72)
-  testthat::expect_equal(node_measure(popped$element, "width_sum"), 5)
+  testthat::expect_equal(node_measure(popped$elements, "width_sum"), 5)
   testthat::expect_equal(node_measure(popped$remaining, "width_sum"), 3)
 })
 

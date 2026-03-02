@@ -118,24 +118,33 @@ testthat::test_that("peek/pop helpers work and are persistent", {
   testthat::expect_identical(as.list(x), as.list(letters[1:4]))
 })
 
-testthat::test_that("peek/pop helpers validate empty input", {
+testthat::test_that("peek/pop helpers return non-throwing miss results on empty input", {
   x <- flexseq()
-  testthat::expect_error(peek_front(x), "empty sequence")
-  testthat::expect_error(peek_back(x), "empty sequence")
-  testthat::expect_error(peek_at(x, 1), "empty sequence")
-  testthat::expect_error(pop_front(x), "empty sequence")
-  testthat::expect_error(pop_back(x), "empty sequence")
-  testthat::expect_error(pop_at(x, 1), "empty sequence")
+  testthat::expect_null(peek_front(x))
+  testthat::expect_null(peek_back(x))
+  testthat::expect_null(peek_at(x, 1))
+
+  pf <- pop_front(x)
+  pb <- pop_back(x)
+  pa <- pop_at(x, 1)
+  testthat::expect_null(pf$element)
+  testthat::expect_identical(length(pf$remaining), 0L)
+  testthat::expect_null(pb$element)
+  testthat::expect_identical(length(pb$remaining), 0L)
+  testthat::expect_null(pa$element)
+  testthat::expect_identical(length(pa$remaining), 0L)
 })
 
-testthat::test_that("peek_at/pop_at validate positional index shape and bounds", {
+testthat::test_that("peek_at/pop_at validate positional index shape and treat out-of-range as miss", {
   x <- as_flexseq(letters[1:4])
   testthat::expect_error(peek_at(x, 0), "positive integer")
-  testthat::expect_error(peek_at(x, 5), "out of bounds")
+  testthat::expect_null(peek_at(x, 5))
   testthat::expect_error(peek_at(x, c(1, 2)), "single positive integer")
 
   testthat::expect_error(pop_at(x, 0), "positive integer")
-  testthat::expect_error(pop_at(x, 5), "out of bounds")
+  miss <- pop_at(x, 5)
+  testthat::expect_null(miss$element)
+  testthat::expect_identical(as.list(miss$remaining), as.list(x))
   testthat::expect_error(pop_at(x, c(1, 2)), "single positive integer")
 })
 

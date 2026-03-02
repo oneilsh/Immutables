@@ -59,25 +59,25 @@ testthat::test_that("lower_bound and upper_bound behave at boundaries", {
   testthat::expect_null(lb9$index)
 })
 
-testthat::test_that("pop_key supports first/all removal by key span", {
+testthat::test_that("pop_key/pop_all_key removal by key span", {
   xs <- as_ordered_sequence(list("aa", "bb", "c", "dd", "e"), keys = c(2, 2, 1, 2, 1))
 
   one <- pop_key(xs, 2)
   testthat::expect_equal(one$element, "aa")
   testthat::expect_equal(as.list(one$remaining), list("c", "e", "bb", "dd"))
 
-  all <- pop_key(xs, 2, which = "all")
-  testthat::expect_s3_class(all$element, "ordered_sequence")
-  testthat::expect_equal(as.list(all$element), list("aa", "bb", "dd"))
+  all <- pop_all_key(xs, 2)
+  testthat::expect_s3_class(all$elements, "ordered_sequence")
+  testthat::expect_equal(as.list(all$elements), list("aa", "bb", "dd"))
   testthat::expect_equal(as.list(all$remaining), list("c", "e"))
 
   miss_one <- pop_key(xs, 99)
   testthat::expect_null(miss_one$element)
   testthat::expect_equal(as.list(miss_one$remaining), as.list(xs))
 
-  miss_all <- pop_key(xs, 99, which = "all")
-  testthat::expect_s3_class(miss_all$element, "ordered_sequence")
-  testthat::expect_identical(length(miss_all$element), 0L)
+  miss_all <- pop_all_key(xs, 99)
+  testthat::expect_s3_class(miss_all$elements, "ordered_sequence")
+  testthat::expect_identical(length(miss_all$elements), 0L)
   testthat::expect_equal(as.list(miss_all$remaining), as.list(xs))
 })
 
@@ -95,11 +95,11 @@ testthat::test_that("elements_between supports inclusivity flags", {
   testthat::expect_equal(e_miss, list())
 })
 
-testthat::test_that("peek_key and pop_key are stable within duplicate key blocks", {
+testthat::test_that("peek_key/peek_all_key and pop_key are stable within duplicate key blocks", {
   xs <- as_ordered_sequence(list("a1", "b1", "a2", "a3"), keys = c(1, 2, 1, 1))
 
   testthat::expect_equal(peek_key(xs, 1), "a1")
-  peek_all <- peek_key(xs, 1, which = "all")
+  peek_all <- peek_all_key(xs, 1)
   testthat::expect_s3_class(peek_all, "ordered_sequence")
   testthat::expect_equal(as.list(peek_all), list("a1", "a2", "a3"))
   out <- pop_key(xs, 1)
@@ -107,8 +107,8 @@ testthat::test_that("peek_key and pop_key are stable within duplicate key blocks
   testthat::expect_equal(out$key, 1)
   testthat::expect_equal(as.list(out$remaining), list("a2", "a3", "b1"))
 
-  testthat::expect_error(peek_key(xs, 9), "No matching key found")
-  testthat::expect_error(peek_key(xs, 9, which = "all"), "No matching key found")
+  testthat::expect_null(peek_key(xs, 9))
+  testthat::expect_identical(length(peek_all_key(xs, 9)), 0L)
   miss <- pop_key(xs, 9)
   testthat::expect_null(miss$element)
   testthat::expect_null(miss$key)
@@ -155,7 +155,7 @@ testthat::test_that("ordered replacement blocker messages never leak structural 
   testthat::expect_false(grepl("Deep", msg3, fixed = TRUE))
 })
 
-testthat::test_that("ordered subsetting requires strictly increasing mapped positions", {
+testthat::test_that("ordered subsetting canonicalizes selector order and rejects duplicates", {
   xs <- as_ordered_sequence(
     list(a = "xa", b = "xb", c = "xc", d = "xd"),
     keys = c(1, 2, 3, 4)
@@ -178,9 +178,22 @@ testthat::test_that("ordered subsetting requires strictly increasing mapped posi
   testthat::expect_equal(as.list(lgl), list(a = "xa", c = "xc"))
   testthat::expect_identical(names(as.list(lgl)), c("a", "c"))
 
-  testthat::expect_error(xs[c(3, 1)], "strictly increasing")
-  testthat::expect_error(xs[c(2, 2)], "strictly increasing")
-  testthat::expect_error(xs[c("c", "a")], "strictly increasing")
+  reordered <- NULL
+  testthat::expect_warning(
+    { reordered <- xs[c(3, 1)] },
+    "canonicalizes selector order"
+  )
+  testthat::expect_equal(as.list(reordered), list(a = "xa", c = "xc"))
+
+  reordered_name <- NULL
+  testthat::expect_warning(
+    { reordered_name <- xs[c("c", "a")] },
+    "canonicalizes selector order"
+  )
+  testthat::expect_equal(as.list(reordered_name), list(a = "xa", c = "xc"))
+
+  testthat::expect_error(xs[c(2, 2)], "duplicate indices")
+  testthat::expect_error(xs[c("a", "a")], "duplicate indices")
   testthat::expect_error(xs[c("a", "missing")], "Unknown element name")
 })
 

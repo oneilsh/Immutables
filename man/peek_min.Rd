@@ -4,13 +4,13 @@
 \alias{peek_min}
 \title{Peek minimum-priority element}
 \usage{
-peek_min(q)
+peek_min(x)
 }
 \arguments{
-\item{q}{A `priority_queue`.}
+\item{x}{A `priority_queue`.}
 }
 \value{
-Element with minimum priority (stable on ties).
+Element with minimum priority (stable on ties), or `NULL` when empty.
 }
 \description{
 Peek minimum-priority element
