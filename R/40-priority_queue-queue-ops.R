@@ -109,7 +109,7 @@ insert.priority_queue <- function(x, element, priority, name = NULL, ...) {
   }
   if(length(pos) == 1L) {
     idx <- pos[[1L]]
-    s <- split_around_by_predicate(x, function(v) v >= idx, ".size")
+    s <- split_around_by_predicate.flexseq(x, function(v) v >= idx, ".size")
     return(.pq_wrap_like(x, concat_trees(s$left, s$right)))
   }
   keep <- setdiff(seq_len(n), pos)

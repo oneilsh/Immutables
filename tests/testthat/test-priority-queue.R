@@ -69,6 +69,22 @@ testthat::test_that("bulk extrema helpers return full tie runs", {
   testthat::expect_equal(lapply(as.list(out_max$remaining), function(e) e$item), list("b", "c"))
 })
 
+testthat::test_that("bulk extrema single-element removal preserves pq measures", {
+  q <- priority_queue("a", "b", "c", priorities = c(3, 1, 2))
+
+  out_min <- pop_all_min(q)
+  testthat::expect_equal(lapply(as.list(out_min$elements), function(e) e$item), list("b"))
+  testthat::expect_equal(peek_min(out_min$remaining), "c")
+  testthat::expect_equal(peek_max(out_min$remaining), "a")
+  testthat::expect_no_error(capture.output(print(out_min$remaining)))
+
+  out_max <- pop_all_max(q)
+  testthat::expect_equal(lapply(as.list(out_max$elements), function(e) e$item), list("a"))
+  testthat::expect_equal(peek_min(out_max$remaining), "b")
+  testthat::expect_equal(peek_max(out_max$remaining), "c")
+  testthat::expect_no_error(capture.output(print(out_max$remaining)))
+})
+
 testthat::test_that("insert is persistent and supports names", {
   q <- as_priority_queue(setNames(as.list(c("x", "y")), c("kx", "ky")), priorities = c(5, 1))
   q2 <- insert(q, "z", priority = 1, name = "kz")

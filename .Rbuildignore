@@ -8,3 +8,5 @@
 ^meta$
 ^\.claude$
 ^\.claude/
+^doc$
+^Meta$
