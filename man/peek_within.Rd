@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{peek_within}
 \alias{peek_within}
-\title{Peek first interval within a query interval}
+\title{Peek First Interval Within a Query Interval}
 \usage{
 peek_within(x, start, end, bounds = NULL)
 }
@@ -19,5 +19,9 @@ peek_within(x, start, end, bounds = NULL)
 The payload item from the first match, or `NULL` on no match.
 }
 \description{
-Peek first interval within a query interval
+Peek First Interval Within a Query Interval
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 5))
+peek_within(ix, 1, 4)
 }

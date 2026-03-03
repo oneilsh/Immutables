@@ -2,7 +2,7 @@
 % Please edit documentation in R/40-priority_queue-queue-ops.R
 \name{pop_min}
 \alias{pop_min}
-\title{Pop minimum-priority element}
+\title{Pop Minimum-Priority Element}
 \usage{
 pop_min(x)
 }
@@ -10,10 +10,17 @@ pop_min(x)
 \item{x}{A `priority_queue`.}
 }
 \value{
-List with `element`, `priority`, and updated `remaining`.
+A list with fields:
+- `element`: removed element, or `NULL` when `x` is empty.
+- `priority`: removed priority, or `NULL` when `x` is empty.
+- `remaining`: queue after removal.
 }
 \description{
-Pop minimum-priority element
+Removes one minimum-priority element and returns it with the remaining queue.
+}
+\details{
+Ties are stable: when multiple elements share minimum priority, the earliest
+element in queue order is removed.
 }
 \examples{
 x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
@@ -21,4 +28,5 @@ out <- pop_min(x)
 out$element
 out$priority
 out$remaining
+pop_min(priority_queue())
 }

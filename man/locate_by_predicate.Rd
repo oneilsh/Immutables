@@ -2,7 +2,7 @@
 % Please edit documentation in R/20-api-generics.R
 \name{locate_by_predicate}
 \alias{locate_by_predicate}
-\title{Locate First Predicate Flip Without Reconstructing Context Trees}
+\title{Locate First Predicate Match}
 \usage{
 locate_by_predicate(
   t,
@@ -15,27 +15,40 @@ locate_by_predicate(
 \arguments{
 \item{t}{A `flexseq`.}
 
-\item{predicate}{Function on accumulated measure values.}
+\item{predicate}{Function applied to accumulated monoid values.}
 
-\item{monoid_name}{Name of monoid from `attr(t, "monoids")`.}
+\item{monoid_name}{Name of the monoid used for scanning.}
 
-\item{accumulator}{Optional starting measure (defaults to monoid identity).}
+\item{accumulator}{Optional starting accumulator value.}
 
-\item{include_metadata}{Logical; include left/hit/right measures and index.}
+\item{include_metadata}{Logical; include scan metadata.}
 }
 \value{
-If `include_metadata = FALSE`: `list(found, elem)`.
-  If `TRUE`: `list(found, elem, metadata = list(left_measure, hit_measure,
-  right_measure, index))`.
+If `include_metadata = FALSE`, a list with:
+- `found`: logical flag.
+- `elem`: matched element when found, otherwise `NULL`.
+
+If `include_metadata = TRUE`, adds `metadata` with:
+- `left_measure`
+- `hit_measure`
+- `right_measure`
+- `index`
 }
 \description{
-Read-only analogue of [split_around_by_predicate()]: finds the distinguished
-element where the scan predicate flips, but does not rebuild left/right
-trees.
+Scans accumulated monoid values and returns the first element where
+`predicate` becomes `TRUE`, without rebuilding split trees.
 }
 \details{
-For `priority_queue` objects, `metadata$index` (when requested) is the
-internal structural position in the underlying sequence representation. It is
-not related to priority rank and is not stable across queue updates, so it
-should be treated as diagnostic metadata only.
+This is the read-only analogue of [split_around_by_predicate()].
+
+As with split helpers, a common setup is a custom monoid created with
+[measure_monoid()] and attached via [add_monoids()].
+}
+\examples{
+x <- flexseq("a", "b", "c", "d")
+size_monoid <- measure_monoid(`+`, 0L, function(e) 1L)
+x2 <- add_monoids(x, list(size = size_monoid))
+
+locate_by_predicate(x2, function(v) v >= 3L, "size")
+locate_by_predicate(x2, function(v) v >= 3L, "size", include_metadata = TRUE)
 }

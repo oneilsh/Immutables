@@ -44,6 +44,9 @@ fapply <- function(X, FUN, ...) {
 #' x2 <- add_monoids(x, list(sum = running_sum))
 #' attr(x2, "measures")$sum
 #'
+#' # Use the monoid in a split query
+#' split_around_by_predicate(x2, function(v) v >= 30, "sum")
+#'
 #' # Overwrite an existing monoid definition
 #' running_count <- measure_monoid(`+`, 0L, function(e) 1L)
 #' x3 <- add_monoids(x2, list(sum = running_count), overwrite = TRUE)
@@ -102,25 +105,37 @@ as_flexseq <- function(x) {
   UseMethod("as_flexseq")
 }
 
-#' Locate First Predicate Flip Without Reconstructing Context Trees
+#' Locate First Predicate Match
 #'
-#' Read-only analogue of [split_around_by_predicate()]: finds the distinguished
-#' element where the scan predicate flips, but does not rebuild left/right
-#' trees.
+#' Scans accumulated monoid values and returns the first element where
+#' `predicate` becomes `TRUE`, without rebuilding split trees.
 #'
 #' @param t A `flexseq`.
-#' @param predicate Function on accumulated measure values.
-#' @param monoid_name Name of monoid from `attr(t, "monoids")`.
-#' @param accumulator Optional starting measure (defaults to monoid identity).
-#' @param include_metadata Logical; include left/hit/right measures and index.
+#' @param predicate Function applied to accumulated monoid values.
+#' @param monoid_name Name of the monoid used for scanning.
+#' @param accumulator Optional starting accumulator value.
+#' @param include_metadata Logical; include scan metadata.
+#' @return If `include_metadata = FALSE`, a list with:
+#' - `found`: logical flag.
+#' - `elem`: matched element when found, otherwise `NULL`.
+#'
+#' If `include_metadata = TRUE`, adds `metadata` with:
+#' - `left_measure`
+#' - `hit_measure`
+#' - `right_measure`
+#' - `index`
 #' @details
-#' For `priority_queue` objects, `metadata$index` (when requested) is the
-#' internal structural position in the underlying sequence representation. It is
-#' not related to priority rank and is not stable across queue updates, so it
-#' should be treated as diagnostic metadata only.
-#' @return If `include_metadata = FALSE`: `list(found, elem)`.
-#'   If `TRUE`: `list(found, elem, metadata = list(left_measure, hit_measure,
-#'   right_measure, index))`.
+#' This is the read-only analogue of [split_around_by_predicate()].
+#'
+#' As with split helpers, a common setup is a custom monoid created with
+#' [measure_monoid()] and attached via [add_monoids()].
+#' @examples
+#' x <- flexseq("a", "b", "c", "d")
+#' size_monoid <- measure_monoid(`+`, 0L, function(e) 1L)
+#' x2 <- add_monoids(x, list(size = size_monoid))
+#'
+#' locate_by_predicate(x2, function(v) v >= 3L, "size")
+#' locate_by_predicate(x2, function(v) v >= 3L, "size", include_metadata = TRUE)
 #' @export
 locate_by_predicate <- function(t, predicate, monoid_name, accumulator = NULL, include_metadata = FALSE) {
   UseMethod("locate_by_predicate")
@@ -224,14 +239,32 @@ split_at <- function(x, at, pull_index = FALSE) {
   UseMethod("split_at")
 }
 
-#' Insert an element
+#' Insert an Element
 #'
-#' Generic `insert()` dispatches by class.
+#' Inserts an element into a structure-specific position according to class
+#' semantics.
 #'
 #' @param x Object to insert into.
 #' @param ... Method-specific arguments.
-#' @return Updated object.
-#' @seealso [insert.priority_queue()], [insert.ordered_sequence()], [insert.interval_index()]
+#' @return Updated object of the same class as `x`.
+#' @details
+#' `insert()` is an S3 generic. Required arguments in `...` depend on `x`:
+#' - `priority_queue`: `element`, `priority` (optional `name`)
+#' - `ordered_sequence`: `element`, `key` (optional `name`)
+#' - `interval_index`: `element`, `start`, `end` (optional `name`)
+#'
+#' This operation is persistent: `x` is not modified.
+#' @examples
+#' q <- priority_queue("a", "b", priorities = c(2, 1))
+#' insert(q, "c", priority = 3)
+#'
+#' o <- ordered_sequence("a", "c", keys = c(1, 3))
+#' insert(o, "b", key = 2)
+#'
+#' iv <- interval_index("A", "B", starts = c(1, 5), ends = c(3, 8))
+#' insert(iv, "C", start = 2, end = 6)
+#' @seealso [insert.priority_queue()], [insert.ordered_sequence()],
+#'   [insert.interval_index()], [insert_at()]
 #' @export
 insert <- function(x, ...) {
   UseMethod("insert")

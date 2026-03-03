@@ -2,7 +2,7 @@
 % Please edit documentation in R/40-priority_queue-queue-ops.R
 \name{pop_max}
 \alias{pop_max}
-\title{Pop maximum-priority element}
+\title{Pop Maximum-Priority Element}
 \usage{
 pop_max(x)
 }
@@ -10,10 +10,17 @@ pop_max(x)
 \item{x}{A `priority_queue`.}
 }
 \value{
-List with `element`, `priority`, and updated `remaining`.
+A list with fields:
+- `element`: removed element, or `NULL` when `x` is empty.
+- `priority`: removed priority, or `NULL` when `x` is empty.
+- `remaining`: queue after removal.
 }
 \description{
-Pop maximum-priority element
+Removes one maximum-priority element and returns it with the remaining queue.
+}
+\details{
+Ties are stable: when multiple elements share maximum priority, the earliest
+element in queue order is removed.
 }
 \examples{
 x <- priority_queue("a", "b", "c", priorities = c(2, 3, 3))
@@ -21,4 +28,5 @@ out <- pop_max(x)
 out$element
 out$priority
 out$remaining
+pop_max(priority_queue())
 }

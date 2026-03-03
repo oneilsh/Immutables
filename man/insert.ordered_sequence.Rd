@@ -2,7 +2,7 @@
 % Please edit documentation in R/50-ordered_sequence-ops.R
 \name{insert.ordered_sequence}
 \alias{insert.ordered_sequence}
-\title{Insert an element into an ordered sequence}
+\title{Insert an Element into an Ordered Sequence}
 \usage{
 \method{insert}{ordered_sequence}(x, element, key, ...)
 }
@@ -11,7 +11,7 @@
 
 \item{element}{Element to insert.}
 
-\item{key}{Scalar key for `element`.}
+\item{key}{Key for `element`.}
 
 \item{...}{Unused.}
 }
@@ -19,5 +19,16 @@
 Updated `ordered_sequence`.
 }
 \description{
-Insert an element into an ordered sequence
+Inserts one element with key `key` and returns the updated sequence.
+}
+\details{
+This operation is persistent: `x` is not modified.
+
+Duplicate keys are allowed and keep stable order.
+}
+\examples{
+x <- ordered_sequence("a", "c", keys = c(1, 3))
+x2 <- insert(x, "b", key = 2)
+x2
+x  # unchanged
 }

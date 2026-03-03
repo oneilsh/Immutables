@@ -2,24 +2,35 @@
 % Please edit documentation in R/40-priority_queue-constructors.R
 \name{as_priority_queue}
 \alias{as_priority_queue}
-\title{Build a Priority Queue from elements and priorities}
+\title{Build a Priority Queue from `x` and `priorities`}
 \usage{
 as_priority_queue(x, priorities)
 }
 \arguments{
 \item{x}{Elements to enqueue.}
 
-\item{priorities}{Scalar non-missing orderable priorities (same length as `x`).}
+\item{priorities}{Priorities with the same length as `x`.}
 }
 \value{
 A `priority_queue`.
 }
 \description{
-Build a Priority Queue from elements and priorities
+Constructs a queue by pairing each element of `x` with the corresponding
+value in `priorities`.
+}
+\details{
+`x` is interpreted element-wise (via list coercion). Names on `x` are
+preserved as queue element names.
+
+All priorities must be non-missing and mutually comparable.
 }
 \examples{
 x <- as_priority_queue(letters[1:4], priorities = c(3, 1, 2, 1))
 x
 peek_min(x)
 peek_max(x)
+
+# Names are preserved
+n <- as_priority_queue(setNames(as.list(1:3), c("a", "b", "c")), priorities = c(2, 1, 3))
+n[["b"]]
 }

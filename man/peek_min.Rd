@@ -2,7 +2,7 @@
 % Please edit documentation in R/40-priority_queue-queue-ops.R
 \name{peek_min}
 \alias{peek_min}
-\title{Peek minimum-priority element}
+\title{Peek Minimum-Priority Element}
 \usage{
 peek_min(x)
 }
@@ -10,13 +10,17 @@ peek_min(x)
 \item{x}{A `priority_queue`.}
 }
 \value{
-Element with minimum priority (stable on ties), or `NULL` when empty.
+Element at minimum priority, or `NULL` when `x` is empty.
 }
 \description{
-Peek minimum-priority element
+Returns the element at the minimum priority without modifying the queue.
+}
+\details{
+Ties are stable: when multiple elements share minimum priority, this returns
+the earliest element in queue order.
 }
 \examples{
 x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
-x
 peek_min(x)
+peek_min(priority_queue())
 }

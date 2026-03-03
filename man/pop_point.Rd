@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{pop_point}
 \alias{pop_point}
-\title{Pop first interval containing a point}
+\title{Pop First Interval Containing a Point}
 \usage{
 pop_point(x, point, bounds = NULL)
 }
@@ -18,5 +18,9 @@ A list with `element`, `start`, `end`, and `remaining`.
   On miss: `element`, `start`, and `end` are `NULL`.
 }
 \description{
-Pop first interval containing a point
+Pop First Interval Containing a Point
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
+pop_point(ix, 2)
 }

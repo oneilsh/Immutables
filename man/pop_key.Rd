@@ -2,7 +2,7 @@
 % Please edit documentation in R/50-ordered_sequence-ops.R
 \name{pop_key}
 \alias{pop_key}
-\title{Pop first element for one key}
+\title{Pop First Element for One Key}
 \usage{
 pop_key(x, key)
 }
@@ -12,10 +12,21 @@ pop_key(x, key)
 \item{key}{Query key.}
 }
 \value{
-A named list with components `element`, `key`, and `remaining`.
-  On miss: `element = NULL`, `key = NULL`, `remaining = x`.
+A list with fields:
+- `element`: removed element, or `NULL` on miss.
+- `key`: removed key, or `NULL` on miss.
+- `remaining`: ordered sequence after removal.
 }
 \description{
-Removes and returns the first (leftmost) sequence element among entries
-whose key equals `key`.
+Removes and returns the first element whose key equals `key`.
+}
+\details{
+For duplicate keys, the first element in stable sequence order is removed.
+}
+\examples{
+x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+out <- pop_key(x, 2)
+out$element
+out$remaining
+pop_key(x, 10)
 }

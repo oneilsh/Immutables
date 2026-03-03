@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{peek_all_overlaps}
 \alias{peek_all_overlaps}
-\title{Peek all intervals overlapping a query interval}
+\title{Peek All Intervals Overlapping a Query Interval}
 \usage{
 peek_all_overlaps(x, start, end, bounds = NULL)
 }
@@ -19,5 +19,12 @@ peek_all_overlaps(x, start, end, bounds = NULL)
 An `interval_index` slice of all matches (possibly empty).
 }
 \description{
-Peek all intervals overlapping a query interval
+Peek All Intervals Overlapping a Query Interval
+}
+\details{
+The returned `interval_index` can be inspected with [as.list()].
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
+as.list(peek_all_overlaps(ix, 2, 5))
 }

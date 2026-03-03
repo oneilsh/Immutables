@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{interval_bounds}
 \alias{interval_bounds}
-\title{Get interval bounds in sequence order}
+\title{Get Interval Bounds in Sequence Order}
 \usage{
 interval_bounds(x)
 }
@@ -19,5 +19,9 @@ A data frame in current sequence order with one row per entry and
   Returns a zero-row data frame with the same columns for empty indexes.
 }
 \description{
-Get interval bounds in sequence order
+Get Interval Bounds in Sequence Order
+}
+\examples{
+ix <- interval_index("a", "b", start = c(1, 3), end = c(2, 5))
+interval_bounds(ix)
 }

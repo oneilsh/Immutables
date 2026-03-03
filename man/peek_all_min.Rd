@@ -2,7 +2,7 @@
 % Please edit documentation in R/40-priority_queue-queue-ops.R
 \name{peek_all_min}
 \alias{peek_all_min}
-\title{Peek all minimum-priority elements}
+\title{Peek All Minimum-Priority Elements}
 \usage{
 peek_all_min(x)
 }
@@ -11,8 +11,16 @@ peek_all_min(x)
 }
 \value{
 A `priority_queue` containing all minimum-priority elements in stable
-  FIFO order.
+  queue order. Returns an empty queue when `x` is empty.
 }
 \description{
-Peek all minimum-priority elements
+Returns the full minimum-priority tie run as a `priority_queue`.
+}
+\details{
+The return is another `priority_queue()`, use `as.list()` to convert 
+the result to a standard R list.
+}
+\examples{
+x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
+peek_all_min(x)
 }

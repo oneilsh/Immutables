@@ -23,7 +23,7 @@ immutable structure.
 }
 \details{
 Mechanics:
-- Each monoid name defines an independent accumulated measure over the tree.
+- Each monoid name defines an independent accumulated measure over elements in the tree.
 - New monoids are computed for all elements and cached in the returned object.
 - Existing monoids are unchanged unless `overwrite = TRUE`.
 - Structural/reserved monoid names cannot be replaced.
@@ -40,6 +40,9 @@ x <- flexseq(10, 20, 30)
 running_sum <- measure_monoid(`+`, 0, as.numeric)
 x2 <- add_monoids(x, list(sum = running_sum))
 attr(x2, "measures")$sum
+
+# Use the monoid in a split query
+split_around_by_predicate(x2, function(v) v >= 30, "sum")
 
 # Overwrite an existing monoid definition
 running_count <- measure_monoid(`+`, 0L, function(e) 1L)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{peek_point}
 \alias{peek_point}
-\title{Peek first interval containing a point}
+\title{Peek First Interval Containing a Point}
 \usage{
 peek_point(x, point, bounds = NULL)
 }
@@ -17,5 +17,14 @@ peek_point(x, point, bounds = NULL)
 The payload item from the first match, or `NULL` on no match.
 }
 \description{
-Peek first interval containing a point
+Peek First Interval Containing a Point
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
+peek_point(ix, 2)
+
+# Boundary override at an endpoint
+edge <- interval_index("a", start = 1, end = 3, bounds = "[)")
+peek_point(edge, 3)                # default "[)": no match at right endpoint
+peek_point(edge, 3, bounds = "[]") # closed bounds: endpoint matches
 }

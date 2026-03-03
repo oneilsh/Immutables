@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{peek_overlaps}
 \alias{peek_overlaps}
-\title{Peek first interval overlapping a query interval}
+\title{Peek First Interval Overlapping a Query Interval}
 \usage{
 peek_overlaps(x, start, end, bounds = NULL)
 }
@@ -19,5 +19,14 @@ peek_overlaps(x, start, end, bounds = NULL)
 The payload item from the first match, or `NULL` on no match.
 }
 \description{
-Peek first interval overlapping a query interval
+Peek First Interval Overlapping a Query Interval
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
+peek_overlaps(ix, 2, 3)
+
+# Boundary override at touching endpoints
+edge <- interval_index("a", start = 1, end = 3, bounds = "[)")
+peek_overlaps(edge, 3, 4)                # default "[)": no endpoint overlap
+peek_overlaps(edge, 3, 4, bounds = "[]") # closed bounds: endpoint overlaps
 }

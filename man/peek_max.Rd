@@ -2,7 +2,7 @@
 % Please edit documentation in R/40-priority_queue-queue-ops.R
 \name{peek_max}
 \alias{peek_max}
-\title{Peek maximum-priority element}
+\title{Peek Maximum-Priority Element}
 \usage{
 peek_max(x)
 }
@@ -10,13 +10,17 @@ peek_max(x)
 \item{x}{A `priority_queue`.}
 }
 \value{
-Element with maximum priority (stable on ties), or `NULL` when empty.
+Element at maximum priority, or `NULL` when `x` is empty.
 }
 \description{
-Peek maximum-priority element
+Returns the element at the maximum priority without modifying the queue.
+}
+\details{
+Ties are stable: when multiple elements share maximum priority, this returns
+the earliest element in queue order.
 }
 \examples{
 x <- priority_queue("a", "b", "c", priorities = c(2, 3, 3))
-x
 peek_max(x)
+peek_max(priority_queue())
 }

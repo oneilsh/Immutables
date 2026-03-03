@@ -9,18 +9,28 @@ priority_queue(..., priorities)
 \arguments{
 \item{...}{Elements to enqueue.}
 
-\item{priorities}{Scalar non-missing orderable priorities matching `...`.}
+\item{priorities}{Priorities with the same length as `...`.}
 }
 \value{
 A `priority_queue`.
 }
 \description{
-Priority queues expose queue-oriented operations (`insert`, `peek_*`,
-`pop_*`, and `fapply`). For full sequence-style editing and traversal,
-cast explicitly with `as_flexseq()`.
+Creates a `priority_queue` from elements in `...` and matching
+`priorities`.
+}
+\details{
+Empty construction is supported: `priority_queue()` returns an empty queue.
+
+If elements are named, names are preserved for name-based reads.
+
+Queue operations are exposed through `insert()`, `peek_*()`, `pop_*()`,
+and `fapply()`.
 }
 \examples{
 x <- priority_queue("a", "b", "c", priorities = c(2, 1, 2))
 x
 peek_min(x)
+
+empty_q <- priority_queue()
+peek_min(empty_q)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{pop_all_point}
 \alias{pop_all_point}
-\title{Pop all intervals containing a point}
+\title{Pop All Intervals Containing a Point}
 \usage{
 pop_all_point(x, point, bounds = NULL)
 }
@@ -17,5 +17,13 @@ pop_all_point(x, point, bounds = NULL)
 A list with `elements` and `remaining`, both `interval_index` objects.
 }
 \description{
-Pop all intervals containing a point
+Pop All Intervals Containing a Point
+}
+\details{
+Use [as.list()] to convert `elements` to a standard R list.
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
+out <- pop_all_point(ix, 2)
+as.list(out$elements)
 }

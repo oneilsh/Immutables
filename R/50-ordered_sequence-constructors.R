@@ -154,19 +154,32 @@
 }
 
 # Runtime: O(n log n) from build and ordering.
-#' Build an Ordered Sequence from elements
+#' Build an Ordered Sequence from `x` and `keys`
+#'
+#' Constructs an `ordered_sequence` by pairing each element of `x` with the
+#' corresponding key in `keys`.
 #'
 #' @param x Elements to add.
-#' @param keys Scalar key values matching `x` length.
-#'
-#' Ordered sequences are always key-sorted. Subsetting with `[` is intentionally
-#' constrained to strictly increasing mapped positions (no duplicates or
-#' reordering) so the result remains ordered.
+#' @param keys Key values with the same length as `x`.
 #' @return An `ordered_sequence`.
+#' @details
+#' Output is always sorted by key.
+#'
+#' Duplicate keys are allowed; ties preserve input order (stable/FIFO within the
+#' same key).
+#'
+#' Names on `x` are preserved as element names.
 #' @examples
-#' xs <- as_ordered_sequence(c(4, 1, 2, 1), keys = c(4, 1, 2, 1))
+#' xs <- as_ordered_sequence(c("d", "a", "b", "a2"), keys = c(4, 1, 2, 1))
 #' xs
 #' length(elements_between(xs, 1, 1))
+#'
+#' n <- as_ordered_sequence(setNames(as.list(c("a", "b")), c("ka", "kb")), keys = c(2, 1))
+#' n[["kb"]]
+#'
+#' # Keys can be other comparable types
+#' num_by_chr <- as_ordered_sequence(c(20, 10, 30), keys = c("b", "a", "c"))
+#' num_by_chr
 #' @export
 # Public cast/build entry for list/vector-like inputs.
 # Used by: users and tests; delegates to .oms_build_from_items().
@@ -177,13 +190,25 @@ as_ordered_sequence <- function(x, keys) {
 # Runtime: O(n log n) from build and ordering.
 #' Construct an Ordered Sequence
 #'
+#' Convenience constructor from `...` and matching `keys`.
+#'
 #' @param ... Elements to add.
-#' @param keys Scalar key values matching `...` length.
+#' @param keys Key values with the same length as `...`.
 #' @return An `ordered_sequence`.
+#' @details
+#' Empty construction is supported: `ordered_sequence()` returns an empty
+#' ordered sequence.
+#'
+#' Output is always sorted by key, with stable order across duplicate keys.
 #' @examples
 #' xs <- ordered_sequence("bb", "a", "ccc", keys = c(2, 1, 3))
 #' xs
 #' lower_bound(xs, 2)
+#'
+#' num_by_chr <- ordered_sequence(20, 10, 30, keys = c("b", "a", "c"))
+#' num_by_chr
+#'
+#' ordered_sequence()
 #' @export
 # Variadic convenience constructor; delegates to .oms_build_from_items().
 ordered_sequence <- function(..., keys) {

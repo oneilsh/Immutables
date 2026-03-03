@@ -2,7 +2,7 @@
 % Please edit documentation in R/40-priority_queue-queue-ops.R
 \name{insert.priority_queue}
 \alias{insert.priority_queue}
-\title{Insert an element into a priority queue}
+\title{Insert an Element into a Priority Queue}
 \usage{
 \method{insert}{priority_queue}(x, element, priority, name = NULL, ...)
 }
@@ -11,7 +11,7 @@
 
 \item{element}{Element to insert.}
 
-\item{priority}{Scalar non-missing orderable priority.}
+\item{priority}{Priority for `element`.}
 
 \item{name}{Optional element name.}
 
@@ -21,13 +21,19 @@
 Updated `priority_queue`.
 }
 \description{
-Insert an element into a priority queue
+Inserts one element with its priority and returns the updated queue.
+}
+\details{
+This operation is persistent: `x` is not modified.
+
+When multiple elements share the same priority, queue order is stable.
 }
 \examples{
 x <- priority_queue("a", "b", priorities = c(2, 1))
-x
-
 x2 <- insert(x, "c", priority = 1)
-x2
 peek_min(x2)
+x  # unchanged
+
+n <- insert(x2, "d", priority = 3, name = "task_d")
+n[["task_d"]]
 }

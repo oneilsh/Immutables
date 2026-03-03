@@ -2,7 +2,7 @@
 % Please edit documentation in R/50-ordered_sequence-ops.R
 \name{pop_all_key}
 \alias{pop_all_key}
-\title{Pop all elements for one key}
+\title{Pop All Elements for One Key}
 \usage{
 pop_all_key(x, key)
 }
@@ -12,10 +12,19 @@ pop_all_key(x, key)
 \item{key}{Query key.}
 }
 \value{
-A named list with components `elements` and `remaining`. Both are
-  `ordered_sequence` objects. On miss, `elements` is empty and `remaining`
-  is unchanged.
+A list with fields:
+- `elements`: `ordered_sequence` of removed matches.
+- `remaining`: `ordered_sequence` after removal.
 }
 \description{
-Removes and returns all matching entries for `key` as an ordered sequence.
+Removes and returns all elements whose key equals `key`.
+}
+\details{
+Use [as.list()] to convert `elements` to a standard R list.
+}
+\examples{
+x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+out <- pop_all_key(x, 2)
+as.list(out$elements)
+out$remaining
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/50-ordered_sequence-ops.R
 \name{peek_key}
 \alias{peek_key}
-\title{Peek first element for one key}
+\title{Peek First Element for One Key}
 \usage{
 peek_key(x, key)
 }
@@ -12,9 +12,16 @@ peek_key(x, key)
 \item{key}{Query key.}
 }
 \value{
-Raw stored element on match, or `NULL` when no matching key exists.
+Matched element, or `NULL` when no matching key exists.
 }
 \description{
-Returns the first (leftmost) sequence element among entries whose key equals
-`key`.
+Returns the first element whose key equals `key`.
+}
+\details{
+For duplicate keys, this returns the first element in stable sequence order.
+}
+\examples{
+x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+peek_key(x, 2)
+peek_key(x, 10)
 }

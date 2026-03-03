@@ -2,7 +2,7 @@
 % Please edit documentation in R/40-priority_queue-queue-ops.R
 \name{peek_all_max}
 \alias{peek_all_max}
-\title{Peek all maximum-priority elements}
+\title{Peek All Maximum-Priority Elements}
 \usage{
 peek_all_max(x)
 }
@@ -11,8 +11,16 @@ peek_all_max(x)
 }
 \value{
 A `priority_queue` containing all maximum-priority elements in stable
-  FIFO order.
+  queue order. Returns an empty queue when `x` is empty.
 }
 \description{
-Peek all maximum-priority elements
+Returns the full maximum-priority tie run as a `priority_queue`.
+}
+\details{
+The return is another `priority_queue()`, use `as.list()` to convert 
+the result to a standard R list.
+}
+\examples{
+x <- priority_queue("a", "b", "c", priorities = c(2, 3, 3))
+peek_all_max(x)
 }

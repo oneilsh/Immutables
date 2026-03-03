@@ -2,7 +2,7 @@
 % Please edit documentation in R/50-ordered_sequence-ops.R
 \name{count_key}
 \alias{count_key}
-\title{Count elements matching one key}
+\title{Count Elements Matching One Key}
 \usage{
 count_key(x, key)
 }
@@ -12,8 +12,13 @@ count_key(x, key)
 \item{key}{Query key.}
 }
 \value{
-Integer count of matching elements.
+Integer count of matches.
 }
 \description{
-Count elements matching one key
+Count Elements Matching One Key
+}
+\examples{
+x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+count_key(x, 2)
+count_key(x, 10)
 }

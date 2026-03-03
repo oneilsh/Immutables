@@ -2,7 +2,7 @@
 % Please edit documentation in R/50-ordered_sequence-ops.R
 \name{peek_all_key}
 \alias{peek_all_key}
-\title{Peek all elements for one key}
+\title{Peek All Elements for One Key}
 \usage{
 peek_all_key(x, key)
 }
@@ -12,9 +12,16 @@ peek_all_key(x, key)
 \item{key}{Query key.}
 }
 \value{
-An `ordered_sequence` with all matching elements; empty on miss.
+An `ordered_sequence` containing all matches; empty on miss.
 }
 \description{
-Returns an ordered sequence containing exactly the entries whose key equals
-`key`.
+Returns all elements whose key equals `key`.
+}
+\details{
+The returned `ordered_sequence` can be inspected with [as.list()].
+}
+\examples{
+x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+out <- peek_all_key(x, 2)
+as.list(out)
 }

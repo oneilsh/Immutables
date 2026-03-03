@@ -2,7 +2,7 @@
 % Please edit documentation in R/50-ordered_sequence-ops.R
 \name{elements_between}
 \alias{elements_between}
-\title{Return elements in a key range}
+\title{Return Elements in a Key Range}
 \usage{
 elements_between(x, from_key, to_key, include_from = TRUE, include_to = TRUE)
 }
@@ -18,8 +18,13 @@ elements_between(x, from_key, to_key, include_from = TRUE, include_to = TRUE)
 \item{include_to}{Include upper bound when `TRUE`.}
 }
 \value{
-List of raw elements.
+Base R list of matched elements, in key order.
 }
 \description{
-Return elements in a key range
+Return Elements in a Key Range
+}
+\examples{
+x <- ordered_sequence("a", "b", "c", "d", keys = c(1, 2, 2, 3))
+elements_between(x, 2, 3)
+elements_between(x, 2, 2, include_to = FALSE)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/50-ordered_sequence-ops.R
 \name{upper_bound}
 \alias{upper_bound}
-\title{Find first element with key > value}
+\title{Find First Element with Key `>` Query}
 \usage{
 upper_bound(x, key)
 }
@@ -12,10 +12,25 @@ upper_bound(x, key)
 \item{key}{Query key.}
 }
 \value{
-Named list with fields `found`, `index`, `element`, and `key`.
-  When no match exists, `found` is `FALSE` and the remaining fields
-  are `NULL`.
+A list with fields:
+- `found`: logical flag.
+- `index`: one-based position of the first match, or `NULL`.
+- `element`: matched element, or `NULL`.
+- `key`: matched key, or `NULL`.
 }
 \description{
-Find first element with key > value
+Find First Element with Key `>` Query
+}
+\details{
+`upper_bound()` finds the first element with key `> key`. This skips exact
+key matches, which is useful for exclusive range endpoints and for finding
+the position immediately after a duplicate-key run.
+}
+\examples{
+x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+upper_bound(x, 2)
+upper_bound(x, 10)
+}
+\seealso{
+[lower_bound()]
 }

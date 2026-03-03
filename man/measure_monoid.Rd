@@ -39,6 +39,7 @@ sum_m <- measure_monoid(`+`, 0, as.numeric)
 x <- as_flexseq(1:5)
 x2 <- add_monoids(x, list(sum = sum_m))
 attr(x2, "measures")$sum
+split_around_by_predicate(x2, function(v) v >= 6, "sum")
 
 # Count elements
 count_m <- measure_monoid(`+`, 0L, function(el) 1L)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/20-api-generics.R
 \name{insert}
 \alias{insert}
-\title{Insert an element}
+\title{Insert an Element}
 \usage{
 insert(x, ...)
 }
@@ -12,11 +12,31 @@ insert(x, ...)
 \item{...}{Method-specific arguments.}
 }
 \value{
-Updated object.
+Updated object of the same class as `x`.
 }
 \description{
-Generic `insert()` dispatches by class.
+Inserts an element into a structure-specific position according to class
+semantics.
+}
+\details{
+`insert()` is an S3 generic. Required arguments in `...` depend on `x`:
+- `priority_queue`: `element`, `priority` (optional `name`)
+- `ordered_sequence`: `element`, `key` (optional `name`)
+- `interval_index`: `element`, `start`, `end` (optional `name`)
+
+This operation is persistent: `x` is not modified.
+}
+\examples{
+q <- priority_queue("a", "b", priorities = c(2, 1))
+insert(q, "c", priority = 3)
+
+o <- ordered_sequence("a", "c", keys = c(1, 3))
+insert(o, "b", key = 2)
+
+iv <- interval_index("A", "B", starts = c(1, 5), ends = c(3, 8))
+insert(iv, "C", start = 2, end = 6)
 }
 \seealso{
-[insert.priority_queue()], [insert.ordered_sequence()], [insert.interval_index()]
+[insert.priority_queue()], [insert.ordered_sequence()],
+  [insert.interval_index()], [insert_at()]
 }

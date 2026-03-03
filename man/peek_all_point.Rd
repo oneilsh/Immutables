@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{peek_all_point}
 \alias{peek_all_point}
-\title{Peek all intervals containing a point}
+\title{Peek All Intervals Containing a Point}
 \usage{
 peek_all_point(x, point, bounds = NULL)
 }
@@ -17,5 +17,12 @@ peek_all_point(x, point, bounds = NULL)
 An `interval_index` slice of all matches (possibly empty).
 }
 \description{
-Peek all intervals containing a point
+Peek All Intervals Containing a Point
+}
+\details{
+The returned `interval_index` can be inspected with [as.list()].
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
+as.list(peek_all_point(ix, 2))
 }

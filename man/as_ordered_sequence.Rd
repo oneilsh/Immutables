@@ -2,27 +2,39 @@
 % Please edit documentation in R/50-ordered_sequence-constructors.R
 \name{as_ordered_sequence}
 \alias{as_ordered_sequence}
-\title{Build an Ordered Sequence from elements}
+\title{Build an Ordered Sequence from `x` and `keys`}
 \usage{
 as_ordered_sequence(x, keys)
 }
 \arguments{
 \item{x}{Elements to add.}
 
-\item{keys}{Scalar key values matching `x` length.
-
-Ordered sequences are always key-sorted. Subsetting with `[` is intentionally
-constrained to strictly increasing mapped positions (no duplicates or
-reordering) so the result remains ordered.}
+\item{keys}{Key values with the same length as `x`.}
 }
 \value{
 An `ordered_sequence`.
 }
 \description{
-Build an Ordered Sequence from elements
+Constructs an `ordered_sequence` by pairing each element of `x` with the
+corresponding key in `keys`.
+}
+\details{
+Output is always sorted by key.
+
+Duplicate keys are allowed; ties preserve input order (stable/FIFO within the
+same key).
+
+Names on `x` are preserved as element names.
 }
 \examples{
-xs <- as_ordered_sequence(c(4, 1, 2, 1), keys = c(4, 1, 2, 1))
+xs <- as_ordered_sequence(c("d", "a", "b", "a2"), keys = c(4, 1, 2, 1))
 xs
 length(elements_between(xs, 1, 1))
+
+n <- as_ordered_sequence(setNames(as.list(c("a", "b")), c("ka", "kb")), keys = c(2, 1))
+n[["kb"]]
+
+# Keys can be other comparable types
+num_by_chr <- as_ordered_sequence(c(20, 10, 30), keys = c("b", "a", "c"))
+num_by_chr
 }

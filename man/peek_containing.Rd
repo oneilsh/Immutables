@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{peek_containing}
 \alias{peek_containing}
-\title{Peek first interval containing a query interval}
+\title{Peek First Interval Containing a Query Interval}
 \usage{
 peek_containing(x, start, end, bounds = NULL)
 }
@@ -19,5 +19,9 @@ peek_containing(x, start, end, bounds = NULL)
 The payload item from the first match, or `NULL` on no match.
 }
 \description{
-Peek first interval containing a query interval
+Peek First Interval Containing a Query Interval
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(5, 3, 6))
+peek_containing(ix, 2, 3)
 }

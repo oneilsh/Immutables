@@ -9,19 +9,26 @@ interval_index(..., start, end, bounds = "[)")
 \arguments{
 \item{...}{Elements to add.}
 
-\item{start}{Scalar start endpoints matching `...`.}
+\item{start}{Start endpoints matching `...`.}
 
-\item{end}{Scalar end endpoints matching `...`.}
+\item{end}{End endpoints matching `...`.}
 
-\item{bounds}{One of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
+\item{bounds}{Boundary convention: one of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
 }
 \value{
 An `interval_index`.
 }
 \description{
-Construct an Interval Index
+Convenience constructor from `...`, `start`, and `end`.
+}
+\details{
+Empty construction is supported: `interval_index()` returns an empty index.
+
+Output is ordered by interval `start`.
 }
 \examples{
 ix <- interval_index("a", "b", "c", start = c(1, 2, 2), end = c(3, 2, 4))
 ix
+
+interval_index()
 }

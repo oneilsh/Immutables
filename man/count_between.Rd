@@ -2,7 +2,7 @@
 % Please edit documentation in R/50-ordered_sequence-ops.R
 \name{count_between}
 \alias{count_between}
-\title{Count elements in a key range}
+\title{Count Elements in a Key Range}
 \usage{
 count_between(x, from_key, to_key, include_from = TRUE, include_to = TRUE)
 }
@@ -18,8 +18,13 @@ count_between(x, from_key, to_key, include_from = TRUE, include_to = TRUE)
 \item{include_to}{Include upper bound when `TRUE`.}
 }
 \value{
-Integer count of matching elements.
+Integer count of matches.
 }
 \description{
-Count elements in a key range
+Count Elements in a Key Range
+}
+\examples{
+x <- ordered_sequence("a", "b", "c", "d", keys = c(1, 2, 2, 3))
+count_between(x, 2, 3)
+count_between(x, 2, 2, include_to = FALSE)
 }

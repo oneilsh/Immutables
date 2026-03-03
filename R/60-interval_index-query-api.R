@@ -5,7 +5,7 @@
 # **Inputs:** `x` interval_index.
 # **Outputs:** data.frame with list-cols `start` and `end`.
 # **Used by:** users/tests.
-#' Get interval bounds in sequence order
+#' Get Interval Bounds in Sequence Order
 #'
 #' @param x An `interval_index`.
 #' @return A data frame in current sequence order with one row per entry and
@@ -15,6 +15,9 @@
 #'     \item{`end`}{End endpoint for each entry.}
 #'   }
 #'   Returns a zero-row data frame with the same columns for empty indexes.
+#' @examples
+#' ix <- interval_index("a", "b", start = c(1, 3), end = c(2, 5))
+#' interval_bounds(ix)
 #' @export
 interval_bounds <- function(x) {
   .ivx_assert_index(x)
@@ -31,12 +34,20 @@ interval_bounds <- function(x) {
 }
 
 # Runtime: O(log n + c), where c is candidate count (worst-case O(n)).
-#' Peek first interval containing a point
+#' Peek First Interval Containing a Point
 #'
 #' @param x An `interval_index`.
 #' @param point Query point.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return The payload item from the first match, or `NULL` on no match.
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
+#' peek_point(ix, 2)
+#'
+#' # Boundary override at an endpoint
+#' edge <- interval_index("a", start = 1, end = 3, bounds = "[)")
+#' peek_point(edge, 3)                # default "[)": no match at right endpoint
+#' peek_point(edge, 3, bounds = "[]") # closed bounds: endpoint matches
 #' @export
 peek_point <- function(x, point, bounds = NULL) {
   .ivx_assert_index(x)
@@ -47,12 +58,17 @@ peek_point <- function(x, point, bounds = NULL) {
 }
 
 # Runtime: O(log n + c + k), where k is matched count (worst-case O(n)).
-#' Peek all intervals containing a point
+#' Peek All Intervals Containing a Point
 #'
 #' @param x An `interval_index`.
 #' @param point Query point.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return An `interval_index` slice of all matches (possibly empty).
+#' @details
+#' The returned `interval_index` can be inspected with [as.list()].
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
+#' as.list(peek_all_point(ix, 2))
 #' @export
 peek_all_point <- function(x, point, bounds = NULL) {
   .ivx_assert_index(x)
@@ -63,13 +79,16 @@ peek_all_point <- function(x, point, bounds = NULL) {
 }
 
 # Runtime: O(log n + c).
-#' Pop first interval containing a point
+#' Pop First Interval Containing a Point
 #'
 #' @param x An `interval_index`.
 #' @param point Query point.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return A list with `element`, `start`, `end`, and `remaining`.
 #'   On miss: `element`, `start`, and `end` are `NULL`.
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
+#' pop_point(ix, 2)
 #' @export
 pop_point <- function(x, point, bounds = NULL) {
   .ivx_assert_index(x)
@@ -80,12 +99,18 @@ pop_point <- function(x, point, bounds = NULL) {
 }
 
 # Runtime: O(n log n) in worst-case rebuild path.
-#' Pop all intervals containing a point
+#' Pop All Intervals Containing a Point
 #'
 #' @param x An `interval_index`.
 #' @param point Query point.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return A list with `elements` and `remaining`, both `interval_index` objects.
+#' @details
+#' Use [as.list()] to convert `elements` to a standard R list.
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
+#' out <- pop_all_point(ix, 2)
+#' as.list(out$elements)
 #' @export
 pop_all_point <- function(x, point, bounds = NULL) {
   .ivx_assert_index(x)
@@ -96,13 +121,21 @@ pop_all_point <- function(x, point, bounds = NULL) {
 }
 
 # Runtime: O(log n + c).
-#' Peek first interval overlapping a query interval
+#' Peek First Interval Overlapping a Query Interval
 #'
 #' @param x An `interval_index`.
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return The payload item from the first match, or `NULL` on no match.
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
+#' peek_overlaps(ix, 2, 3)
+#'
+#' # Boundary override at touching endpoints
+#' edge <- interval_index("a", start = 1, end = 3, bounds = "[)")
+#' peek_overlaps(edge, 3, 4)                # default "[)": no endpoint overlap
+#' peek_overlaps(edge, 3, 4, bounds = "[]") # closed bounds: endpoint overlaps
 #' @export
 peek_overlaps <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
@@ -113,13 +146,18 @@ peek_overlaps <- function(x, start, end, bounds = NULL) {
 }
 
 # Runtime: O(log n + c + k), where k is matched count (worst-case O(n)).
-#' Peek all intervals overlapping a query interval
+#' Peek All Intervals Overlapping a Query Interval
 #'
 #' @param x An `interval_index`.
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return An `interval_index` slice of all matches (possibly empty).
+#' @details
+#' The returned `interval_index` can be inspected with [as.list()].
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
+#' as.list(peek_all_overlaps(ix, 2, 5))
 #' @export
 peek_all_overlaps <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
@@ -130,13 +168,16 @@ peek_all_overlaps <- function(x, start, end, bounds = NULL) {
 }
 
 # Runtime: O(log n + c).
-#' Peek first interval containing a query interval
+#' Peek First Interval Containing a Query Interval
 #'
 #' @param x An `interval_index`.
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return The payload item from the first match, or `NULL` on no match.
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(5, 3, 6))
+#' peek_containing(ix, 2, 3)
 #' @export
 peek_containing <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
@@ -147,13 +188,18 @@ peek_containing <- function(x, start, end, bounds = NULL) {
 }
 
 # Runtime: O(log n + c + k), where k is matched count (worst-case O(n)).
-#' Peek all intervals containing a query interval
+#' Peek All Intervals Containing a Query Interval
 #'
 #' @param x An `interval_index`.
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return An `interval_index` slice of all matches (possibly empty).
+#' @details
+#' The returned `interval_index` can be inspected with [as.list()].
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 5, 7))
+#' as.list(peek_all_containing(ix, 2, 4))
 #' @export
 peek_all_containing <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
@@ -164,13 +210,16 @@ peek_all_containing <- function(x, start, end, bounds = NULL) {
 }
 
 # Runtime: O(log n + c).
-#' Peek first interval within a query interval
+#' Peek First Interval Within a Query Interval
 #'
 #' @param x An `interval_index`.
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return The payload item from the first match, or `NULL` on no match.
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 5))
+#' peek_within(ix, 1, 4)
 #' @export
 peek_within <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
@@ -181,13 +230,18 @@ peek_within <- function(x, start, end, bounds = NULL) {
 }
 
 # Runtime: O(log n + c + k), where k is matched count (worst-case O(n)).
-#' Peek all intervals within a query interval
+#' Peek All Intervals Within a Query Interval
 #'
 #' @param x An `interval_index`.
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return An `interval_index` slice of all matches (possibly empty).
+#' @details
+#' The returned `interval_index` can be inspected with [as.list()].
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 5))
+#' as.list(peek_all_within(ix, 1, 4))
 #' @export
 peek_all_within <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
@@ -198,7 +252,7 @@ peek_all_within <- function(x, start, end, bounds = NULL) {
 }
 
 # Runtime: O(log n + c).
-#' Pop first overlapping interval
+#' Pop First Overlapping Interval
 #'
 #' @param x An `interval_index`.
 #' @param start Query interval start.
@@ -206,6 +260,9 @@ peek_all_within <- function(x, start, end, bounds = NULL) {
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return A list with `element`, `start`, `end`, and `remaining`.
 #'   On miss: `element`, `start`, and `end` are `NULL`.
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
+#' pop_overlaps(ix, 2, 3)
 #' @export
 pop_overlaps <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
@@ -216,13 +273,19 @@ pop_overlaps <- function(x, start, end, bounds = NULL) {
 }
 
 # Runtime: O(n log n) in worst-case rebuild path.
-#' Pop all overlapping intervals
+#' Pop All Overlapping Intervals
 #'
 #' @param x An `interval_index`.
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return A list with `elements` and `remaining`, both `interval_index` objects.
+#' @details
+#' Use [as.list()] to convert `elements` to a standard R list.
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
+#' out <- pop_all_overlaps(ix, 2, 5)
+#' as.list(out$elements)
 #' @export
 pop_all_overlaps <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
@@ -233,7 +296,7 @@ pop_all_overlaps <- function(x, start, end, bounds = NULL) {
 }
 
 # Runtime: O(log n + c).
-#' Pop first containing interval
+#' Pop First Containing Interval
 #'
 #' @param x An `interval_index`.
 #' @param start Query interval start.
@@ -241,6 +304,9 @@ pop_all_overlaps <- function(x, start, end, bounds = NULL) {
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return A list with `element`, `start`, `end`, and `remaining`.
 #'   On miss: `element`, `start`, and `end` are `NULL`.
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 7))
+#' pop_containing(ix, 2, 4)
 #' @export
 pop_containing <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
@@ -251,13 +317,19 @@ pop_containing <- function(x, start, end, bounds = NULL) {
 }
 
 # Runtime: O(n log n) in worst-case rebuild path.
-#' Pop all containing intervals
+#' Pop All Containing Intervals
 #'
 #' @param x An `interval_index`.
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return A list with `elements` and `remaining`, both `interval_index` objects.
+#' @details
+#' Use [as.list()] to convert `elements` to a standard R list.
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 5, 7))
+#' out <- pop_all_containing(ix, 2, 4)
+#' as.list(out$elements)
 #' @export
 pop_all_containing <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
@@ -268,7 +340,7 @@ pop_all_containing <- function(x, start, end, bounds = NULL) {
 }
 
 # Runtime: O(log n + c).
-#' Pop first interval within a query interval
+#' Pop First Interval Within a Query Interval
 #'
 #' @param x An `interval_index`.
 #' @param start Query interval start.
@@ -276,6 +348,9 @@ pop_all_containing <- function(x, start, end, bounds = NULL) {
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return A list with `element`, `start`, `end`, and `remaining`.
 #'   On miss: `element`, `start`, and `end` are `NULL`.
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 5))
+#' pop_within(ix, 1, 4)
 #' @export
 pop_within <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
@@ -286,13 +361,19 @@ pop_within <- function(x, start, end, bounds = NULL) {
 }
 
 # Runtime: O(n log n) in worst-case rebuild path.
-#' Pop all intervals within a query interval
+#' Pop All Intervals Within a Query Interval
 #'
 #' @param x An `interval_index`.
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return A list with `elements` and `remaining`, both `interval_index` objects.
+#' @details
+#' Use [as.list()] to convert `elements` to a standard R list.
+#' @examples
+#' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 5))
+#' out <- pop_all_within(ix, 1, 4)
+#' as.list(out$elements)
 #' @export
 pop_all_within <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)

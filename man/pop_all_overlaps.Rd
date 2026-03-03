@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{pop_all_overlaps}
 \alias{pop_all_overlaps}
-\title{Pop all overlapping intervals}
+\title{Pop All Overlapping Intervals}
 \usage{
 pop_all_overlaps(x, start, end, bounds = NULL)
 }
@@ -19,5 +19,13 @@ pop_all_overlaps(x, start, end, bounds = NULL)
 A list with `elements` and `remaining`, both `interval_index` objects.
 }
 \description{
-Pop all overlapping intervals
+Pop All Overlapping Intervals
+}
+\details{
+Use [as.list()] to convert `elements` to a standard R list.
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
+out <- pop_all_overlaps(ix, 2, 5)
+as.list(out$elements)
 }

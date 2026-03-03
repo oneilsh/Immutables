@@ -54,22 +54,29 @@ add_monoids.priority_queue <- function(t, monoids, overwrite = FALSE) {
 }
 
 # Runtime: O(log n) near right edge.
-#' Insert an element into a priority queue
+#' Insert an Element into a Priority Queue
+#'
+#' Inserts one element with its priority and returns the updated queue.
 #'
 #' @method insert priority_queue
 #' @param x A `priority_queue`.
 #' @param element Element to insert.
-#' @param priority Scalar non-missing orderable priority.
+#' @param priority Priority for `element`.
 #' @param name Optional element name.
 #' @param ... Unused.
 #' @return Updated `priority_queue`.
+#' @details
+#' This operation is persistent: `x` is not modified.
+#'
+#' When multiple elements share the same priority, queue order is stable.
 #' @examples
 #' x <- priority_queue("a", "b", priorities = c(2, 1))
-#' x
-#'
 #' x2 <- insert(x, "c", priority = 1)
-#' x2
 #' peek_min(x2)
+#' x  # unchanged
+#'
+#' n <- insert(x2, "d", priority = 3, name = "task_d")
+#' n[["task_d"]]
 #' @export
 insert.priority_queue <- function(x, element, priority, name = NULL, ...) {
   q <- x
@@ -213,102 +220,170 @@ insert.priority_queue <- function(x, element, priority, name = NULL, ...) {
 }
 
 # Runtime: O(log n) near locate point depth.
-#' Peek minimum-priority element
+#' Peek Minimum-Priority Element
+#'
+#' Returns the element at the minimum priority without modifying the queue.
 #'
 #' @param x A `priority_queue`.
-#' @return Element with minimum priority (stable on ties), or `NULL` when empty.
+#' @return Element at minimum priority, or `NULL` when `x` is empty.
+#' @details
+#' Ties are stable: when multiple elements share minimum priority, this returns
+#' the earliest element in queue order.
 #' @examples
 #' x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
-#' x
 #' peek_min(x)
+#' peek_min(priority_queue())
 #' @export
 peek_min <- function(x) {
   .pq_peek(x, ".pq_min")
 }
 
 # Runtime: O(log n) near locate point depth.
-#' Peek maximum-priority element
+#' Peek Maximum-Priority Element
+#'
+#' Returns the element at the maximum priority without modifying the queue.
 #'
 #' @param x A `priority_queue`.
-#' @return Element with maximum priority (stable on ties), or `NULL` when empty.
+#' @return Element at maximum priority, or `NULL` when `x` is empty.
+#' @details
+#' Ties are stable: when multiple elements share maximum priority, this returns
+#' the earliest element in queue order.
 #' @examples
 #' x <- priority_queue("a", "b", "c", priorities = c(2, 3, 3))
-#' x
 #' peek_max(x)
+#' peek_max(priority_queue())
 #' @export
 peek_max <- function(x) {
   .pq_peek(x, ".pq_max")
 }
 
 # Runtime: O(n) due tie-run scan.
-#' Peek all minimum-priority elements
+#' Peek All Minimum-Priority Elements
+#'
+#' Returns the full minimum-priority tie run as a `priority_queue`.
 #'
 #' @param x A `priority_queue`.
 #' @return A `priority_queue` containing all minimum-priority elements in stable
-#'   FIFO order.
+#'   queue order. Returns an empty queue when `x` is empty.
+#' @details
+#' The return is another `priority_queue()`, use `as.list()` to convert 
+#' the result to a standard R list.
+#' @examples
+#' x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
+#' peek_all_min(x)
 #' @export
 peek_all_min <- function(x) {
   .pq_peek_all(x, ".pq_min")
 }
 
 # Runtime: O(n) due tie-run scan.
-#' Peek all maximum-priority elements
+#' Peek All Maximum-Priority Elements
+#'
+#' Returns the full maximum-priority tie run as a `priority_queue`.
 #'
 #' @param x A `priority_queue`.
 #' @return A `priority_queue` containing all maximum-priority elements in stable
-#'   FIFO order.
+#'   queue order. Returns an empty queue when `x` is empty.
+#' @details
+#' The return is another `priority_queue()`, use `as.list()` to convert 
+#' the result to a standard R list.
+#' @examples
+#' x <- priority_queue("a", "b", "c", priorities = c(2, 3, 3))
+#' peek_all_max(x)
 #' @export
 peek_all_max <- function(x) {
   .pq_peek_all(x, ".pq_max")
 }
 
 # Runtime: O(log n) near split point depth.
-#' Pop minimum-priority element
+#' Pop Minimum-Priority Element
+#'
+#' Removes one minimum-priority element and returns it with the remaining queue.
 #'
 #' @param x A `priority_queue`.
-#' @return List with `element`, `priority`, and updated `remaining`.
+#' @return A list with fields:
+#' - `element`: removed element, or `NULL` when `x` is empty.
+#' - `priority`: removed priority, or `NULL` when `x` is empty.
+#' - `remaining`: queue after removal.
+#' @details
+#' Ties are stable: when multiple elements share minimum priority, the earliest
+#' element in queue order is removed.
 #' @examples
 #' x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
 #' out <- pop_min(x)
 #' out$element
 #' out$priority
 #' out$remaining
+#' pop_min(priority_queue())
 #' @export
 pop_min <- function(x) {
   .pq_extract(x, ".pq_min")
 }
 
 # Runtime: O(log n) near split point depth.
-#' Pop maximum-priority element
+#' Pop Maximum-Priority Element
+#'
+#' Removes one maximum-priority element and returns it with the remaining queue.
 #'
 #' @param x A `priority_queue`.
-#' @return List with `element`, `priority`, and updated `remaining`.
+#' @return A list with fields:
+#' - `element`: removed element, or `NULL` when `x` is empty.
+#' - `priority`: removed priority, or `NULL` when `x` is empty.
+#' - `remaining`: queue after removal.
+#' @details
+#' Ties are stable: when multiple elements share maximum priority, the earliest
+#' element in queue order is removed.
 #' @examples
 #' x <- priority_queue("a", "b", "c", priorities = c(2, 3, 3))
 #' out <- pop_max(x)
 #' out$element
 #' out$priority
 #' out$remaining
+#' pop_max(priority_queue())
 #' @export
 pop_max <- function(x) {
   .pq_extract(x, ".pq_max")
 }
 
 # Runtime: O(n log n) worst-case.
-#' Pop all minimum-priority elements
+#' Pop All Minimum-Priority Elements
+#'
+#' Removes the full minimum-priority tie run.
 #'
 #' @param x A `priority_queue`.
-#' @return List with `elements` and updated `remaining`.
+#' @return A list with fields:
+#' - `elements`: `priority_queue` of removed minimum-priority elements.
+#' - `remaining`: queue after removal.
+#' @details
+#' The return `elements` is another `priority_queue()`, use `as.list()` to 
+#' convert the result to a standard R list.
+#' @examples
+#' x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
+#' out <- pop_all_min(x)
+#' out$elements
+#' out$remaining
 #' @export
 pop_all_min <- function(x) {
   .pq_extract_all(x, ".pq_min")
 }
 
 # Runtime: O(n log n) worst-case.
-#' Pop all maximum-priority elements
+#' Pop All Maximum-Priority Elements
+#'
+#' Removes the full maximum-priority tie run.
 #'
 #' @param x A `priority_queue`.
-#' @return List with `elements` and updated `remaining`.
+#' @return A list with fields:
+#' - `elements`: `priority_queue` of removed maximum-priority elements.
+#' - `remaining`: queue after removal.
+#' @details
+#' The return `elements` is another `priority_queue()`, use `as.list()` to 
+#' convert the result to a standard R list.
+#' @examples
+#' x <- priority_queue("a", "b", "c", priorities = c(2, 3, 3))
+#' out <- pop_all_max(x)
+#' out$elements
+#' out$remaining
 #' @export
 pop_all_max <- function(x) {
   .pq_extract_all(x, ".pq_max")

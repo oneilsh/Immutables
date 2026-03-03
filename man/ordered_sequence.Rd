@@ -9,16 +9,27 @@ ordered_sequence(..., keys)
 \arguments{
 \item{...}{Elements to add.}
 
-\item{keys}{Scalar key values matching `...` length.}
+\item{keys}{Key values with the same length as `...`.}
 }
 \value{
 An `ordered_sequence`.
 }
 \description{
-Construct an Ordered Sequence
+Convenience constructor from `...` and matching `keys`.
+}
+\details{
+Empty construction is supported: `ordered_sequence()` returns an empty
+ordered sequence.
+
+Output is always sorted by key, with stable order across duplicate keys.
 }
 \examples{
 xs <- ordered_sequence("bb", "a", "ccc", keys = c(2, 1, 3))
 xs
 lower_bound(xs, 2)
+
+num_by_chr <- ordered_sequence(20, 10, 30, keys = c("b", "a", "c"))
+num_by_chr
+
+ordered_sequence()
 }

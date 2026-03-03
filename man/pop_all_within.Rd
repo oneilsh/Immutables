@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{pop_all_within}
 \alias{pop_all_within}
-\title{Pop all intervals within a query interval}
+\title{Pop All Intervals Within a Query Interval}
 \usage{
 pop_all_within(x, start, end, bounds = NULL)
 }
@@ -19,5 +19,13 @@ pop_all_within(x, start, end, bounds = NULL)
 A list with `elements` and `remaining`, both `interval_index` objects.
 }
 \description{
-Pop all intervals within a query interval
+Pop All Intervals Within a Query Interval
+}
+\details{
+Use [as.list()] to convert `elements` to a standard R list.
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 5))
+out <- pop_all_within(ix, 1, 4)
+as.list(out$elements)
 }

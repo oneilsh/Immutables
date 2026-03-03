@@ -2,27 +2,41 @@
 % Please edit documentation in R/60-interval_index-constructors.R
 \name{as_interval_index}
 \alias{as_interval_index}
-\title{Build an Interval Index from elements and interval bounds}
+\title{Build an Interval Index from `x`, `start`, and `end`}
 \usage{
 as_interval_index(x, start, end, bounds = "[)")
 }
 \arguments{
 \item{x}{Elements to add.}
 
-\item{start}{Scalar start endpoints (same length as `x`).}
+\item{start}{Start endpoints with the same length as `x`.}
 
-\item{end}{Scalar end endpoints (same length as `x`).}
+\item{end}{End endpoints with the same length as `x`.}
 
-\item{bounds}{One of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
+\item{bounds}{Boundary convention: one of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
 }
 \value{
 An `interval_index`.
 }
 \description{
-Build an Interval Index from elements and interval bounds
+Constructs an `interval_index` by pairing each element of `x` with
+corresponding `start` and `end` endpoints.
+}
+\details{
+Output is ordered by interval `start`.
+
+Names on `x` are preserved as element names.
 }
 \examples{
 ix <- as_interval_index(c("a", "b", "c"), start = c(1, 2, 2), end = c(3, 2, 4))
 ix
 as.list(peek_all_point(ix, 2))
+
+# Endpoints can be other comparable types
+ix_date <- as_interval_index(
+  c("phase1", "phase2"),
+  start = as.Date(c("2024-01-01", "2024-01-10")),
+  end = as.Date(c("2024-01-05", "2024-01-15"))
+)
+ix_date
 }

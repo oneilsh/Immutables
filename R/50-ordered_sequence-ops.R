@@ -109,14 +109,25 @@ add_monoids.ordered_sequence <- function(t, monoids, overwrite = FALSE) {
 }
 
 # Runtime: O(log n) near insertion/split point depth.
-#' Insert an element into an ordered sequence
+#' Insert an Element into an Ordered Sequence
+#'
+#' Inserts one element with key `key` and returns the updated sequence.
 #'
 #' @method insert ordered_sequence
 #' @param x An `ordered_sequence`.
 #' @param element Element to insert.
-#' @param key Scalar key for `element`.
+#' @param key Key for `element`.
 #' @param ... Unused.
 #' @return Updated `ordered_sequence`.
+#' @details
+#' This operation is persistent: `x` is not modified.
+#'
+#' Duplicate keys are allowed and keep stable order.
+#' @examples
+#' x <- ordered_sequence("a", "c", keys = c(1, 3))
+#' x2 <- insert(x, "b", key = 2)
+#' x2
+#' x  # unchanged
 #' @export
 insert.ordered_sequence <- function(x, element, key, ...) {
   .oms_insert_impl(x, element, key)
@@ -159,13 +170,24 @@ insert.ordered_sequence <- function(x, element, key, ...) {
 }
 
 # Runtime: O(log n).
-#' Find first element with key >= value
+#' Find First Element with Key `>=` Query
 #'
 #' @param x An `ordered_sequence`.
 #' @param key Query key.
-#' @return Named list with fields `found`, `index`, `element`, and `key`.
-#'   When no match exists, `found` is `FALSE` and the remaining fields
-#'   are `NULL`.
+#' @return A list with fields:
+#' - `found`: logical flag.
+#' - `index`: one-based position of the first match, or `NULL`.
+#' - `element`: matched element, or `NULL`.
+#' - `key`: matched key, or `NULL`.
+#' @details
+#' `lower_bound()` finds the first element with key `>= key`. This includes an
+#' exact key match when present, which is useful for starting equality or
+#' inclusive range scans.
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+#' lower_bound(x, 2)
+#' lower_bound(x, 10)
+#' @seealso [upper_bound()]
 #' @export
 # Public lower-bound query wrapper over .oms_bound_index().
 lower_bound <- function(x, key) {
@@ -183,13 +205,24 @@ lower_bound <- function(x, key) {
 }
 
 # Runtime: O(log n).
-#' Find first element with key > value
+#' Find First Element with Key `>` Query
 #'
 #' @param x An `ordered_sequence`.
 #' @param key Query key.
-#' @return Named list with fields `found`, `index`, `element`, and `key`.
-#'   When no match exists, `found` is `FALSE` and the remaining fields
-#'   are `NULL`.
+#' @return A list with fields:
+#' - `found`: logical flag.
+#' - `index`: one-based position of the first match, or `NULL`.
+#' - `element`: matched element, or `NULL`.
+#' - `key`: matched key, or `NULL`.
+#' @details
+#' `upper_bound()` finds the first element with key `> key`. This skips exact
+#' key matches, which is useful for exclusive range endpoints and for finding
+#' the position immediately after a duplicate-key run.
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+#' upper_bound(x, 2)
+#' upper_bound(x, 10)
+#' @seealso [lower_bound()]
 #' @export
 # Public upper-bound query wrapper over .oms_bound_index().
 upper_bound <- function(x, key) {
@@ -207,14 +240,19 @@ upper_bound <- function(x, key) {
 }
 
 # Runtime: O(log n).
-#' Peek first element for one key
+#' Peek First Element for One Key
 #'
-#' Returns the first (leftmost) sequence element among entries whose key equals
-#' `key`.
+#' Returns the first element whose key equals `key`.
 #'
 #' @param x An `ordered_sequence`.
 #' @param key Query key.
-#' @return Raw stored element on match, or `NULL` when no matching key exists.
+#' @return Matched element, or `NULL` when no matching key exists.
+#' @details
+#' For duplicate keys, this returns the first element in stable sequence order.
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+#' peek_key(x, 2)
+#' peek_key(x, 10)
 #' @export
 peek_key <- function(x, key) {
   .oms_stop_interval_index(x, "peek_key")
@@ -227,14 +265,19 @@ peek_key <- function(x, key) {
 }
 
 # Runtime: O(log n) near split points.
-#' Peek all elements for one key
+#' Peek All Elements for One Key
 #'
-#' Returns an ordered sequence containing exactly the entries whose key equals
-#' `key`.
+#' Returns all elements whose key equals `key`.
 #'
 #' @param x An `ordered_sequence`.
 #' @param key Query key.
-#' @return An `ordered_sequence` with all matching elements; empty on miss.
+#' @return An `ordered_sequence` containing all matches; empty on miss.
+#' @details
+#' The returned `ordered_sequence` can be inspected with [as.list()].
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+#' out <- peek_all_key(x, 2)
+#' as.list(out)
 #' @export
 peek_all_key <- function(x, key) {
   .oms_stop_interval_index(x, "peek_all_key")
@@ -247,15 +290,24 @@ peek_all_key <- function(x, key) {
 }
 
 # Runtime: O(log n) near split point depth.
-#' Pop first element for one key
+#' Pop First Element for One Key
 #'
-#' Removes and returns the first (leftmost) sequence element among entries
-#' whose key equals `key`.
+#' Removes and returns the first element whose key equals `key`.
 #'
 #' @param x An `ordered_sequence`.
 #' @param key Query key.
-#' @return A named list with components `element`, `key`, and `remaining`.
-#'   On miss: `element = NULL`, `key = NULL`, `remaining = x`.
+#' @return A list with fields:
+#' - `element`: removed element, or `NULL` on miss.
+#' - `key`: removed key, or `NULL` on miss.
+#' - `remaining`: ordered sequence after removal.
+#' @details
+#' For duplicate keys, the first element in stable sequence order is removed.
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+#' out <- pop_key(x, 2)
+#' out$element
+#' out$remaining
+#' pop_key(x, 10)
 #' @export
 pop_key <- function(x, key) {
   .oms_stop_interval_index(x, "pop_key")
@@ -272,15 +324,22 @@ pop_key <- function(x, key) {
 }
 
 # Runtime: O(log n) near split point depth.
-#' Pop all elements for one key
+#' Pop All Elements for One Key
 #'
-#' Removes and returns all matching entries for `key` as an ordered sequence.
+#' Removes and returns all elements whose key equals `key`.
 #'
 #' @param x An `ordered_sequence`.
 #' @param key Query key.
-#' @return A named list with components `elements` and `remaining`. Both are
-#'   `ordered_sequence` objects. On miss, `elements` is empty and `remaining`
-#'   is unchanged.
+#' @return A list with fields:
+#' - `elements`: `ordered_sequence` of removed matches.
+#' - `remaining`: `ordered_sequence` after removal.
+#' @details
+#' Use [as.list()] to convert `elements` to a standard R list.
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+#' out <- pop_all_key(x, 2)
+#' as.list(out$elements)
+#' out$remaining
 #' @export
 pop_all_key <- function(x, key) {
   .oms_stop_interval_index(x, "pop_all_key")
@@ -298,14 +357,18 @@ pop_all_key <- function(x, key) {
 }
 
 # Runtime: O(log n + k), where k is output size.
-#' Return elements in a key range
+#' Return Elements in a Key Range
 #'
 #' @param x An `ordered_sequence`.
 #' @param from_key Lower bound key.
 #' @param to_key Upper bound key.
 #' @param include_from Include lower bound when `TRUE`.
 #' @param include_to Include upper bound when `TRUE`.
-#' @return List of raw elements.
+#' @return Base R list of matched elements, in key order.
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", "d", keys = c(1, 2, 2, 3))
+#' elements_between(x, 2, 3)
+#' elements_between(x, 2, 2, include_to = FALSE)
 #' @export
 # Public range extraction API over bound-index helpers.
 elements_between <- function(x, from_key, to_key, include_from = TRUE, include_to = TRUE) {
@@ -326,11 +389,15 @@ elements_between <- function(x, from_key, to_key, include_from = TRUE, include_t
 }
 
 # Runtime: O(log n).
-#' Count elements matching one key
+#' Count Elements Matching One Key
 #'
 #' @param x An `ordered_sequence`.
 #' @param key Query key.
-#' @return Integer count of matching elements.
+#' @return Integer count of matches.
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+#' count_key(x, 2)
+#' count_key(x, 10)
 #' @export
 # Public multiplicity query for a single key (size of duplicate-key run).
 count_key <- function(x, key) {
@@ -342,14 +409,18 @@ count_key <- function(x, key) {
 }
 
 # Runtime: O(log n).
-#' Count elements in a key range
+#' Count Elements in a Key Range
 #'
 #' @param x An `ordered_sequence`.
 #' @param from_key Lower bound key.
 #' @param to_key Upper bound key.
 #' @param include_from Include lower bound when `TRUE`.
 #' @param include_to Include upper bound when `TRUE`.
-#' @return Integer count of matching elements.
+#' @return Integer count of matches.
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", "d", keys = c(1, 2, 2, 3))
+#' count_between(x, 2, 3)
+#' count_between(x, 2, 2, include_to = FALSE)
 #' @export
 # Public multiplicity query for a key interval.
 count_between <- function(x, from_key, to_key, include_from = TRUE, include_to = TRUE) {

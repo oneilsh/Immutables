@@ -2,7 +2,7 @@
 % Please edit documentation in R/40-priority_queue-queue-ops.R
 \name{pop_all_min}
 \alias{pop_all_min}
-\title{Pop all minimum-priority elements}
+\title{Pop All Minimum-Priority Elements}
 \usage{
 pop_all_min(x)
 }
@@ -10,8 +10,20 @@ pop_all_min(x)
 \item{x}{A `priority_queue`.}
 }
 \value{
-List with `elements` and updated `remaining`.
+A list with fields:
+- `elements`: `priority_queue` of removed minimum-priority elements.
+- `remaining`: queue after removal.
 }
 \description{
-Pop all minimum-priority elements
+Removes the full minimum-priority tie run.
+}
+\details{
+The return `elements` is another `priority_queue()`, use `as.list()` to 
+convert the result to a standard R list.
+}
+\examples{
+x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
+out <- pop_all_min(x)
+out$elements
+out$remaining
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{peek_all_within}
 \alias{peek_all_within}
-\title{Peek all intervals within a query interval}
+\title{Peek All Intervals Within a Query Interval}
 \usage{
 peek_all_within(x, start, end, bounds = NULL)
 }
@@ -19,5 +19,12 @@ peek_all_within(x, start, end, bounds = NULL)
 An `interval_index` slice of all matches (possibly empty).
 }
 \description{
-Peek all intervals within a query interval
+Peek All Intervals Within a Query Interval
+}
+\details{
+The returned `interval_index` can be inspected with [as.list()].
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 5))
+as.list(peek_all_within(ix, 1, 4))
 }

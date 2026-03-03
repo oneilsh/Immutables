@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{pop_overlaps}
 \alias{pop_overlaps}
-\title{Pop first overlapping interval}
+\title{Pop First Overlapping Interval}
 \usage{
 pop_overlaps(x, start, end, bounds = NULL)
 }
@@ -20,5 +20,9 @@ A list with `element`, `start`, `end`, and `remaining`.
   On miss: `element`, `start`, and `end` are `NULL`.
 }
 \description{
-Pop first overlapping interval
+Pop First Overlapping Interval
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
+pop_overlaps(ix, 2, 3)
 }

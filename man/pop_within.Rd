@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{pop_within}
 \alias{pop_within}
-\title{Pop first interval within a query interval}
+\title{Pop First Interval Within a Query Interval}
 \usage{
 pop_within(x, start, end, bounds = NULL)
 }
@@ -20,5 +20,9 @@ A list with `element`, `start`, `end`, and `remaining`.
   On miss: `element`, `start`, and `end` are `NULL`.
 }
 \description{
-Pop first interval within a query interval
+Pop First Interval Within a Query Interval
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 5))
+pop_within(ix, 1, 4)
 }

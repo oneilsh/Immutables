@@ -1,16 +1,28 @@
 #SO
 
 # Runtime: O(n) overall (entry normalization + linear sequence construction).
-#' Build a Priority Queue from elements and priorities
+#' Build a Priority Queue from `x` and `priorities`
+#'
+#' Constructs a queue by pairing each element of `x` with the corresponding
+#' value in `priorities`.
 #'
 #' @param x Elements to enqueue.
-#' @param priorities Scalar non-missing orderable priorities (same length as `x`).
+#' @param priorities Priorities with the same length as `x`.
 #' @return A `priority_queue`.
+#' @details
+#' `x` is interpreted element-wise (via list coercion). Names on `x` are
+#' preserved as queue element names.
+#'
+#' All priorities must be non-missing and mutually comparable.
 #' @examples
 #' x <- as_priority_queue(letters[1:4], priorities = c(3, 1, 2, 1))
 #' x
 #' peek_min(x)
 #' peek_max(x)
+#'
+#' # Names are preserved
+#' n <- as_priority_queue(setNames(as.list(1:3), c("a", "b", "c")), priorities = c(2, 1, 3))
+#' n[["b"]]
 #' @export
 as_priority_queue <- function(x, priorities) {
   .as_priority_queue_build(x, priorities = priorities, monoids = NULL)
@@ -49,17 +61,26 @@ as_priority_queue <- function(x, priorities) {
 # Runtime: O(n) overall (entry normalization + linear sequence construction).
 #' Construct a Priority Queue
 #'
-#' Priority queues expose queue-oriented operations (`insert`, `peek_*`,
-#' `pop_*`, and `fapply`). For full sequence-style editing and traversal,
-#' cast explicitly with `as_flexseq()`.
+#' Creates a `priority_queue` from elements in `...` and matching
+#' `priorities`.
 #'
 #' @param ... Elements to enqueue.
-#' @param priorities Scalar non-missing orderable priorities matching `...`.
+#' @param priorities Priorities with the same length as `...`.
 #' @return A `priority_queue`.
+#' @details
+#' Empty construction is supported: `priority_queue()` returns an empty queue.
+#'
+#' If elements are named, names are preserved for name-based reads.
+#'
+#' Queue operations are exposed through `insert()`, `peek_*()`, `pop_*()`,
+#' and `fapply()`.
 #' @examples
 #' x <- priority_queue("a", "b", "c", priorities = c(2, 1, 2))
 #' x
 #' peek_min(x)
+#'
+#' empty_q <- priority_queue()
+#' peek_min(empty_q)
 #' @export
 priority_queue <- function(..., priorities) {
   if(missing(priorities)) {
