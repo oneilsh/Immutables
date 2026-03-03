@@ -20,6 +20,35 @@ Method-dependent result.
 `fapply()` is an S3 generic for applying functions over immutable
 structures with type-specific dispatch.
 }
+\details{
+`fapply()` returns a new object and preserves class semantics.
+
+Method signatures:
+- `fapply.flexseq(X, FUN, ..., preserve_custom_monoids = TRUE)`
+- `fapply.priority_queue(X, FUN, ..., preserve_custom_monoids = TRUE)`
+- `fapply.ordered_sequence(X, FUN, ..., preserve_custom_monoids = TRUE)`
+- `fapply.interval_index(X, FUN, ..., preserve_custom_monoids = TRUE)`
+
+For `priority_queue`, `ordered_sequence`, and `interval_index`,
+`FUN` receives structured fields (`item` plus metadata) and should return the
+new payload value only; ordering metadata is preserved.
+
+If supported by the method, `preserve_custom_monoids = TRUE` keeps added user
+monoids; `FALSE` rebuilds with required structural monoids only.
+}
+\examples{
+x <- flexseq("a", "b", "c")
+fapply(x, toupper)
+
+q <- priority_queue(one = "a", two = "b", priorities = c(2, 1))
+fapply(q, function(item, priority, name) paste0(item, priority))
+
+o <- ordered_sequence(one = "a", two = "b", keys = c(2, 1))
+fapply(o, function(item, key, name) paste0(item, "_", key))
+
+ix <- interval_index(one = "a", two = "b", start = c(1, 3), end = c(2, 4))
+fapply(ix, function(item, start, end, name) paste0(item, "[", start, ",", end, "]"))
+}
 \seealso{
-[fapply.flexseq()], [fapply.priority_queue()], [fapply.ordered_sequence()], [fapply.interval_index()]
+[flexseq()], [priority_queue()], [ordered_sequence()], [interval_index()]
 }

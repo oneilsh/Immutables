@@ -37,6 +37,6 @@ iv <- interval_index("A", "B", starts = c(1, 5), ends = c(3, 8))
 insert(iv, "C", start = 2, end = 6)
 }
 \seealso{
-[insert.priority_queue()], [insert.ordered_sequence()],
-  [insert.interval_index()], [insert_at()]
+[priority_queue()], [ordered_sequence()], [interval_index()],
+  [insert_at()]
 }

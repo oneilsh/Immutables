@@ -15,6 +15,8 @@ reference:
     contents:
       - flexseq
       - as_flexseq
+      - insert
+      - fapply
       - push_front
       - push_back
       - insert_at
@@ -30,7 +32,6 @@ reference:
       - "print.flexseq"
       - "length.flexseq"
       - "as.list.flexseq"
-      - "fapply.flexseq"
       - "plot.flexseq"
 
   - title: "Priority Queue"
@@ -41,7 +42,8 @@ reference:
     contents:
       - priority_queue
       - as_priority_queue
-      - insert.priority_queue
+      - insert
+      - fapply
       - peek_min
       - peek_max
       - peek_all_min
@@ -55,7 +57,6 @@ reference:
       - "as.list.priority_queue"
       - "print.priority_queue"
       - "length.priority_queue"
-      - "fapply.priority_queue"
       - "plot.priority_queue"
 
   - title: "Ordered Sequence"
@@ -66,7 +67,8 @@ reference:
     contents:
       - ordered_sequence
       - as_ordered_sequence
-      - insert.ordered_sequence
+      - insert
+      - fapply
       - peek_key
       - peek_all_key
       - pop_key
@@ -80,7 +82,6 @@ reference:
       - "print.ordered_sequence"
       - "length.ordered_sequence"
       - "as.list.ordered_sequence"
-      - "fapply.ordered_sequence"
       - "plot.ordered_sequence"
 
   - title: "Interval Index"
@@ -90,7 +91,8 @@ reference:
     contents:
       - interval_index
       - as_interval_index
-      - insert.interval_index
+      - insert
+      - fapply
       - peek_point
       - peek_all_point
       - pop_point
@@ -111,14 +113,11 @@ reference:
       - "print.interval_index"
       - "length.interval_index"
       - "as.list.interval_index"
-      - "fapply.interval_index"
       - "plot.interval_index"
 
   - title: "Developer Tools"
     desc: "Lower-level primitives for custom monoids, predicate queries, and validation."
     contents:
-      - insert
-      - fapply
       - add_monoids
       - locate_by_predicate
       - split_around_by_predicate

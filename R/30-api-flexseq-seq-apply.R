@@ -43,17 +43,9 @@
   .as_flexseq_build(out, monoids = out_monoids)
 }
 
-#' Apply a function over flexseq elements
-#'
 #' @method fapply flexseq
-#' @param X A `flexseq`.
-#' @param FUN Function to apply to each element.
-#' @param preserve_custom_monoids Logical scalar. If `TRUE` (default), rebuild with the
-#'   full current monoid set (including user monoids). If `FALSE`, rebuild using
-#'   only required structural monoids (`.size`, `.named_count`).
-#' @param ... Additional arguments passed to `FUN`.
-#' @return A new `flexseq` with transformed elements.
 #' @export
+#' @noRd
 fapply.flexseq <- function(X, FUN, ..., preserve_custom_monoids = TRUE) {
   if(!is.function(FUN)) {
     stop("`FUN` must be a function.")

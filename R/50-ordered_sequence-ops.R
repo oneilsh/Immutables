@@ -109,26 +109,9 @@ add_monoids.ordered_sequence <- function(t, monoids, overwrite = FALSE) {
 }
 
 # Runtime: O(log n) near insertion/split point depth.
-#' Insert an Element into an Ordered Sequence
-#'
-#' Inserts one element with key `key` and returns the updated sequence.
-#'
 #' @method insert ordered_sequence
-#' @param x An `ordered_sequence`.
-#' @param element Element to insert.
-#' @param key Key for `element`.
-#' @param ... Unused.
-#' @return Updated `ordered_sequence`.
-#' @details
-#' This operation is persistent: `x` is not modified.
-#'
-#' Duplicate keys are allowed and keep stable order.
-#' @examples
-#' x <- ordered_sequence("a", "c", keys = c(1, 3))
-#' x2 <- insert(x, "b", key = 2)
-#' x2
-#' x  # unchanged
 #' @export
+#' @noRd
 insert.ordered_sequence <- function(x, element, key, ...) {
   .oms_insert_impl(x, element, key)
 }

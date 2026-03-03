@@ -65,32 +65,9 @@ add_monoids.interval_index <- function(t, monoids, overwrite = FALSE) {
 # **Inputs:** `x` interval_index; payload `element`; scalar `start`/`end`; optional `name`.
 # **Outputs:** updated interval_index.
 # **Used by:** users/tests.
-#' Insert an Element into an Interval Index
-#'
-#' Inserts one interval record and returns the updated index.
-#'
 #' @method insert interval_index
-#' @param x An `interval_index`.
-#' @param element Element to insert.
-#' @param start Start endpoint for the inserted interval.
-#' @param end End endpoint for the inserted interval.
-#' @param name Optional element name.
-#' @param ... Unused.
-#' @return Updated `interval_index`.
-#' @details
-#' This operation is persistent: `x` is not modified.
-#'
-#' Endpoint validation and comparison follow the endpoint type and bounds
-#' conventions already established on `x`.
-#' @examples
-#' ix <- interval_index("a", "b", start = c(1, 4), end = c(2, 5))
-#' ix2 <- insert(ix, "c", start = 2, end = 3)
-#' ix2
-#' ix  # unchanged
-#'
-#' named <- insert(ix2, "d", start = 6, end = 7, name = "task_d")
-#' named[["task_d"]]
 #' @export
+#' @noRd
 insert.interval_index <- function(x, element, start, end, name = NULL, ...) {
   .ivx_assert_index(x)
 

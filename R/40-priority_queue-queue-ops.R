@@ -54,30 +54,9 @@ add_monoids.priority_queue <- function(t, monoids, overwrite = FALSE) {
 }
 
 # Runtime: O(log n) near right edge.
-#' Insert an Element into a Priority Queue
-#'
-#' Inserts one element with its priority and returns the updated queue.
-#'
 #' @method insert priority_queue
-#' @param x A `priority_queue`.
-#' @param element Element to insert.
-#' @param priority Priority for `element`.
-#' @param name Optional element name.
-#' @param ... Unused.
-#' @return Updated `priority_queue`.
-#' @details
-#' This operation is persistent: `x` is not modified.
-#'
-#' When multiple elements share the same priority, queue order is stable.
-#' @examples
-#' x <- priority_queue("a", "b", priorities = c(2, 1))
-#' x2 <- insert(x, "c", priority = 1)
-#' peek_min(x2)
-#' x  # unchanged
-#'
-#' n <- insert(x2, "d", priority = 3, name = "task_d")
-#' n[["task_d"]]
 #' @export
+#' @noRd
 insert.priority_queue <- function(x, element, priority, name = NULL, ...) {
   q <- x
   .pq_assert_queue(q)

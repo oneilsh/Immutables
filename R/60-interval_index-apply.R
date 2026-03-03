@@ -62,34 +62,9 @@
 # `preserve_custom_monoids`.
 # **Outputs:** interval_index with transformed payload items.
 # **Used by:** public `fapply()` generic dispatch.
-#' Apply a Function over Interval Index Entries
-#'
-#' Applies `FUN` to each entry payload and returns a new `interval_index`.
-#'
 #' @method fapply interval_index
-#' @param X An `interval_index`.
-#' @param FUN Function of `(item, start, end, name, ...)` returning the new
-#'   payload value.
-#' @param preserve_custom_monoids Logical scalar. If `TRUE` (default), preserve
-#'   custom added monoids; if `FALSE`, keep only required built-in monoids.
-#' @param ... Additional arguments passed to `FUN`.
-#' @return A new `interval_index` with transformed payload values.
-#' @details
-#' Interval coordinates (`start`, `end`) and entry names are not changed by
-#' `fapply()`.
-#' @examples
-#' ix <- interval_index(
-#'   one = "a", two = "b", three = "c",
-#'   start = c(1, 3, 5), end = c(2, 4, 6)
-#' )
-#'
-#' ix2 <- fapply(ix, function(item, start, end, name) toupper(item))
-#' as.list(ix2)
-#'
-#' # Extra arguments are forwarded to FUN
-#' ix3 <- fapply(ix, function(item, start, end, name, suffix) paste0(item, suffix), suffix = "!")
-#' as.list(ix3)
 #' @export
+#' @noRd
 fapply.interval_index <- function(X, FUN, ..., preserve_custom_monoids = TRUE) {
   if(!is.function(FUN)) {
     stop("`FUN` must be a function.")
