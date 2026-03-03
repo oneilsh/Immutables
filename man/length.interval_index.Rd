@@ -7,13 +7,16 @@
 \method{length}{interval_index}(x)
 }
 \arguments{
-\item{x}{An `interval_index`.}
+\item{x}{An \code{interval_index}.}
 }
 \value{
 Number of indexed intervals.
 }
 \description{
 Interval Index Length
+}
+\details{
+Uses cached size metadata and runs in O(1).
 }
 \examples{
 ix <- interval_index("a", "b", start = c(1, 3), end = c(2, 5))

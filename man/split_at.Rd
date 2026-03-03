@@ -7,26 +7,28 @@
 split_at(x, at, pull_index = FALSE)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 
 \item{at}{A single positive integer position or a single character name.}
 
 \item{pull_index}{Controls output shape:
-- `FALSE` (default): returns `list(left, elem, right)`.
-- `TRUE`: returns `list(left, right)`.}
+\itemize{
+\item \code{FALSE} (default): returns \code{list(left, elem, right)}.
+\item \code{TRUE}: returns \code{list(left, right)}.
+}}
 }
 \value{
-A split result with shape controlled by `pull_index`.
+A split result with shape controlled by \code{pull_index}.
 }
 \description{
 Splits by a single one-based position or a single element name.
 }
 \details{
-`split_at(x, at, pull_index = FALSE)` is a convenience wrapper around
-[split_around_by_predicate()] using positional scanning.
+\code{split_at(x, at, pull_index = FALSE)} is a convenience wrapper around
+\code{\link[=split_around_by_predicate]{split_around_by_predicate()}} using positional scanning.
 
-`split_at(x, at, pull_index = TRUE)` is the two-way variant using
-[split_by_predicate()].
+\code{split_at(x, at, pull_index = TRUE)} is the two-way variant using
+\code{\link[=split_by_predicate]{split_by_predicate()}}.
 }
 \examples{
 x <- flexseq("a", "b", "c", "d")

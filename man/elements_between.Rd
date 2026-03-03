@@ -7,21 +7,30 @@
 elements_between(x, from_key, to_key, include_from = TRUE, include_to = TRUE)
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 
 \item{from_key}{Lower bound key.}
 
 \item{to_key}{Upper bound key.}
 
-\item{include_from}{Include lower bound when `TRUE`.}
+\item{include_from}{Include lower bound when \code{TRUE}.}
 
-\item{include_to}{Include upper bound when `TRUE`.}
+\item{include_to}{Include upper bound when \code{TRUE}.}
 }
 \value{
 Base R list of matched elements, in key order.
 }
 \description{
 Return Elements in a Key Range
+}
+\details{
+Range membership is controlled by \code{include_from} and \code{include_to}:
+\itemize{
+\item \code{include_from = TRUE} uses \code{key >= from_key}; otherwise \code{key > from_key}.
+\item \code{include_to = TRUE} uses \code{key <= to_key}; otherwise \code{key < to_key}.
+}
+
+If no elements fall in the range, returns \code{list()}.
 }
 \examples{
 x <- ordered_sequence("a", "b", "c", "d", keys = c(1, 2, 2, 3))

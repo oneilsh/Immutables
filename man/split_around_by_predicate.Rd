@@ -7,7 +7,7 @@
 split_around_by_predicate(t, predicate, monoid_name, accumulator = NULL)
 }
 \arguments{
-\item{t}{A `flexseq`.}
+\item{t}{A \code{flexseq}.}
 
 \item{predicate}{Function applied to accumulated monoid values.}
 
@@ -17,17 +17,19 @@ split_around_by_predicate(t, predicate, monoid_name, accumulator = NULL)
 }
 \value{
 A list with fields:
-- `left`: elements before the split point.
-- `elem`: the matched element at the split point.
-- `right`: elements after the split point.
+\itemize{
+\item \code{left}: elements before the split point.
+\item \code{elem}: the matched element at the split point.
+\item \code{right}: elements after the split point.
+}
 }
 \description{
-Splits at the first point where a `predicate` function becomes `TRUE` 
+Splits at the first point where a \code{predicate} function becomes \code{TRUE}
 while scanning the sequence.
 }
 \details{
 This function generally requires the sequence be annotated with
-a `measure_monoid()`; see the examples and `measure_monoid()`
+a \code{measure_monoid()}; see the examples and \code{measure_monoid()}
 for more information.
 }
 \examples{

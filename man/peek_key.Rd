@@ -7,15 +7,15 @@
 peek_key(x, key)
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 
 \item{key}{Query key.}
 }
 \value{
-Matched element, or `NULL` when no matching key exists.
+Matched element, or \code{NULL} when no matching key exists.
 }
 \description{
-Returns the first element whose key equals `key`.
+Returns the first element whose key equals \code{key}.
 }
 \details{
 For duplicate keys, this returns the first element in stable sequence order.

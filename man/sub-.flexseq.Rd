@@ -23,33 +23,49 @@
 \method{[[}{flexseq}(x, i) <- value
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 
-\item{name}{Element name (for `$` and `$<-`).}
+\item{name}{Element name (for \code{$} and \verb{$<-}).}
 
 \item{value}{Replacement values; recycled to selected index length.}
 
 \item{i}{Positive integer indices, character element names, or logical mask.
-For `[[`, a single integer or character name.}
+For \code{[[}, a single integer or character name.}
 
 \item{...}{Unused.}
 }
 \value{
-For `$`: the matched element.
+For \code{$}: the matched element.
 
-For `$<-`: updated tree with one named element replaced.
+For \verb{$<-}: updated tree with one named element replaced.
 
-For `[`: a new `flexseq` containing selected elements in query order.
-  For character indexing, missing names are represented as `NULL` elements.
+For \code{[}: a new \code{flexseq} containing selected elements in query order.
+For character indexing, missing names are represented as \code{NULL} elements.
 
-For `[[`: the extracted element (internal name metadata is removed).
+For \code{[[}: the extracted element (internal name metadata is removed).
 
-For `[<-`: a new `flexseq` with selected elements replaced.
+For \verb{[<-}: a new \code{flexseq} with selected elements replaced.
 
-For `[[<-`: a new `flexseq` with one element replaced.
+For \verb{[[<-}: a new \code{flexseq} with one element replaced.
 }
 \description{
-Index, replace, and extract elements of a `flexseq` by position or name.
+Index, replace, and extract elements of a \code{flexseq} by position or name.
+}
+\details{
+Selector behavior:
+\itemize{
+\item Integer indexing (\code{[}) returns elements in the requested order.
+\item Character indexing (\code{[}) returns elements in requested name order; unknown
+names become \code{NULL} elements in the output.
+\item Logical indexing (\code{[}) is positional and follows logical-mask selection.
+}
+
+Replacement behavior:
+\itemize{
+\item \verb{[<-} is persistent and recycles \code{value} to the number of selected
+positions (with standard R recycling warnings where applicable).
+\item \verb{[[<-} replaces one element; assigning \code{NULL} removes that element.
+}
 }
 \examples{
 

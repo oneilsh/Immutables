@@ -10,22 +10,21 @@ flexseq(...)
 \item{...}{Sequence elements.}
 }
 \value{
-A `flexseq` object.
+A \code{flexseq} object.
 }
 \description{
-`flexseq(...)` creates an immutable sequence from `...`, preserving element
+\code{flexseq(...)} creates an immutable sequence from \code{...}, preserving element
 order and optional names, with efficient persistent updates.
 }
 \details{
 It is list-like in payload flexibility (any R object per element), but
-sequence-oriented in API (`push_*`, `peek_*`, `pop_*`, indexing, split/concat).
+sequence-oriented in API (\verb{push_*}, \verb{peek_*}, \verb{pop_*}, indexing, split/concat).
 
+\code{flexseq} is the base general-purpose structure in this package.
+Specialized structures such as \code{priority_queue}, \code{ordered_sequence}, and
+\code{interval_index} build on related internals but expose narrower semantics.
 
-`flexseq` is the base general-purpose structure in this package.
-Specialized structures such as `priority_queue`, `ordered_sequence`, and
-`interval_index` build on related internals but expose narrower semantics.
-
-`flexseq` operations are persistent: updates return new objects and do not
+\code{flexseq} operations are persistent: updates return new objects and do not
 mutate prior versions.
 }
 \examples{
@@ -41,5 +40,5 @@ named
 named[["a"]]
 }
 \seealso{
-[as_flexseq()], [priority_queue()], [ordered_sequence()], [interval_index()]
+\code{\link[=as_flexseq]{as_flexseq()}}, \code{\link[=priority_queue]{priority_queue()}}, \code{\link[=ordered_sequence]{ordered_sequence()}}, \code{\link[=interval_index]{interval_index()}}
 }

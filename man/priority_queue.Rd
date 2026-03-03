@@ -9,22 +9,22 @@ priority_queue(..., priorities)
 \arguments{
 \item{...}{Elements to enqueue.}
 
-\item{priorities}{Priorities with the same length as `...`.}
+\item{priorities}{Priorities with the same length as \code{...}.}
 }
 \value{
-A `priority_queue`.
+A \code{priority_queue}.
 }
 \description{
-Creates a `priority_queue` from elements in `...` and matching
-`priorities`.
+Creates a \code{priority_queue} from elements in \code{...} and matching
+\code{priorities}.
 }
 \details{
-Empty construction is supported: `priority_queue()` returns an empty queue.
+Empty construction is supported: \code{priority_queue()} returns an empty queue.
 
 If elements are named, names are preserved for name-based reads.
 
-Queue operations are exposed through `insert()`, `peek_*()`, `pop_*()`,
-and `fapply()`.
+Queue operations are exposed through \code{insert()}, \verb{peek_*()}, \verb{pop_*()},
+and \code{fapply()}.
 }
 \examples{
 x <- priority_queue("a", "b", "c", priorities = c(2, 1, 2))

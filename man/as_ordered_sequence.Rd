@@ -2,21 +2,21 @@
 % Please edit documentation in R/50-ordered_sequence-constructors.R
 \name{as_ordered_sequence}
 \alias{as_ordered_sequence}
-\title{Build an Ordered Sequence from `x` and `keys`}
+\title{Build an Ordered Sequence from \code{x} and \code{keys}}
 \usage{
 as_ordered_sequence(x, keys)
 }
 \arguments{
 \item{x}{Elements to add.}
 
-\item{keys}{Key values with the same length as `x`.}
+\item{keys}{Key values with the same length as \code{x}.}
 }
 \value{
-An `ordered_sequence`.
+An \code{ordered_sequence}.
 }
 \description{
-Constructs an `ordered_sequence` by pairing each element of `x` with the
-corresponding key in `keys`.
+Constructs an \code{ordered_sequence} by pairing each element of \code{x} with the
+corresponding key in \code{keys}.
 }
 \details{
 Output is always sorted by key.
@@ -24,7 +24,7 @@ Output is always sorted by key.
 Duplicate keys are allowed; ties preserve input order (stable/FIFO within the
 same key).
 
-Names on `x` are preserved as element names.
+Names on \code{x} are preserved as element names.
 }
 \examples{
 xs <- as_ordered_sequence(c("d", "a", "b", "a2"), keys = c(4, 1, 2, 1))

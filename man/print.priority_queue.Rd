@@ -7,14 +7,14 @@
 \method{print}{priority_queue}(x, max_elements = 4L, ...)
 }
 \arguments{
-\item{x}{A `priority_queue`.}
+\item{x}{A \code{priority_queue}.}
 
 \item{max_elements}{Maximum number of elements shown in the preview.}
 
-\item{...}{Passed through to per-element `print()`.}
+\item{...}{Passed through to per-element \code{print()}.}
 }
 \value{
-Invisibly returns `x`.
+Invisibly returns \code{x}.
 }
 \description{
 Prints a compact summary with priority range and a head/tail preview.

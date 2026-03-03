@@ -18,16 +18,16 @@
 \arguments{
 \item{x}{FingerTree.}
 
-\item{max_elements}{Maximum number of elements shown in preview (`head + tail`).
-Default `4`.}
+\item{max_elements}{Maximum number of elements shown in preview (\code{head + tail}).
+Default \code{4}.}
 
-\item{show_internal_monoids}{Logical; show internal monoids (`.size`,
-`.named_count`). Default `FALSE`.}
+\item{show_internal_monoids}{Logical; show internal monoids (\code{.size},
+\code{.named_count}). Default \code{FALSE}.}
 
-\item{...}{Passed through to `print()` for preview elements.}
+\item{...}{Passed through to \code{print()} for preview elements.}
 }
 \value{
-`x`, invisibly.
+\code{x}, invisibly.
 }
 \description{
 Print a compact summary of a finger tree

@@ -7,12 +7,15 @@
 \method{plot}{interval_index}(x, ...)
 }
 \arguments{
-\item{x}{An `interval_index`.}
+\item{x}{An \code{interval_index}.}
 
 \item{...}{Passed to the internal tree plotting routine.}
 }
 \description{
-Plots the underlying tree structure used by an `interval_index`.
+Plots the underlying tree structure used by an \code{interval_index}.
+}
+\details{
+Visualizes the internal finger-tree structure used for interval queries.
 }
 \examples{
 ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))

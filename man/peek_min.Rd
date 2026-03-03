@@ -7,10 +7,10 @@
 peek_min(x)
 }
 \arguments{
-\item{x}{A `priority_queue`.}
+\item{x}{A \code{priority_queue}.}
 }
 \value{
-Element at minimum priority, or `NULL` when `x` is empty.
+Element at minimum priority, or \code{NULL} when \code{x} is empty.
 }
 \description{
 Returns the element at the minimum priority without modifying the queue.

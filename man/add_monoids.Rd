@@ -7,31 +7,33 @@
 add_monoids(t, monoids, overwrite = FALSE)
 }
 \arguments{
-\item{t}{Immutable structure (`flexseq` and subclasses).}
+\item{t}{Immutable structure (\code{flexseq} and subclasses).}
 
-\item{monoids}{Named list of [measure_monoid()] objects.}
+\item{monoids}{Named list of \code{\link[=measure_monoid]{measure_monoid()}} objects.}
 
-\item{overwrite}{Logical; if `TRUE`, replace existing monoids with the same
-names. If `FALSE`, existing names are kept.}
+\item{overwrite}{Logical; if \code{TRUE}, replace existing monoids with the same
+names. If \code{FALSE}, existing names are kept.}
 }
 \value{
 A persistent copy with updated monoid definitions and cached measures.
 }
 \description{
-Attaches one or more named [measure_monoid()] definitions to an existing
+Attaches one or more named \code{\link[=measure_monoid]{measure_monoid()}} definitions to an existing
 immutable structure.
 }
 \details{
 Mechanics:
-- Each monoid name defines an independent accumulated measure over elements in the tree.
-- New monoids are computed for all elements and cached in the returned object.
-- Existing monoids are unchanged unless `overwrite = TRUE`.
-- Structural/reserved monoid names cannot be replaced.
+\itemize{
+\item Each monoid name defines an independent accumulated measure over elements in the tree.
+\item New monoids are computed for all elements and cached in the returned object.
+\item Existing monoids are unchanged unless \code{overwrite = TRUE}.
+\item Structural/reserved monoid names cannot be replaced.
+}
 
-This operation is persistent: `t` is not modified.
+This operation is persistent: \code{t} is not modified.
 
 Use this when you want fast predicate scans (for example with
-[locate_by_predicate()], [split_by_predicate()], [split_around_by_predicate()])
+\code{\link[=locate_by_predicate]{locate_by_predicate()}}, \code{\link[=split_by_predicate]{split_by_predicate()}}, \code{\link[=split_around_by_predicate]{split_around_by_predicate()}})
 driven by domain-specific accumulated values.
 }
 \examples{
@@ -50,6 +52,6 @@ x3 <- add_monoids(x2, list(sum = running_count), overwrite = TRUE)
 attr(x3, "measures")$sum
 }
 \seealso{
-[add_monoids.flexseq()], [add_monoids.priority_queue()],
-  [add_monoids.ordered_sequence()], [add_monoids.interval_index()]
+\code{\link[=add_monoids.flexseq]{add_monoids.flexseq()}}, \code{\link[=add_monoids.priority_queue]{add_monoids.priority_queue()}},
+\code{\link[=add_monoids.ordered_sequence]{add_monoids.ordered_sequence()}}, \code{\link[=add_monoids.interval_index]{add_monoids.interval_index()}}
 }

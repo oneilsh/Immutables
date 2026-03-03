@@ -12,19 +12,21 @@ insert(x, ...)
 \item{...}{Method-specific arguments.}
 }
 \value{
-Updated object of the same class as `x`.
+Updated object of the same class as \code{x}.
 }
 \description{
 Inserts an element into a structure-specific position according to class
 semantics.
 }
 \details{
-`insert()` is an S3 generic. Required arguments in `...` depend on `x`:
-- `priority_queue`: `element`, `priority` (optional `name`)
-- `ordered_sequence`: `element`, `key` (optional `name`)
-- `interval_index`: `element`, `start`, `end` (optional `name`)
+\code{insert()} is an S3 generic. Required arguments in \code{...} depend on \code{x}:
+\itemize{
+\item \code{priority_queue}: \code{element}, \code{priority} (optional \code{name})
+\item \code{ordered_sequence}: \code{element}, \code{key} (optional \code{name})
+\item \code{interval_index}: \code{element}, \code{start}, \code{end} (optional \code{name})
+}
 
-This operation is persistent: `x` is not modified.
+This operation is persistent: \code{x} is not modified.
 }
 \examples{
 q <- priority_queue("a", "b", priorities = c(2, 1))
@@ -37,6 +39,6 @@ iv <- interval_index("A", "B", starts = c(1, 5), ends = c(3, 8))
 insert(iv, "C", start = 2, end = 6)
 }
 \seealso{
-[priority_queue()], [ordered_sequence()], [interval_index()],
-  [insert_at()]
+\code{\link[=priority_queue]{priority_queue()}}, \code{\link[=ordered_sequence]{ordered_sequence()}}, \code{\link[=interval_index]{interval_index()}},
+\code{\link[=insert_at]{insert_at()}}
 }

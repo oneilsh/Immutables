@@ -61,6 +61,8 @@ as.list.interval_index <- function(x, ...) {
 #' @method length interval_index
 #' @param x An `interval_index`.
 #' @return Number of indexed intervals.
+#' @details
+#' Uses cached size metadata and runs in O(1).
 #' @examples
 #' ix <- interval_index("a", "b", start = c(1, 3), end = c(2, 5))
 #' length(ix)
@@ -82,6 +84,8 @@ length.interval_index <- function(x) {
 #' @method plot interval_index
 #' @param x An `interval_index`.
 #' @param ... Passed to the internal tree plotting routine.
+#' @details
+#' Visualizes the internal finger-tree structure used for interval queries.
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
 #' plot(ix)

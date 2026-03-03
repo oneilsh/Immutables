@@ -7,18 +7,20 @@
 pop_all_max(x)
 }
 \arguments{
-\item{x}{A `priority_queue`.}
+\item{x}{A \code{priority_queue}.}
 }
 \value{
 A list with fields:
-- `elements`: `priority_queue` of removed maximum-priority elements.
-- `remaining`: queue after removal.
+\itemize{
+\item \code{elements}: \code{priority_queue} of removed maximum-priority elements.
+\item \code{remaining}: queue after removal.
+}
 }
 \description{
 Removes the full maximum-priority tie run.
 }
 \details{
-The return `elements` is another `priority_queue()`, use `as.list()` to 
+The return \code{elements} is another \code{priority_queue()}, use \code{as.list()} to
 convert the result to a standard R list.
 }
 \examples{

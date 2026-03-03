@@ -7,7 +7,7 @@
 \method{as.list}{interval_index}(x, ...)
 }
 \arguments{
-\item{x}{An `interval_index`.}
+\item{x}{An \code{interval_index}.}
 
 \item{...}{Unused.}
 }

@@ -330,6 +330,8 @@ push_front <- function(x, value) {
 #'
 #' @param x A `flexseq`.
 #' @return First element, or `NULL` when `x` is empty.
+#' @details
+#' Returns the payload element without modifying `x`.
 #' @examples
 #' x <- flexseq("a", "b", "c")
 #' peek_front(x)
@@ -359,6 +361,8 @@ peek_front <- function(x) {
 #'
 #' @param x A `flexseq`.
 #' @return Last element, or `NULL` when `x` is empty.
+#' @details
+#' Returns the payload element without modifying `x`.
 #' @examples
 #' x <- flexseq("a", "b", "c")
 #' peek_back(x)
@@ -390,10 +394,15 @@ peek_back <- function(x) {
 #' @param x A `flexseq`.
 #' @param index One-based position to read.
 #' @return Element at `index`, or `NULL` when `index` is out of bounds.
+#' @details
+#' Positive integer indices beyond `length(x)` return `NULL`.
+#' Invalid indices (`NA`, non-integer, `<= 0`, or length not equal to 1) error.
 #' @examples
 #' x <- flexseq("a", "b", "c")
 #' peek_at(x, 2)
 #' peek_at(x, 10)
+#'
+#' try(peek_at(x, 0))
 #' @export
 # Runtime: O(log n) lookup by scalar index.
 peek_at <- function(x, index) {
@@ -425,6 +434,9 @@ peek_at <- function(x, index) {
 #' - `remaining`: the sequence after removing the first element.
 #' @details
 #' This operation is persistent: `x` is not modified.
+#'
+#' On empty input, returns a non-throwing miss object with
+#' `element = NULL` and `remaining = x`.
 #' @examples
 #' s <- flexseq("a", "b", "c")
 #' out <- pop_front(s)
@@ -464,6 +476,9 @@ pop_front <- function(x) {
 #' - `remaining`: the sequence after removing the last element.
 #' @details
 #' This operation is persistent: `x` is not modified.
+#'
+#' On empty input, returns a non-throwing miss object with
+#' `element = NULL` and `remaining = x`.
 #' @examples
 #' s <- flexseq("a", "b", "c")
 #' out <- pop_back(s)
@@ -504,6 +519,10 @@ pop_back <- function(x) {
 #' - `remaining`: the sequence after removing the selected element.
 #' @details
 #' This operation is persistent: `x` is not modified.
+#'
+#' Positive integer indices beyond `length(x)` return a non-throwing miss object
+#' with `element = NULL` and `remaining = x`.
+#' Invalid indices (`NA`, non-integer, `<= 0`, or length not equal to 1) error.
 #' @examples
 #' x <- flexseq("a", "b", "c", "d")
 #' out <- pop_at(x, 3)
@@ -512,6 +531,7 @@ pop_back <- function(x) {
 #' x  # unchanged
 #'
 #' pop_at(x, 10)
+#' try(pop_at(x, 0))
 #' @export
 # Runtime: O(log n) for one read plus O(k log n) index subset to rebuild.
 pop_at <- function(x, index) {

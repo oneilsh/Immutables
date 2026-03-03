@@ -7,7 +7,7 @@
 \method{as.list}{ordered_sequence}(x, ...)
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 
 \item{...}{Unused.}
 }
@@ -16,4 +16,12 @@ A plain list of elements in key order.
 }
 \description{
 Coerce Ordered Sequence to List
+}
+\details{
+Returns payload elements only (keys are omitted) in canonical key order.
+If entries are named, names are preserved on the returned list.
+}
+\examples{
+x <- ordered_sequence("a", "b", "c", keys = c(2, 1, 3))
+as.list(x)
 }

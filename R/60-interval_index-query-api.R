@@ -7,6 +7,9 @@
 #' @param point Query point.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return The payload item from the first match, or `NULL` on no match.
+#' @details
+#' Returns the first match in canonical interval order. Use [peek_all_point()] to
+#' retrieve all matches as an `interval_index` slice.
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
 #' peek_point(ix, 2)
@@ -53,6 +56,10 @@ peek_all_point <- function(x, point, bounds = NULL) {
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return A list with `element`, `start`, `end`, and `remaining`.
 #'   On miss: `element`, `start`, and `end` are `NULL`.
+#' @details
+#' Removes the first match in canonical interval order. On miss, returns a
+#' non-throwing miss object with `remaining = x`.
+#' Use [pop_all_point()] to remove all matches.
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
 #' pop_point(ix, 2)
@@ -95,6 +102,9 @@ pop_all_point <- function(x, point, bounds = NULL) {
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return The payload item from the first match, or `NULL` on no match.
+#' @details
+#' Returns the first match in canonical interval order. Use
+#' [peek_all_overlaps()] to retrieve all matches as an `interval_index` slice.
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
 #' peek_overlaps(ix, 2, 3)
@@ -142,6 +152,9 @@ peek_all_overlaps <- function(x, start, end, bounds = NULL) {
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return The payload item from the first match, or `NULL` on no match.
+#' @details
+#' Returns the first match in canonical interval order. Use
+#' [peek_all_containing()] to retrieve all matches as an `interval_index` slice.
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(5, 3, 6))
 #' peek_containing(ix, 2, 3)
@@ -184,6 +197,9 @@ peek_all_containing <- function(x, start, end, bounds = NULL) {
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return The payload item from the first match, or `NULL` on no match.
+#' @details
+#' Returns the first match in canonical interval order. Use [peek_all_within()]
+#' to retrieve all matches as an `interval_index` slice.
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 5))
 #' peek_within(ix, 1, 4)
@@ -227,6 +243,10 @@ peek_all_within <- function(x, start, end, bounds = NULL) {
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return A list with `element`, `start`, `end`, and `remaining`.
 #'   On miss: `element`, `start`, and `end` are `NULL`.
+#' @details
+#' Removes the first match in canonical interval order. On miss, returns a
+#' non-throwing miss object with `remaining = x`.
+#' Use [pop_all_overlaps()] to remove all matches.
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
 #' pop_overlaps(ix, 2, 3)
@@ -271,6 +291,10 @@ pop_all_overlaps <- function(x, start, end, bounds = NULL) {
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return A list with `element`, `start`, `end`, and `remaining`.
 #'   On miss: `element`, `start`, and `end` are `NULL`.
+#' @details
+#' Removes the first match in canonical interval order. On miss, returns a
+#' non-throwing miss object with `remaining = x`.
+#' Use [pop_all_containing()] to remove all matches.
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 7))
 #' pop_containing(ix, 2, 4)
@@ -315,6 +339,10 @@ pop_all_containing <- function(x, start, end, bounds = NULL) {
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 #' @return A list with `element`, `start`, `end`, and `remaining`.
 #'   On miss: `element`, `start`, and `end` are `NULL`.
+#' @details
+#' Removes the first match in canonical interval order. On miss, returns a
+#' non-throwing miss object with `remaining = x`.
+#' Use [pop_all_within()] to remove all matches.
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 5))
 #' pop_within(ix, 1, 4)

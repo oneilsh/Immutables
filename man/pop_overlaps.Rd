@@ -7,20 +7,25 @@
 pop_overlaps(x, start, end, bounds = NULL)
 }
 \arguments{
-\item{x}{An `interval_index`.}
+\item{x}{An \code{interval_index}.}
 
 \item{start}{Query interval start.}
 
 \item{end}{Query interval end.}
 
-\item{bounds}{Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
+\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
 }
 \value{
-A list with `element`, `start`, `end`, and `remaining`.
-  On miss: `element`, `start`, and `end` are `NULL`.
+A list with \code{element}, \code{start}, \code{end}, and \code{remaining}.
+On miss: \code{element}, \code{start}, and \code{end} are \code{NULL}.
 }
 \description{
 Pop First Overlapping Interval
+}
+\details{
+Removes the first match in canonical interval order. On miss, returns a
+non-throwing miss object with \code{remaining = x}.
+Use \code{\link[=pop_all_overlaps]{pop_all_overlaps()}} to remove all matches.
 }
 \examples{
 ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))

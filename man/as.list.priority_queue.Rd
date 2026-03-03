@@ -7,7 +7,7 @@
 \method{as.list}{priority_queue}(x, ...)
 }
 \arguments{
-\item{x}{A `priority_queue`.}
+\item{x}{A \code{priority_queue}.}
 
 \item{...}{Unused.}
 }
@@ -15,8 +15,12 @@
 A plain list of queue entry records.
 }
 \description{
-Returns queue entries as a plain list of records with fields `item` and
-`priority`, in queue sequence order.
+Returns queue entries as a plain list of records with fields \code{item} and
+\code{priority}, in queue sequence order.
+}
+\details{
+Each returned element is a record with fields \code{item} and \code{priority}.
+Entry names (when present) are preserved on the returned list.
 }
 \examples{
 q <- priority_queue("a", "b", priorities = c(2, 1))

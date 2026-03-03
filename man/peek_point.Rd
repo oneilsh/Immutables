@@ -7,17 +7,21 @@
 peek_point(x, point, bounds = NULL)
 }
 \arguments{
-\item{x}{An `interval_index`.}
+\item{x}{An \code{interval_index}.}
 
 \item{point}{Query point.}
 
-\item{bounds}{Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
+\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
 }
 \value{
-The payload item from the first match, or `NULL` on no match.
+The payload item from the first match, or \code{NULL} on no match.
 }
 \description{
 Peek First Interval Containing a Point
+}
+\details{
+Returns the first match in canonical interval order. Use \code{\link[=peek_all_point]{peek_all_point()}} to
+retrieve all matches as an \code{interval_index} slice.
 }
 \examples{
 ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))

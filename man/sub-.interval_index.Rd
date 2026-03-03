@@ -23,7 +23,7 @@
 \method{$}{interval_index}(x, name) <- value
 }
 \arguments{
-\item{x}{An `interval_index`.}
+\item{x}{An \code{interval_index}.}
 
 \item{i}{Index input.}
 
@@ -31,18 +31,41 @@
 
 \item{value}{Replacement value (unsupported).}
 
-\item{name}{Element name (for `$` and `$<-`).}
+\item{name}{Element name (for \code{$} and \verb{$<-}).}
 }
 \value{
 Read methods return interval payload values/subsets; replacement forms
-  always error.
+always error.
 
-For `$`: the matched payload element.
+For \code{$}: the matched payload element.
 
 No return value; always errors because replacement indexing is unsupported.
 }
 \description{
-Read indexing returns `interval_index` subsets while preserving interval/key
+Read indexing returns \code{interval_index} subsets while preserving interval/key
 order; out-of-order selectors are canonicalized with a warning. Replacement
 indexing is blocked.
+}
+\details{
+Read indexing preserves canonical interval order in returned subsets.
+\itemize{
+\item Integer/character vectors are treated as selectors and canonicalized to
+interval-order output.
+\item Out-of-order selector vectors trigger a warning and are canonicalized.
+\item Duplicate selectors are rejected.
+\item \code{[[} and \code{$} return payload values.
+\item Replacement indexing (\verb{[<-}, \verb{[[<-}, \verb{$<-}) is unsupported.
+}
+}
+\examples{
+ix <- interval_index(a = "A", b = "B", c = "C", start = c(1, 3, 5), end = c(2, 4, 6))
+
+ix[c(3, 1)]         # warning; result returned in interval order
+ix[c("c", "a")]     # warning; result returned in interval order
+ix[c(TRUE, FALSE, TRUE)]
+ix[["b"]]
+ix$b
+
+try(ix[c(2, 2)])
+try(ix$b <- "updated")
 }

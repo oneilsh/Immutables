@@ -10,12 +10,14 @@ validate_tree(t)
 \item{t}{FingerTree.}
 }
 \value{
-`TRUE` invisibly; errors if invariant violations are found.
+\code{TRUE} invisibly; errors if invariant violations are found.
 }
 \description{
 Performs expensive full-tree auditing of:
-- structural attributes (`monoids`/`measures`) consistency
-- global name-state invariants
+\itemize{
+\item structural attributes (\code{monoids}/\code{measures}) consistency
+\item global name-state invariants
+}
 }
 \details{
 Intended for debugging and tests, not hot runtime paths.

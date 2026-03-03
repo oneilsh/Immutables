@@ -2,24 +2,24 @@
 % Please edit documentation in R/40-priority_queue-constructors.R
 \name{as_priority_queue}
 \alias{as_priority_queue}
-\title{Build a Priority Queue from `x` and `priorities`}
+\title{Build a Priority Queue from \code{x} and \code{priorities}}
 \usage{
 as_priority_queue(x, priorities)
 }
 \arguments{
 \item{x}{Elements to enqueue.}
 
-\item{priorities}{Priorities with the same length as `x`.}
+\item{priorities}{Priorities with the same length as \code{x}.}
 }
 \value{
-A `priority_queue`.
+A \code{priority_queue}.
 }
 \description{
-Constructs a queue by pairing each element of `x` with the corresponding
-value in `priorities`.
+Constructs a queue by pairing each element of \code{x} with the corresponding
+value in \code{priorities}.
 }
 \details{
-`x` is interpreted element-wise (via list coercion). Names on `x` are
+\code{x} is interpreted element-wise (via list coercion). Names on \code{x} are
 preserved as queue element names.
 
 All priorities must be non-missing and mutually comparable.

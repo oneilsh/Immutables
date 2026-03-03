@@ -13,6 +13,26 @@
 #' @param ... Unused.
 #' @return Read methods return interval payload values/subsets; replacement forms
 #'   always error.
+#' @details
+#' Read indexing preserves canonical interval order in returned subsets.
+#'
+#' - Integer/character vectors are treated as selectors and canonicalized to
+#'   interval-order output.
+#' - Out-of-order selector vectors trigger a warning and are canonicalized.
+#' - Duplicate selectors are rejected.
+#' - `[[` and `$` return payload values.
+#' - Replacement indexing (`[<-`, `[[<-`, `$<-`) is unsupported.
+#' @examples
+#' ix <- interval_index(a = "A", b = "B", c = "C", start = c(1, 3, 5), end = c(2, 4, 6))
+#'
+#' ix[c(3, 1)]         # warning; result returned in interval order
+#' ix[c("c", "a")]     # warning; result returned in interval order
+#' ix[c(TRUE, FALSE, TRUE)]
+#' ix[["b"]]
+#' ix$b
+#'
+#' try(ix[c(2, 2)])
+#' try(ix$b <- "updated")
 NULL
 
 # Runtime: O(k log n) for reads + O(k log k) selector normalization.

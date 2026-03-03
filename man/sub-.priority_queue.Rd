@@ -23,21 +23,39 @@
 \method{$}{priority_queue}(x, name) <- value
 }
 \arguments{
-\item{x}{A `priority_queue`.}
+\item{x}{A \code{priority_queue}.}
 
-\item{i}{Index input. For reads, must be a character name (scalar for `[[`).}
+\item{i}{Index input. For reads, must be a character name (scalar for \code{[[}).}
 
 \item{...}{Unused.}
 
 \item{value}{Replacement value (unsupported).}
 
-\item{name}{Element name (for `$` and `$<-`).}
+\item{name}{Element name (for \code{$} and \verb{$<-}).}
 }
 \value{
-For `$`/`[[`/`[`: queue payload values or queue subsets by name.
-  Replacement forms always error.
+For \code{$}/\code{[[}/\code{[}: queue payload values or queue subsets by name.
+Replacement forms always error.
 }
 \description{
 Name-based indexing is supported for reads only. Positional indexing and all
 replacement indexing are intentionally blocked to preserve queue-first UX.
+}
+\details{
+\code{priority_queue} supports name-based read indexing only.
+\itemize{
+\item \code{[}: character vector of names, returns a \code{priority_queue} subset.
+\item \code{[[} and \code{$}: scalar name, return the payload value.
+\item Positional indexing and all replacement indexing forms are unsupported.
+}
+}
+\examples{
+q <- priority_queue(a = "task-a", b = "task-b", priorities = c(2, 1))
+
+q["a"]
+q[["b"]]
+q$b
+
+try(q[1])
+try(q$a <- "updated")
 }

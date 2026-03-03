@@ -142,6 +142,26 @@ as_flexseq.flexseq <- function(x) {
 #' @param ... `flexseq` objects.
 #' @param recursive Unused; must be `FALSE`.
 #' @return A concatenated `flexseq`.
+#' @details
+#' `c()` is supported for `flexseq` and returns a new concatenated `flexseq`.
+#'
+#' For `priority_queue`, `ordered_sequence`, and `interval_index`, `c()` is not
+#' supported because concatenation can violate structure-specific invariants.
+#' Cast first with [as_flexseq()] when sequence-style concatenation is intended,
+#' noting that this drops ordering and priority metadata.
+#' @examples
+#' x <- flexseq("a", "b")
+#' y <- flexseq("c", "d")
+#' c(x, y)
+#'
+#' q1 <- priority_queue("a", priorities = 2)
+#' q2 <- priority_queue("b", priorities = 1)
+#' try(c(q1, q2))
+#' c(as_flexseq(q1), as_flexseq(q2))
+#'
+#' o1 <- ordered_sequence("a", keys = 1)
+#' o2 <- ordered_sequence("b", keys = 2)
+#' try(c(o1, o2))
 #' @export
 # Runtime: O(sum(n_i)) worst-case with monoid harmonization.
 c.flexseq <- function(..., recursive = FALSE) {
@@ -171,6 +191,11 @@ c.priority_queue <- function(..., recursive = FALSE) {
 #' @method plot flexseq
 #' @param x A `flexseq`.
 #' @param ... Passed to the internal tree plotting routine.
+#' @details
+#' Visualizes the internal finger-tree structure, not a value-level chart.
+#' @examples
+#' x <- flexseq("a", "b", "c")
+#' plot(x)
 #' @export
 # Runtime: O(n) to build plot graph data.
 plot.flexseq <- function(x, ...) {
@@ -182,6 +207,13 @@ plot.flexseq <- function(x, ...) {
 #' @method length flexseq
 #' @param x A `flexseq`.
 #' @return Number of elements in the sequence.
+#' @details
+#' Uses cached size metadata and runs in O(1).
+#' @examples
+#' x <- flexseq("a", "b")
+#' length(x)
+#'
+#' length(flexseq())
 #' @export
 # Runtime: O(1) using cached `.size` measure.
 length.flexseq <- function(x) {
@@ -196,6 +228,15 @@ length.flexseq <- function(x) {
 #' @param x A `flexseq`.
 #' @param ... Unused.
 #' @return A base R list of sequence elements.
+#' @details
+#' Returns payload elements in sequence order. If the sequence is fully named,
+#' those names are preserved on the returned list.
+#' @examples
+#' x <- flexseq("a", "b", "c")
+#' as.list(x)
+#'
+#' n <- flexseq(a = 1, b = 2)
+#' as.list(n)
 #' @export
 # Runtime: O(n) over number of elements.
 as.list.flexseq <- function(x, ...) {

@@ -7,20 +7,26 @@
 pop_at(x, index)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 
 \item{index}{One-based position to remove.}
 }
 \value{
 A list with fields:
-- `element`: the element at `index`, or `NULL` when `index` is out of bounds.
-- `remaining`: the sequence after removing the selected element.
+\itemize{
+\item \code{element}: the element at \code{index}, or \code{NULL} when \code{index} is out of bounds.
+\item \code{remaining}: the sequence after removing the selected element.
+}
 }
 \description{
 Returns the selected element and the remaining sequence.
 }
 \details{
-This operation is persistent: `x` is not modified.
+This operation is persistent: \code{x} is not modified.
+
+Positive integer indices beyond \code{length(x)} return a non-throwing miss object
+with \code{element = NULL} and \code{remaining = x}.
+Invalid indices (\code{NA}, non-integer, \verb{<= 0}, or length not equal to 1) error.
 }
 \examples{
 x <- flexseq("a", "b", "c", "d")
@@ -30,4 +36,5 @@ out$remaining
 x  # unchanged
 
 pop_at(x, 10)
+try(pop_at(x, 0))
 }

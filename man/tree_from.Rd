@@ -9,12 +9,12 @@ tree_from(x, monoids = NULL)
 \arguments{
 \item{x}{Elements to insert.}
 
-\item{monoids}{Optional named list of `measure_monoid` objects.}
+\item{monoids}{Optional named list of \code{measure_monoid} objects.}
 }
 \value{
 A finger tree with cached measures for all monoids.
-  If `x` has names, they are used for name-based indexing and must be
-  complete (no missing/empty names) and unique.
+If \code{x} has names, they are used for name-based indexing and must be
+complete (no missing/empty names) and unique.
 }
 \description{
 Build a Structural Tree from a Vector or List

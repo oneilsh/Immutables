@@ -7,7 +7,7 @@
 split_by_predicate(x, predicate, monoid_name)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 
 \item{predicate}{Function applied to accumulated monoid values.}
 
@@ -15,18 +15,20 @@ split_by_predicate(x, predicate, monoid_name)
 }
 \value{
 A list with fields:
-- `left`: elements before the split point.
-- `right`: elements from the split point onward.
+\itemize{
+\item \code{left}: elements before the split point.
+\item \code{right}: elements from the split point onward.
+}
 }
 \description{
-Splits at the first point where `predicate` becomes `TRUE` while scanning
+Splits at the first point where \code{predicate} becomes \code{TRUE} while scanning
 the sequence.
 }
 \details{
-This is the two-way variant of [split_around_by_predicate()].
+This is the two-way variant of \code{\link[=split_around_by_predicate]{split_around_by_predicate()}}.
 
-As with [split_around_by_predicate()], a common setup is a custom monoid
-created with [measure_monoid()] and attached via [add_monoids()].
+As with \code{\link[=split_around_by_predicate]{split_around_by_predicate()}}, a common setup is a custom monoid
+created with \code{\link[=measure_monoid]{measure_monoid()}} and attached via \code{\link[=add_monoids]{add_monoids()}}.
 }
 \examples{
 x <- flexseq("a", "b", "c", "d")

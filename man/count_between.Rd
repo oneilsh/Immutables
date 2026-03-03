@@ -7,21 +7,29 @@
 count_between(x, from_key, to_key, include_from = TRUE, include_to = TRUE)
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 
 \item{from_key}{Lower bound key.}
 
 \item{to_key}{Upper bound key.}
 
-\item{include_from}{Include lower bound when `TRUE`.}
+\item{include_from}{Include lower bound when \code{TRUE}.}
 
-\item{include_to}{Include upper bound when `TRUE`.}
+\item{include_to}{Include upper bound when \code{TRUE}.}
 }
 \value{
 Integer count of matches.
 }
 \description{
 Count Elements in a Key Range
+}
+\details{
+Uses the same range semantics as \code{\link[=elements_between]{elements_between()}} but returns only the
+count:
+\itemize{
+\item \code{include_from = TRUE} uses \code{key >= from_key}; otherwise \code{key > from_key}.
+\item \code{include_to = TRUE} uses \code{key <= to_key}; otherwise \code{key < to_key}.
+}
 }
 \examples{
 x <- ordered_sequence("a", "b", "c", "d", keys = c(1, 2, 2, 3))

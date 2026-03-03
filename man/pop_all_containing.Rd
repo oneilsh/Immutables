@@ -7,22 +7,22 @@
 pop_all_containing(x, start, end, bounds = NULL)
 }
 \arguments{
-\item{x}{An `interval_index`.}
+\item{x}{An \code{interval_index}.}
 
 \item{start}{Query interval start.}
 
 \item{end}{Query interval end.}
 
-\item{bounds}{Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
+\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
 }
 \value{
-A list with `elements` and `remaining`, both `interval_index` objects.
+A list with \code{elements} and \code{remaining}, both \code{interval_index} objects.
 }
 \description{
 Pop All Containing Intervals
 }
 \details{
-Use [as.list()] to convert `elements` to a standard R list.
+Use \code{\link[=as.list]{as.list()}} to convert \code{elements} to a standard R list.
 }
 \examples{
 ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 5, 7))

@@ -13,7 +13,7 @@ locate_by_predicate(
 )
 }
 \arguments{
-\item{t}{A `flexseq`.}
+\item{t}{A \code{flexseq}.}
 
 \item{predicate}{Function applied to accumulated monoid values.}
 
@@ -24,25 +24,29 @@ locate_by_predicate(
 \item{include_metadata}{Logical; include scan metadata.}
 }
 \value{
-If `include_metadata = FALSE`, a list with:
-- `found`: logical flag.
-- `elem`: matched element when found, otherwise `NULL`.
+If \code{include_metadata = FALSE}, a list with:
+\itemize{
+\item \code{found}: logical flag.
+\item \code{elem}: matched element when found, otherwise \code{NULL}.
+}
 
-If `include_metadata = TRUE`, adds `metadata` with:
-- `left_measure`
-- `hit_measure`
-- `right_measure`
-- `index`
+If \code{include_metadata = TRUE}, adds \code{metadata} with:
+\itemize{
+\item \code{left_measure}
+\item \code{hit_measure}
+\item \code{right_measure}
+\item \code{index}
+}
 }
 \description{
 Scans accumulated monoid values and returns the first element where
-`predicate` becomes `TRUE`, without rebuilding split trees.
+\code{predicate} becomes \code{TRUE}, without rebuilding split trees.
 }
 \details{
-This is the read-only analogue of [split_around_by_predicate()].
+This is the read-only analogue of \code{\link[=split_around_by_predicate]{split_around_by_predicate()}}.
 
 As with split helpers, a common setup is a custom monoid created with
-[measure_monoid()] and attached via [add_monoids()].
+\code{\link[=measure_monoid]{measure_monoid()}} and attached via \code{\link[=add_monoids]{add_monoids()}}.
 }
 \examples{
 x <- flexseq("a", "b", "c", "d")

@@ -9,12 +9,12 @@ measure_monoid(f, i, measure)
 \arguments{
 \item{f}{Associative binary function over measure values.}
 
-\item{i}{Identity value for `f`.}
+\item{i}{Identity value for \code{f}.}
 
 \item{measure}{Function mapping one element to its measure value.}
 }
 \value{
-An object of class `measure_monoid`.
+An object of class \code{measure_monoid}.
 }
 \description{
 Defines how element-level values are measured and combined as accumulated
@@ -22,17 +22,21 @@ tree metadata.
 }
 \details{
 A measure monoid has three parts:
-- `measure(element)`: maps each element to a measure value.
-- `f(left, right)`: combines two measure values.
-- `i`: identity value for `f`.
+\itemize{
+\item \code{measure(element)}: maps each element to a measure value.
+\item \code{f(left, right)}: combines two measure values.
+\item \code{i}: identity value for \code{f}.
+}
 
 Requirements:
-- `f` should be associative.
-- `i` should satisfy `f(i, x) == x` and `f(x, i) == x`.
-- `measure()` outputs must be compatible with `f` and `i`.
+\itemize{
+\item \code{f} should be associative.
+\item \code{i} should satisfy \code{f(i, x) == x} and \code{f(x, i) == x}.
+\item \code{measure()} outputs must be compatible with \code{f} and \code{i}.
+}
 
-`measure_monoid()` only constructs the specification; it becomes active after
-being attached to a structure via [add_monoids()].
+\code{measure_monoid()} only constructs the specification; it becomes active after
+being attached to a structure via \code{\link[=add_monoids]{add_monoids()}}.
 }
 \examples{
 sum_m <- measure_monoid(`+`, 0, as.numeric)

@@ -7,10 +7,17 @@
 \method{plot}{priority_queue}(x, ...)
 }
 \arguments{
-\item{x}{A `priority_queue`.}
+\item{x}{A \code{priority_queue}.}
 
 \item{...}{Passed to the internal tree plotting routine.}
 }
 \description{
 Plot a Priority Queue Tree
+}
+\details{
+Visualizes the internal finger-tree structure backing the queue.
+}
+\examples{
+q <- priority_queue("a", "b", "c", priorities = c(2, 1, 3))
+plot(q)
 }

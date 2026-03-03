@@ -7,12 +7,15 @@
 \method{plot}{ordered_sequence}(x, ...)
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 
 \item{...}{Passed to the internal tree plotting routine.}
 }
 \description{
-Plots the underlying tree structure used by an `ordered_sequence`.
+Plots the underlying tree structure used by an \code{ordered_sequence}.
+}
+\details{
+Visualizes the internal finger-tree structure used to store ordered entries.
 }
 \examples{
 x <- ordered_sequence("a", "b", "c", keys = c(2, 1, 3))

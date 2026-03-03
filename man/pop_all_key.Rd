@@ -7,20 +7,22 @@
 pop_all_key(x, key)
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 
 \item{key}{Query key.}
 }
 \value{
 A list with fields:
-- `elements`: `ordered_sequence` of removed matches.
-- `remaining`: `ordered_sequence` after removal.
+\itemize{
+\item \code{elements}: \code{ordered_sequence} of removed matches.
+\item \code{remaining}: \code{ordered_sequence} after removal.
+}
 }
 \description{
-Removes and returns all elements whose key equals `key`.
+Removes and returns all elements whose key equals \code{key}.
 }
 \details{
-Use [as.list()] to convert `elements` to a standard R list.
+Use \code{\link[=as.list]{as.list()}} to convert \code{elements} to a standard R list.
 }
 \examples{
 x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))

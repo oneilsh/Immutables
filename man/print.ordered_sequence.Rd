@@ -7,14 +7,14 @@
 \method{print}{ordered_sequence}(x, max_elements = 4L, ...)
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 
 \item{max_elements}{Maximum number of elements shown in the preview.}
 
-\item{...}{Passed through to per-element `print()`.}
+\item{...}{Passed through to per-element \code{print()}.}
 }
 \value{
-Invisibly returns `x`.
+Invisibly returns \code{x}.
 }
 \description{
 Prints a compact summary and head/tail preview in key order.

@@ -7,18 +7,20 @@
 pop_key(x, key)
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 
 \item{key}{Query key.}
 }
 \value{
 A list with fields:
-- `element`: removed element, or `NULL` on miss.
-- `key`: removed key, or `NULL` on miss.
-- `remaining`: ordered sequence after removal.
+\itemize{
+\item \code{element}: removed element, or \code{NULL} on miss.
+\item \code{key}: removed key, or \code{NULL} on miss.
+\item \code{remaining}: ordered sequence after removal.
+}
 }
 \description{
-Removes and returns the first element whose key equals `key`.
+Removes and returns the first element whose key equals \code{key}.
 }
 \details{
 For duplicate keys, the first element in stable sequence order is removed.

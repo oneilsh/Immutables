@@ -7,14 +7,14 @@
 \method{print}{flexseq}(x, max_elements = 4L, show_internal_monoids = FALSE, ...)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 
-\item{max_elements}{Maximum number of elements shown in preview (`head + tail`).}
+\item{max_elements}{Maximum number of elements shown in preview (\code{head + tail}).}
 
 \item{show_internal_monoids}{Logical; include internal monoids in the
 "Custom monoids" line.}
 
-\item{...}{Passed through to per-element `print()`.}
+\item{...}{Passed through to per-element \code{print()}.}
 }
 \description{
 Print a flexseq

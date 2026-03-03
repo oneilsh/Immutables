@@ -7,14 +7,14 @@
 \method{print}{interval_index}(x, max_elements = 4L, ...)
 }
 \arguments{
-\item{x}{An `interval_index`.}
+\item{x}{An \code{interval_index}.}
 
 \item{max_elements}{Maximum number of elements shown in the preview.}
 
-\item{...}{Passed through to per-element `print()`.}
+\item{...}{Passed through to per-element \code{print()}.}
 }
 \value{
-Invisibly returns `x`.
+Invisibly returns \code{x}.
 }
 \description{
 Prints a compact summary with interval bounds and a head/tail preview of

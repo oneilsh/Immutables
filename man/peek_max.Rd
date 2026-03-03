@@ -7,10 +7,10 @@
 peek_max(x)
 }
 \arguments{
-\item{x}{A `priority_queue`.}
+\item{x}{A \code{priority_queue}.}
 }
 \value{
-Element at maximum priority, or `NULL` when `x` is empty.
+Element at maximum priority, or \code{NULL} when \code{x} is empty.
 }
 \description{
 Returns the element at the maximum priority without modifying the queue.

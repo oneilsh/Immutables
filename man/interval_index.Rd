@@ -9,22 +9,22 @@ interval_index(..., start, end, bounds = "[)")
 \arguments{
 \item{...}{Elements to add.}
 
-\item{start}{Start endpoints matching `...`.}
+\item{start}{Start endpoints matching \code{...}.}
 
-\item{end}{End endpoints matching `...`.}
+\item{end}{End endpoints matching \code{...}.}
 
-\item{bounds}{Boundary convention: one of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
+\item{bounds}{Boundary convention: one of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
 }
 \value{
-An `interval_index`.
+An \code{interval_index}.
 }
 \description{
-Convenience constructor from `...`, `start`, and `end`.
+Convenience constructor from \code{...}, \code{start}, and \code{end}.
 }
 \details{
-Empty construction is supported: `interval_index()` returns an empty index.
+Empty construction is supported: \code{interval_index()} returns an empty index.
 
-Output is ordered by interval `start`.
+Output is ordered by interval \code{start}.
 }
 \examples{
 ix <- interval_index("a", "b", "c", start = c(1, 2, 2), end = c(3, 2, 4))

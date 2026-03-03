@@ -13,6 +13,26 @@
 #' @param ... Unused.
 #' @return Read methods return ordered payload values/subsets; replacement forms
 #'   always error.
+#' @details
+#' Vector selectors are treated as membership selectors, not output-order
+#' instructions.
+#'
+#' - Integer/character vectors are normalized to unique positions and returned in
+#'   canonical sequence order.
+#' - Out-of-order selector vectors trigger a warning and are canonicalized.
+#' - Duplicate selectors are rejected.
+#' - Replacement indexing (`[<-`, `[[<-`, `$<-`) is unsupported.
+#' @examples
+#' x <- ordered_sequence(a = "A", b = "B", c = "C", keys = c(1, 2, 3))
+#'
+#' x[c(3, 1)]          # warning; result returned in key order
+#' x[c("c", "a")]      # warning; result returned in key order
+#' x[c(TRUE, FALSE, TRUE)]
+#' x[["b"]]
+#' x$b
+#'
+#' try(x[c(2, 2)])
+#' try(x$b <- "updated")
 #' @rdname sub-.ordered_sequence
 #' @method [ ordered_sequence
 #' @export

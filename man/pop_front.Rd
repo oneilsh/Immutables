@@ -7,18 +7,23 @@
 pop_front(x)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 }
 \value{
 A list with fields:
-- `element`: the first element, or `NULL` when `x` is empty.
-- `remaining`: the sequence after removing the first element.
+\itemize{
+\item \code{element}: the first element, or \code{NULL} when \code{x} is empty.
+\item \code{remaining}: the sequence after removing the first element.
+}
 }
 \description{
 Returns the first element and the remaining sequence.
 }
 \details{
-This operation is persistent: `x` is not modified.
+This operation is persistent: \code{x} is not modified.
+
+On empty input, returns a non-throwing miss object with
+\code{element = NULL} and \code{remaining = x}.
 }
 \examples{
 s <- flexseq("a", "b", "c")

@@ -7,9 +7,9 @@
 insert_at(x, index, values)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 
-\item{index}{One-based insertion position in `[1, length(x) + 1]`.}
+\item{index}{One-based insertion position in \verb{[1, length(x) + 1]}.}
 
 \item{values}{Values to insert.}
 }
@@ -17,21 +17,23 @@ insert_at(x, index, values)
 Updated sequence with inserted values.
 }
 \description{
-Inserts `values` before the current element at `index`.
+Inserts \code{values} before the current element at \code{index}.
 }
 \details{
-`values` is interpreted as a collection of elements to splice in.
+\code{values} is interpreted as a collection of elements to splice in.
 
 Common cases:
-- Atomic vector (`c("x", "y")`): inserts one element per vector entry.
-- List (`list("x", "y")`): inserts one element per list entry.
-- `flexseq`: inserts all of its elements.
-- Empty input (`list()` or `flexseq()`): no change.
+\itemize{
+\item Atomic vector (\code{c("x", "y")}): inserts one element per vector entry.
+\item List (\code{list("x", "y")}): inserts one element per list entry.
+\item \code{flexseq}: inserts all of its elements.
+\item Empty input (\code{list()} or \code{flexseq()}): no change.
+}
 
 To insert one composite object (for example, a vector or a list) as a single
-element, wrap it in `list(...)`.
+element, wrap it in \code{list(...)}.
 
-This operation is persistent: `x` is not modified.
+This operation is persistent: \code{x} is not modified.
 }
 \examples{
 x <- flexseq("a", "b", "c", "d")

@@ -7,9 +7,9 @@
 concat_trees(x, y)
 }
 \arguments{
-\item{x}{A `flexseq` (left side).}
+\item{x}{A \code{flexseq} (left side).}
 
-\item{y}{A `flexseq` (right side).}
+\item{y}{A \code{flexseq} (right side).}
 }
 \value{
 Concatenated tree.

@@ -10,7 +10,7 @@ validate_name_state(t)
 \item{t}{FingerTree.}
 }
 \value{
-`TRUE` invisibly; errors if name invariants are violated.
+\code{TRUE} invisibly; errors if name invariants are violated.
 }
 \description{
 Checks that trees are either fully unnamed or fully named with unique,

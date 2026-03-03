@@ -7,14 +7,18 @@
 \method{str}{flexseq}(object, ...)
 }
 \arguments{
-\item{object}{A `flexseq`.}
+\item{object}{A \code{flexseq}.}
 
-\item{...}{Passed to [utils::str()].}
+\item{...}{Passed to \code{\link[utils:str]{utils::str()}}.}
 }
 \value{
-`NULL`, invisibly.
+\code{NULL}, invisibly.
 }
 \description{
 Display Internal Structure of a flexseq
+}
+\examples{
+x <- flexseq(a = 1, b = list(k = 2))
+str(x)
 }
 \keyword{internal}

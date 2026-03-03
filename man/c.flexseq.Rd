@@ -7,13 +7,35 @@
 \method{c}{flexseq}(..., recursive = FALSE)
 }
 \arguments{
-\item{...}{`flexseq` objects.}
+\item{...}{\code{flexseq} objects.}
 
-\item{recursive}{Unused; must be `FALSE`.}
+\item{recursive}{Unused; must be \code{FALSE}.}
 }
 \value{
-A concatenated `flexseq`.
+A concatenated \code{flexseq}.
 }
 \description{
 Concatenate Sequences
+}
+\details{
+\code{c()} is supported for \code{flexseq} and returns a new concatenated \code{flexseq}.
+
+For \code{priority_queue}, \code{ordered_sequence}, and \code{interval_index}, \code{c()} is not
+supported because concatenation can violate structure-specific invariants.
+Cast first with \code{\link[=as_flexseq]{as_flexseq()}} when sequence-style concatenation is intended,
+noting that this drops ordering and priority metadata.
+}
+\examples{
+x <- flexseq("a", "b")
+y <- flexseq("c", "d")
+c(x, y)
+
+q1 <- priority_queue("a", priorities = 2)
+q2 <- priority_queue("b", priorities = 1)
+try(c(q1, q2))
+c(as_flexseq(q1), as_flexseq(q2))
+
+o1 <- ordered_sequence("a", keys = 1)
+o2 <- ordered_sequence("b", keys = 2)
+try(c(o1, o2))
 }

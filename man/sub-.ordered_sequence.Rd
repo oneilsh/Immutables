@@ -23,7 +23,7 @@
 \method{$}{ordered_sequence}(x, name) <- value
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 
 \item{i}{Index input.}
 
@@ -31,14 +31,37 @@
 
 \item{value}{Replacement value (unsupported).}
 
-\item{name}{Element name (for `$` and `$<-`).}
+\item{name}{Element name (for \code{$} and \verb{$<-}).}
 }
 \value{
 Read methods return ordered payload values/subsets; replacement forms
-  always error.
+always error.
 }
 \description{
 Read indexing treats vectors as selectors and returns subsets in key order.
 Out-of-order selectors are canonicalized with a warning.
 Replacement indexing is blocked to prevent order-breaking writes.
+}
+\details{
+Vector selectors are treated as membership selectors, not output-order
+instructions.
+\itemize{
+\item Integer/character vectors are normalized to unique positions and returned in
+canonical sequence order.
+\item Out-of-order selector vectors trigger a warning and are canonicalized.
+\item Duplicate selectors are rejected.
+\item Replacement indexing (\verb{[<-}, \verb{[[<-}, \verb{$<-}) is unsupported.
+}
+}
+\examples{
+x <- ordered_sequence(a = "A", b = "B", c = "C", keys = c(1, 2, 3))
+
+x[c(3, 1)]          # warning; result returned in key order
+x[c("c", "a")]      # warning; result returned in key order
+x[c(TRUE, FALSE, TRUE)]
+x[["b"]]
+x$b
+
+try(x[c(2, 2)])
+try(x$b <- "updated")
 }

@@ -2,30 +2,30 @@
 % Please edit documentation in R/60-interval_index-constructors.R
 \name{as_interval_index}
 \alias{as_interval_index}
-\title{Build an Interval Index from `x`, `start`, and `end`}
+\title{Build an Interval Index from \code{x}, \code{start}, and \code{end}}
 \usage{
 as_interval_index(x, start, end, bounds = "[)")
 }
 \arguments{
 \item{x}{Elements to add.}
 
-\item{start}{Start endpoints with the same length as `x`.}
+\item{start}{Start endpoints with the same length as \code{x}.}
 
-\item{end}{End endpoints with the same length as `x`.}
+\item{end}{End endpoints with the same length as \code{x}.}
 
-\item{bounds}{Boundary convention: one of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
+\item{bounds}{Boundary convention: one of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
 }
 \value{
-An `interval_index`.
+An \code{interval_index}.
 }
 \description{
-Constructs an `interval_index` by pairing each element of `x` with
-corresponding `start` and `end` endpoints.
+Constructs an \code{interval_index} by pairing each element of \code{x} with
+corresponding \code{start} and \code{end} endpoints.
 }
 \details{
-Output is ordered by interval `start`.
+Output is ordered by interval \code{start}.
 
-Names on `x` are preserved as element names.
+Names on \code{x} are preserved as element names.
 }
 \examples{
 ix <- as_interval_index(c("a", "b", "c"), start = c(1, 2, 2), end = c(3, 2, 4))

@@ -2,27 +2,29 @@
 % Please edit documentation in R/50-ordered_sequence-ops.R
 \name{lower_bound}
 \alias{lower_bound}
-\title{Find First Element with Key `>=` Query}
+\title{Find First Element with Key \code{>=} Query}
 \usage{
 lower_bound(x, key)
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 
 \item{key}{Query key.}
 }
 \value{
 A list with fields:
-- `found`: logical flag.
-- `index`: one-based position of the first match, or `NULL`.
-- `element`: matched element, or `NULL`.
-- `key`: matched key, or `NULL`.
+\itemize{
+\item \code{found}: logical flag.
+\item \code{index}: one-based position of the first match, or \code{NULL}.
+\item \code{element}: matched element, or \code{NULL}.
+\item \code{key}: matched key, or \code{NULL}.
+}
 }
 \description{
-Find First Element with Key `>=` Query
+Find First Element with Key \code{>=} Query
 }
 \details{
-`lower_bound()` finds the first element with key `>= key`. This includes an
+\code{lower_bound()} finds the first element with key \verb{>= key}. This includes an
 exact key match when present, which is useful for starting equality or
 inclusive range scans.
 }
@@ -32,5 +34,5 @@ lower_bound(x, 2)
 lower_bound(x, 10)
 }
 \seealso{
-[upper_bound()]
+\code{\link[=upper_bound]{upper_bound()}}
 }

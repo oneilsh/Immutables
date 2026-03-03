@@ -7,22 +7,22 @@
 peek_all_containing(x, start, end, bounds = NULL)
 }
 \arguments{
-\item{x}{An `interval_index`.}
+\item{x}{An \code{interval_index}.}
 
 \item{start}{Query interval start.}
 
 \item{end}{Query interval end.}
 
-\item{bounds}{Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
+\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
 }
 \value{
-An `interval_index` slice of all matches (possibly empty).
+An \code{interval_index} slice of all matches (possibly empty).
 }
 \description{
 Peek All Intervals Containing a Query Interval
 }
 \details{
-The returned `interval_index` can be inspected with [as.list()].
+The returned \code{interval_index} can be inspected with \code{\link[=as.list]{as.list()}}.
 }
 \examples{
 ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 5, 7))

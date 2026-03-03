@@ -420,6 +420,17 @@
 #' @param ... Unused.
 #' @return For `[`: a new `flexseq` containing selected elements in query order.
 #'   For character indexing, missing names are represented as `NULL` elements.
+#' @details
+#' Selector behavior:
+#' - Integer indexing (`[`) returns elements in the requested order.
+#' - Character indexing (`[`) returns elements in requested name order; unknown
+#'   names become `NULL` elements in the output.
+#' - Logical indexing (`[`) is positional and follows logical-mask selection.
+#'
+#' Replacement behavior:
+#' - `[<-` is persistent and recycles `value` to the number of selected
+#'   positions (with standard R recycling warnings where applicable).
+#' - `[[<-` replaces one element; assigning `NULL` removes that element.
 #' @examples
 #' x <- as_flexseq(letters[1:6])
 #' x

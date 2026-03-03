@@ -7,18 +7,18 @@
 push_back(x, value)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 
 \item{value}{Element to append.}
 }
 \value{
-Updated `flexseq`.
+Updated \code{flexseq}.
 }
 \description{
-Returns a new sequence with `value` appended at the right end.
+Returns a new sequence with \code{value} appended at the right end.
 }
 \details{
-This operation is persistent: `x` is not modified.
+This operation is persistent: \code{x} is not modified.
 
 Elements can be named, but only if all are uniquely named (no missing
 names).

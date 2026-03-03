@@ -7,17 +7,17 @@
 peek_all_min(x)
 }
 \arguments{
-\item{x}{A `priority_queue`.}
+\item{x}{A \code{priority_queue}.}
 }
 \value{
-A `priority_queue` containing all minimum-priority elements in stable
-  queue order. Returns an empty queue when `x` is empty.
+A \code{priority_queue} containing all minimum-priority elements in stable
+queue order. Returns an empty queue when \code{x} is empty.
 }
 \description{
-Returns the full minimum-priority tie run as a `priority_queue`.
+Returns the full minimum-priority tie run as a \code{priority_queue}.
 }
 \details{
-The return is another `priority_queue()`, use `as.list()` to convert 
+The return is another \code{priority_queue()}, use \code{as.list()} to convert
 the result to a standard R list.
 }
 \examples{

@@ -7,10 +7,17 @@
 \method{plot}{flexseq}(x, ...)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 
 \item{...}{Passed to the internal tree plotting routine.}
 }
 \description{
 Plot a Sequence Tree
+}
+\details{
+Visualizes the internal finger-tree structure, not a value-level chart.
+}
+\examples{
+x <- flexseq("a", "b", "c")
+plot(x)
 }

@@ -17,24 +17,26 @@ fapply(X, FUN, ...)
 Method-dependent result.
 }
 \description{
-`fapply()` is an S3 generic for applying functions over immutable
+\code{fapply()} is an S3 generic for applying functions over immutable
 structures with type-specific dispatch.
 }
 \details{
-`fapply()` returns a new object and preserves class semantics.
+\code{fapply()} returns a new object and preserves class semantics.
 
 Method signatures:
-- `fapply.flexseq(X, FUN, ..., preserve_custom_monoids = TRUE)`
-- `fapply.priority_queue(X, FUN, ..., preserve_custom_monoids = TRUE)`
-- `fapply.ordered_sequence(X, FUN, ..., preserve_custom_monoids = TRUE)`
-- `fapply.interval_index(X, FUN, ..., preserve_custom_monoids = TRUE)`
+\itemize{
+\item \code{fapply.flexseq(X, FUN, ..., preserve_custom_monoids = TRUE)}
+\item \code{fapply.priority_queue(X, FUN, ..., preserve_custom_monoids = TRUE)}
+\item \code{fapply.ordered_sequence(X, FUN, ..., preserve_custom_monoids = TRUE)}
+\item \code{fapply.interval_index(X, FUN, ..., preserve_custom_monoids = TRUE)}
+}
 
-For `priority_queue`, `ordered_sequence`, and `interval_index`,
-`FUN` receives structured fields (`item` plus metadata) and should return the
+For \code{priority_queue}, \code{ordered_sequence}, and \code{interval_index},
+\code{FUN} receives structured fields (\code{item} plus metadata) and should return the
 new payload value only; ordering metadata is preserved.
 
-If supported by the method, `preserve_custom_monoids = TRUE` keeps added user
-monoids; `FALSE` rebuilds with required structural monoids only.
+If supported by the method, \code{preserve_custom_monoids = TRUE} keeps added user
+monoids; \code{FALSE} rebuilds with required structural monoids only.
 }
 \examples{
 x <- flexseq("a", "b", "c")
@@ -50,5 +52,5 @@ ix <- interval_index(one = "a", two = "b", start = c(1, 3), end = c(2, 4))
 fapply(ix, function(item, start, end, name) paste0(item, "[", start, ",", end, "]"))
 }
 \seealso{
-[flexseq()], [priority_queue()], [ordered_sequence()], [interval_index()]
+\code{\link[=flexseq]{flexseq()}}, \code{\link[=priority_queue]{priority_queue()}}, \code{\link[=ordered_sequence]{ordered_sequence()}}, \code{\link[=interval_index]{interval_index()}}
 }

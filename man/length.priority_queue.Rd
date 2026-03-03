@@ -7,11 +7,20 @@
 \method{length}{priority_queue}(x)
 }
 \arguments{
-\item{x}{A `priority_queue`.}
+\item{x}{A \code{priority_queue}.}
 }
 \value{
 Integer length.
 }
 \description{
 Priority Queue Length
+}
+\details{
+Uses cached size metadata and runs in O(1).
+}
+\examples{
+q <- priority_queue("a", "b", priorities = c(2, 1))
+length(q)
+
+length(priority_queue())
 }

@@ -7,19 +7,23 @@
 peek_overlaps(x, start, end, bounds = NULL)
 }
 \arguments{
-\item{x}{An `interval_index`.}
+\item{x}{An \code{interval_index}.}
 
 \item{start}{Query interval start.}
 
 \item{end}{Query interval end.}
 
-\item{bounds}{Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.}
+\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
 }
 \value{
-The payload item from the first match, or `NULL` on no match.
+The payload item from the first match, or \code{NULL} on no match.
 }
 \description{
 Peek First Interval Overlapping a Query Interval
+}
+\details{
+Returns the first match in canonical interval order. Use
+\code{\link[=peek_all_overlaps]{peek_all_overlaps()}} to retrieve all matches as an \code{interval_index} slice.
 }
 \examples{
 ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))

@@ -12,6 +12,21 @@
 #' @param ... Unused.
 #' @return For `$`/`[[`/`[`: queue payload values or queue subsets by name.
 #'   Replacement forms always error.
+#' @details
+#' `priority_queue` supports name-based read indexing only.
+#'
+#' - `[`: character vector of names, returns a `priority_queue` subset.
+#' - `[[` and `$`: scalar name, return the payload value.
+#' - Positional indexing and all replacement indexing forms are unsupported.
+#' @examples
+#' q <- priority_queue(a = "task-a", b = "task-b", priorities = c(2, 1))
+#'
+#' q["a"]
+#' q[["b"]]
+#' q$b
+#'
+#' try(q[1])
+#' try(q$a <- "updated")
 NULL
 
 # Runtime: O(k * n_lookup) for short name queries; O(n + k) in map-backed paths.

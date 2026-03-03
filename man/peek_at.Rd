@@ -7,18 +7,24 @@
 peek_at(x, index)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 
 \item{index}{One-based position to read.}
 }
 \value{
-Element at `index`, or `NULL` when `index` is out of bounds.
+Element at \code{index}, or \code{NULL} when \code{index} is out of bounds.
 }
 \description{
 Returns the element at a one-based index without modifying the sequence.
+}
+\details{
+Positive integer indices beyond \code{length(x)} return \code{NULL}.
+Invalid indices (\code{NA}, non-integer, \verb{<= 0}, or length not equal to 1) error.
 }
 \examples{
 x <- flexseq("a", "b", "c")
 peek_at(x, 2)
 peek_at(x, 10)
+
+try(peek_at(x, 0))
 }

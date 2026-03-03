@@ -348,6 +348,12 @@ pop_all_key <- function(x, key) {
 #' @param include_from Include lower bound when `TRUE`.
 #' @param include_to Include upper bound when `TRUE`.
 #' @return Base R list of matched elements, in key order.
+#' @details
+#' Range membership is controlled by `include_from` and `include_to`:
+#' - `include_from = TRUE` uses `key >= from_key`; otherwise `key > from_key`.
+#' - `include_to = TRUE` uses `key <= to_key`; otherwise `key < to_key`.
+#'
+#' If no elements fall in the range, returns `list()`.
 #' @examples
 #' x <- ordered_sequence("a", "b", "c", "d", keys = c(1, 2, 2, 3))
 #' elements_between(x, 2, 3)
@@ -377,6 +383,9 @@ elements_between <- function(x, from_key, to_key, include_from = TRUE, include_t
 #' @param x An `ordered_sequence`.
 #' @param key Query key.
 #' @return Integer count of matches.
+#' @details
+#' Counts multiplicity for a single key. Returns `0L` when the key is not
+#' present.
 #' @examples
 #' x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
 #' count_key(x, 2)
@@ -400,6 +409,11 @@ count_key <- function(x, key) {
 #' @param include_from Include lower bound when `TRUE`.
 #' @param include_to Include upper bound when `TRUE`.
 #' @return Integer count of matches.
+#' @details
+#' Uses the same range semantics as [elements_between()] but returns only the
+#' count:
+#' - `include_from = TRUE` uses `key >= from_key`; otherwise `key > from_key`.
+#' - `include_to = TRUE` uses `key <= to_key`; otherwise `key < to_key`.
 #' @examples
 #' x <- ordered_sequence("a", "b", "c", "d", keys = c(1, 2, 2, 3))
 #' count_between(x, 2, 3)

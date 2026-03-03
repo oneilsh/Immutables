@@ -7,13 +7,15 @@
 pop_min(x)
 }
 \arguments{
-\item{x}{A `priority_queue`.}
+\item{x}{A \code{priority_queue}.}
 }
 \value{
 A list with fields:
-- `element`: removed element, or `NULL` when `x` is empty.
-- `priority`: removed priority, or `NULL` when `x` is empty.
-- `remaining`: queue after removal.
+\itemize{
+\item \code{element}: removed element, or \code{NULL} when \code{x} is empty.
+\item \code{priority}: removed priority, or \code{NULL} when \code{x} is empty.
+\item \code{remaining}: queue after removal.
+}
 }
 \description{
 Removes one minimum-priority element and returns it with the remaining queue.

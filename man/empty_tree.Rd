@@ -7,10 +7,10 @@
 empty_tree(monoids = NULL)
 }
 \arguments{
-\item{monoids}{Optional named list of `measure_monoid` objects.}
+\item{monoids}{Optional named list of \code{measure_monoid} objects.}
 }
 \value{
-An empty finger tree with structural `monoids` and `measures` attrs.
+An empty finger tree with structural \code{monoids} and \code{measures} attrs.
 }
 \description{
 Create an Empty Structural Tree

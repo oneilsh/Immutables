@@ -9,16 +9,16 @@ ordered_sequence(..., keys)
 \arguments{
 \item{...}{Elements to add.}
 
-\item{keys}{Key values with the same length as `...`.}
+\item{keys}{Key values with the same length as \code{...}.}
 }
 \value{
-An `ordered_sequence`.
+An \code{ordered_sequence}.
 }
 \description{
-Convenience constructor from `...` and matching `keys`.
+Convenience constructor from \code{...} and matching \code{keys}.
 }
 \details{
-Empty construction is supported: `ordered_sequence()` returns an empty
+Empty construction is supported: \code{ordered_sequence()} returns an empty
 ordered sequence.
 
 Output is always sorted by key, with stable order across duplicate keys.

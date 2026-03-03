@@ -7,7 +7,7 @@
 count_key(x, key)
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 
 \item{key}{Query key.}
 }
@@ -16,6 +16,10 @@ Integer count of matches.
 }
 \description{
 Count Elements Matching One Key
+}
+\details{
+Counts multiplicity for a single key. Returns \code{0L} when the key is not
+present.
 }
 \examples{
 x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))

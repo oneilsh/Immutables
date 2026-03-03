@@ -7,13 +7,16 @@
 peek_front(x)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 }
 \value{
-First element, or `NULL` when `x` is empty.
+First element, or \code{NULL} when \code{x} is empty.
 }
 \description{
 Returns the first element without modifying the sequence.
+}
+\details{
+Returns the payload element without modifying \code{x}.
 }
 \examples{
 x <- flexseq("a", "b", "c")

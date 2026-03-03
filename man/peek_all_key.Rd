@@ -7,18 +7,18 @@
 peek_all_key(x, key)
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 
 \item{key}{Query key.}
 }
 \value{
-An `ordered_sequence` containing all matches; empty on miss.
+An \code{ordered_sequence} containing all matches; empty on miss.
 }
 \description{
-Returns all elements whose key equals `key`.
+Returns all elements whose key equals \code{key}.
 }
 \details{
-The returned `ordered_sequence` can be inspected with [as.list()].
+The returned \code{ordered_sequence} can be inspected with \code{\link[=as.list]{as.list()}}.
 }
 \examples{
 x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))

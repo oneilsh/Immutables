@@ -2,7 +2,7 @@
 % Please edit documentation in R/20-api-generics.R
 \name{as_flexseq}
 \alias{as_flexseq}
-\title{Coerce Objects to `flexseq`}
+\title{Coerce Objects to \code{flexseq}}
 \usage{
 as_flexseq(x)
 }
@@ -10,27 +10,28 @@ as_flexseq(x)
 \item{x}{Input object.}
 }
 \value{
-A plain `flexseq`.
+A plain \code{flexseq}.
 }
 \description{
-`as_flexseq()` is the canonical way to obtain a plain `flexseq` for full
+\code{as_flexseq()} is the canonical way to obtain a plain \code{flexseq} for full
 sequence-style operations.
 }
 \details{
-For base vectors/lists, this builds a new `flexseq` preserving element order
+For base vectors/lists, this builds a new \code{flexseq} preserving element order
 and names.
 
-For specialized immutable subclasses (`priority_queue`,
-`ordered_sequence`, `interval_index`), this intentionally drops subclass
-semantics and returns a plain `flexseq` over stored entries.
-
+For specialized immutable subclasses (\code{priority_queue},
+\code{ordered_sequence}, \code{interval_index}), this intentionally drops subclass
+semantics and returns a plain \code{flexseq} over stored entries.
 
 This is an S3 generic. Notable method behavior:
-- `as_flexseq.flexseq(x)` returns `x` unchanged.
-- `as_flexseq.priority_queue(x)` drops queue-only API constraints and removes
-  queue-specific monoids.
-- `as_flexseq.ordered_sequence(x)` and `as_flexseq.interval_index(x)` drop
-  ordered/query semantics and return sequence entries.
+\itemize{
+\item \code{as_flexseq.flexseq(x)} returns \code{x} unchanged.
+\item \code{as_flexseq.priority_queue(x)} drops queue-only API constraints and removes
+queue-specific monoids.
+\item \code{as_flexseq.ordered_sequence(x)} and \code{as_flexseq.interval_index(x)} drop
+ordered/query semantics and return sequence entries.
+}
 }
 \examples{
 x <- as_flexseq(1:3)
@@ -43,5 +44,5 @@ o <- ordered_sequence("a", "b", keys = c(2, 1))
 as_flexseq(o)
 }
 \seealso{
-[flexseq()], [priority_queue()], [ordered_sequence()], [interval_index()]
+\code{\link[=flexseq]{flexseq()}}, \code{\link[=priority_queue]{priority_queue()}}, \code{\link[=ordered_sequence]{ordered_sequence()}}, \code{\link[=interval_index]{interval_index()}}
 }

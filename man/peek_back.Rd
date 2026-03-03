@@ -7,13 +7,16 @@
 peek_back(x)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 }
 \value{
-Last element, or `NULL` when `x` is empty.
+Last element, or \code{NULL} when \code{x} is empty.
 }
 \description{
 Returns the last element without modifying the sequence.
+}
+\details{
+Returns the payload element without modifying \code{x}.
 }
 \examples{
 x <- flexseq("a", "b", "c")

@@ -7,11 +7,20 @@
 \method{length}{ordered_sequence}(x)
 }
 \arguments{
-\item{x}{An `ordered_sequence`.}
+\item{x}{An \code{ordered_sequence}.}
 }
 \value{
 Integer length.
 }
 \description{
 Ordered Sequence Length
+}
+\details{
+Uses cached size metadata and runs in O(1).
+}
+\examples{
+x <- ordered_sequence("a", "b", keys = c(2, 1))
+length(x)
+
+length(ordered_sequence())
 }

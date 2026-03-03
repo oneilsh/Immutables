@@ -7,11 +7,20 @@
 \method{length}{flexseq}(x)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 }
 \value{
 Number of elements in the sequence.
 }
 \description{
 Sequence Length
+}
+\details{
+Uses cached size metadata and runs in O(1).
+}
+\examples{
+x <- flexseq("a", "b")
+length(x)
+
+length(flexseq())
 }

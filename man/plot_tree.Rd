@@ -17,9 +17,9 @@ plot_tree(
 \arguments{
 \item{t1}{FingerTree.}
 
-\item{vertex.size}{Vertex size passed to `igraph::plot.igraph`.}
+\item{vertex.size}{Vertex size passed to \code{igraph::plot.igraph}.}
 
-\item{edge.width}{Edge width passed to `igraph::plot.igraph`.}
+\item{edge.width}{Edge width passed to \code{igraph::plot.igraph}.}
 
 \item{label_edges}{Whether to draw edge labels.}
 
@@ -27,7 +27,7 @@ plot_tree(
 
 \item{node_label}{Node label mode: value, type, both, or none.}
 
-\item{...}{Additional arguments passed to `igraph::plot.igraph`.}
+\item{...}{Additional arguments passed to \code{igraph::plot.igraph}.}
 }
 \description{
 Plot a finger tree with igraph

@@ -7,7 +7,7 @@
 \method{as.list}{flexseq}(x, ...)
 }
 \arguments{
-\item{x}{A `flexseq`.}
+\item{x}{A \code{flexseq}.}
 
 \item{...}{Unused.}
 }
@@ -16,4 +16,15 @@ A base R list of sequence elements.
 }
 \description{
 Returns elements in left-to-right sequence order.
+}
+\details{
+Returns payload elements in sequence order. If the sequence is fully named,
+those names are preserved on the returned list.
+}
+\examples{
+x <- flexseq("a", "b", "c")
+as.list(x)
+
+n <- flexseq(a = 1, b = 2)
+as.list(n)
 }

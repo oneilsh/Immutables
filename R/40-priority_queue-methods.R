@@ -27,6 +27,9 @@ as_flexseq.priority_queue <- function(x) {
 #' @param x A `priority_queue`.
 #' @param ... Unused.
 #' @return A plain list of queue entry records.
+#' @details
+#' Each returned element is a record with fields `item` and `priority`.
+#' Entry names (when present) are preserved on the returned list.
 #' @examples
 #' q <- priority_queue("a", "b", priorities = c(2, 1))
 #' as.list(q)
@@ -42,6 +45,11 @@ as.list.priority_queue <- function(x, ...) {
 #' @method plot priority_queue
 #' @param x A `priority_queue`.
 #' @param ... Passed to the internal tree plotting routine.
+#' @details
+#' Visualizes the internal finger-tree structure backing the queue.
+#' @examples
+#' q <- priority_queue("a", "b", "c", priorities = c(2, 1, 3))
+#' plot(q)
 #' @export
 # Runtime: O(n) to build plot graph data.
 plot.priority_queue <- function(x, ...) {
@@ -53,6 +61,13 @@ plot.priority_queue <- function(x, ...) {
 #' @method length priority_queue
 #' @param x A `priority_queue`.
 #' @return Integer length.
+#' @details
+#' Uses cached size metadata and runs in O(1).
+#' @examples
+#' q <- priority_queue("a", "b", priorities = c(2, 1))
+#' length(q)
+#'
+#' length(priority_queue())
 #' @export
 length.priority_queue <- function(x) {
   as.integer(node_measure(x, ".size"))
