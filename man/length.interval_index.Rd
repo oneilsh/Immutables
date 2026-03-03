@@ -10,8 +10,14 @@
 \item{x}{An `interval_index`.}
 }
 \value{
-Integer length.
+Number of indexed intervals.
 }
 \description{
 Interval Index Length
+}
+\examples{
+ix <- interval_index("a", "b", start = c(1, 3), end = c(2, 5))
+length(ix)
+
+length(interval_index())
 }

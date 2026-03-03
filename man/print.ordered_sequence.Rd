@@ -2,14 +2,14 @@
 % Please edit documentation in R/50-ordered_sequence-print.R
 \name{print.ordered_sequence}
 \alias{print.ordered_sequence}
-\title{Print an ordered sequence summary}
+\title{Print an Ordered Sequence Summary}
 \usage{
 \method{print}{ordered_sequence}(x, max_elements = 4L, ...)
 }
 \arguments{
 \item{x}{An `ordered_sequence`.}
 
-\item{max_elements}{Maximum number of elements shown in preview (`head + tail`).}
+\item{max_elements}{Maximum number of elements shown in the preview.}
 
 \item{...}{Passed through to per-element `print()`.}
 }
@@ -17,12 +17,14 @@
 Invisibly returns `x`.
 }
 \description{
-Print an ordered sequence summary
+Prints a compact summary and head/tail preview in key order.
 }
 \examples{
-xs <- ordered_sequence(one = 1, two = 2, three = 3, keys = c(20, 30, 10))
+xs <- ordered_sequence(one = "a", two = "b", three = "c", keys = c(20, 30, 10))
 print(xs, max_elements = 4)
 
-ys <- ordered_sequence(1, 2, 3, keys = c(2, 1, 3))
+ys <- ordered_sequence("x", "y", "z", keys = c(2, 1, 3))
 print(ys, max_elements = 3)
+
+print(ordered_sequence())
 }

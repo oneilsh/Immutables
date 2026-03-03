@@ -24,18 +24,22 @@
   list(entry = s$elem, remaining = rest)
 }
 
-#' Print a Priority Queue
+#' Print a Priority Queue Summary
+#'
+#' Prints a compact summary with priority range and a head/tail preview.
 #'
 #' @param x A `priority_queue`.
-#' @param max_elements Maximum number of elements shown in preview (`head + tail`).
+#' @param max_elements Maximum number of elements shown in the preview.
 #' @param ... Passed through to per-element `print()`.
-#' @return `x` invisibly.
+#' @return Invisibly returns `x`.
 #' @examples
 #' q <- priority_queue(one = 1, two = 2, three = 3, priorities = c(20, 30, 10))
 #' print(q, max_elements = 4)
 #'
 #' q2 <- priority_queue(1, 2, 3, priorities = c(2, 1, 3))
 #' print(q2, max_elements = 3)
+#'
+#' print(priority_queue())
 #' @export
 # Runtime: O(k log n), where k = shown elements.
 print.priority_queue <- function(x, max_elements = 4L, ...) {

@@ -12,5 +12,9 @@
 \item{...}{Passed to the internal tree plotting routine.}
 }
 \description{
-Plot an Interval Index Tree
+Plots the underlying tree structure used by an `interval_index`.
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
+plot(ix)
 }

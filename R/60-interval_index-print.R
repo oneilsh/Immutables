@@ -9,10 +9,13 @@
   paste0(substr(bounds, 1L, 1L), "start, end", substr(bounds, 2L, 2L))
 }
 
-#' Print an interval index summary
+#' Print an Interval Index Summary
+#'
+#' Prints a compact summary with interval bounds and a head/tail preview of
+#' payload elements.
 #'
 #' @param x An `interval_index`.
-#' @param max_elements Maximum number of elements shown in preview (`head + tail`).
+#' @param max_elements Maximum number of elements shown in the preview.
 #' @param ... Passed through to per-element `print()`.
 #' @return Invisibly returns `x`.
 #' @examples
@@ -24,6 +27,8 @@
 #'
 #' ix2 <- interval_index(1, 2, 3, start = c(2, 4, 6), end = c(3, 5, 8), bounds = "[]")
 #' print(ix2, max_elements = 3)
+#'
+#' print(interval_index())
 #' @export
 #' @method print interval_index
 # Runtime: O((k + h) log n), where k = shown elements and h = preview split overhead.

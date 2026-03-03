@@ -1,17 +1,21 @@
 #SO
 
-#' Print an ordered sequence summary
+#' Print an Ordered Sequence Summary
+#'
+#' Prints a compact summary and head/tail preview in key order.
 #'
 #' @param x An `ordered_sequence`.
-#' @param max_elements Maximum number of elements shown in preview (`head + tail`).
+#' @param max_elements Maximum number of elements shown in the preview.
 #' @param ... Passed through to per-element `print()`.
 #' @return Invisibly returns `x`.
 #' @examples
-#' xs <- ordered_sequence(one = 1, two = 2, three = 3, keys = c(20, 30, 10))
+#' xs <- ordered_sequence(one = "a", two = "b", three = "c", keys = c(20, 30, 10))
 #' print(xs, max_elements = 4)
 #'
-#' ys <- ordered_sequence(1, 2, 3, keys = c(2, 1, 3))
+#' ys <- ordered_sequence("x", "y", "z", keys = c(2, 1, 3))
 #' print(ys, max_elements = 3)
+#'
+#' print(ordered_sequence())
 #' @export
 #' @method print ordered_sequence
 # Runtime: O((k + h) log n), where k = shown elements and h = preview split overhead.

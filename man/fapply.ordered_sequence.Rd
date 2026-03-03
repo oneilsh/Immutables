@@ -2,7 +2,7 @@
 % Please edit documentation in R/50-ordered_sequence-apply.R
 \name{fapply.ordered_sequence}
 \alias{fapply.ordered_sequence}
-\title{Apply a function over ordered sequence entries}
+\title{Apply a Function over Ordered Sequence Entries}
 \usage{
 \method{fapply}{ordered_sequence}(X, FUN, ..., preserve_custom_monoids = TRUE)
 }
@@ -10,17 +10,28 @@
 \item{X}{An `ordered_sequence`.}
 
 \item{FUN}{Function of `(item, key, name, ...)` returning the new payload
-item. Key metadata (`key`, `name`) is read-only.}
+value.}
 
 \item{...}{Additional arguments passed to `FUN`.}
 
 \item{preserve_custom_monoids}{Logical scalar. If `TRUE` (default), preserve
-attached user monoids during rebuild. If `FALSE`, drop user monoids and
-keep only required ordered/structural monoids.}
+custom user monoids; if `FALSE`, keep only required built-in monoids.}
 }
 \value{
-A new `ordered_sequence` with transformed entries.
+A new `ordered_sequence` with transformed payload values.
 }
 \description{
-Apply a function over ordered sequence entries
+Applies `FUN` to each payload and returns a new `ordered_sequence`.
+}
+\details{
+Keys and entry names are preserved.
+}
+\examples{
+x <- ordered_sequence(one = "a", two = "b", three = "c", keys = c(2, 1, 3))
+x2 <- fapply(x, function(item, key, name) toupper(item))
+as.list(x2)
+
+# Extra arguments are forwarded to FUN
+x3 <- fapply(x, function(item, key, name, suffix) paste0(item, suffix), suffix = "!")
+as.list(x3)
 }

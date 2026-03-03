@@ -2,22 +2,22 @@
 % Please edit documentation in R/40-priority_queue-print.R
 \name{print.priority_queue}
 \alias{print.priority_queue}
-\title{Print a Priority Queue}
+\title{Print a Priority Queue Summary}
 \usage{
 \method{print}{priority_queue}(x, max_elements = 4L, ...)
 }
 \arguments{
 \item{x}{A `priority_queue`.}
 
-\item{max_elements}{Maximum number of elements shown in preview (`head + tail`).}
+\item{max_elements}{Maximum number of elements shown in the preview.}
 
 \item{...}{Passed through to per-element `print()`.}
 }
 \value{
-`x` invisibly.
+Invisibly returns `x`.
 }
 \description{
-Print a Priority Queue
+Prints a compact summary with priority range and a head/tail preview.
 }
 \examples{
 q <- priority_queue(one = 1, two = 2, three = 3, priorities = c(20, 30, 10))
@@ -25,4 +25,6 @@ print(q, max_elements = 4)
 
 q2 <- priority_queue(1, 2, 3, priorities = c(2, 1, 3))
 print(q2, max_elements = 3)
+
+print(priority_queue())
 }

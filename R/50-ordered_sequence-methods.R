@@ -20,9 +20,14 @@ as_flexseq.ordered_sequence <- function(x) {
 
 #' Plot an Ordered Sequence Tree
 #'
+#' Plots the underlying tree structure used by an `ordered_sequence`.
+#'
 #' @method plot ordered_sequence
 #' @param x An `ordered_sequence`.
 #' @param ... Passed to the internal tree plotting routine.
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", keys = c(2, 1, 3))
+#' plot(x)
 #' @export
 # Runtime: O(n) to build plot graph data.
 plot.ordered_sequence <- function(x, ...) {

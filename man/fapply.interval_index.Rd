@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-apply.R
 \name{fapply.interval_index}
 \alias{fapply.interval_index}
-\title{Apply a function over interval index entries}
+\title{Apply a Function over Interval Index Entries}
 \usage{
 \method{fapply}{interval_index}(X, FUN, ..., preserve_custom_monoids = TRUE)
 }
@@ -10,17 +10,33 @@
 \item{X}{An `interval_index`.}
 
 \item{FUN}{Function of `(item, start, end, name, ...)` returning the new
-payload item. Interval metadata (`start`, `end`, `name`) is read-only.}
+payload value.}
 
 \item{...}{Additional arguments passed to `FUN`.}
 
 \item{preserve_custom_monoids}{Logical scalar. If `TRUE` (default), preserve
-attached user monoids during rebuild. If `FALSE`, drop user monoids and
-keep only required interval/ordered/structural monoids.}
+custom added monoids; if `FALSE`, keep only required built-in monoids.}
 }
 \value{
-A new `interval_index` with transformed entries.
+A new `interval_index` with transformed payload values.
 }
 \description{
-Apply a function over interval index entries
+Applies `FUN` to each entry payload and returns a new `interval_index`.
+}
+\details{
+Interval coordinates (`start`, `end`) and entry names are not changed by
+`fapply()`.
+}
+\examples{
+ix <- interval_index(
+  one = "a", two = "b", three = "c",
+  start = c(1, 3, 5), end = c(2, 4, 6)
+)
+
+ix2 <- fapply(ix, function(item, start, end, name) toupper(item))
+as.list(ix2)
+
+# Extra arguments are forwarded to FUN
+ix3 <- fapply(ix, function(item, start, end, name, suffix) paste0(item, suffix), suffix = "!")
+as.list(ix3)
 }

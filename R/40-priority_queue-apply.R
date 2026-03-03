@@ -43,17 +43,29 @@
   .pq_wrap_like(q, q2)
 }
 
-#' Apply a function over priority queue entries
+#' Apply a Function over Priority Queue Entries
+#'
+#' Applies `FUN` to each queue payload and returns a new `priority_queue`.
 #'
 #' @method fapply priority_queue
 #' @param X A `priority_queue`.
 #' @param FUN Function of `(item, priority, name, ...)` returning the new
-#'   payload item. Queue metadata (`priority`, `name`) is read-only.
+#'   payload value.
 #' @param preserve_custom_monoids Logical scalar. If `TRUE` (default), preserve
-#'   attached user monoids during rebuild. If `FALSE`, drop user monoids and
-#'   keep only required queue/structural monoids.
+#'   custom user monoids; if `FALSE`, keep only required built-in monoids.
 #' @param ... Additional arguments passed to `FUN`.
-#' @return A new `priority_queue` with transformed entries.
+#' @return A new `priority_queue` with transformed payload values.
+#' @details
+#' Priorities and names are preserved.
+#' @examples
+#' q <- priority_queue(one = "a", two = "b", three = "c", priorities = c(2, 1, 3))
+#' q2 <- fapply(q, function(item, priority, name) toupper(item))
+#' peek_min(q2)
+#' peek_max(q2)
+#'
+#' # Extra arguments are forwarded to FUN
+#' q3 <- fapply(q, function(item, priority, name, suffix) paste0(item, suffix), suffix = "!")
+#' peek_min(q3)
 #' @export
 fapply.priority_queue <- function(X, FUN, ..., preserve_custom_monoids = TRUE) {
   if(!is.function(FUN)) {

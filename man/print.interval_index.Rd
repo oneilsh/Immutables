@@ -2,14 +2,14 @@
 % Please edit documentation in R/60-interval_index-print.R
 \name{print.interval_index}
 \alias{print.interval_index}
-\title{Print an interval index summary}
+\title{Print an Interval Index Summary}
 \usage{
 \method{print}{interval_index}(x, max_elements = 4L, ...)
 }
 \arguments{
 \item{x}{An `interval_index`.}
 
-\item{max_elements}{Maximum number of elements shown in preview (`head + tail`).}
+\item{max_elements}{Maximum number of elements shown in the preview.}
 
 \item{...}{Passed through to per-element `print()`.}
 }
@@ -17,7 +17,8 @@
 Invisibly returns `x`.
 }
 \description{
-Print an interval index summary
+Prints a compact summary with interval bounds and a head/tail preview of
+payload elements.
 }
 \examples{
 ix <- interval_index(
@@ -28,4 +29,6 @@ print(ix, max_elements = 4)
 
 ix2 <- interval_index(1, 2, 3, start = c(2, 4, 6), end = c(3, 5, 8), bounds = "[]")
 print(ix2, max_elements = 3)
+
+print(interval_index())
 }

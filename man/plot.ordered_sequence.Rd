@@ -12,5 +12,9 @@
 \item{...}{Passed to the internal tree plotting routine.}
 }
 \description{
-Plot an Ordered Sequence Tree
+Plots the underlying tree structure used by an `ordered_sequence`.
+}
+\examples{
+x <- ordered_sequence("a", "b", "c", keys = c(2, 1, 3))
+plot(x)
 }

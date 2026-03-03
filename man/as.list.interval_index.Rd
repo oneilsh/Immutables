@@ -17,3 +17,10 @@ A plain list of payload elements in interval order.
 \description{
 Coerce Interval Index to List
 }
+\details{
+This returns payload values only.
+}
+\examples{
+ix <- interval_index("a", "b", "c", start = c(3, 1, 2), end = c(4, 2, 3))
+as.list(ix)
+}
