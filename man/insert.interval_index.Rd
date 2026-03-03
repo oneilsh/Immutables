@@ -2,7 +2,7 @@
 % Please edit documentation in R/60-interval_index-mutations.R
 \name{insert.interval_index}
 \alias{insert.interval_index}
-\title{Insert an element into an interval index}
+\title{Insert an Element into an Interval Index}
 \usage{
 \method{insert}{interval_index}(x, element, start, end, name = NULL, ...)
 }
@@ -11,9 +11,9 @@
 
 \item{element}{Element to insert.}
 
-\item{start}{Scalar start endpoint.}
+\item{start}{Start endpoint for the inserted interval.}
 
-\item{end}{Scalar end endpoint.}
+\item{end}{End endpoint for the inserted interval.}
 
 \item{name}{Optional element name.}
 
@@ -23,5 +23,20 @@
 Updated `interval_index`.
 }
 \description{
-Insert an element into an interval index
+Inserts one interval record and returns the updated index.
+}
+\details{
+This operation is persistent: `x` is not modified.
+
+Endpoint validation and comparison follow the endpoint type and bounds
+conventions already established on `x`.
+}
+\examples{
+ix <- interval_index("a", "b", start = c(1, 4), end = c(2, 5))
+ix2 <- insert(ix, "c", start = 2, end = 3)
+ix2
+ix  # unchanged
+
+named <- insert(ix2, "d", start = 6, end = 7, name = "task_d")
+named[["task_d"]]
 }

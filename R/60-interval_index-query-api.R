@@ -7,17 +7,21 @@
 # **Used by:** users/tests.
 #' Get Interval Bounds in Sequence Order
 #'
+#' Returns per-element interval endpoints as a two-column data frame.
+#'
 #' @param x An `interval_index`.
-#' @return A data frame in current sequence order with one row per entry and
-#'   two list-columns:
+#' @return A data frame in sequence order with one row per entry and two
+#'   list-columns:
 #'   \describe{
 #'     \item{`start`}{Start endpoint for each entry.}
 #'     \item{`end`}{End endpoint for each entry.}
 #'   }
-#'   Returns a zero-row data frame with the same columns for empty indexes.
+#'   For an empty index, returns a zero-row data frame with the same columns.
 #' @examples
 #' ix <- interval_index("a", "b", start = c(1, 3), end = c(2, 5))
 #' interval_bounds(ix)
+#'
+#' interval_bounds(interval_index())
 #' @export
 interval_bounds <- function(x) {
   .ivx_assert_index(x)
