@@ -85,6 +85,19 @@ testthat::test_that("bulk extrema single-element removal preserves pq measures",
   testthat::expect_no_error(capture.output(print(out_max$remaining)))
 })
 
+testthat::test_that("as.list.priority_queue returns entry records in queue sequence order", {
+  q <- as_priority_queue(
+    setNames(as.list(c("x", "y", "z")), c("kx", "ky", "kz")),
+    priorities = c(2, 1, 3)
+  )
+
+  out <- as.list(q)
+  testthat::expect_type(out, "list")
+  testthat::expect_identical(names(out), c("kx", "ky", "kz"))
+  testthat::expect_equal(unname(lapply(out, function(e) e$item)), list("x", "y", "z"))
+  testthat::expect_equal(unname(lapply(out, function(e) e$priority)), as.list(c(2, 1, 3)))
+})
+
 testthat::test_that("insert is persistent and supports names", {
   q <- as_priority_queue(setNames(as.list(c("x", "y")), c("kx", "ky")), priorities = c(5, 1))
   q2 <- insert(q, "z", priority = 1, name = "kz")

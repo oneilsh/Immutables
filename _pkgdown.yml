@@ -52,6 +52,7 @@ reference:
       - pop_all_max
       - "[.priority_queue"
       - "[[.priority_queue"
+      - "as.list.priority_queue"
       - "print.priority_queue"
       - "length.priority_queue"
       - "fapply.priority_queue"
