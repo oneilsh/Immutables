@@ -9,9 +9,11 @@ testthat::test_that("interval_index constructor sorts by start and preserves sta
   testthat::expect_equal(as.list(ix), list("a", "c", "b", "d"))
   testthat::expect_identical(length(ix), 4L)
 
-  b <- interval_bounds(ix)
-  testthat::expect_equal(lapply(b$start, identity), as.list(c(1, 2, 2, 2)))
-  testthat::expect_equal(lapply(b$end, identity), as.list(c(3, 5, 4, 6)))
+  entries <- .ivx_entries(ix)
+  starts <- lapply(entries, function(e) e$start)
+  ends <- lapply(entries, function(e) e$end)
+  testthat::expect_equal(starts, as.list(c(1, 2, 2, 2)))
+  testthat::expect_equal(ends, as.list(c(3, 5, 4, 6)))
 })
 
 testthat::test_that("interval_index validates endpoints and bounds", {
@@ -29,9 +31,11 @@ testthat::test_that("insert is persistent and appends at right edge of equal-sta
   testthat::expect_equal(as.list(ix), list("a", "b", "c"))
   testthat::expect_equal(as.list(ix2), list("a", "b", "c", "d"))
 
-  b <- interval_bounds(ix2)
-  testthat::expect_equal(lapply(b$start, identity), as.list(c(1, 2, 2, 2)))
-  testthat::expect_equal(lapply(b$end, identity), as.list(c(2, 3, 4, 5)))
+  entries <- .ivx_entries(ix2)
+  starts <- lapply(entries, function(e) e$start)
+  ends <- lapply(entries, function(e) e$end)
+  testthat::expect_equal(starts, as.list(c(1, 2, 2, 2)))
+  testthat::expect_equal(ends, as.list(c(2, 3, 4, 5)))
 })
 
 testthat::test_that("peek_point honors boundary modes", {
@@ -86,9 +90,9 @@ testthat::test_that("relation query/pop contracts hold across all bounds tokens"
     bounds = "[)"
   )
   vals <- as.list(ix)
-  bnd <- interval_bounds(ix)
-  starts <- as.numeric(unlist(lapply(bnd$start, identity), use.names = FALSE))
-  ends <- as.numeric(unlist(lapply(bnd$end, identity), use.names = FALSE))
+  entries <- .ivx_entries(ix)
+  starts <- as.numeric(unlist(lapply(entries, function(e) e$start), use.names = FALSE))
+  ends <- as.numeric(unlist(lapply(entries, function(e) e$end), use.names = FALSE))
 
   contains_point <- function(start, end, point, bounds) {
     include_start <- substr(bounds, 1L, 1L) == "["
@@ -297,7 +301,7 @@ testthat::test_that("fapply for interval_index updates payload only and keeps in
     end = c(4, 2, 3),
     bounds = "[]"
   )
-  b0 <- interval_bounds(ix)
+  b0 <- lapply(.ivx_entries(ix), function(e) list(start = e$start, end = e$end))
 
   ix2 <- fapply(ix, function(item, start, end, name) {
     toupper(item)
@@ -307,9 +311,9 @@ testthat::test_that("fapply for interval_index updates payload only and keeps in
   testthat::expect_equal(unname(as.list(ix2)), list("B", "C", "A"))
   testthat::expect_equal(ix2[["kb"]], "B")
 
-  b2 <- interval_bounds(ix2)
-  testthat::expect_equal(unname(lapply(b2$start, identity)), unname(lapply(b0$start, identity)))
-  testthat::expect_equal(unname(lapply(b2$end, identity)), unname(lapply(b0$end, identity)))
+  b2 <- lapply(.ivx_entries(ix2), function(e) list(start = e$start, end = e$end))
+  testthat::expect_equal(unname(lapply(b2, function(e) e$start)), unname(lapply(b0, function(e) e$start)))
+  testthat::expect_equal(unname(lapply(b2, function(e) e$end)), unname(lapply(b0, function(e) e$end)))
 
   testthat::expect_error(fapply(ix, 1), "`FUN` must be a function")
 
@@ -318,9 +322,9 @@ testthat::test_that("fapply for interval_index updates payload only and keeps in
   })
   testthat::expect_type(ix3[[1]], "list")
   testthat::expect_named(ix3[[1]], c("old", "at", "nm"))
-  b3 <- interval_bounds(ix3)
-  testthat::expect_equal(unname(lapply(b3$start, identity)), unname(lapply(b0$start, identity)))
-  testthat::expect_equal(unname(lapply(b3$end, identity)), unname(lapply(b0$end, identity)))
+  b3 <- lapply(.ivx_entries(ix3), function(e) list(start = e$start, end = e$end))
+  testthat::expect_equal(unname(lapply(b3, function(e) e$start)), unname(lapply(b0, function(e) e$start)))
+  testthat::expect_equal(unname(lapply(b3, function(e) e$end)), unname(lapply(b0, function(e) e$end)))
   testthat::expect_error(fapply(ix, identity, preserve_custom_monoids = NA), "`preserve_custom_monoids` must be TRUE or FALSE")
 })
 

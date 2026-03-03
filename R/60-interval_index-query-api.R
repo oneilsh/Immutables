@@ -1,42 +1,5 @@
 #SO
 
-# Runtime: O(n).
-# Returns per-entry interval endpoints in current sequence order.
-# **Inputs:** `x` interval_index.
-# **Outputs:** data.frame with list-cols `start` and `end`.
-# **Used by:** users/tests.
-#' Get Interval Bounds in Sequence Order
-#'
-#' Returns per-element interval endpoints as a two-column data frame.
-#'
-#' @param x An `interval_index`.
-#' @return A data frame in sequence order with one row per entry and two
-#'   list-columns:
-#'   \describe{
-#'     \item{`start`}{Start endpoint for each entry.}
-#'     \item{`end`}{End endpoint for each entry.}
-#'   }
-#'   For an empty index, returns a zero-row data frame with the same columns.
-#' @examples
-#' ix <- interval_index("a", "b", start = c(1, 3), end = c(2, 5))
-#' interval_bounds(ix)
-#'
-#' interval_bounds(interval_index())
-#' @export
-interval_bounds <- function(x) {
-  .ivx_assert_index(x)
-  entries <- .ivx_entries(x)
-  n <- length(entries)
-
-  if(n == 0L) {
-    return(data.frame(start = I(list()), end = I(list()), row.names = integer(0)))
-  }
-
-  starts <- unname(lapply(entries, function(e) e$start))
-  ends <- unname(lapply(entries, function(e) e$end))
-  data.frame(start = I(starts), end = I(ends), row.names = seq_len(n))
-}
-
 # Runtime: O(log n + c), where c is candidate count (worst-case O(n)).
 #' Peek First Interval Containing a Point
 #'

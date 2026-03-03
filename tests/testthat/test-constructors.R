@@ -24,7 +24,9 @@ testthat::test_that("public constructor wrappers align with as_* constructors", 
   ix_as <- as_interval_index(list(one = "a", two = "b"), start = c(2, 1), end = c(4, 3), bounds = "[]")
   testthat::expect_s3_class(ix, "interval_index")
   testthat::expect_equal(as.list(ix), as.list(ix_as))
-  testthat::expect_equal(interval_bounds(ix), interval_bounds(ix_as))
+  ix_entries <- lapply(.ivx_entries(ix), function(e) list(start = e$start, end = e$end))
+  ix_as_entries <- lapply(.ivx_entries(ix_as), function(e) list(start = e$start, end = e$end))
+  testthat::expect_equal(ix_entries, ix_as_entries)
 })
 
 testthat::test_that("constructors enforce required metadata args when elements are supplied", {

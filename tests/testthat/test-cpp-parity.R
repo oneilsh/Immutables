@@ -427,7 +427,7 @@ testthat::test_that("backend parity: interval_index insert and queries", {
 
     list(
       values = as.list(y),
-      bounds = interval_bounds(y),
+      intervals = lapply(.ivx_entries(y), function(e) list(start = e$start, end = e$end)),
       bounds_matrix = bounds_matrix,
       point_first = peek_point(y, 2),
       point = as.list(peek_all_point(y, 2)),

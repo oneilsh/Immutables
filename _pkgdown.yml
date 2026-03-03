@@ -106,7 +106,6 @@ reference:
       - pop_all_containing
       - pop_within
       - pop_all_within
-      - interval_bounds
       - "[.interval_index"
       - "print.interval_index"
       - "length.interval_index"
