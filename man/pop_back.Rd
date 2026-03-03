@@ -2,7 +2,7 @@
 % Please edit documentation in R/30-api-flexseq-ends.R
 \name{pop_back}
 \alias{pop_back}
-\title{Pop the back element}
+\title{Pop the Back Element}
 \usage{
 pop_back(x)
 }
@@ -10,14 +10,22 @@ pop_back(x)
 \item{x}{A `flexseq`.}
 }
 \value{
-A list with fields `element` and `remaining`.
+A list with fields:
+- `element`: the last element, or `NULL` when `x` is empty.
+- `remaining`: the sequence after removing the last element.
 }
 \description{
-Returns both the popped element and the remaining sequence.
+Returns the last element and the remaining sequence.
+}
+\details{
+This operation is persistent: `x` is not modified.
 }
 \examples{
-s <- as_flexseq(letters[1:3])
+s <- flexseq("a", "b", "c")
 out <- pop_back(s)
 out$element
 out$remaining
+s  # unchanged
+
+pop_back(flexseq())
 }

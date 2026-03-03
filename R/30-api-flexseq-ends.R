@@ -87,21 +87,31 @@
   .ft_push_back_named_dispatch(x, element, element_name, monoids, context = context)
 }
 
-#' Push an element to the back
+#' Push an Element to the Back
+#'
+#' Returns a new sequence with `value` appended at the right end.
 #'
 #' @param x A `flexseq`.
-#' @param value Element to push.
-#' @return Updated tree.
-#'   If `x` is name-indexed, pushing unnamed elements is invalid.
+#' @param value Element to append.
+#' @return Updated `flexseq`.
+#' @details
+#' This operation is persistent: `x` is not modified.
+#'
+#' Elements can be named, but only if all are uniquely named (no missing
+#' names). 
 #' @examples
 #' s <- as_flexseq(letters[1:3])
 #' s2 <- push_back(s, "d")
 #' s2
+#' s  # unchanged
 #'
 #' n <- as_flexseq(list(two = 2, three = 3))
 #' new_el <- 4
 #' names(new_el) <- "four"
 #' push_back(n, new_el)
+#'
+#' # Named/unnamed mixes are rejected
+#' try(push_back(n, 5))
 #' @export
 # Runtime: O(log n) tree update, with O(1) local name-state checks.
 push_back <- function(x, value) {
@@ -114,21 +124,31 @@ push_back <- function(x, value) {
   .ft_push_back_impl(x, value, context = "push_back()")
 }
 
-#' Push an element to the front
+#' Push an Element to the Front
+#'
+#' Returns a new sequence with `value` prepended at the left end.
 #'
 #' @param x A `flexseq`.
-#' @param value Element to push.
-#' @return Updated tree.
-#'   If `x` is name-indexed, pushing unnamed elements is invalid.
+#' @param value Element to prepend.
+#' @return Updated `flexseq`.
+#' @details
+#' This operation is persistent: `x` is not modified.
+#'
+#' Elements can be named, but only if all are uniquely named (no missing
+#' names). 
 #' @examples
 #' s <- as_flexseq(letters[2:4])
 #' s2 <- push_front(s, "a")
 #' s2
+#' s  # unchanged
 #'
 #' n <- as_flexseq(list(two = 2, three = 3))
 #' new_el <- 1
 #' names(new_el) <- "one"
 #' push_front(n, new_el)
+#'
+#' # Named/unnamed mixes are rejected
+#' try(push_front(n, 0))
 #' @export
 # Runtime: O(log n) tree update, with O(1) local name-state checks.
 push_front <- function(x, value) {
@@ -304,10 +324,17 @@ push_front <- function(x, value) {
   invisible(TRUE)
 }
 
-#' Peek at the front element
+#' Peek at the Front Element
+#'
+#' Returns the first element without modifying the sequence.
 #'
 #' @param x A `flexseq`.
-#' @return Front element, or `NULL` when `x` is empty.
+#' @return First element, or `NULL` when `x` is empty.
+#' @examples
+#' x <- flexseq("a", "b", "c")
+#' peek_front(x)
+#'
+#' peek_front(flexseq())
 #' @export
 # Runtime: O(log n) lookup by scalar index.
 peek_front <- function(x) {
@@ -326,10 +353,17 @@ peek_front <- function(x) {
   .ft_unwrap_public_value(x, x[[1L]])
 }
 
-#' Peek at the back element
+#' Peek at the Back Element
+#'
+#' Returns the last element without modifying the sequence.
 #'
 #' @param x A `flexseq`.
-#' @return Back element, or `NULL` when `x` is empty.
+#' @return Last element, or `NULL` when `x` is empty.
+#' @examples
+#' x <- flexseq("a", "b", "c")
+#' peek_back(x)
+#'
+#' peek_back(flexseq())
 #' @export
 # Runtime: O(log n) lookup by scalar index.
 peek_back <- function(x) {
@@ -349,11 +383,17 @@ peek_back <- function(x) {
   .ft_unwrap_public_value(x, x[[n]])
 }
 
-#' Peek at an element by position
+#' Peek at an Element by Position
+#'
+#' Returns the element at a one-based index without modifying the sequence.
 #'
 #' @param x A `flexseq`.
 #' @param index One-based position to read.
 #' @return Element at `index`, or `NULL` when `index` is out of bounds.
+#' @examples
+#' x <- flexseq("a", "b", "c")
+#' peek_at(x, 2)
+#' peek_at(x, 10)
 #' @export
 # Runtime: O(log n) lookup by scalar index.
 peek_at <- function(x, index) {
@@ -375,17 +415,24 @@ peek_at <- function(x, index) {
   .ft_unwrap_public_value(x, element)
 }
 
-#' Pop the front element
+#' Pop the Front Element
 #'
-#' Returns both the popped element and the remaining sequence.
+#' Returns the first element and the remaining sequence.
 #'
 #' @param x A `flexseq`.
-#' @return A list with fields `element` and `remaining`.
+#' @return A list with fields:
+#' - `element`: the first element, or `NULL` when `x` is empty.
+#' - `remaining`: the sequence after removing the first element.
+#' @details
+#' This operation is persistent: `x` is not modified.
 #' @examples
-#' s <- as_flexseq(letters[1:3])
+#' s <- flexseq("a", "b", "c")
 #' out <- pop_front(s)
 #' out$element
 #' out$remaining
+#' s  # unchanged
+#'
+#' pop_front(flexseq())
 #' @export
 # Runtime: O(log n) for one read plus one subset.
 pop_front <- function(x) {
@@ -407,17 +454,24 @@ pop_front <- function(x) {
   list(element = element, remaining = remaining)
 }
 
-#' Pop the back element
+#' Pop the Back Element
 #'
-#' Returns both the popped element and the remaining sequence.
+#' Returns the last element and the remaining sequence.
 #'
 #' @param x A `flexseq`.
-#' @return A list with fields `element` and `remaining`.
+#' @return A list with fields:
+#' - `element`: the last element, or `NULL` when `x` is empty.
+#' - `remaining`: the sequence after removing the last element.
+#' @details
+#' This operation is persistent: `x` is not modified.
 #' @examples
-#' s <- as_flexseq(letters[1:3])
+#' s <- flexseq("a", "b", "c")
 #' out <- pop_back(s)
 #' out$element
 #' out$remaining
+#' s  # unchanged
+#'
+#' pop_back(flexseq())
 #' @export
 # Runtime: O(log n) for one read plus one subset.
 pop_back <- function(x) {
@@ -439,18 +493,25 @@ pop_back <- function(x) {
   list(element = element, remaining = remaining)
 }
 
-#' Pop an element by position
+#' Pop an Element by Position
 #'
-#' Returns both the popped element and the remaining sequence.
+#' Returns the selected element and the remaining sequence.
 #'
 #' @param x A `flexseq`.
 #' @param index One-based position to remove.
-#' @return A list with fields `element` and `remaining`.
+#' @return A list with fields:
+#' - `element`: the element at `index`, or `NULL` when `index` is out of bounds.
+#' - `remaining`: the sequence after removing the selected element.
+#' @details
+#' This operation is persistent: `x` is not modified.
 #' @examples
-#' s <- as_flexseq(letters[1:4])
-#' out <- pop_at(s, 3)
+#' x <- flexseq("a", "b", "c", "d")
+#' out <- pop_at(x, 3)
 #' out$element
 #' out$remaining
+#' x  # unchanged
+#'
+#' pop_at(x, 10)
 #' @export
 # Runtime: O(log n) for one read plus O(k log n) index subset to rebuild.
 pop_at <- function(x, index) {
@@ -483,17 +544,35 @@ pop_at <- function(x, index) {
   list(element = element, remaining = remaining)
 }
 
-#' Insert elements at a position
+#' Insert Elements at a Position
 #'
-#' Inserts one or more elements before the current element at `index`.
+#' Inserts `values` before the current element at `index`.
 #'
 #' @param x A `flexseq`.
 #' @param index One-based insertion position in `[1, length(x) + 1]`.
-#' @param values Elements to insert. Supports scalar/vector/list/flexseq inputs.
-#' @return Updated sequence with inserted elements.
+#' @param values Values to insert.
+#' @return Updated sequence with inserted values.
+#' @details
+#' `values` is interpreted as a collection of elements to splice in.
+#'
+#' Common cases:
+#' - Atomic vector (`c("x", "y")`): inserts one element per vector entry.
+#' - List (`list("x", "y")`): inserts one element per list entry.
+#' - `flexseq`: inserts all of its elements.
+#' - Empty input (`list()` or `flexseq()`): no change.
+#'
+#' To insert one composite object (for example, a vector or a list) as a single
+#' element, wrap it in `list(...)`.
+#'
+#' This operation is persistent: `x` is not modified.
 #' @examples
-#' s <- as_flexseq(letters[1:4])
-#' insert_at(s, 3, c("x", "y"))
+#' x <- flexseq("a", "b", "c", "d")
+#' insert_at(x, 3, c("x", "y"))
+#' insert_at(x, 1, "start")
+#' insert_at(x, length(x) + 1, "end")
+#'
+#' # Insert one vector as a single element
+#' insert_at(x, 3, list(c("u", "v")))
 #' @export
 # Runtime: O(k log k) to build inserted payload + O(log n) split + concat work.
 insert_at <- function(x, index, values) {

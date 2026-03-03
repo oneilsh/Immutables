@@ -2,24 +2,37 @@
 % Please edit documentation in R/20-api-generics.R
 \name{split_at}
 \alias{split_at}
-\title{Split by Scalar Index or Name}
+\title{Split at a Position or Name}
 \usage{
 split_at(x, at, pull_index = FALSE)
 }
 \arguments{
 \item{x}{A `flexseq`.}
 
-\item{at}{Positive scalar integer index or scalar character name.}
+\item{at}{A single positive integer position or a single character name.}
 
-\item{pull_index}{Logical switch between two-way and three-way split shape.
-If `TRUE`, uses [split_by_predicate()] and returns `list(left, right)`.
-If `FALSE`, uses [split_around_by_predicate()] and returns
-`list(left, elem, right)`.}
+\item{pull_index}{Controls output shape:
+- `FALSE` (default): returns `list(left, elem, right)`.
+- `TRUE`: returns `list(left, right)`.}
 }
 \value{
-A split list, shape controlled by `pull_index`.
+A split result with shape controlled by `pull_index`.
 }
 \description{
-Splits by element position (`.size` measure) after resolving `at` to a single
-index. `at` can be a positive scalar integer index or a scalar character name.
+Splits by a single one-based position or a single element name.
+}
+\details{
+`split_at(x, at, pull_index = FALSE)` is a convenience wrapper around
+[split_around_by_predicate()] using positional scanning.
+
+`split_at(x, at, pull_index = TRUE)` is the two-way variant using
+[split_by_predicate()].
+}
+\examples{
+x <- flexseq("a", "b", "c", "d")
+split_at(x, 3)
+split_at(x, 3, pull_index = TRUE)
+
+n <- flexseq(a = 1, b = 2, c = 3)
+split_at(n, "b")
 }

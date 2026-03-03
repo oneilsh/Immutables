@@ -2,29 +2,38 @@
 % Please edit documentation in R/30-api-flexseq-ends.R
 \name{push_back}
 \alias{push_back}
-\title{Push an element to the back}
+\title{Push an Element to the Back}
 \usage{
 push_back(x, value)
 }
 \arguments{
 \item{x}{A `flexseq`.}
 
-\item{value}{Element to push.}
+\item{value}{Element to append.}
 }
 \value{
-Updated tree.
-  If `x` is name-indexed, pushing unnamed elements is invalid.
+Updated `flexseq`.
 }
 \description{
-Push an element to the back
+Returns a new sequence with `value` appended at the right end.
+}
+\details{
+This operation is persistent: `x` is not modified.
+
+Elements can be named, but only if all are uniquely named (no missing
+names).
 }
 \examples{
 s <- as_flexseq(letters[1:3])
 s2 <- push_back(s, "d")
 s2
+s  # unchanged
 
 n <- as_flexseq(list(two = 2, three = 3))
 new_el <- 4
 names(new_el) <- "four"
 push_back(n, new_el)
+
+# Named/unnamed mixes are rejected
+try(push_back(n, 5))
 }

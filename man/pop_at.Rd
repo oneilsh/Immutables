@@ -2,7 +2,7 @@
 % Please edit documentation in R/30-api-flexseq-ends.R
 \name{pop_at}
 \alias{pop_at}
-\title{Pop an element by position}
+\title{Pop an Element by Position}
 \usage{
 pop_at(x, index)
 }
@@ -12,14 +12,22 @@ pop_at(x, index)
 \item{index}{One-based position to remove.}
 }
 \value{
-A list with fields `element` and `remaining`.
+A list with fields:
+- `element`: the element at `index`, or `NULL` when `index` is out of bounds.
+- `remaining`: the sequence after removing the selected element.
 }
 \description{
-Returns both the popped element and the remaining sequence.
+Returns the selected element and the remaining sequence.
+}
+\details{
+This operation is persistent: `x` is not modified.
 }
 \examples{
-s <- as_flexseq(letters[1:4])
-out <- pop_at(s, 3)
+x <- flexseq("a", "b", "c", "d")
+out <- pop_at(x, 3)
 out$element
 out$remaining
+x  # unchanged
+
+pop_at(x, 10)
 }

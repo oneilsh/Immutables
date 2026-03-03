@@ -2,29 +2,38 @@
 % Please edit documentation in R/30-api-flexseq-ends.R
 \name{push_front}
 \alias{push_front}
-\title{Push an element to the front}
+\title{Push an Element to the Front}
 \usage{
 push_front(x, value)
 }
 \arguments{
 \item{x}{A `flexseq`.}
 
-\item{value}{Element to push.}
+\item{value}{Element to prepend.}
 }
 \value{
-Updated tree.
-  If `x` is name-indexed, pushing unnamed elements is invalid.
+Updated `flexseq`.
 }
 \description{
-Push an element to the front
+Returns a new sequence with `value` prepended at the left end.
+}
+\details{
+This operation is persistent: `x` is not modified.
+
+Elements can be named, but only if all are uniquely named (no missing
+names).
 }
 \examples{
 s <- as_flexseq(letters[2:4])
 s2 <- push_front(s, "a")
 s2
+s  # unchanged
 
 n <- as_flexseq(list(two = 2, three = 3))
 new_el <- 1
 names(new_el) <- "one"
 push_front(n, new_el)
+
+# Named/unnamed mixes are rejected
+try(push_front(n, 0))
 }

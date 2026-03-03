@@ -2,7 +2,7 @@
 % Please edit documentation in R/30-api-flexseq-ends.R
 \name{peek_back}
 \alias{peek_back}
-\title{Peek at the back element}
+\title{Peek at the Back Element}
 \usage{
 peek_back(x)
 }
@@ -10,8 +10,14 @@ peek_back(x)
 \item{x}{A `flexseq`.}
 }
 \value{
-Back element, or `NULL` when `x` is empty.
+Last element, or `NULL` when `x` is empty.
 }
 \description{
-Peek at the back element
+Returns the last element without modifying the sequence.
+}
+\examples{
+x <- flexseq("a", "b", "c")
+peek_back(x)
+
+peek_back(flexseq())
 }

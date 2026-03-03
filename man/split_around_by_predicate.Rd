@@ -2,24 +2,51 @@
 % Please edit documentation in R/20-api-generics.R
 \name{split_around_by_predicate}
 \alias{split_around_by_predicate}
-\title{Split Around First Predicate Flip}
+\title{Split Around First Predicate Match}
 \usage{
 split_around_by_predicate(t, predicate, monoid_name, accumulator = NULL)
 }
 \arguments{
 \item{t}{A `flexseq`.}
 
-\item{predicate}{Function on accumulated measure values.}
+\item{predicate}{Function applied to accumulated monoid values.}
 
-\item{monoid_name}{Name of monoid from `attr(t, "monoids")`.}
+\item{monoid_name}{Name of the monoid used for scanning.}
 
-\item{accumulator}{Optional starting measure (defaults to monoid identity).}
+\item{accumulator}{Optional starting accumulator value.}
 }
 \value{
-A list with `left`, `elem`, and `right`.
+A list with fields:
+- `left`: elements before the split point.
+- `elem`: the matched element at the split point.
+- `right`: elements after the split point.
 }
 \description{
-Splits a sequence into left context, matched element, and right context at
-the first point where `predicate` becomes `TRUE` on accumulated monoid
-measures.
+Splits at the first point where a `predicate` function becomes `TRUE` 
+while scanning the sequence.
+}
+\details{
+This function generally requires the sequence be annotated with
+a `measure_monoid()`; see the examples and `measure_monoid()`
+for more information.
+}
+\examples{
+x <- flexseq("a", "b", "c", "d")
+
+# Each element e has measure 1; the accumulated measure for
+# a set of elements is computed by the associative function `+`
+# along with the identity value 0.
+size_monoid <- measure_monoid(`+`, 0L, function(e) 1L)
+x2 <- add_monoids(x, list(size = size_monoid))
+
+# the first time the measure stored in the size monoid
+# accumulates to greater than or equal to 3 is the 3rd
+# element in sequence.
+split_around_by_predicate(x2, function(v) v >= 3L, "size")
+
+# Split at the first element
+split_around_by_predicate(x2, function(v) v >= 1L, "size")
+
+# Split at the last element
+split_around_by_predicate(x2, function(v) v >= 4L, "size")
 }

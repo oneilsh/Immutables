@@ -2,7 +2,7 @@
 % Please edit documentation in R/30-api-flexseq-ends.R
 \name{pop_front}
 \alias{pop_front}
-\title{Pop the front element}
+\title{Pop the Front Element}
 \usage{
 pop_front(x)
 }
@@ -10,14 +10,22 @@ pop_front(x)
 \item{x}{A `flexseq`.}
 }
 \value{
-A list with fields `element` and `remaining`.
+A list with fields:
+- `element`: the first element, or `NULL` when `x` is empty.
+- `remaining`: the sequence after removing the first element.
 }
 \description{
-Returns both the popped element and the remaining sequence.
+Returns the first element and the remaining sequence.
+}
+\details{
+This operation is persistent: `x` is not modified.
 }
 \examples{
-s <- as_flexseq(letters[1:3])
+s <- flexseq("a", "b", "c")
 out <- pop_front(s)
 out$element
 out$remaining
+s  # unchanged
+
+pop_front(flexseq())
 }

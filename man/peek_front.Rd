@@ -2,7 +2,7 @@
 % Please edit documentation in R/30-api-flexseq-ends.R
 \name{peek_front}
 \alias{peek_front}
-\title{Peek at the front element}
+\title{Peek at the Front Element}
 \usage{
 peek_front(x)
 }
@@ -10,8 +10,14 @@ peek_front(x)
 \item{x}{A `flexseq`.}
 }
 \value{
-Front element, or `NULL` when `x` is empty.
+First element, or `NULL` when `x` is empty.
 }
 \description{
-Peek at the front element
+Returns the first element without modifying the sequence.
+}
+\examples{
+x <- flexseq("a", "b", "c")
+peek_front(x)
+
+peek_front(flexseq())
 }

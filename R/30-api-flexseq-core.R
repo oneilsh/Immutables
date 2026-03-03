@@ -70,17 +70,33 @@
 
 #' Construct a Persistent Flexible Sequence
 #'
-#' Works like `list(...)`, but returns an immutable sequence backed by
-#' measured finger-tree internals.
+#' `flexseq(...)` creates an immutable sequence from `...`, preserving element
+#' order and optional names, with efficient persistent updates.
+#'
+#' It is list-like in payload flexibility (any R object per element), but
+#' sequence-oriented in API (`push_*`, `peek_*`, `pop_*`, indexing, split/concat).
 #'
 #' @param ... Sequence elements.
 #' @return A `flexseq` object.
+#' @details
+#' `flexseq` is the base general-purpose structure in this package.
+#' Specialized structures such as `priority_queue`, `ordered_sequence`, and
+#' `interval_index` build on related internals but expose narrower semantics.
+#'
+#' `flexseq` operations are persistent: updates return new objects and do not
+#' mutate prior versions.
 #' @examples
 #' x <- flexseq(1, 2, 3)
 #' x
 #'
-#' x2 <- flexseq("a", "b", "c")
-#' x2
+#' y <- push_front(x, 0)
+#' y
+#' x  # unchanged
+#'
+#' named <- flexseq(a = 1, b = 2)
+#' named
+#' named[["a"]]
+#' @seealso [as_flexseq()], [priority_queue()], [ordered_sequence()], [interval_index()]
 #' @export
 flexseq <- function(...) {
   .as_flexseq_build(list(...), monoids = NULL)

@@ -2,21 +2,38 @@
 % Please edit documentation in R/20-api-generics.R
 \name{split_by_predicate}
 \alias{split_by_predicate}
-\title{Split a flexseq into Left and Right Parts by Predicate}
+\title{Split into Left and Right Parts}
 \usage{
 split_by_predicate(x, predicate, monoid_name)
 }
 \arguments{
 \item{x}{A `flexseq`.}
 
-\item{predicate}{Predicate function on accumulated measure values.}
+\item{predicate}{Function applied to accumulated monoid values.}
 
-\item{monoid_name}{Character scalar naming the monoid to scan.}
+\item{monoid_name}{Name of the monoid used for scanning.}
 }
 \value{
-A list with `left` and `right` flexseq objects.
+A list with fields:
+- `left`: elements before the split point.
+- `right`: elements from the split point onward.
 }
 \description{
-Splits a sequence at the point where the predicate first becomes TRUE on
-accumulated monoid measures.
+Splits at the first point where `predicate` becomes `TRUE` while scanning
+the sequence.
+}
+\details{
+This is the two-way variant of [split_around_by_predicate()].
+
+As with [split_around_by_predicate()], a common setup is a custom monoid
+created with [measure_monoid()] and attached via [add_monoids()].
+}
+\examples{
+x <- flexseq("a", "b", "c", "d")
+size_monoid <- measure_monoid(`+`, 0L, function(e) 1L)
+x2 <- add_monoids(x, list(size = size_monoid))
+split_by_predicate(x2, function(v) v >= 3L, "size")
+
+# Split at the first element
+split_by_predicate(x2, function(v) v >= 1L, "size")
 }

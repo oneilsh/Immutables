@@ -2,16 +2,46 @@
 % Please edit documentation in R/20-api-generics.R
 \name{as_flexseq}
 \alias{as_flexseq}
-\title{Coerce to flexseq}
+\title{Coerce Objects to `flexseq`}
 \usage{
 as_flexseq(x)
 }
 \arguments{
-\item{x}{Input vector/list-like object.}
+\item{x}{Input object.}
 }
 \value{
-A `flexseq` object.
+A plain `flexseq`.
 }
 \description{
-Coerce to flexseq
+`as_flexseq()` is the canonical way to obtain a plain `flexseq` for full
+sequence-style operations.
+}
+\details{
+For base vectors/lists, this builds a new `flexseq` preserving element order
+and names.
+
+For specialized immutable subclasses (`priority_queue`,
+`ordered_sequence`, `interval_index`), this intentionally drops subclass
+semantics and returns a plain `flexseq` over stored entries.
+
+
+This is an S3 generic. Notable method behavior:
+- `as_flexseq.flexseq(x)` returns `x` unchanged.
+- `as_flexseq.priority_queue(x)` drops queue-only API constraints and removes
+  queue-specific monoids.
+- `as_flexseq.ordered_sequence(x)` and `as_flexseq.interval_index(x)` drop
+  ordered/query semantics and return sequence entries.
+}
+\examples{
+x <- as_flexseq(1:3)
+x
+
+q <- priority_queue("a", "b", priorities = c(2, 1))
+as_flexseq(q)
+
+o <- ordered_sequence("a", "b", keys = c(2, 1))
+as_flexseq(o)
+}
+\seealso{
+[flexseq()], [priority_queue()], [ordered_sequence()], [interval_index()]
 }

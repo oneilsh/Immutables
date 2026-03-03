@@ -2,22 +2,49 @@
 % Please edit documentation in R/20-api-generics.R
 \name{add_monoids}
 \alias{add_monoids}
-\title{Add/merge monoids on an existing tree}
+\title{Add or Merge Measure Monoids}
 \usage{
 add_monoids(t, monoids, overwrite = FALSE)
 }
 \arguments{
-\item{t}{FingerTree.}
+\item{t}{Immutable structure (`flexseq` and subclasses).}
 
-\item{monoids}{Named list of `measure_monoid` objects to add.}
+\item{monoids}{Named list of [measure_monoid()] objects.}
 
-\item{overwrite}{Logical; whether overlapping names replace existing monoids.}
+\item{overwrite}{Logical; if `TRUE`, replace existing monoids with the same
+names. If `FALSE`, existing names are kept.}
 }
 \value{
-A persistent copy with recomputed cached measures.
+A persistent copy with updated monoid definitions and cached measures.
 }
 \description{
-Add/merge monoids on an existing tree
+Attaches one or more named [measure_monoid()] definitions to an existing
+immutable structure.
+}
+\details{
+Mechanics:
+- Each monoid name defines an independent accumulated measure over the tree.
+- New monoids are computed for all elements and cached in the returned object.
+- Existing monoids are unchanged unless `overwrite = TRUE`.
+- Structural/reserved monoid names cannot be replaced.
+
+This operation is persistent: `t` is not modified.
+
+Use this when you want fast predicate scans (for example with
+[locate_by_predicate()], [split_by_predicate()], [split_around_by_predicate()])
+driven by domain-specific accumulated values.
+}
+\examples{
+x <- flexseq(10, 20, 30)
+
+running_sum <- measure_monoid(`+`, 0, as.numeric)
+x2 <- add_monoids(x, list(sum = running_sum))
+attr(x2, "measures")$sum
+
+# Overwrite an existing monoid definition
+running_count <- measure_monoid(`+`, 0L, function(e) 1L)
+x3 <- add_monoids(x2, list(sum = running_count), overwrite = TRUE)
+attr(x3, "measures")$sum
 }
 \seealso{
 [add_monoids.flexseq()], [add_monoids.priority_queue()],

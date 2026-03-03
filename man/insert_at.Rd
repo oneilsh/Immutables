@@ -2,7 +2,7 @@
 % Please edit documentation in R/30-api-flexseq-ends.R
 \name{insert_at}
 \alias{insert_at}
-\title{Insert elements at a position}
+\title{Insert Elements at a Position}
 \usage{
 insert_at(x, index, values)
 }
@@ -11,15 +11,34 @@ insert_at(x, index, values)
 
 \item{index}{One-based insertion position in `[1, length(x) + 1]`.}
 
-\item{values}{Elements to insert. Supports scalar/vector/list/flexseq inputs.}
+\item{values}{Values to insert.}
 }
 \value{
-Updated sequence with inserted elements.
+Updated sequence with inserted values.
 }
 \description{
-Inserts one or more elements before the current element at `index`.
+Inserts `values` before the current element at `index`.
+}
+\details{
+`values` is interpreted as a collection of elements to splice in.
+
+Common cases:
+- Atomic vector (`c("x", "y")`): inserts one element per vector entry.
+- List (`list("x", "y")`): inserts one element per list entry.
+- `flexseq`: inserts all of its elements.
+- Empty input (`list()` or `flexseq()`): no change.
+
+To insert one composite object (for example, a vector or a list) as a single
+element, wrap it in `list(...)`.
+
+This operation is persistent: `x` is not modified.
 }
 \examples{
-s <- as_flexseq(letters[1:4])
-insert_at(s, 3, c("x", "y"))
+x <- flexseq("a", "b", "c", "d")
+insert_at(x, 3, c("x", "y"))
+insert_at(x, 1, "start")
+insert_at(x, length(x) + 1, "end")
+
+# Insert one vector as a single element
+insert_at(x, 3, list(c("u", "v")))
 }

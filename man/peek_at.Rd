@@ -2,7 +2,7 @@
 % Please edit documentation in R/30-api-flexseq-ends.R
 \name{peek_at}
 \alias{peek_at}
-\title{Peek at an element by position}
+\title{Peek at an Element by Position}
 \usage{
 peek_at(x, index)
 }
@@ -15,5 +15,10 @@ peek_at(x, index)
 Element at `index`, or `NULL` when `index` is out of bounds.
 }
 \description{
-Peek at an element by position
+Returns the element at a one-based index without modifying the sequence.
+}
+\examples{
+x <- flexseq("a", "b", "c")
+peek_at(x, 2)
+peek_at(x, 10)
 }
