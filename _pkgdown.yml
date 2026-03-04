@@ -15,18 +15,17 @@ reference:
     contents:
       - flexseq
       - as_flexseq
-      - insert
-      - fapply
       - push_front
       - push_back
-      - insert_at
       - pop_front
       - pop_back
       - peek_front
       - peek_back
+      - insert_at
       - peek_at
       - pop_at
       - split_at
+      - fapply
       - "c.flexseq"
       - "[.flexseq"
       - "print.flexseq"
@@ -43,7 +42,6 @@ reference:
       - priority_queue
       - as_priority_queue
       - insert
-      - fapply
       - peek_min
       - peek_max
       - peek_all_min
@@ -52,6 +50,7 @@ reference:
       - pop_max
       - pop_all_min
       - pop_all_max
+      - fapply
       - "[.priority_queue"
       - "[[.priority_queue"
       - "as.list.priority_queue"
@@ -68,7 +67,6 @@ reference:
       - ordered_sequence
       - as_ordered_sequence
       - insert
-      - fapply
       - peek_key
       - peek_all_key
       - pop_key
@@ -78,6 +76,7 @@ reference:
       - elements_between
       - count_key
       - count_between
+      - fapply
       - "[.ordered_sequence"
       - "print.ordered_sequence"
       - "length.ordered_sequence"

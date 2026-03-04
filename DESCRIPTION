@@ -8,9 +8,8 @@ Authors@R: c(
     person(given = "Shawn T.", family = "O'Neil", email = "shawn@tislab.org", role = c("aut", "cre"))
   )
 Description: Provides fast, side-effect free data structures, including
-    catenable named lists, priority queues, double-ended queues, and
-    more. Implemented as Monoid-Annotated 2-3 Finger Trees as described
-    by Hinze and Paterson.
+    catenable named lists, priority queues, double-ended queues, ordered
+    sequences, and interval indices.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
