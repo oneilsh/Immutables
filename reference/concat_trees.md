@@ -13,11 +13,11 @@ concat_trees(x, y)
 
 - x:
 
-  A \`flexseq\` (left side).
+  A `flexseq` (left side).
 
 - y:
 
-  A \`flexseq\` (right side).
+  A `flexseq` (right side).
 
 ## Value
 

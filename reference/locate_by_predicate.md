@@ -1,8 +1,7 @@
-# Locate First Predicate Flip Without Reconstructing Context Trees
+# Locate First Predicate Match
 
-Read-only analogue of \[split_around_by_predicate()\]: finds the
-distinguished element where the scan predicate flips, but does not
-rebuild left/right trees.
+Scans accumulated monoid values and returns the first element where
+`predicate` becomes `TRUE`, without rebuilding split trees.
 
 ## Usage
 
@@ -20,34 +19,85 @@ locate_by_predicate(
 
 - t:
 
-  A \`flexseq\`.
+  A `flexseq`.
 
 - predicate:
 
-  Function on accumulated measure values.
+  Function applied to accumulated monoid values.
 
 - monoid_name:
 
-  Name of monoid from \`attr(t, "monoids")\`.
+  Name of the monoid used for scanning.
 
 - accumulator:
 
-  Optional starting measure (defaults to monoid identity).
+  Optional starting accumulator value.
 
 - include_metadata:
 
-  Logical; include left/hit/right measures and index.
+  Logical; include scan metadata.
 
 ## Value
 
-If \`include_metadata = FALSE\`: \`list(found, elem)\`. If \`TRUE\`:
-\`list(found, elem, metadata = list(left_measure, hit_measure,
-right_measure, index))\`.
+If `include_metadata = FALSE`, a list with:
+
+- `found`: logical flag.
+
+- `elem`: matched element when found, otherwise `NULL`.
+
+If `include_metadata = TRUE`, adds `metadata` with:
+
+- `left_measure`
+
+- `hit_measure`
+
+- `right_measure`
+
+- `index`
 
 ## Details
 
-For \`priority_queue\` objects, \`metadata\$index\` (when requested) is
-the internal structural position in the underlying sequence
-representation. It is not related to priority rank and is not stable
-across queue updates, so it should be treated as diagnostic metadata
-only.
+This is the read-only analogue of
+[`split_around_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_around_by_predicate.md).
+
+As with split helpers, a common setup is a custom monoid created with
+[`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md)
+and attached via
+[`add_monoids()`](https://oneilsh.github.io/immutables/reference/add_monoids.md).
+
+## Examples
+
+``` r
+x <- flexseq("a", "b", "c", "d")
+size_monoid <- measure_monoid(`+`, 0L, function(e) 1L)
+x2 <- add_monoids(x, list(size = size_monoid))
+
+locate_by_predicate(x2, function(v) v >= 3L, "size")
+#> $found
+#> [1] TRUE
+#> 
+#> $elem
+#> [1] "c"
+#> 
+locate_by_predicate(x2, function(v) v >= 3L, "size", include_metadata = TRUE)
+#> $found
+#> [1] TRUE
+#> 
+#> $elem
+#> [1] "c"
+#> 
+#> $metadata
+#> $metadata$left_measure
+#> [1] 2
+#> 
+#> $metadata$hit_measure
+#> [1] 3
+#> 
+#> $metadata$right_measure
+#> [1] 1
+#> 
+#> $metadata$index
+#> [1] 3
+#> 
+#> 
+```

@@ -1,22 +1,34 @@
-# Pop minimum-priority element
+# Pop Minimum-Priority Element
 
-Pop minimum-priority element
+Removes one minimum-priority element and returns it with the remaining
+queue.
 
 ## Usage
 
 ``` r
-pop_min(q)
+pop_min(x)
 ```
 
 ## Arguments
 
-- q:
+- x:
 
-  A \`priority_queue\`.
+  A `priority_queue`.
 
 ## Value
 
-List with \`element\`, \`priority\`, and updated \`remaining\`.
+A list with fields:
+
+- `element`: removed element, or `NULL` when `x` is empty.
+
+- `priority`: removed priority, or `NULL` when `x` is empty.
+
+- `remaining`: queue after removal.
+
+## Details
+
+Ties are stable: when multiple elements share minimum priority, the
+earliest element in queue order is removed.
 
 ## Examples
 
@@ -38,5 +50,15 @@ out$remaining
 #> 
 #> (priority 2)
 #> [1] "a"
+#> 
+pop_min(priority_queue())
+#> $element
+#> NULL
+#> 
+#> $priority
+#> NULL
+#> 
+#> $remaining
+#> Unnamed priority_queue with 0 elements.
 #> 
 ```

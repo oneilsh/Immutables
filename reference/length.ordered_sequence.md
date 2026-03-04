@@ -13,8 +13,23 @@ length(x)
 
 - x:
 
-  An \`ordered_sequence\`.
+  An `ordered_sequence`.
 
 ## Value
 
 Integer length.
+
+## Details
+
+Uses cached size metadata and runs in O(1).
+
+## Examples
+
+``` r
+x <- ordered_sequence("a", "b", keys = c(2, 1))
+length(x)
+#> [1] 2
+
+length(ordered_sequence())
+#> [1] 0
+```

@@ -118,9 +118,64 @@ element and the updated queue.</p>
 <span><span class="co">#&gt; [1] "task_a"</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="bulk-extrema-tie-runs">Bulk extrema (tie runs)<a class="anchor" aria-label="anchor" href="#bulk-extrema-tie-runs"></a>
+</h2>
+<p>Use bulk helpers to read/remove all elements tied at the current
+minimum or maximum priority.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/peek_all_min.html">peek_all_min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed priority_queue with 1 element.</span></span>
+<span><span class="co">#&gt; Minimum priority: 1, Maximum priority: 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by priority):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority 1)</span></span>
+<span><span class="co">#&gt; [1] "task_b"</span></span>
+<span><span class="fu"><a href="../reference/pop_all_min.html">pop_all_min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $elements</span></span>
+<span><span class="co">#&gt; Unnamed priority_queue with 1 element.</span></span>
+<span><span class="co">#&gt; Minimum priority: 1, Maximum priority: 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by priority):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority 1)</span></span>
+<span><span class="co">#&gt; [1] "task_b"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $remaining</span></span>
+<span><span class="co">#&gt; Unnamed priority_queue with 2 elements.</span></span>
+<span><span class="co">#&gt; Minimum priority: 2, Maximum priority: 3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by priority):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority 2)</span></span>
+<span><span class="co">#&gt; [1] "task_c"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority 3)</span></span>
+<span><span class="co">#&gt; [1] "task_a"</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="empty-queues">Empty queues<a class="anchor" aria-label="anchor" href="#empty-queues"></a>
+</h2>
+<p>Scalar peek/pop helpers are non-throwing on empty queues.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">empty_q</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/peek_min.html">peek_min</a></span><span class="op">(</span><span class="va">empty_q</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="fu"><a href="../reference/pop_min.html">pop_min</a></span><span class="op">(</span><span class="va">empty_q</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $element</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $priority</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $remaining</span></span>
+<span><span class="co">#&gt; Unnamed priority_queue with 0 elements.</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="inserting-elements">Inserting elements<a class="anchor" aria-label="anchor" href="#inserting-elements"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"task_d"</span>, priority <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">x3</span></span>
 <span><span class="co">#&gt; Unnamed priority_queue with 4 elements.</span></span>
@@ -146,7 +201,7 @@ element and the updated queue.</p>
 <h2 id="persistence">Persistence<a class="anchor" aria-label="anchor" href="#persistence"></a>
 </h2>
 <p>The original queue is unchanged.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/peek_min.html">peek_min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "task_b"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>

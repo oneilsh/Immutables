@@ -1,50 +1,76 @@
-# Pop elements for one key
+# Pop First Element for One Key
 
-For \`which = "first"\`, removes and returns the first (leftmost)
-sequence element among entries whose key equals \`key\`.
+Removes and returns the first element whose key equals `key`.
 
 ## Usage
 
 ``` r
-pop_key(x, key, which = c("first", "all"))
+pop_key(x, key)
 ```
 
 ## Arguments
 
 - x:
 
-  An \`ordered_sequence\`.
+  An `ordered_sequence`.
 
 - key:
 
   Query key.
 
-- which:
-
-  One of \`"first"\` or \`"all"\`.
-
 ## Value
 
-A named list with components `element`, `key`, and `remaining`.
+A list with fields:
 
-- For `which = "first"`:
+- `element`: removed element, or `NULL` on miss.
 
-  - On match: `element` is the first matching item and `key` is its key.
+- `key`: removed key, or `NULL` on miss.
 
-  - On miss: `element = NULL`, `key = NULL`, `remaining = x`.
-
-- For `which = "all"`:
-
-  - `element` is an `ordered_sequence` of all matching items in stable
-    order. It may have size 0 (miss), 1 (single match), or greater than
-    1 (multiple matches).
-
-  - `key` is the normalized key on match, otherwise `NULL`.
-
-  - `remaining` is the original sequence with that full key-run removed
-    (or unchanged on miss).
+- `remaining`: ordered sequence after removal.
 
 ## Details
 
-For \`which = "all"\`, removes and returns all matching entries as an
-ordered sequence.
+For duplicate keys, the first element in stable sequence order is
+removed.
+
+## Examples
+
+``` r
+x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+out <- pop_key(x, 2)
+out$element
+#> [1] "b"
+out$remaining
+#> Unnamed ordered_sequence with 2 elements.
+#> 
+#> Elements (by key order):
+#> 
+#> [[1]] (key 1)
+#> [1] "a"
+#> 
+#> [[2]] (key 2)
+#> [1] "c"
+#> 
+pop_key(x, 10)
+#> $element
+#> NULL
+#> 
+#> $key
+#> NULL
+#> 
+#> $remaining
+#> Unnamed ordered_sequence with 3 elements.
+#> 
+#> Elements (by key order):
+#> 
+#> [[1]] (key 1)
+#> [1] "a"
+#> 
+#> [[2]] (key 2)
+#> [1] "b"
+#> 
+#> [[3]] (key 2)
+#> [1] "c"
+#> 
+#> 
+```

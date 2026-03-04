@@ -24,11 +24,11 @@ plot_tree(
 
 - vertex.size:
 
-  Vertex size passed to \`igraph::plot.igraph\`.
+  Vertex size passed to `igraph::plot.igraph`.
 
 - edge.width:
 
-  Edge width passed to \`igraph::plot.igraph\`.
+  Edge width passed to `igraph::plot.igraph`.
 
 - label_edges:
 
@@ -44,7 +44,7 @@ plot_tree(
 
 - ...:
 
-  Additional arguments passed to \`igraph::plot.igraph\`.
+  Additional arguments passed to `igraph::plot.igraph`.
 
 ## Examples
 

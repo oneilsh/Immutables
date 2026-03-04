@@ -1,7 +1,10 @@
 # Validate full tree invariants (debug/test utility)
 
-Performs expensive full-tree auditing of: - structural attributes
-(\`monoids\`/\`measures\`) consistency - global name-state invariants
+Performs expensive full-tree auditing of:
+
+- structural attributes (`monoids`/`measures`) consistency
+
+- global name-state invariants
 
 ## Usage
 
@@ -17,7 +20,7 @@ validate_tree(t)
 
 ## Value
 
-\`TRUE\` invisibly; errors if invariant violations are found.
+`TRUE` invisibly; errors if invariant violations are found.
 
 ## Details
 

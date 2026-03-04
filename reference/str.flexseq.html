@@ -52,18 +52,125 @@
 
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
-<dd><p>A `flexseq`.</p></dd>
+<dd><p>A <code>flexseq</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Passed to [utils::str()].</p></dd>
+<dd><p>Passed to <code><a href="https://rdrr.io/r/utils/str.html" class="external-link">utils::str()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>`NULL`, invisibly.</p>
+    <p><code>NULL</code>, invisibly.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="flexseq.html">flexseq</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span>, b <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>k <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ prefix:List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "ft_name")= chr "a"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "Digit" "list"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "monoids")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ .size       :List of 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ f      :function (a, b)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 18 5 37 18 37 5 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137bba22e8&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ i      : num 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ measure:function (el)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 43 5 56 43 56 5 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137bba22e8&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ .named_count:List of 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ f      :function (a, b)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 18 8 37 18 37 8 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137c076608&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ i      : int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ measure:function (el)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 44 12 3 44 3 8 12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137c076608&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "measures")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ .size       : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ .named_count: int 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ middle:List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:3] "Empty" "FingerTree" "list"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "monoids")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ .size       :List of 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ f      :function (a, b)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 18 5 37 18 37 5 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137bba22e8&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ i      : num 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ measure:function (el)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 43 5 56 43 56 5 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137bba22e8&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ .named_count:List of 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ f      :function (a, b)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 18 8 37 18 37 8 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137c076608&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ i      : int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ measure:function (el)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 44 12 3 44 3 8 12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137c076608&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "measures")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ .size       : num 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ .named_count: int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ suffix:List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ :List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ k: num 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "ft_name")= chr "b"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "Digit" "list"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "monoids")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ .size       :List of 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ f      :function (a, b)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 18 5 37 18 37 5 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137bba22e8&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ i      : num 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ measure:function (el)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 43 5 56 43 56 5 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137bba22e8&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ .named_count:List of 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ f      :function (a, b)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 18 8 37 18 37 8 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137c076608&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ i      : int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ measure:function (el)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 44 12 3 44 3 8 12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137c076608&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "measures")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ .size       : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ .named_count: int 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "monoids")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ .size       :List of 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ f      :function (a, b)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 18 5 37 18 37 5 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137bba22e8&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ i      : num 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ measure:function (el)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 43 5 56 43 56 5 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137bba22e8&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ .named_count:List of 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ f      :function (a, b)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 18 8 37 18 37 8 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137c076608&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ i      : int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ measure:function (el)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 44 12 3 44 3 8 12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x56137c076608&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "measures")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ .size       : num 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ .named_count: int 2</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

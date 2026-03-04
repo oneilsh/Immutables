@@ -1,7 +1,6 @@
 # Flexseq Indexing
 
-Index, replace, and extract elements of a \`flexseq\` by position or
-name.
+Index, replace, and extract elements of a `flexseq` by position or name.
 
 ## Usage
 
@@ -29,11 +28,11 @@ x[[i]] <- value
 
 - x:
 
-  A \`flexseq\`.
+  A `flexseq`.
 
 - name:
 
-  Element name (for \`\$\` and \`\$\<-\`).
+  Element name (for `$` and `$<-`).
 
 - value:
 
@@ -42,7 +41,7 @@ x[[i]] <- value
 - i:
 
   Positive integer indices, character element names, or logical mask.
-  For \`\[\[\`, a single integer or character name.
+  For `[[`, a single integer or character name.
 
 - ...:
 
@@ -50,19 +49,38 @@ x[[i]] <- value
 
 ## Value
 
-For \`\$\`: the matched element.
+For `$`: the matched element.
 
-For \`\$\<-\`: updated tree with one named element replaced.
+For `$<-`: updated tree with one named element replaced.
 
-For \`\[\`: a new \`flexseq\` containing selected elements in query
-order. For character indexing, missing names are represented as \`NULL\`
+For `[`: a new `flexseq` containing selected elements in query order.
+For character indexing, missing names are represented as `NULL`
 elements.
 
-For \`\[\[\`: the extracted element (internal name metadata is removed).
+For `[[`: the extracted element (internal name metadata is removed).
 
-For \`\[\<-\`: a new \`flexseq\` with selected elements replaced.
+For `[<-`: a new `flexseq` with selected elements replaced.
 
-For \`\[\[\<-\`: a new \`flexseq\` with one element replaced.
+For `[[<-`: a new `flexseq` with one element replaced.
+
+## Details
+
+Selector behavior:
+
+- Integer indexing (`[`) returns elements in the requested order.
+
+- Character indexing (`[`) returns elements in requested name order;
+  unknown names become `NULL` elements in the output.
+
+- Logical indexing (`[`) is positional and follows logical-mask
+  selection.
+
+Replacement behavior:
+
+- `[<-` is persistent and recycles `value` to the number of selected
+  positions (with standard R recycling warnings where applicable).
+
+- `[[<-` replaces one element; assigning `NULL` removes that element.
 
 ## Examples
 

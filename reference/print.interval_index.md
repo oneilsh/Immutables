@@ -1,6 +1,7 @@
-# Print an interval index summary
+# Print an Interval Index Summary
 
-Print an interval index summary
+Prints a compact summary with interval bounds and a head/tail preview of
+payload elements.
 
 ## Usage
 
@@ -13,19 +14,20 @@ print(x, max_elements = 4L, ...)
 
 - x:
 
-  An \`interval_index\`.
+  An `interval_index`.
 
 - max_elements:
 
-  Maximum number of elements shown in preview (\`head + tail\`).
+  Maximum number of elements shown in the preview.
 
 - ...:
 
-  Passed through to per-element \`print()\`.
+  Passed through to per-element
+  [`print()`](https://rdrr.io/r/base/print.html).
 
 ## Value
 
-Invisibly returns \`x\`.
+Invisibly returns `x`.
 
 ## Examples
 
@@ -64,4 +66,7 @@ print(ix2, max_elements = 3)
 #> [[3]] (interval [6, 8])
 #> [1] 3
 #> 
+
+print(interval_index())
+#> Unnamed interval_index with 0 elements, default bounds [start, end).
 ```

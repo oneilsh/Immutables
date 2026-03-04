@@ -1,6 +1,7 @@
-# Build a Priority Queue from elements and priorities
+# Build a Priority Queue from `x` and `priorities`
 
-Build a Priority Queue from elements and priorities
+Constructs a queue by pairing each element of `x` with the corresponding
+value in `priorities`.
 
 ## Usage
 
@@ -16,11 +17,18 @@ as_priority_queue(x, priorities)
 
 - priorities:
 
-  Scalar non-missing orderable priorities (same length as \`x\`).
+  Priorities with the same length as `x`.
 
 ## Value
 
-A \`priority_queue\`.
+A `priority_queue`.
+
+## Details
+
+`x` is interpreted element-wise (via list coercion). Names on `x` are
+preserved as queue element names.
+
+All priorities must be non-missing and mutually comparable.
 
 ## Examples
 
@@ -48,4 +56,9 @@ peek_min(x)
 #> [1] "b"
 peek_max(x)
 #> [1] "a"
+
+# Names are preserved
+n <- as_priority_queue(setNames(as.list(1:3), c("a", "b", "c")), priorities = c(2, 1, 3))
+n[["b"]]
+#> [1] 2
 ```

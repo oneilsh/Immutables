@@ -57,77 +57,84 @@
           <code><a href="as_flexseq.html">as_flexseq()</a></code>
 
         </dt>
-        <dd>Coerce to flexseq</dd>
+        <dd>Coerce Objects to <code>flexseq</code></dd>
 
         <dt>
 
           <code><a href="push_front.html">push_front()</a></code>
 
         </dt>
-        <dd>Push an element to the front</dd>
+        <dd>Push an Element to the Front</dd>
 
         <dt>
 
           <code><a href="push_back.html">push_back()</a></code>
 
         </dt>
-        <dd>Push an element to the back</dd>
-
-        <dt>
-
-          <code><a href="insert_at.html">insert_at()</a></code>
-
-        </dt>
-        <dd>Insert elements at a position</dd>
+        <dd>Push an Element to the Back</dd>
 
         <dt>
 
           <code><a href="pop_front.html">pop_front()</a></code>
 
         </dt>
-        <dd>Pop the front element</dd>
+        <dd>Pop the Front Element</dd>
 
         <dt>
 
           <code><a href="pop_back.html">pop_back()</a></code>
 
         </dt>
-        <dd>Pop the back element</dd>
+        <dd>Pop the Back Element</dd>
 
         <dt>
 
           <code><a href="peek_front.html">peek_front()</a></code>
 
         </dt>
-        <dd>Peek at the front element</dd>
+        <dd>Peek at the Front Element</dd>
 
         <dt>
 
           <code><a href="peek_back.html">peek_back()</a></code>
 
         </dt>
-        <dd>Peek at the back element</dd>
+        <dd>Peek at the Back Element</dd>
+
+        <dt>
+
+          <code><a href="insert_at.html">insert_at()</a></code>
+
+        </dt>
+        <dd>Insert Elements at a Position</dd>
 
         <dt>
 
           <code><a href="peek_at.html">peek_at()</a></code>
 
         </dt>
-        <dd>Peek at an element by position</dd>
+        <dd>Peek at an Element by Position</dd>
 
         <dt>
 
           <code><a href="pop_at.html">pop_at()</a></code>
 
         </dt>
-        <dd>Pop an element by position</dd>
+        <dd>Pop an Element by Position</dd>
 
         <dt>
 
           <code><a href="split_at.html">split_at()</a></code>
 
         </dt>
-        <dd>Split by Scalar Index or Name</dd>
+        <dd>Split at a Position or Name</dd>
+
+        <dt>
+
+          <code><a href="fapply.html">fapply()</a></code>
+
+        </dt>
+        <dd>Fapply with S3 dispatch</dd>
 
         <dt>
 
@@ -166,13 +173,6 @@
 
         <dt>
 
-          <code><a href="fapply.flexseq.html">fapply(<i>&lt;flexseq&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Apply a function over flexseq elements</dd>
-
-        <dt>
-
           <code><a href="plot.flexseq.html">plot(<i>&lt;flexseq&gt;</i>)</a></code>
 
         </dt>
@@ -199,42 +199,77 @@
           <code><a href="as_priority_queue.html">as_priority_queue()</a></code>
 
         </dt>
-        <dd>Build a Priority Queue from elements and priorities</dd>
+        <dd>Build a Priority Queue from <code>x</code> and <code>priorities</code></dd>
 
         <dt>
 
-          <code><a href="insert.priority_queue.html">insert(<i>&lt;priority_queue&gt;</i>)</a></code>
+          <code><a href="insert.html">insert()</a></code>
 
         </dt>
-        <dd>Insert an element into a priority queue</dd>
+        <dd>Insert an Element</dd>
 
         <dt>
 
           <code><a href="peek_min.html">peek_min()</a></code>
 
         </dt>
-        <dd>Peek minimum-priority element</dd>
+        <dd>Peek Minimum-Priority Element</dd>
 
         <dt>
 
           <code><a href="peek_max.html">peek_max()</a></code>
 
         </dt>
-        <dd>Peek maximum-priority element</dd>
+        <dd>Peek Maximum-Priority Element</dd>
+
+        <dt>
+
+          <code><a href="peek_all_min.html">peek_all_min()</a></code>
+
+        </dt>
+        <dd>Peek All Minimum-Priority Elements</dd>
+
+        <dt>
+
+          <code><a href="peek_all_max.html">peek_all_max()</a></code>
+
+        </dt>
+        <dd>Peek All Maximum-Priority Elements</dd>
 
         <dt>
 
           <code><a href="pop_min.html">pop_min()</a></code>
 
         </dt>
-        <dd>Pop minimum-priority element</dd>
+        <dd>Pop Minimum-Priority Element</dd>
 
         <dt>
 
           <code><a href="pop_max.html">pop_max()</a></code>
 
         </dt>
-        <dd>Pop maximum-priority element</dd>
+        <dd>Pop Maximum-Priority Element</dd>
+
+        <dt>
+
+          <code><a href="pop_all_min.html">pop_all_min()</a></code>
+
+        </dt>
+        <dd>Pop All Minimum-Priority Elements</dd>
+
+        <dt>
+
+          <code><a href="pop_all_max.html">pop_all_max()</a></code>
+
+        </dt>
+        <dd>Pop All Maximum-Priority Elements</dd>
+
+        <dt>
+
+          <code><a href="fapply.html">fapply()</a></code>
+
+        </dt>
+        <dd>Fapply with S3 dispatch</dd>
 
         <dt>
 
@@ -245,10 +280,17 @@
 
         <dt>
 
+          <code><a href="as.list.priority_queue.html">as.list(<i>&lt;priority_queue&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Coerce Priority Queue to List</dd>
+
+        <dt>
+
           <code><a href="print.priority_queue.html">print(<i>&lt;priority_queue&gt;</i>)</a></code>
 
         </dt>
-        <dd>Print a Priority Queue</dd>
+        <dd>Print a Priority Queue Summary</dd>
 
         <dt>
 
@@ -256,13 +298,6 @@
 
         </dt>
         <dd>Priority Queue Length</dd>
-
-        <dt>
-
-          <code><a href="fapply.priority_queue.html">fapply(<i>&lt;priority_queue&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Apply a function over priority queue entries</dd>
 
         <dt>
 
@@ -292,63 +327,84 @@
           <code><a href="as_ordered_sequence.html">as_ordered_sequence()</a></code>
 
         </dt>
-        <dd>Build an Ordered Sequence from elements</dd>
+        <dd>Build an Ordered Sequence from <code>x</code> and <code>keys</code></dd>
 
         <dt>
 
-          <code><a href="insert.ordered_sequence.html">insert(<i>&lt;ordered_sequence&gt;</i>)</a></code>
+          <code><a href="insert.html">insert()</a></code>
 
         </dt>
-        <dd>Insert an element into an ordered sequence</dd>
+        <dd>Insert an Element</dd>
 
         <dt>
 
           <code><a href="peek_key.html">peek_key()</a></code>
 
         </dt>
-        <dd>Peek elements for one key</dd>
+        <dd>Peek First Element for One Key</dd>
+
+        <dt>
+
+          <code><a href="peek_all_key.html">peek_all_key()</a></code>
+
+        </dt>
+        <dd>Peek All Elements for One Key</dd>
 
         <dt>
 
           <code><a href="pop_key.html">pop_key()</a></code>
 
         </dt>
-        <dd>Pop elements for one key</dd>
+        <dd>Pop First Element for One Key</dd>
+
+        <dt>
+
+          <code><a href="pop_all_key.html">pop_all_key()</a></code>
+
+        </dt>
+        <dd>Pop All Elements for One Key</dd>
 
         <dt>
 
           <code><a href="lower_bound.html">lower_bound()</a></code>
 
         </dt>
-        <dd>Find first element with key &gt;= value</dd>
+        <dd>Find First Element with Key <code>&gt;=</code> Query</dd>
 
         <dt>
 
           <code><a href="upper_bound.html">upper_bound()</a></code>
 
         </dt>
-        <dd>Find first element with key &gt; value</dd>
+        <dd>Find First Element with Key <code>&gt;</code> Query</dd>
 
         <dt>
 
           <code><a href="elements_between.html">elements_between()</a></code>
 
         </dt>
-        <dd>Return elements in a key range</dd>
+        <dd>Return Elements in a Key Range</dd>
 
         <dt>
 
           <code><a href="count_key.html">count_key()</a></code>
 
         </dt>
-        <dd>Count elements matching one key</dd>
+        <dd>Count Elements Matching One Key</dd>
 
         <dt>
 
           <code><a href="count_between.html">count_between()</a></code>
 
         </dt>
-        <dd>Count elements in a key range</dd>
+        <dd>Count Elements in a Key Range</dd>
+
+        <dt>
+
+          <code><a href="fapply.html">fapply()</a></code>
+
+        </dt>
+        <dd>Fapply with S3 dispatch</dd>
 
         <dt>
 
@@ -362,7 +418,7 @@
           <code><a href="print.ordered_sequence.html">print(<i>&lt;ordered_sequence&gt;</i>)</a></code>
 
         </dt>
-        <dd>Print an ordered sequence summary</dd>
+        <dd>Print an Ordered Sequence Summary</dd>
 
         <dt>
 
@@ -377,13 +433,6 @@
 
         </dt>
         <dd>Coerce Ordered Sequence to List</dd>
-
-        <dt>
-
-          <code><a href="fapply.ordered_sequence.html">fapply(<i>&lt;ordered_sequence&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Apply a function over ordered sequence entries</dd>
 
         <dt>
 
@@ -413,77 +462,133 @@
           <code><a href="as_interval_index.html">as_interval_index()</a></code>
 
         </dt>
-        <dd>Build an Interval Index from elements and interval bounds</dd>
+        <dd>Build an Interval Index from <code>x</code>, <code>start</code>, and <code>end</code></dd>
 
         <dt>
 
-          <code><a href="insert.interval_index.html">insert(<i>&lt;interval_index&gt;</i>)</a></code>
+          <code><a href="insert.html">insert()</a></code>
 
         </dt>
-        <dd>Insert an element into an interval index</dd>
+        <dd>Insert an Element</dd>
+
+        <dt>
+
+          <code><a href="fapply.html">fapply()</a></code>
+
+        </dt>
+        <dd>Fapply with S3 dispatch</dd>
 
         <dt>
 
           <code><a href="peek_point.html">peek_point()</a></code>
 
         </dt>
-        <dd>Peek intervals containing a point</dd>
+        <dd>Peek First Interval Containing a Point</dd>
+
+        <dt>
+
+          <code><a href="peek_all_point.html">peek_all_point()</a></code>
+
+        </dt>
+        <dd>Peek All Intervals Containing a Point</dd>
 
         <dt>
 
           <code><a href="pop_point.html">pop_point()</a></code>
 
         </dt>
-        <dd>Pop intervals containing a point</dd>
+        <dd>Pop First Interval Containing a Point</dd>
+
+        <dt>
+
+          <code><a href="pop_all_point.html">pop_all_point()</a></code>
+
+        </dt>
+        <dd>Pop All Intervals Containing a Point</dd>
 
         <dt>
 
           <code><a href="peek_overlaps.html">peek_overlaps()</a></code>
 
         </dt>
-        <dd>Peek intervals overlapping a query interval</dd>
+        <dd>Peek First Interval Overlapping a Query Interval</dd>
+
+        <dt>
+
+          <code><a href="peek_all_overlaps.html">peek_all_overlaps()</a></code>
+
+        </dt>
+        <dd>Peek All Intervals Overlapping a Query Interval</dd>
 
         <dt>
 
           <code><a href="peek_containing.html">peek_containing()</a></code>
 
         </dt>
-        <dd>Peek intervals containing a query interval</dd>
+        <dd>Peek First Interval Containing a Query Interval</dd>
+
+        <dt>
+
+          <code><a href="peek_all_containing.html">peek_all_containing()</a></code>
+
+        </dt>
+        <dd>Peek All Intervals Containing a Query Interval</dd>
 
         <dt>
 
           <code><a href="peek_within.html">peek_within()</a></code>
 
         </dt>
-        <dd>Peek intervals within a query interval</dd>
+        <dd>Peek First Interval Within a Query Interval</dd>
+
+        <dt>
+
+          <code><a href="peek_all_within.html">peek_all_within()</a></code>
+
+        </dt>
+        <dd>Peek All Intervals Within a Query Interval</dd>
 
         <dt>
 
           <code><a href="pop_overlaps.html">pop_overlaps()</a></code>
 
         </dt>
-        <dd>Pop overlapping intervals</dd>
+        <dd>Pop First Overlapping Interval</dd>
+
+        <dt>
+
+          <code><a href="pop_all_overlaps.html">pop_all_overlaps()</a></code>
+
+        </dt>
+        <dd>Pop All Overlapping Intervals</dd>
 
         <dt>
 
           <code><a href="pop_containing.html">pop_containing()</a></code>
 
         </dt>
-        <dd>Pop intervals containing a query interval</dd>
+        <dd>Pop First Containing Interval</dd>
+
+        <dt>
+
+          <code><a href="pop_all_containing.html">pop_all_containing()</a></code>
+
+        </dt>
+        <dd>Pop All Containing Intervals</dd>
 
         <dt>
 
           <code><a href="pop_within.html">pop_within()</a></code>
 
         </dt>
-        <dd>Pop intervals within a query interval</dd>
+        <dd>Pop First Interval Within a Query Interval</dd>
 
         <dt>
 
-          <code><a href="interval_bounds.html">interval_bounds()</a></code>
+          <code><a href="pop_all_within.html">pop_all_within()</a></code>
 
         </dt>
-        <dd>Get interval bounds in sequence order</dd>
+        <dd>Pop All Intervals Within a Query Interval</dd>
 
         <dt>
 
@@ -497,7 +602,7 @@
           <code><a href="print.interval_index.html">print(<i>&lt;interval_index&gt;</i>)</a></code>
 
         </dt>
-        <dd>Print an interval index summary</dd>
+        <dd>Print an Interval Index Summary</dd>
 
         <dt>
 
@@ -512,13 +617,6 @@
 
         </dt>
         <dd>Coerce Interval Index to List</dd>
-
-        <dt>
-
-          <code><a href="fapply.interval_index.html">fapply(<i>&lt;interval_index&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Apply a function over interval index entries</dd>
 
         <dt>
 
@@ -538,45 +636,31 @@
 
       <dl><dt>
 
-          <code><a href="insert.html">insert()</a></code>
-
-        </dt>
-        <dd>Insert an element</dd>
-
-        <dt>
-
-          <code><a href="fapply.html">fapply()</a></code>
-
-        </dt>
-        <dd>Fapply with S3 dispatch</dd>
-
-        <dt>
-
           <code><a href="add_monoids.html">add_monoids()</a></code>
 
         </dt>
-        <dd>Add/merge monoids on an existing tree</dd>
+        <dd>Add or Merge Measure Monoids</dd>
 
         <dt>
 
           <code><a href="locate_by_predicate.html">locate_by_predicate()</a></code>
 
         </dt>
-        <dd>Locate First Predicate Flip Without Reconstructing Context Trees</dd>
+        <dd>Locate First Predicate Match</dd>
 
         <dt>
 
           <code><a href="split_around_by_predicate.html">split_around_by_predicate()</a></code>
 
         </dt>
-        <dd>Split Around First Predicate Flip</dd>
+        <dd>Split Around First Predicate Match</dd>
 
         <dt>
 
           <code><a href="split_by_predicate.html">split_by_predicate()</a></code>
 
         </dt>
-        <dd>Split a flexseq into Left and Right Parts by Predicate</dd>
+        <dd>Split into Left and Right Parts</dd>
 
         <dt>
 

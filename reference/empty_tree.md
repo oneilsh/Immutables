@@ -12,11 +12,11 @@ empty_tree(monoids = NULL)
 
 - monoids:
 
-  Optional named list of \`measure_monoid\` objects.
+  Optional named list of `measure_monoid` objects.
 
 ## Value
 
-An empty finger tree with structural \`monoids\` and \`measures\` attrs.
+An empty finger tree with structural `monoids` and `measures` attrs.
 
 ## Examples
 

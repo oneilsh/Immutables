@@ -7,30 +7,48 @@ ends, O(log n) indexing and replacement, and efficient split/concat.
 
 - [`flexseq()`](https://oneilsh.github.io/immutables/reference/flexseq.md)
   : Construct a Persistent Flexible Sequence
+
 - [`as_flexseq()`](https://oneilsh.github.io/immutables/reference/as_flexseq.md)
-  : Coerce to flexseq
+  :
+
+  Coerce Objects to `flexseq`
+
 - [`push_front()`](https://oneilsh.github.io/immutables/reference/push_front.md)
-  : Push an element to the front
+  : Push an Element to the Front
+
 - [`push_back()`](https://oneilsh.github.io/immutables/reference/push_back.md)
-  : Push an element to the back
-- [`insert_at()`](https://oneilsh.github.io/immutables/reference/insert_at.md)
-  : Insert elements at a position
+  : Push an Element to the Back
+
 - [`pop_front()`](https://oneilsh.github.io/immutables/reference/pop_front.md)
-  : Pop the front element
+  : Pop the Front Element
+
 - [`pop_back()`](https://oneilsh.github.io/immutables/reference/pop_back.md)
-  : Pop the back element
+  : Pop the Back Element
+
 - [`peek_front()`](https://oneilsh.github.io/immutables/reference/peek_front.md)
-  : Peek at the front element
+  : Peek at the Front Element
+
 - [`peek_back()`](https://oneilsh.github.io/immutables/reference/peek_back.md)
-  : Peek at the back element
+  : Peek at the Back Element
+
+- [`insert_at()`](https://oneilsh.github.io/immutables/reference/insert_at.md)
+  : Insert Elements at a Position
+
 - [`peek_at()`](https://oneilsh.github.io/immutables/reference/peek_at.md)
-  : Peek at an element by position
+  : Peek at an Element by Position
+
 - [`pop_at()`](https://oneilsh.github.io/immutables/reference/pop_at.md)
-  : Pop an element by position
+  : Pop an Element by Position
+
 - [`split_at()`](https://oneilsh.github.io/immutables/reference/split_at.md)
-  : Split by Scalar Index or Name
+  : Split at a Position or Name
+
+- [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+  : Fapply with S3 dispatch
+
 - [`c(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/c.flexseq.md)
   : Concatenate Sequences
+
 - [`` `$`( ``*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.flexseq.md)
   [`` `$<-`( ``*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.flexseq.md)
   [`` `[`( ``*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.flexseq.md)
@@ -38,14 +56,16 @@ ends, O(log n) indexing and replacement, and efficient split/concat.
   [`` `[<-`( ``*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.flexseq.md)
   [`` `[[<-`( ``*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.flexseq.md)
   : Flexseq Indexing
+
 - [`print(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/print.flexseq.md)
   : Print a flexseq
+
 - [`length(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/length.flexseq.md)
   : Sequence Length
+
 - [`as.list(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/as.list.flexseq.md)
   : Coerce a Sequence to Base List
-- [`fapply(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/fapply.flexseq.md)
-  : Apply a function over flexseq elements
+
 - [`plot(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/plot.flexseq.md)
   : Plot a Sequence Tree
 
@@ -58,18 +78,42 @@ for full sequence operations.
 
 - [`priority_queue()`](https://oneilsh.github.io/immutables/reference/priority_queue.md)
   : Construct a Priority Queue
+
 - [`as_priority_queue()`](https://oneilsh.github.io/immutables/reference/as_priority_queue.md)
-  : Build a Priority Queue from elements and priorities
-- [`insert(`*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/insert.priority_queue.md)
-  : Insert an element into a priority queue
+  :
+
+  Build a Priority Queue from `x` and `priorities`
+
+- [`insert()`](https://oneilsh.github.io/immutables/reference/insert.md)
+  : Insert an Element
+
 - [`peek_min()`](https://oneilsh.github.io/immutables/reference/peek_min.md)
-  : Peek minimum-priority element
+  : Peek Minimum-Priority Element
+
 - [`peek_max()`](https://oneilsh.github.io/immutables/reference/peek_max.md)
-  : Peek maximum-priority element
+  : Peek Maximum-Priority Element
+
+- [`peek_all_min()`](https://oneilsh.github.io/immutables/reference/peek_all_min.md)
+  : Peek All Minimum-Priority Elements
+
+- [`peek_all_max()`](https://oneilsh.github.io/immutables/reference/peek_all_max.md)
+  : Peek All Maximum-Priority Elements
+
 - [`pop_min()`](https://oneilsh.github.io/immutables/reference/pop_min.md)
-  : Pop minimum-priority element
+  : Pop Minimum-Priority Element
+
 - [`pop_max()`](https://oneilsh.github.io/immutables/reference/pop_max.md)
-  : Pop maximum-priority element
+  : Pop Maximum-Priority Element
+
+- [`pop_all_min()`](https://oneilsh.github.io/immutables/reference/pop_all_min.md)
+  : Pop All Minimum-Priority Elements
+
+- [`pop_all_max()`](https://oneilsh.github.io/immutables/reference/pop_all_max.md)
+  : Pop All Maximum-Priority Elements
+
+- [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+  : Fapply with S3 dispatch
+
 - [`` `[`( ``*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.priority_queue.md)
   [`` `[[`( ``*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.priority_queue.md)
   [`` `[<-`( ``*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.priority_queue.md)
@@ -77,12 +121,16 @@ for full sequence operations.
   [`` `$`( ``*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.priority_queue.md)
   [`` `$<-`( ``*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.priority_queue.md)
   : Indexing for Priority Queues
+
+- [`as.list(`*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/as.list.priority_queue.md)
+  : Coerce Priority Queue to List
+
 - [`print(`*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/print.priority_queue.md)
-  : Print a Priority Queue
+  : Print a Priority Queue Summary
+
 - [`length(`*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/length.priority_queue.md)
   : Priority Queue Length
-- [`fapply(`*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/fapply.priority_queue.md)
-  : Apply a function over priority queue entries
+
 - [`plot(`*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/plot.priority_queue.md)
   : Plot a Priority Queue Tree
 
@@ -94,24 +142,49 @@ is not supported.
 
 - [`ordered_sequence()`](https://oneilsh.github.io/immutables/reference/ordered_sequence.md)
   : Construct an Ordered Sequence
+
 - [`as_ordered_sequence()`](https://oneilsh.github.io/immutables/reference/as_ordered_sequence.md)
-  : Build an Ordered Sequence from elements
-- [`insert(`*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/insert.ordered_sequence.md)
-  : Insert an element into an ordered sequence
+  :
+
+  Build an Ordered Sequence from `x` and `keys`
+
+- [`insert()`](https://oneilsh.github.io/immutables/reference/insert.md)
+  : Insert an Element
+
 - [`peek_key()`](https://oneilsh.github.io/immutables/reference/peek_key.md)
-  : Peek elements for one key
+  : Peek First Element for One Key
+
+- [`peek_all_key()`](https://oneilsh.github.io/immutables/reference/peek_all_key.md)
+  : Peek All Elements for One Key
+
 - [`pop_key()`](https://oneilsh.github.io/immutables/reference/pop_key.md)
-  : Pop elements for one key
+  : Pop First Element for One Key
+
+- [`pop_all_key()`](https://oneilsh.github.io/immutables/reference/pop_all_key.md)
+  : Pop All Elements for One Key
+
 - [`lower_bound()`](https://oneilsh.github.io/immutables/reference/lower_bound.md)
-  : Find first element with key \>= value
+  :
+
+  Find First Element with Key `>=` Query
+
 - [`upper_bound()`](https://oneilsh.github.io/immutables/reference/upper_bound.md)
-  : Find first element with key \> value
+  :
+
+  Find First Element with Key `>` Query
+
 - [`elements_between()`](https://oneilsh.github.io/immutables/reference/elements_between.md)
-  : Return elements in a key range
+  : Return Elements in a Key Range
+
 - [`count_key()`](https://oneilsh.github.io/immutables/reference/count_key.md)
-  : Count elements matching one key
+  : Count Elements Matching One Key
+
 - [`count_between()`](https://oneilsh.github.io/immutables/reference/count_between.md)
-  : Count elements in a key range
+  : Count Elements in a Key Range
+
+- [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+  : Fapply with S3 dispatch
+
 - [`` `[`( ``*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.ordered_sequence.md)
   [`` `[[`( ``*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.ordered_sequence.md)
   [`` `[<-`( ``*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.ordered_sequence.md)
@@ -119,14 +192,16 @@ is not supported.
   [`` `$`( ``*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.ordered_sequence.md)
   [`` `$<-`( ``*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.ordered_sequence.md)
   : Indexing for Ordered Sequences
+
 - [`print(`*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/print.ordered_sequence.md)
-  : Print an ordered sequence summary
+  : Print an Ordered Sequence Summary
+
 - [`length(`*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/length.ordered_sequence.md)
   : Ordered Sequence Length
+
 - [`as.list(`*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/as.list.ordered_sequence.md)
   : Coerce Ordered Sequence to List
-- [`fapply(`*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/fapply.ordered_sequence.md)
-  : Apply a function over ordered sequence entries
+
 - [`plot(`*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/plot.ordered_sequence.md)
   : Plot an Ordered Sequence Tree
 
@@ -137,28 +212,66 @@ query/pop helpers over ordered interval endpoints.
 
 - [`interval_index()`](https://oneilsh.github.io/immutables/reference/interval_index.md)
   : Construct an Interval Index
+
 - [`as_interval_index()`](https://oneilsh.github.io/immutables/reference/as_interval_index.md)
-  : Build an Interval Index from elements and interval bounds
-- [`insert(`*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/insert.interval_index.md)
-  : Insert an element into an interval index
+  :
+
+  Build an Interval Index from `x`, `start`, and `end`
+
+- [`insert()`](https://oneilsh.github.io/immutables/reference/insert.md)
+  : Insert an Element
+
+- [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+  : Fapply with S3 dispatch
+
 - [`peek_point()`](https://oneilsh.github.io/immutables/reference/peek_point.md)
-  : Peek intervals containing a point
+  : Peek First Interval Containing a Point
+
+- [`peek_all_point()`](https://oneilsh.github.io/immutables/reference/peek_all_point.md)
+  : Peek All Intervals Containing a Point
+
 - [`pop_point()`](https://oneilsh.github.io/immutables/reference/pop_point.md)
-  : Pop intervals containing a point
+  : Pop First Interval Containing a Point
+
+- [`pop_all_point()`](https://oneilsh.github.io/immutables/reference/pop_all_point.md)
+  : Pop All Intervals Containing a Point
+
 - [`peek_overlaps()`](https://oneilsh.github.io/immutables/reference/peek_overlaps.md)
-  : Peek intervals overlapping a query interval
+  : Peek First Interval Overlapping a Query Interval
+
+- [`peek_all_overlaps()`](https://oneilsh.github.io/immutables/reference/peek_all_overlaps.md)
+  : Peek All Intervals Overlapping a Query Interval
+
 - [`peek_containing()`](https://oneilsh.github.io/immutables/reference/peek_containing.md)
-  : Peek intervals containing a query interval
+  : Peek First Interval Containing a Query Interval
+
+- [`peek_all_containing()`](https://oneilsh.github.io/immutables/reference/peek_all_containing.md)
+  : Peek All Intervals Containing a Query Interval
+
 - [`peek_within()`](https://oneilsh.github.io/immutables/reference/peek_within.md)
-  : Peek intervals within a query interval
+  : Peek First Interval Within a Query Interval
+
+- [`peek_all_within()`](https://oneilsh.github.io/immutables/reference/peek_all_within.md)
+  : Peek All Intervals Within a Query Interval
+
 - [`pop_overlaps()`](https://oneilsh.github.io/immutables/reference/pop_overlaps.md)
-  : Pop overlapping intervals
+  : Pop First Overlapping Interval
+
+- [`pop_all_overlaps()`](https://oneilsh.github.io/immutables/reference/pop_all_overlaps.md)
+  : Pop All Overlapping Intervals
+
 - [`pop_containing()`](https://oneilsh.github.io/immutables/reference/pop_containing.md)
-  : Pop intervals containing a query interval
+  : Pop First Containing Interval
+
+- [`pop_all_containing()`](https://oneilsh.github.io/immutables/reference/pop_all_containing.md)
+  : Pop All Containing Intervals
+
 - [`pop_within()`](https://oneilsh.github.io/immutables/reference/pop_within.md)
-  : Pop intervals within a query interval
-- [`interval_bounds()`](https://oneilsh.github.io/immutables/reference/interval_bounds.md)
-  : Get interval bounds in sequence order
+  : Pop First Interval Within a Query Interval
+
+- [`pop_all_within()`](https://oneilsh.github.io/immutables/reference/pop_all_within.md)
+  : Pop All Intervals Within a Query Interval
+
 - [`` `[`( ``*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.interval_index.md)
   [`` `[[`( ``*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.interval_index.md)
   [`` `[<-`( ``*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.interval_index.md)
@@ -166,14 +279,16 @@ query/pop helpers over ordered interval endpoints.
   [`` `$`( ``*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.interval_index.md)
   [`` `$<-`( ``*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.interval_index.md)
   : Indexing for Interval Indexes
+
 - [`print(`*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/print.interval_index.md)
-  : Print an interval index summary
+  : Print an Interval Index Summary
+
 - [`length(`*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/length.interval_index.md)
   : Interval Index Length
+
 - [`as.list(`*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/as.list.interval_index.md)
   : Coerce Interval Index to List
-- [`fapply(`*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/fapply.interval_index.md)
-  : Apply a function over interval index entries
+
 - [`plot(`*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/plot.interval_index.md)
   : Plot an Interval Index Tree
 
@@ -182,18 +297,14 @@ query/pop helpers over ordered interval endpoints.
 Lower-level primitives for custom monoids, predicate queries, and
 validation.
 
-- [`insert()`](https://oneilsh.github.io/immutables/reference/insert.md)
-  : Insert an element
-- [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
-  : Fapply with S3 dispatch
 - [`add_monoids()`](https://oneilsh.github.io/immutables/reference/add_monoids.md)
-  : Add/merge monoids on an existing tree
+  : Add or Merge Measure Monoids
 - [`locate_by_predicate()`](https://oneilsh.github.io/immutables/reference/locate_by_predicate.md)
-  : Locate First Predicate Flip Without Reconstructing Context Trees
+  : Locate First Predicate Match
 - [`split_around_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_around_by_predicate.md)
-  : Split Around First Predicate Flip
+  : Split Around First Predicate Match
 - [`split_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_by_predicate.md)
-  : Split a flexseq into Left and Right Parts by Predicate
+  : Split into Left and Right Parts
 - [`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md)
   : Construct a Measure Monoid Specification
 - [`predicate()`](https://oneilsh.github.io/immutables/reference/Predicate.md)

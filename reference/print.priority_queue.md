@@ -1,6 +1,6 @@
-# Print a Priority Queue
+# Print a Priority Queue Summary
 
-Print a Priority Queue
+Prints a compact summary with priority range and a head/tail preview.
 
 ## Usage
 
@@ -13,19 +13,20 @@ print(x, max_elements = 4L, ...)
 
 - x:
 
-  A \`priority_queue\`.
+  A `priority_queue`.
 
 - max_elements:
 
-  Maximum number of elements shown in preview (\`head + tail\`).
+  Maximum number of elements shown in the preview.
 
 - ...:
 
-  Passed through to per-element \`print()\`.
+  Passed through to per-element
+  [`print()`](https://rdrr.io/r/base/print.html).
 
 ## Value
 
-\`x\` invisibly.
+Invisibly returns `x`.
 
 ## Examples
 
@@ -63,4 +64,7 @@ print(q2, max_elements = 3)
 #> (priority 3)
 #> [1] 3
 #> 
+
+print(priority_queue())
+#> Unnamed priority_queue with 0 elements.
 ```

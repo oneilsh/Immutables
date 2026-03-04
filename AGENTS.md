@@ -171,6 +171,14 @@ of the API or underlying implementations change.
   - like this
   - and this
 - Keep notes short and concrete (commit SHA + impact + risk).
+- `local`: API ergonomics redesign landed across
+  ordered/interval/priority/flexseq: removed public `which="first|all"`
+  selectors in favor of explicit `peek_all_*`/`pop_all_*`, standardized
+  scalar misses (`peek_*` returns `NULL`; scalar `pop_*` returns
+  non-throwing miss object), and canonicalized ordered/interval vector
+  `[` selectors to sorted unique positions (duplicates now error). Risk:
+  intentional breaking changes for callers using old `which` signatures,
+  bulk pop `$element`, or strict-increasing selector assumptions.
 - `eb493fd`: ordered_sequence key APIs aligned around
   `key`/`from_key`/`to_key`, `extract_key` renamed to `pop_key`, and
   missing-key reads are non-throwing (`peek_key(..., if_missing=...)`,
@@ -219,9 +227,8 @@ of the API or underlying implementations change.
   reads, `as_flexseq_only`) to keep single-scenario runs within ~30s
   when capped. Risk: full-profile values are less stress-heavy than
   earlier settings.
-- `eb493fd`: fixed
-  [`insert.ordered_sequence()`](https://oneilsh.github.io/immutables/reference/insert.ordered_sequence.md)
-  R fallback boundary case (`use_cpp=FALSE`) by avoiding public
+- `eb493fd`: fixed `insert.ordered_sequence()` R fallback boundary case
+  (`use_cpp=FALSE`) by avoiding public
   [`push_back()`](https://oneilsh.github.io/immutables/reference/push_back.md)
   guard when appending split-left fragments; `ordered_sequence_insert`
   benchmarks now execute on R backend. Risk: internal append helper path

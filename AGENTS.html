@@ -200,6 +200,8 @@
 </ul></li>
 <li>Keep notes short and concrete (commit SHA + impact + risk).</li>
 <li>
+<code>local</code>: API ergonomics redesign landed across ordered/interval/priority/flexseq: removed public <code>which="first|all"</code> selectors in favor of explicit <code>peek_all_*</code>/<code>pop_all_*</code>, standardized scalar misses (<code>peek_*</code> returns <code>NULL</code>; scalar <code>pop_*</code> returns non-throwing miss object), and canonicalized ordered/interval vector <code>[</code> selectors to sorted unique positions (duplicates now error). Risk: intentional breaking changes for callers using old <code>which</code> signatures, bulk pop <code>$element</code>, or strict-increasing selector assumptions.</li>
+<li>
 <code>eb493fd</code>: ordered_sequence key APIs aligned around <code>key</code>/<code>from_key</code>/<code>to_key</code>, <code>extract_key</code> renamed to <code>pop_key</code>, and missing-key reads are non-throwing (<code>peek_key(..., if_missing=...)</code>, <code><a href="reference/pop_key.html">pop_key()</a></code> null-returns on miss). Risk: callers relying on previous argument names/error behavior need updates.</li>
 <li>
 <code>eb493fd</code>: removed <code>delete_one</code>/<code>delete_all</code>; <code><a href="reference/peek_key.html">peek_key()</a></code> and <code><a href="reference/pop_key.html">pop_key()</a></code> now support <code>which = "first"|"all"</code> where <code>"all"</code> operates on full duplicate-key runs and returns an ordered slice. Risk: code using deleted functions or assuming <code><a href="reference/pop_key.html">pop_key()</a></code> always pops one element must migrate.</li>
@@ -218,7 +220,7 @@
 <li>
 <code>eb493fd</code>: full-profile benchmark sizes were reduced in high-cost R-backend scenarios (<code>flexseq_tree_from*</code>, split variants, index reads, <code>as_flexseq_only</code>) to keep single-scenario runs within ~30s when capped. Risk: full-profile values are less stress-heavy than earlier settings.</li>
 <li>
-<code>eb493fd</code>: fixed <code><a href="reference/insert.ordered_sequence.html">insert.ordered_sequence()</a></code> R fallback boundary case (<code>use_cpp=FALSE</code>) by avoiding public <code><a href="reference/push_back.html">push_back()</a></code> guard when appending split-left fragments; <code>ordered_sequence_insert</code> benchmarks now execute on R backend. Risk: internal append helper path should continue to preserve ordered wrapping invariants (covered by ordered-sequence tests).</li>
+<code>eb493fd</code>: fixed <code>insert.ordered_sequence()</code> R fallback boundary case (<code>use_cpp=FALSE</code>) by avoiding public <code><a href="reference/push_back.html">push_back()</a></code> guard when appending split-left fragments; <code>ordered_sequence_insert</code> benchmarks now execute on R backend. Risk: internal append helper path should continue to preserve ordered wrapping invariants (covered by ordered-sequence tests).</li>
 <li>
 <code>eb493fd</code>: benchmark coverage now includes additional non-flexseq structure scenarios (<code>ordered_sequence_bounds</code>, <code>pq_insert_pop</code>) and both are in quick/full profiles with R-safe parameter sizes. Risk: scenario names/default params changed; compare historical runs by scenario+params, not just run label.</li>
 <li>

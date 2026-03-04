@@ -1,35 +1,38 @@
-# Peek elements for one key
+# Peek First Element for One Key
 
-For \`which = "first"\`, returns the first (leftmost) sequence element
-among entries whose key equals \`key\`.
+Returns the first element whose key equals `key`.
 
 ## Usage
 
 ``` r
-peek_key(x, key, which = c("first", "all"))
+peek_key(x, key)
 ```
 
 ## Arguments
 
 - x:
 
-  An \`ordered_sequence\`.
+  An `ordered_sequence`.
 
 - key:
 
   Query key.
 
-- which:
-
-  One of \`"first"\` or \`"all"\`.
-
 ## Value
 
-For \`which = "first"\`, raw stored element. For \`which = "all"\`, an
-ordered sequence with matching elements. Throws when no matching key
-exists.
+Matched element, or `NULL` when no matching key exists.
 
 ## Details
 
-For \`which = "all"\`, returns an ordered sequence containing exactly
-the entries whose key equals \`key\`.
+For duplicate keys, this returns the first element in stable sequence
+order.
+
+## Examples
+
+``` r
+x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+peek_key(x, 2)
+#> [1] "b"
+peek_key(x, 10)
+#> NULL
+```

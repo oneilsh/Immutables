@@ -1,6 +1,6 @@
-# Peek at the front element
+# Peek at the Front Element
 
-Peek at the front element
+Returns the first element without modifying the sequence.
 
 ## Usage
 
@@ -12,8 +12,23 @@ peek_front(x)
 
 - x:
 
-  A \`flexseq\`.
+  A `flexseq`.
 
 ## Value
 
-Front element.
+First element, or `NULL` when `x` is empty.
+
+## Details
+
+Returns the payload element without modifying `x`.
+
+## Examples
+
+``` r
+x <- flexseq("a", "b", "c")
+peek_front(x)
+#> [1] "a"
+
+peek_front(flexseq())
+#> NULL
+```

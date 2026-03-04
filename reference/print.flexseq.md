@@ -13,11 +13,11 @@ print(x, max_elements = 4L, show_internal_monoids = FALSE, ...)
 
 - x:
 
-  A \`flexseq\`.
+  A `flexseq`.
 
 - max_elements:
 
-  Maximum number of elements shown in preview (\`head + tail\`).
+  Maximum number of elements shown in preview (`head + tail`).
 
 - show_internal_monoids:
 
@@ -25,7 +25,8 @@ print(x, max_elements = 4L, show_internal_monoids = FALSE, ...)
 
 - ...:
 
-  Passed through to per-element \`print()\`.
+  Passed through to per-element
+  [`print()`](https://rdrr.io/r/base/print.html).
 
 ## Examples
 

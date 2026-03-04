@@ -1,6 +1,6 @@
-# Peek at an element by position
+# Peek at an Element by Position
 
-Peek at an element by position
+Returns the element at a one-based index without modifying the sequence.
 
 ## Usage
 
@@ -12,7 +12,7 @@ peek_at(x, index)
 
 - x:
 
-  A \`flexseq\`.
+  A `flexseq`.
 
 - index:
 
@@ -20,4 +20,23 @@ peek_at(x, index)
 
 ## Value
 
-Element at \`index\`.
+Element at `index`, or `NULL` when `index` is out of bounds.
+
+## Details
+
+Positive integer indices beyond `length(x)` return `NULL`. Invalid
+indices (`NA`, non-integer, `<= 0`, or length not equal to 1) error.
+
+## Examples
+
+``` r
+x <- flexseq("a", "b", "c")
+peek_at(x, 2)
+#> [1] "b"
+peek_at(x, 10)
+#> NULL
+
+try(peek_at(x, 0))
+#> Error in .ft_validate_scalar_position_missable(index, n) : 
+#>   Only positive integer indices are supported.
+```

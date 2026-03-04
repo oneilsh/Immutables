@@ -1,6 +1,6 @@
-# Find first element with key \> value
+# Find First Element with Key `>` Query
 
-Find first element with key \> value
+Find First Element with Key `>` Query
 
 ## Usage
 
@@ -12,7 +12,7 @@ upper_bound(x, key)
 
 - x:
 
-  An \`ordered_sequence\`.
+  An `ordered_sequence`.
 
 - key:
 
@@ -20,6 +20,54 @@ upper_bound(x, key)
 
 ## Value
 
-Named list with fields \`found\`, \`index\`, \`element\`, and \`key\`.
-When no match exists, \`found\` is \`FALSE\` and the remaining fields
-are \`NULL\`.
+A list with fields:
+
+- `found`: logical flag.
+
+- `index`: one-based position of the first match, or `NULL`.
+
+- `element`: matched element, or `NULL`.
+
+- `key`: matched key, or `NULL`.
+
+## Details
+
+`upper_bound()` finds the first element with key `> key`. This skips
+exact key matches, which is useful for exclusive range endpoints and for
+finding the position immediately after a duplicate-key run.
+
+## See also
+
+[`lower_bound()`](https://oneilsh.github.io/immutables/reference/lower_bound.md)
+
+## Examples
+
+``` r
+x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
+upper_bound(x, 2)
+#> $found
+#> [1] FALSE
+#> 
+#> $index
+#> NULL
+#> 
+#> $element
+#> NULL
+#> 
+#> $key
+#> NULL
+#> 
+upper_bound(x, 10)
+#> $found
+#> [1] FALSE
+#> 
+#> $index
+#> NULL
+#> 
+#> $element
+#> NULL
+#> 
+#> $key
+#> NULL
+#> 
+```

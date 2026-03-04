@@ -1,42 +1,34 @@
-# Peek minimum-priority element
+# Peek Minimum-Priority Element
 
-Peek minimum-priority element
+Returns the element at the minimum priority without modifying the queue.
 
 ## Usage
 
 ``` r
-peek_min(q)
+peek_min(x)
 ```
 
 ## Arguments
 
-- q:
+- x:
 
-  A \`priority_queue\`.
+  A `priority_queue`.
 
 ## Value
 
-Element with minimum priority (stable on ties).
+Element at minimum priority, or `NULL` when `x` is empty.
+
+## Details
+
+Ties are stable: when multiple elements share minimum priority, this
+returns the earliest element in queue order.
 
 ## Examples
 
 ``` r
 x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
-x
-#> Unnamed priority_queue with 3 elements.
-#> Minimum priority: 1, Maximum priority: 2
-#> 
-#> Elements (by priority):
-#> 
-#> (priority 1)
-#> [1] "b"
-#> 
-#> (priority 1)
-#> [1] "c"
-#> 
-#> (priority 2)
-#> [1] "a"
-#> 
 peek_min(x)
 #> [1] "b"
+peek_min(priority_queue())
+#> NULL
 ```

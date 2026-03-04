@@ -1,6 +1,6 @@
-# Push an element to the front
+# Push an Element to the Front
 
-Push an element to the front
+Returns a new sequence with `value` prepended at the left end.
 
 ## Usage
 
@@ -12,16 +12,22 @@ push_front(x, value)
 
 - x:
 
-  A \`flexseq\`.
+  A `flexseq`.
 
 - value:
 
-  Element to push.
+  Element to prepend.
 
 ## Value
 
-Updated tree. If \`x\` is name-indexed, pushing unnamed elements is
-invalid.
+Updated `flexseq`.
+
+## Details
+
+This operation is persistent: `x` is not modified.
+
+Elements can be named, but only if all are uniquely named (no missing
+names).
 
 ## Examples
 
@@ -45,6 +51,20 @@ s2
 #> [[4]]
 #> [1] "d"
 #> 
+s  # unchanged
+#> Unnamed flexseq with 3 elements.
+#> 
+#> Elements:
+#> 
+#> [[1]]
+#> [1] "b"
+#> 
+#> [[2]]
+#> [1] "c"
+#> 
+#> [[3]]
+#> [1] "d"
+#> 
 
 n <- as_flexseq(list(two = 2, three = 3))
 new_el <- 1
@@ -64,4 +84,9 @@ push_front(n, new_el)
 #> $three
 #> [1] 3
 #> 
+
+# Named/unnamed mixes are rejected
+try(push_front(n, 0))
+#> Error in push_front(n, 0) : 
+#>   Cannot mix named and unnamed elements (push_front would create mixed named and unnamed tree).
 ```

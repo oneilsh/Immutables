@@ -1,6 +1,6 @@
 # Construct an Ordered Sequence
 
-Construct an Ordered Sequence
+Convenience constructor from `...` and matching `keys`.
 
 ## Usage
 
@@ -16,11 +16,18 @@ ordered_sequence(..., keys)
 
 - keys:
 
-  Scalar key values matching \`...\` length.
+  Key values with the same length as `...`.
 
 ## Value
 
-An \`ordered_sequence\`.
+An `ordered_sequence`.
+
+## Details
+
+Empty construction is supported: `ordered_sequence()` returns an empty
+ordered sequence.
+
+Output is always sorted by key, with stable order across duplicate keys.
 
 ## Examples
 
@@ -53,4 +60,23 @@ lower_bound(xs, 2)
 #> $key
 #> [1] 2
 #> 
+
+num_by_chr <- ordered_sequence(20, 10, 30, keys = c("b", "a", "c"))
+num_by_chr
+#> Unnamed ordered_sequence with 3 elements.
+#> 
+#> Elements (by key order):
+#> 
+#> [[1]] (key a)
+#> [1] 10
+#> 
+#> [[2]] (key b)
+#> [1] 20
+#> 
+#> [[3]] (key c)
+#> [1] 30
+#> 
+
+ordered_sequence()
+#> Unnamed ordered_sequence with 0 elements.
 ```

@@ -1,6 +1,6 @@
 # Plot an Interval Index Tree
 
-Plot an Interval Index Tree
+Plots the underlying tree structure used by an `interval_index`.
 
 ## Usage
 
@@ -13,8 +13,20 @@ plot(x, ...)
 
 - x:
 
-  An \`interval_index\`.
+  An `interval_index`.
 
 - ...:
 
   Passed to the internal tree plotting routine.
+
+## Details
+
+Visualizes the internal finger-tree structure used for interval queries.
+
+## Examples
+
+``` r
+ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
+plot(ix)
+#> Error in plot_tree(x, ...): Package 'igraph' is required for plot_tree(). Install it with install.packages('igraph').
+```

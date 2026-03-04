@@ -1,8 +1,7 @@
 # Construct a Priority Queue
 
-Priority queues expose queue-oriented operations (\`insert\`,
-\`peek\_\*\`, \`pop\_\*\`, and \`fapply\`). For full sequence-style
-editing and traversal, cast explicitly with \`as_flexseq()\`.
+Creates a `priority_queue` from elements in `...` and matching
+`priorities`.
 
 ## Usage
 
@@ -18,11 +17,23 @@ priority_queue(..., priorities)
 
 - priorities:
 
-  Scalar non-missing orderable priorities matching \`...\`.
+  Priorities with the same length as `...`.
 
 ## Value
 
-A \`priority_queue\`.
+A `priority_queue`.
+
+## Details
+
+Empty construction is supported: `priority_queue()` returns an empty
+queue.
+
+If elements are named, names are preserved for name-based reads.
+
+Queue operations are exposed through
+[`insert()`](https://oneilsh.github.io/immutables/reference/insert.md),
+`peek_*()`, `pop_*()`, and
+[`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md).
 
 ## Examples
 
@@ -45,4 +56,8 @@ x
 #> 
 peek_min(x)
 #> [1] "b"
+
+empty_q <- priority_queue()
+peek_min(empty_q)
+#> NULL
 ```

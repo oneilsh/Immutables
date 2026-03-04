@@ -1,6 +1,6 @@
-# Push an element to the back
+# Push an Element to the Back
 
-Push an element to the back
+Returns a new sequence with `value` appended at the right end.
 
 ## Usage
 
@@ -12,16 +12,22 @@ push_back(x, value)
 
 - x:
 
-  A \`flexseq\`.
+  A `flexseq`.
 
 - value:
 
-  Element to push.
+  Element to append.
 
 ## Value
 
-Updated tree. If \`x\` is name-indexed, pushing unnamed elements is
-invalid.
+Updated `flexseq`.
+
+## Details
+
+This operation is persistent: `x` is not modified.
+
+Elements can be named, but only if all are uniquely named (no missing
+names).
 
 ## Examples
 
@@ -45,6 +51,20 @@ s2
 #> [[4]]
 #> [1] "d"
 #> 
+s  # unchanged
+#> Unnamed flexseq with 3 elements.
+#> 
+#> Elements:
+#> 
+#> [[1]]
+#> [1] "a"
+#> 
+#> [[2]]
+#> [1] "b"
+#> 
+#> [[3]]
+#> [1] "c"
+#> 
 
 n <- as_flexseq(list(two = 2, three = 3))
 new_el <- 4
@@ -64,4 +84,9 @@ push_back(n, new_el)
 #> four 
 #>    4 
 #> 
+
+# Named/unnamed mixes are rejected
+try(push_back(n, 5))
+#> Error in .ft_push_back_impl(x, value, context = "push_back()") : 
+#>   Cannot mix named and unnamed elements (push_back would create mixed named and unnamed tree).
 ```

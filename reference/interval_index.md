@@ -1,6 +1,6 @@
 # Construct an Interval Index
 
-Construct an Interval Index
+Convenience constructor from `...`, `start`, and `end`.
 
 ## Usage
 
@@ -16,19 +16,26 @@ interval_index(..., start, end, bounds = "[)")
 
 - start:
 
-  Scalar start endpoints matching \`...\`.
+  Start endpoints matching `...`.
 
 - end:
 
-  Scalar end endpoints matching \`...\`.
+  End endpoints matching `...`.
 
 - bounds:
 
-  One of \`"\[)"\`, \`"\[\]"\`, \`"()"\`, \`"(\]"\`.
+  Boundary convention: one of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 
 ## Value
 
-An \`interval_index\`.
+An `interval_index`.
+
+## Details
+
+Empty construction is supported: `interval_index()` returns an empty
+index.
+
+Output is ordered by interval `start`.
 
 ## Examples
 
@@ -48,4 +55,7 @@ ix
 #> [[3]] (interval [2, 4))
 #> [1] "c"
 #> 
+
+interval_index()
+#> Unnamed interval_index with 0 elements, default bounds [start, end).
 ```

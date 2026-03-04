@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   flexseq: flexseq.html
   priority-queues: priority-queues.html
-last_built: 2026-02-27T21:22Z
+last_built: 2026-03-04T01:41Z
 urls:
   reference: https://oneilsh.github.io/immutables/reference
   article: https://oneilsh.github.io/immutables/articles

@@ -1,42 +1,34 @@
-# Peek maximum-priority element
+# Peek Maximum-Priority Element
 
-Peek maximum-priority element
+Returns the element at the maximum priority without modifying the queue.
 
 ## Usage
 
 ``` r
-peek_max(q)
+peek_max(x)
 ```
 
 ## Arguments
 
-- q:
+- x:
 
-  A \`priority_queue\`.
+  A `priority_queue`.
 
 ## Value
 
-Element with maximum priority (stable on ties).
+Element at maximum priority, or `NULL` when `x` is empty.
+
+## Details
+
+Ties are stable: when multiple elements share maximum priority, this
+returns the earliest element in queue order.
 
 ## Examples
 
 ``` r
 x <- priority_queue("a", "b", "c", priorities = c(2, 3, 3))
-x
-#> Unnamed priority_queue with 3 elements.
-#> Minimum priority: 2, Maximum priority: 3
-#> 
-#> Elements (by priority):
-#> 
-#> (priority 2)
-#> [1] "a"
-#> 
-#> (priority 3)
-#> [1] "b"
-#> 
-#> (priority 3)
-#> [1] "c"
-#> 
 peek_max(x)
 #> [1] "b"
+peek_max(priority_queue())
+#> NULL
 ```

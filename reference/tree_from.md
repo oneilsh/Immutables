@@ -16,11 +16,11 @@ tree_from(x, monoids = NULL)
 
 - monoids:
 
-  Optional named list of \`measure_monoid\` objects.
+  Optional named list of `measure_monoid` objects.
 
 ## Value
 
-A finger tree with cached measures for all monoids. If \`x\` has names,
+A finger tree with cached measures for all monoids. If `x` has names,
 they are used for name-based indexing and must be complete (no
 missing/empty names) and unique.
 

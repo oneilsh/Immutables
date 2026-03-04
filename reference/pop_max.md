@@ -1,22 +1,34 @@
-# Pop maximum-priority element
+# Pop Maximum-Priority Element
 
-Pop maximum-priority element
+Removes one maximum-priority element and returns it with the remaining
+queue.
 
 ## Usage
 
 ``` r
-pop_max(q)
+pop_max(x)
 ```
 
 ## Arguments
 
-- q:
+- x:
 
-  A \`priority_queue\`.
+  A `priority_queue`.
 
 ## Value
 
-List with \`element\`, \`priority\`, and updated \`remaining\`.
+A list with fields:
+
+- `element`: removed element, or `NULL` when `x` is empty.
+
+- `priority`: removed priority, or `NULL` when `x` is empty.
+
+- `remaining`: queue after removal.
+
+## Details
+
+Ties are stable: when multiple elements share maximum priority, the
+earliest element in queue order is removed.
 
 ## Examples
 
@@ -38,5 +50,15 @@ out$remaining
 #> 
 #> (priority 3)
 #> [1] "c"
+#> 
+pop_max(priority_queue())
+#> $element
+#> NULL
+#> 
+#> $priority
+#> NULL
+#> 
+#> $remaining
+#> Unnamed priority_queue with 0 elements.
 #> 
 ```

@@ -26,21 +26,22 @@ print(x, ...)
 
 - max_elements:
 
-  Maximum number of elements shown in preview (\`head + tail\`). Default
-  \`4\`.
+  Maximum number of elements shown in preview (`head + tail`). Default
+  `4`.
 
 - show_internal_monoids:
 
-  Logical; show internal monoids (\`.size\`, \`.named_count\`). Default
-  \`FALSE\`.
+  Logical; show internal monoids (`.size`, `.named_count`). Default
+  `FALSE`.
 
 - ...:
 
-  Passed through to \`print()\` for preview elements.
+  Passed through to [`print()`](https://rdrr.io/r/base/print.html) for
+  preview elements.
 
 ## Value
 
-\`x\`, invisibly.
+`x`, invisibly.
 
 ## Examples
 

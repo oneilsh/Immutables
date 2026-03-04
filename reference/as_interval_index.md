@@ -1,6 +1,7 @@
-# Build an Interval Index from elements and interval bounds
+# Build an Interval Index from `x`, `start`, and `end`
 
-Build an Interval Index from elements and interval bounds
+Constructs an `interval_index` by pairing each element of `x` with
+corresponding `start` and `end` endpoints.
 
 ## Usage
 
@@ -16,19 +17,25 @@ as_interval_index(x, start, end, bounds = "[)")
 
 - start:
 
-  Scalar start endpoints (same length as \`x\`).
+  Start endpoints with the same length as `x`.
 
 - end:
 
-  Scalar end endpoints (same length as \`x\`).
+  End endpoints with the same length as `x`.
 
 - bounds:
 
-  One of \`"\[)"\`, \`"\[\]"\`, \`"()"\`, \`"(\]"\`.
+  Boundary convention: one of `"[)"`, `"[]"`, `"()"`, `"(]"`.
 
 ## Value
 
-An \`interval_index\`.
+An `interval_index`.
+
+## Details
+
+Output is ordered by interval `start`.
+
+Names on `x` are preserved as element names.
 
 ## Examples
 
@@ -48,11 +55,29 @@ ix
 #> [[3]] (interval [2, 4))
 #> [1] "c"
 #> 
-as.list(peek_point(ix, 2, which = "all"))
+as.list(peek_all_point(ix, 2))
 #> [[1]]
 #> [1] "a"
 #> 
 #> [[2]]
 #> [1] "c"
+#> 
+
+# Endpoints can be other comparable types
+ix_date <- as_interval_index(
+  c("phase1", "phase2"),
+  start = as.Date(c("2024-01-01", "2024-01-10")),
+  end = as.Date(c("2024-01-05", "2024-01-15"))
+)
+ix_date
+#> Unnamed interval_index with 2 elements, default bounds [start, end).
+#> 
+#> Elements (by interval start order):
+#> 
+#> [[1]] (interval [2024-01-01, 2024-01-05))
+#> [1] "phase1"
+#> 
+#> [[2]] (interval [2024-01-10, 2024-01-15))
+#> [1] "phase2"
 #> 
 ```

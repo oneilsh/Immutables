@@ -17,7 +17,7 @@ validate_name_state(t)
 
 ## Value
 
-\`TRUE\` invisibly; errors if name invariants are violated.
+`TRUE` invisibly; errors if name invariants are violated.
 
 ## Details
 
