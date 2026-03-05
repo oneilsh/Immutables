@@ -1,0 +1,80 @@
+---
+title: "immutables"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{immutables}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+if(requireNamespace("immutables", quietly = TRUE)) {
+  library(immutables)
+} else if(requireNamespace("pkgload", quietly = TRUE)) {
+  pkgload::load_all(".", quiet = TRUE)
+} else {
+  stop("Need either installed 'immutables' or the 'pkgload' package to render this vignette.")
+}
+```
+
+## Overview
+
+`immutables` provides persistent (immutable) data structures:
+
+- `flexseq`: general sequence
+- `priority_queue`: queue-oriented priority access
+- `ordered_sequence`: key-ordered sequence
+- `interval_index`: interval query structure
+
+Every write-like operation returns a new value and leaves the original unchanged.
+
+## Quick Tour
+
+### flexseq
+
+```{r}
+s <- flexseq("a", "b", "c")
+s2 <- push_back(s, "d")
+s
+s2
+```
+
+### priority_queue
+
+```{r}
+q <- priority_queue("low", "high", priorities = c(10, 1))
+peek_min(q)
+pop_min(q)$remaining
+```
+
+### ordered_sequence
+
+```{r}
+os <- ordered_sequence("one", "two", "two-b", keys = c(1, 2, 2))
+peek_key(os, 2)
+as.list(peek_all_key(os, 2))
+```
+
+### interval_index
+
+```{r}
+ix <- interval_index("A", "B", start = c(1, 3), end = c(4, 5))
+peek_point(ix, 3)
+as.list(peek_all_overlaps(ix, 2, 3))
+```
+
+## Choosing a Structure
+
+- Use `flexseq` for general sequence updates and slicing.
+- Use `priority_queue` when min/max priority operations are primary.
+- Use `ordered_sequence` when key lookup/range queries are primary.
+- Use `interval_index` for point/overlap/containment interval relations.
+
+## Next Articles
+
+- [flexseq](flexseq.html)
+- [Priority Queues](priority-queues.html)
+- [Ordered Sequences](ordered-sequences.html)
+- [Interval Indices](interval-indices.html)
+- [Developer API](developer-api.html)

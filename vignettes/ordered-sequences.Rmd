@@ -1,0 +1,74 @@
+---
+title: "Ordered Sequences"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Ordered Sequences}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+if(requireNamespace("immutables", quietly = TRUE)) {
+  library(immutables)
+} else if(requireNamespace("pkgload", quietly = TRUE)) {
+  pkgload::load_all(".", quiet = TRUE)
+} else {
+  stop("Need either installed 'immutables' or the 'pkgload' package to render this vignette.")
+}
+```
+
+## What is an ordered sequence?
+
+`ordered_sequence` stores elements sorted by key, with stable FIFO behavior for
+duplicate keys.
+
+```{r}
+xs <- ordered_sequence("a1", "b1", "b2", "c1", keys = c(1, 2, 2, 3))
+xs
+```
+
+## Key-based lookup
+
+```{r}
+peek_key(xs, 2)
+as.list(peek_all_key(xs, 2))
+count_key(xs, 2)
+```
+
+## Key boundaries
+
+`lower_bound()` gives first `>= key`, and `upper_bound()` gives first `> key`.
+
+```{r}
+lower_bound(xs, 2)
+upper_bound(xs, 2)
+```
+
+## Key range queries
+
+```{r}
+elements_between(xs, 2, 3)
+count_between(xs, 2, 3)
+count_between(xs, 2, 3, include_to = FALSE)
+```
+
+## Pop by key
+
+```{r}
+one <- pop_key(xs, 2)
+one$element
+one$key
+one$remaining
+
+all_two <- pop_all_key(xs, 2)
+as.list(all_two$elements)
+all_two$remaining
+```
+
+## Insert
+
+```{r}
+xs2 <- insert(xs, "a2", key = 1)
+xs2
+```

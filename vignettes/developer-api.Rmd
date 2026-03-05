@@ -1,0 +1,79 @@
+---
+title: "Developer API"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Developer API}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+if(requireNamespace("immutables", quietly = TRUE)) {
+  library(immutables)
+} else if(requireNamespace("pkgload", quietly = TRUE)) {
+  pkgload::load_all(".", quiet = TRUE)
+} else {
+  stop("Need either installed 'immutables' or the 'pkgload' package to render this vignette.")
+}
+```
+
+## Scope
+
+This vignette sketches low-level APIs used to extend/query immutable
+structures:
+
+- `measure_monoid()`
+- `add_monoids()`
+- `predicate()`
+- `locate_by_predicate()`
+- `split_around_by_predicate()` / `split_by_predicate()`
+- `validate_tree()` / `validate_name_state()`
+
+## Define and attach a monoid
+
+```{r}
+x <- flexseq("a", "bb", "ccc", "dddd")
+
+width_monoid <- measure_monoid(
+  f = `+`,
+  i = 0L,
+  measure = function(el) nchar(el)
+)
+
+x2 <- add_monoids(x, list(width = width_monoid))
+attr(x2, "measures")$width
+```
+
+## Locate with predicate scans
+
+```{r}
+p <- predicate(function(v) v >= 5L)
+
+loc <- locate_by_predicate(x2, p, "width", include_metadata = TRUE)
+loc$found
+loc$elem
+loc$metadata
+```
+
+## Split with predicate scans
+
+```{r}
+s1 <- split_around_by_predicate(x2, function(v) v >= 5L, "width")
+s1$left
+s1$elem
+s1$right
+
+s2 <- split_by_predicate(x2, function(v) v >= 5L, "width")
+s2$left
+s2$right
+```
+
+## Invariant checks
+
+These are intended for debugging and tests.
+
+```{r}
+validate_tree(x2)
+validate_name_state(as_flexseq(list(a = 1, b = 2)))
+```

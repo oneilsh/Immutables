@@ -7,6 +7,57 @@ home:
   title: immutables
   description: Monoid-annotated 2-3 finger trees for R
 
+navbar:
+  structure:
+    left: [intro, reference, articles]
+    right: [search, github]
+  components:
+    intro:
+      text: "Getting Started"
+      href: articles/index.html
+    reference:
+      text: "Reference API"
+      href: reference/index.html
+    articles:
+      text: "Articles"
+      menu:
+        - text: "flexseq"
+          href: articles/flexseq.html
+        - text: "Priority Queues"
+          href: articles/priority-queues.html
+        - text: "Ordered Sequences"
+          href: articles/ordered-sequences.html
+        - text: "Interval Indices"
+          href: articles/interval-indices.html
+        - text: "Developer API"
+          href: articles/developer-api.html
+
+articles:
+  - title: "immutables"
+    desc: "Main overview and package entrypoint."
+    contents:
+      - index
+  - title: "Flexible Sequence (flexseq)"
+    desc: "General persistent sequence usage."
+    contents:
+      - flexseq
+  - title: "Priority Queue"
+    desc: "Queue-oriented priority operations."
+    contents:
+      - priority-queues
+  - title: "Ordered Sequence"
+    desc: "Key-ordered lookup and range operations."
+    contents:
+      - ordered-sequences
+  - title: "Interval Index"
+    desc: "Interval relation query patterns."
+    contents:
+      - interval-indices
+  - title: "Developer Tools"
+    desc: "Monoid/predicate internals and validation utilities."
+    contents:
+      - developer-api
+
 reference:
   - title: "Flexible Sequence (flexseq)"
     desc: |

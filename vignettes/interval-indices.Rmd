@@ -1,0 +1,81 @@
+---
+title: "Interval Indices"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Interval Indices}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+if(requireNamespace("immutables", quietly = TRUE)) {
+  library(immutables)
+} else if(requireNamespace("pkgload", quietly = TRUE)) {
+  pkgload::load_all(".", quiet = TRUE)
+} else {
+  stop("Need either installed 'immutables' or the 'pkgload' package to render this vignette.")
+}
+```
+
+## What is an interval index?
+
+`interval_index` stores elements with interval endpoints and supports immutable
+relation queries.
+
+```{r}
+ix <- interval_index(
+  "A", "B", "C",
+  start = c(1, 2, 4),
+  end = c(3, 2, 5)
+)
+ix
+```
+
+## Point query
+
+```{r}
+peek_point(ix, 2)
+as.list(peek_all_point(ix, 2))
+```
+
+## Interval relations
+
+```{r}
+peek_overlaps(ix, 2, 3)
+as.list(peek_all_overlaps(ix, 2, 3))
+
+peek_containing(ix, 2, 2)
+peek_within(ix, 1, 4)
+```
+
+## Pop queries
+
+```{r}
+p1 <- pop_point(ix, 2)
+p1$element
+p1$start
+p1$end
+p1$remaining
+
+p_all <- pop_all_overlaps(ix, 2, 3)
+as.list(p_all$elements)
+p_all$remaining
+```
+
+## Boundary modes
+
+Use `bounds` to control endpoint inclusion (`"[)"`, `"[]"`, `"()"`, `"(]"`).
+
+```{r}
+edge <- interval_index("E", start = 1, end = 3, bounds = "[)")
+peek_point(edge, 3)
+peek_point(edge, 3, bounds = "[]")
+```
+
+## Insert
+
+```{r}
+ix2 <- insert(ix, "D", start = 2, end = 6)
+ix2
+```

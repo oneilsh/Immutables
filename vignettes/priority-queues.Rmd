@@ -18,21 +18,27 @@ if(requireNamespace("immutables", quietly = TRUE)) {
 }
 ```
 
-## Creating a priority queue
+## What is a priority queue?
+
+`priority_queue` is a persistent queue ordered by numeric or comparable
+priority values.
+For full sequence-style operations, cast with `as_flexseq()`.
+
+## Creating a queue
 
 ```{r}
 x <- priority_queue("task_a", "task_b", "task_c", priorities = c(3, 1, 2))
 x
 ```
 
-## Peeking at extremes
+## Peeking min and max
 
 ```{r}
 peek_min(x)
 peek_max(x)
 ```
 
-## Popping elements
+## Popping one element
 
 `pop_min()` and `pop_max()` return both the element and the updated queue.
 
@@ -43,14 +49,16 @@ x2$priority
 x2$remaining
 ```
 
-## Bulk extrema (tie runs)
+## Popping a full tie run
 
 Use bulk helpers to read/remove all elements tied at the current minimum or
 maximum priority.
 
 ```{r}
 peek_all_min(x)
-pop_all_min(x)
+p_all <- pop_all_min(x)
+as.list(p_all$elements)
+p_all$remaining
 ```
 
 ## Empty queues
@@ -63,7 +71,7 @@ peek_min(empty_q)
 pop_min(empty_q)
 ```
 
-## Inserting elements
+## Inserting
 
 ```{r}
 x3 <- insert(x, "task_d", priority = 0)
@@ -71,7 +79,7 @@ x3
 peek_min(x3)
 ```
 
-## Persistence
+## Persistence recap
 
 The original queue is unchanged.
 
