@@ -20,14 +20,34 @@ if(requireNamespace("immutables", quietly = TRUE)) {
 
 ## Overview
 
-`immutables` provides persistent (immutable) data structures:
+`immutables` provides four fast data structures:
 
-- `flexseq`: general sequence
-- `priority_queue`: queue-oriented priority access
-- `ordered_sequence`: key-ordered sequence
-- `interval_index`: interval query structure
+`flexseq()` - Provides list-like operations including indexed and named element
+   access, push/pop/peek from either end for double-ended queue behavior, 
+   insertion, splitting, and concatenation.
 
-Every write-like operation returns a new value and leaves the original unchanged.
+`priority_queue()` - Associates items with priority values and provides
+  min and max peek/pop by priority and fast insertion.
+
+`ordered_sequence()` - Associates items with key values and keeps the elements in
+  sorted order by key. These may be similarly be inserted/popped/peeked by key
+  value as well as position. Keys may be duplicated, with first-in-first-out 
+  order within key groups.
+
+`interval_index()` - Stores items associated with interval ranges, supporting
+  point and interval overlap/containment/subsumption queries. Items are kept
+  in interval-start-order.
+  
+Built on monoid-annotated finger trees described by 
+[Hinze and Paterson (2006)](https://www.cs.ox.ac.uk/ralf.hinze/publications/FingerTrees.pdf),
+they are immutable: operations return modified copies, and are thus 'side-effect free'. 
+Their fascinating internal structure ensures most operations are fast, either
+constant amortized time or $O(\log(n))$, memory proportional to $n \log(n)$, 
+and `immutables` implements core operations in `C++` via `Rcpp` for 
+numeric/character/logical key and priority types, while enabling R fallback 
+for more complex types such as dates.
+
+
 
 ## Quick Tour
 
@@ -36,8 +56,6 @@ Every write-like operation returns a new value and leaves the original unchanged
 ```{r}
 s <- flexseq("a", "b", "c")
 s2 <- push_back(s, "d")
-s
-s2
 ```
 
 ### priority_queue
@@ -70,6 +88,13 @@ as.list(peek_all_overlaps(ix, 2, 3))
 - Use `priority_queue` when min/max priority operations are primary.
 - Use `ordered_sequence` when key lookup/range queries are primary.
 - Use `interval_index` for point/overlap/containment interval relations.
+
+All structures support names using standard R accessors (`seq[c("name1", "name2")]`, `seq[["name"]]`, `seq$name`), but access by name is slower than other operations in some cases. In the case of
+ordered sequences and interval indices, return sequences are kept in order, and a warning is displayed if this is different than the requested order. It is generally possible to cast down with `as_flexseq` with
+
+If names are used,
+all elements must be non-NULL and unique. Every write-like operation returns a new value and leaves the original unchanged, though assignment with `[<-`, `[[<-`, and `$<-` is possible in  
+
 
 ## Next Articles
 
