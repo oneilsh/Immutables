@@ -250,7 +250,7 @@
   }
   if(identical(scenario, "ordered_sequence_pop_cycle")) {
     x <- as_ordered_sequence(list("a", "b", "c"), keys = c(1, 2, 3))
-    out <- pop_key(x, 2, which = "first")
+    out <- pop_key(x, 2)
     if(!is.list(out) || is.null(out$remaining) || !inherits(out$remaining, "ordered_sequence")) {
       stop("Scenario contract failed: pop_key() output shape changed.")
     }
@@ -270,10 +270,10 @@
   }
   if(identical(scenario, "interval_index_queries")) {
     x <- as_interval_index(list("a", "b", "c"), start = c(1, 2, 3), end = c(2, 4, 5))
-    p <- peek_point(x, 2, which = "all")
-    o <- peek_overlaps(x, 2, 3, which = "all")
-    c <- peek_containing(x, 2, 3, which = "all")
-    w <- peek_within(x, 2, 3, which = "all")
+    p <- peek_all_point(x, 2)
+    o <- peek_all_overlaps(x, 2, 3)
+    c <- peek_all_containing(x, 2, 3)
+    w <- peek_all_within(x, 2, 3)
     if(!inherits(p, "interval_index") || !inherits(o, "interval_index") || !inherits(c, "interval_index") || !inherits(w, "interval_index")) {
       stop("Scenario contract failed: interval query helper output shape changed.")
     }
@@ -281,7 +281,7 @@
   }
   if(identical(scenario, "interval_index_pop_cycle")) {
     x <- as_interval_index(list("a", "b", "c"), start = c(1, 2, 3), end = c(2, 4, 5))
-    out <- pop_overlaps(x, 2, 3, which = "first")
+    out <- pop_overlaps(x, 2, 3)
     if(!is.list(out) || is.null(out$remaining) || !inherits(out$remaining, "interval_index")) {
       stop("Scenario contract failed: pop_overlaps() output shape changed.")
     }
@@ -305,9 +305,9 @@
   }
   if(identical(scenario, "interval_index_bounds_override")) {
     x <- as_interval_index(list("a", "b", "c"), start = c(1, 2, 3), end = c(2, 4, 5), bounds = "[)")
-    p <- peek_point(x, 2, which = "all", bounds = "[]")
-    o <- peek_overlaps(x, 2, 3, which = "all", bounds = "()")
-    r <- pop_overlaps(x, 2, 3, which = "first", bounds = "(]")
+    p <- peek_all_point(x, 2, bounds = "[]")
+    o <- peek_all_overlaps(x, 2, 3, bounds = "()")
+    r <- pop_overlaps(x, 2, 3, bounds = "(]")
     if(!inherits(p, "interval_index") || !inherits(o, "interval_index") || !is.list(r) || !inherits(r$remaining, "interval_index")) {
       stop("Scenario contract failed: interval bounds override paths changed.")
     }
@@ -315,9 +315,9 @@
   }
   if(identical(scenario, "interval_index_overlaps_all_stress")) {
     x <- as_interval_index(list("a", "b", "c"), start = c(1, 2, 3), end = c(4, 5, 6), bounds = "[]")
-    p <- peek_overlaps(x, 1, 5, which = "all")
-    r <- pop_overlaps(x, 1, 5, which = "all")
-    if(!inherits(p, "interval_index") || !is.list(r) || !inherits(r$element, "interval_index") || !inherits(r$remaining, "interval_index")) {
+    p <- peek_all_overlaps(x, 1, 5)
+    r <- pop_all_overlaps(x, 1, 5)
+    if(!inherits(p, "interval_index") || !is.list(r) || !inherits(r$elements, "interval_index") || !inherits(r$remaining, "interval_index")) {
       stop("Scenario contract failed: interval overlap stress paths changed.")
     }
     return(invisible(TRUE))
@@ -681,7 +681,7 @@
 
   q <- sample.int(key_space, steps, replace = TRUE)
   for(k in q) {
-    out <- pop_key(seq, k, which = "first")
+    out <- pop_key(seq, k)
     if(!is.null(out$element)) {
       seq <- insert(out$remaining, out$element, key = as.integer(k))
     } else {
@@ -741,10 +741,10 @@
     a <- q_start[[i]]
     b <- q_end[[i]]
     p <- points[[i]]
-    invisible(peek_point(ix, p, which = "all"))
-    invisible(peek_overlaps(ix, a, b, which = "all"))
-    invisible(peek_containing(ix, a, b, which = "all"))
-    invisible(peek_within(ix, a, b, which = "all"))
+    invisible(peek_all_point(ix, p))
+    invisible(peek_all_overlaps(ix, a, b))
+    invisible(peek_all_containing(ix, a, b))
+    invisible(peek_all_within(ix, a, b))
   }
   invisible(NULL)
 }
@@ -761,7 +761,7 @@
   q_end <- pmin(q_start + q_w, coord_space)
 
   for(i in seq_len(steps)) {
-    out <- pop_overlaps(ix, q_start[[i]], q_end[[i]], which = "first")
+    out <- pop_overlaps(ix, q_start[[i]], q_end[[i]])
     if(!is.null(out$element)) {
       ix <- insert(out$remaining, out$element, start = out$start, end = out$end)
     } else {
@@ -805,9 +805,9 @@
     a <- q_start[[i]]
     z <- q_end[[i]]
     p <- points[[i]]
-    invisible(peek_point(ix, p, which = "all", bounds = b))
-    invisible(peek_overlaps(ix, a, z, which = "all", bounds = b))
-    out <- pop_overlaps(ix, a, z, which = "first", bounds = b)
+    invisible(peek_all_point(ix, p, bounds = b))
+    invisible(peek_all_overlaps(ix, a, z, bounds = b))
+    out <- pop_overlaps(ix, a, z, bounds = b)
     if(!is.null(out$element)) {
       ix <- insert(out$remaining, out$element, start = out$start, end = out$end)
     } else {
@@ -832,8 +832,8 @@
   for(i in seq_len(queries)) {
     a <- q_start[[i]]
     b <- q_end[[i]]
-    invisible(peek_overlaps(ix, a, b, which = "all"))
-    invisible(pop_overlaps(ix, a, b, which = "all"))
+    invisible(peek_all_overlaps(ix, a, b))
+    invisible(pop_all_overlaps(ix, a, b))
   }
   invisible(NULL)
 }
