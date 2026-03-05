@@ -26,18 +26,33 @@ as_flexseq.priority_queue <- function(x) {
 #' @method as.list priority_queue
 #' @param x A `priority_queue`.
 #' @param ... Unused.
-#' @return A plain list of queue entry records.
+#' @param drop_meta Logical scalar. When `FALSE` (default), returns full queue
+#'   entry records (`item` + `priority`). When `TRUE`, returns payload items
+#'   only.
+#' @return A plain list of queue entry records (`drop_meta = FALSE`) or payload
+#'   items (`drop_meta = TRUE`).
 #' @details
 #' Each returned element is a record with fields `item` and `priority`.
 #' Entry names (when present) are preserved on the returned list.
 #' @examples
 #' q <- priority_queue("a", "b", priorities = c(2, 1))
 #' as.list(q)
+#' as.list(q, drop_meta = TRUE)
 #' @export
 # Runtime: O(n).
-as.list.priority_queue <- function(x, ...) {
+as.list.priority_queue <- function(x, ..., drop_meta = FALSE) {
   .pq_assert_queue(x)
-  as.list.flexseq(x, ...)
+  if(!is.logical(drop_meta) || length(drop_meta) != 1L || is.na(drop_meta)) {
+    stop("`drop_meta` must be TRUE or FALSE.")
+  }
+  entries <- as.list.flexseq(x, ...)
+  if(!isTRUE(drop_meta)) {
+    return(entries)
+  }
+
+  items <- lapply(entries, function(e) e$item)
+  names(items) <- names(entries)
+  items
 }
 
 #' Plot a Priority Queue Tree

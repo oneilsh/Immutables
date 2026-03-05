@@ -4,15 +4,20 @@
 \alias{as.list.priority_queue}
 \title{Coerce Priority Queue to List}
 \usage{
-\method{as.list}{priority_queue}(x, ...)
+\method{as.list}{priority_queue}(x, ..., drop_meta = FALSE)
 }
 \arguments{
 \item{x}{A \code{priority_queue}.}
 
 \item{...}{Unused.}
+
+\item{drop_meta}{Logical scalar. When \code{FALSE} (default), returns full queue
+entry records (\code{item} + \code{priority}). When \code{TRUE}, returns payload items
+only.}
 }
 \value{
-A plain list of queue entry records.
+A plain list of queue entry records (\code{drop_meta = FALSE}) or payload
+items (\code{drop_meta = TRUE}).
 }
 \description{
 Returns queue entries as a plain list of records with fields \code{item} and
@@ -25,4 +30,5 @@ Entry names (when present) are preserved on the returned list.
 \examples{
 q <- priority_queue("a", "b", priorities = c(2, 1))
 as.list(q)
+as.list(q, drop_meta = TRUE)
 }

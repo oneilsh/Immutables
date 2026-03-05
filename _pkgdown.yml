@@ -82,6 +82,7 @@ reference:
       - "print.flexseq"
       - "length.flexseq"
       - "as.list.flexseq"
+      - "unlist.flexseq"
       - "plot.flexseq"
 
   - title: "Priority Queue"
@@ -105,6 +106,7 @@ reference:
       - "[.priority_queue"
       - "[[.priority_queue"
       - "as.list.priority_queue"
+      - "unlist.flexseq"
       - "print.priority_queue"
       - "length.priority_queue"
       - "plot.priority_queue"
@@ -132,6 +134,7 @@ reference:
       - "print.ordered_sequence"
       - "length.ordered_sequence"
       - "as.list.ordered_sequence"
+      - "unlist.flexseq"
       - "plot.ordered_sequence"
 
   - title: "Interval Index"
@@ -163,6 +166,7 @@ reference:
       - "print.interval_index"
       - "length.interval_index"
       - "as.list.interval_index"
+      - "unlist.flexseq"
       - "plot.interval_index"
 
   - title: "Developer Tools"
