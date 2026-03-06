@@ -200,37 +200,6 @@ oms_max_key_monoid <- function() {
 }
 
 # Runtime: O(1).
-.oms_measure_adapter_matches <- function(fn) {
-  identical(attr(fn, "immutables.measure_adapter", exact = TRUE), "ordered_sequence")
-}
-
-# Runtime: O(1).
-.oms_wrap_measure <- function(fn) {
-  if(.oms_measure_adapter_matches(fn)) {
-    return(fn)
-  }
-  wrapped <- function(entry) fn(entry$item, entry$key)
-  attr(wrapped, "immutables.measure_adapter") <- "ordered_sequence"
-  wrapped
-}
-
-# Runtime: O(m), where m = number of user-supplied monoids.
-.oms_adapt_user_monoids <- function(monoids) {
-  if(length(monoids) == 0L) {
-    return(monoids)
-  }
-  out <- monoids
-  nm <- names(out)
-  for(i in seq_along(out)) {
-    monoid_name <- if(is.null(nm)) NULL else nm[[i]]
-    spec <- .normalize_measure_monoid_spec(out[[i]], monoid_name = monoid_name)
-    spec$measure <- .oms_wrap_measure(spec$measure)
-    out[[i]] <- spec
-  }
-  out
-}
-
-# Runtime: O(1).
 .oms_merge_monoids <- function(monoids = NULL) {
   user <- if(is.null(monoids)) list() else monoids
   if(length(user) > 0L) {
@@ -238,7 +207,6 @@ oms_max_key_monoid <- function() {
     if(length(bad) > 0L) {
       stop(paste0("Reserved monoid names cannot be supplied for ordered_sequence: ", paste(bad, collapse = ", ")))
     }
-    user <- .oms_adapt_user_monoids(user)
   }
   ensure_size_monoids(c(user, .oms_required_monoids()))
 }

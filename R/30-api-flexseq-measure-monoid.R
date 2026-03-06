@@ -11,7 +11,7 @@
 #' @return An object of class `measure_monoid`.
 #' @details
 #' A measure monoid has three parts:
-#' - `measure(element)`: maps each element to a measure value.
+#' - `measure(entry)`: maps each stored leaf entry to a measure value.
 #' - `f(left, right)`: combines two measure values.
 #' - `i`: identity value for `f`.
 #'
@@ -20,11 +20,11 @@
 #' - `i` should satisfy `f(i, x) == x` and `f(x, i) == x`.
 #' - `measure()` outputs must be compatible with `f` and `i`.
 #'
-#' For specialized structures, `measure` can use structured arguments when added
-#' via [add_monoids()]:
-#' - `ordered_sequence`: `function(item, key)`.
-#' - `priority_queue`: `function(item, priority)`.
-#' - `interval_index`: `function(item, start, end)`.
+#' Developer APIs are leaf-entry oriented:
+#' - `flexseq`: entry is the stored user element.
+#' - `ordered_sequence`: entry is `list(item, key)`.
+#' - `priority_queue`: entry is `list(item, priority)`.
+#' - `interval_index`: entry is `list(item, start, end)`.
 #'
 #' `measure_monoid()` only constructs the specification; it becomes active after
 #' being attached to a structure via [add_monoids()].

@@ -80,6 +80,20 @@ testthat::test_that("add_monoids blocks reserved monoid names by type", {
   )
 })
 
+testthat::test_that("advanced structures require entry-style measure functions", {
+  pq <- priority_queue("a", priorities = 1)
+  pq_tuple <- measure_monoid(`+`, 0, function(item, priority) as.numeric(priority))
+  testthat::expect_error(add_monoids(pq, list(m = pq_tuple)))
+
+  os <- as_ordered_sequence(list("a"), keys = 1)
+  os_tuple <- measure_monoid(`+`, 0, function(item, key) as.numeric(key))
+  testthat::expect_error(add_monoids(os, list(m = os_tuple)))
+
+  ix <- as_interval_index(list("a"), start = 1, end = 2)
+  ix_tuple <- measure_monoid(`+`, 0, function(item, start, end) as.numeric(end - start))
+  testthat::expect_error(add_monoids(ix, list(m = ix_tuple)))
+})
+
 testthat::test_that("concat_trees unions monoids on shared names", {
   a <- measure_monoid(function(x, y) x + y, 0, function(el) el)
   b <- measure_monoid(function(x, y) x + y, 0, function(el) 1)

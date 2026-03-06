@@ -7,7 +7,7 @@
 split_around_by_predicate(t, predicate, monoid_name, accumulator = NULL)
 }
 \arguments{
-\item{t}{A \code{flexseq}.}
+\item{t}{A \code{flexseq} (or subclass).}
 
 \item{predicate}{Function applied to accumulated monoid values.}
 
@@ -31,6 +31,17 @@ while scanning the sequence.
 This function generally requires the sequence be annotated with
 a \code{measure_monoid()}; see the examples and \code{measure_monoid()}
 for more information.
+
+\code{elem} is the matched leaf entry for the input structure:
+\itemize{
+\item \code{flexseq}: stored user element.
+\item \code{ordered_sequence}: \code{list(item, key)}.
+\item \code{priority_queue}: \code{list(item, priority)}.
+\item \code{interval_index}: \code{list(item, start, end)}.
+}
+
+\code{left} and \code{right} preserve subclass when the input is a subclass of
+\code{flexseq}.
 }
 \examples{
 x <- flexseq("a", "b", "c", "d")

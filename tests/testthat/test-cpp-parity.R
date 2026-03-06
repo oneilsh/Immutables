@@ -459,8 +459,8 @@ testthat::test_that("backend parity: interval_index insert and queries", {
 
 testthat::test_that("backend parity: interval_index user monoid recomputation", {
   expect_backend_identical({
-    sum_item <- measure_monoid(function(a, b) a + b, 0, function(item, start, end) as.numeric(item))
-    width_sum <- measure_monoid(function(a, b) a + b, 0, function(item, start, end) as.numeric(end - start))
+    sum_item <- measure_monoid(function(a, b) a + b, 0, function(entry) as.numeric(entry$item))
+    width_sum <- measure_monoid(function(a, b) a + b, 0, function(entry) as.numeric(entry$end - entry$start))
 
     x <- add_monoids(as_interval_index(
       as.list(c(10, 20, 30)),

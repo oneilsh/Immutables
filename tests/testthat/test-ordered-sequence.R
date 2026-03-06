@@ -172,6 +172,23 @@ testthat::test_that("count helpers match range and key multiplicities", {
   testthat::expect_identical(count_between(xs, 9, 10), 0L)
 })
 
+testthat::test_that("split helpers preserve ordered_sequence subclass", {
+  xs <- as_ordered_sequence(list("a", "bb", "cc", "ddd", "eeee"), keys = c(1, 2, 2, 3, 4))
+
+  s <- split_by_predicate(xs, function(v) v >= 3L, ".size")
+  testthat::expect_s3_class(s$left, "ordered_sequence")
+  testthat::expect_s3_class(s$right, "ordered_sequence")
+  testthat::expect_equal(as.list(s$left), list("a", "bb"))
+  testthat::expect_equal(as.list(s$right), list("cc", "ddd", "eeee"))
+
+  sa <- split_around_by_predicate(xs, function(v) v >= 3L, ".size")
+  testthat::expect_s3_class(sa$left, "ordered_sequence")
+  testthat::expect_s3_class(sa$right, "ordered_sequence")
+  testthat::expect_equal(sa$elem$item, "cc")
+  testthat::expect_equal(as.list(sa$left), list("a", "bb"))
+  testthat::expect_equal(as.list(sa$right), list("ddd", "eeee"))
+})
+
 testthat::test_that("order-breaking writes are blocked on ordered types", {
   xs <- as_ordered_sequence(list("a", "b"), keys = c(1, 2))
 
@@ -286,7 +303,7 @@ testthat::test_that("fapply dispatches for ordered_sequence and no reset_ties ar
 })
 
 testthat::test_that("fapply can drop custom monoids for ordered_sequence", {
-  sum_item <- measure_monoid(`+`, 0, function(item, key) as.numeric(item))
+  sum_item <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$item))
   xs <- add_monoids(as_ordered_sequence(list(10, 20), keys = c(1, 2)), list(sum_item = sum_item))
   xs2 <- fapply(xs, function(item, key, name) item + 1, preserve_custom_monoids = FALSE)
 
@@ -299,18 +316,18 @@ testthat::test_that("fapply can drop custom monoids for ordered_sequence", {
   testthat::expect_equal(as.list(xs2), list(11, 21))
 })
 
-testthat::test_that("ordered_sequence custom monoids accept structured measure arguments", {
+testthat::test_that("ordered_sequence custom monoids accept entry measure arguments", {
   xs <- add_monoids(
     as_ordered_sequence(list(10, 20), keys = c(2, 1)),
     list(
-      by_key = measure_monoid(`+`, 0, function(item, key) as.numeric(key))
+      by_key = measure_monoid(`+`, 0, function(entry) as.numeric(entry$key))
     )
   )
   testthat::expect_equal(node_measure(xs, "by_key"), 3)
 })
 
 testthat::test_that("ordered_sequence casts down to flexseq explicitly", {
-  sum_key <- measure_monoid(`+`, 0, function(item, key) key)
+  sum_key <- measure_monoid(`+`, 0, function(entry) entry$key)
   xs <- add_monoids(as_ordered_sequence(
     setNames(list("x", "y"), c("kx", "ky")),
     keys = c(2, 1)

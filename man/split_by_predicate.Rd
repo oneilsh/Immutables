@@ -7,7 +7,7 @@
 split_by_predicate(x, predicate, monoid_name)
 }
 \arguments{
-\item{x}{A \code{flexseq}.}
+\item{x}{A \code{flexseq} (or subclass).}
 
 \item{predicate}{Function applied to accumulated monoid values.}
 
@@ -29,6 +29,9 @@ This is the two-way variant of \code{\link[=split_around_by_predicate]{split_aro
 
 As with \code{\link[=split_around_by_predicate]{split_around_by_predicate()}}, a common setup is a custom monoid
 created with \code{\link[=measure_monoid]{measure_monoid()}} and attached via \code{\link[=add_monoids]{add_monoids()}}.
+
+\code{left} and \code{right} preserve subclass when the input is a subclass of
+\code{flexseq}.
 }
 \examples{
 x <- flexseq("a", "b", "c", "d")

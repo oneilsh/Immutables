@@ -329,8 +329,8 @@ testthat::test_that("fapply for interval_index updates payload only and keeps in
 })
 
 testthat::test_that("interval_index recomputes user monoids across insert, fapply, and slices", {
-  sum_item <- measure_monoid(function(a, b) a + b, 0, function(item, start, end) as.numeric(item))
-  width_sum <- measure_monoid(function(a, b) a + b, 0, function(item, start, end) as.numeric(end - start))
+  sum_item <- measure_monoid(function(a, b) a + b, 0, function(entry) as.numeric(entry$item))
+  width_sum <- measure_monoid(function(a, b) a + b, 0, function(entry) as.numeric(entry$end - entry$start))
 
   ix <- add_monoids(as_interval_index(
     as.list(c(10, 20, 30)),
@@ -363,18 +363,18 @@ testthat::test_that("interval_index recomputes user monoids across insert, fappl
   testthat::expect_equal(node_measure(popped$remaining, "width_sum"), 3)
 })
 
-testthat::test_that("interval_index custom monoids accept structured endpoint arguments", {
+testthat::test_that("interval_index custom monoids accept entry measure arguments", {
   ix <- add_monoids(
     as_interval_index(as.list(c(10, 20)), start = c(1, 3), end = c(2, 5)),
     list(
-      by_width = measure_monoid(`+`, 0, function(item, start, end) as.numeric(end - start))
+      by_width = measure_monoid(`+`, 0, function(entry) as.numeric(entry$end - entry$start))
     )
   )
   testthat::expect_equal(node_measure(ix, "by_width"), 3)
 })
 
 testthat::test_that("fapply can drop custom monoids for interval_index", {
-  sum_item <- measure_monoid(`+`, 0, function(item, start, end) as.numeric(item))
+  sum_item <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$item))
   ix <- add_monoids(as_interval_index(as.list(c(10, 20)), start = c(1, 3), end = c(2, 5)), list(sum_item = sum_item))
   ix2 <- fapply(ix, function(item, start, end, name) item + 1, preserve_custom_monoids = FALSE)
 
@@ -390,7 +390,7 @@ testthat::test_that("fapply can drop custom monoids for interval_index", {
 })
 
 testthat::test_that("interval_index casts down to flexseq explicitly", {
-  width_sum <- measure_monoid(`+`, 0, function(item, start, end) as.numeric(end - start))
+  width_sum <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$end - entry$start))
   ix <- add_monoids(as_interval_index(
     setNames(list("x", "y"), c("ix", "iy")),
     start = c(1, 3),

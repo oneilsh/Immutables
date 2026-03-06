@@ -33,9 +33,9 @@ Mechanics:
 Measure-function signatures:
 \itemize{
 \item \code{flexseq}: \code{measure(entry)} where \code{entry} is the stored element.
-\item \code{ordered_sequence}: \code{measure(item, key)}.
-\item \code{priority_queue}: \code{measure(item, priority)}.
-\item \code{interval_index}: \code{measure(item, start, end)}.
+\item \code{ordered_sequence}: \code{measure(entry)} where \code{entry} is \code{list(item, key)}.
+\item \code{priority_queue}: \code{measure(entry)} where \code{entry} is \code{list(item, priority)}.
+\item \code{interval_index}: \code{measure(entry)} where \code{entry} is \code{list(item, start, end)}.
 }
 
 This operation is persistent: \code{t} is not modified.

@@ -215,7 +215,7 @@ testthat::test_that("fapply preserves priority queue entry names", {
 })
 
 testthat::test_that("fapply can drop custom monoids for priority_queue", {
-  sum_item <- measure_monoid(`+`, 0, function(item, priority) as.numeric(item))
+  sum_item <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$item))
   q <- add_monoids(priority_queue(1, 2, priorities = c(2, 1)), list(sum_item = sum_item))
   q2 <- fapply(q, function(item, priority, name) item * 10, preserve_custom_monoids = FALSE)
 
@@ -229,11 +229,11 @@ testthat::test_that("fapply can drop custom monoids for priority_queue", {
   testthat::expect_equal(peek_min(q2), 20)
 })
 
-testthat::test_that("priority_queue custom monoids accept structured measure arguments", {
+testthat::test_that("priority_queue custom monoids accept entry measure arguments", {
   q <- add_monoids(
     priority_queue(10, 20, priorities = c(2, 1)),
     list(
-      by_priority = measure_monoid(`+`, 0, function(item, priority) as.numeric(priority))
+      by_priority = measure_monoid(`+`, 0, function(entry) as.numeric(entry$priority))
     )
   )
   testthat::expect_equal(node_measure(q, "by_priority"), 3)

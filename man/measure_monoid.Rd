@@ -23,7 +23,7 @@ tree metadata.
 \details{
 A measure monoid has three parts:
 \itemize{
-\item \code{measure(element)}: maps each element to a measure value.
+\item \code{measure(entry)}: maps each stored leaf entry to a measure value.
 \item \code{f(left, right)}: combines two measure values.
 \item \code{i}: identity value for \code{f}.
 }
@@ -35,12 +35,12 @@ Requirements:
 \item \code{measure()} outputs must be compatible with \code{f} and \code{i}.
 }
 
-For specialized structures, \code{measure} can use structured arguments when added
-via \code{\link[=add_monoids]{add_monoids()}}:
+Developer APIs are leaf-entry oriented:
 \itemize{
-\item \code{ordered_sequence}: \verb{function(item, key)}.
-\item \code{priority_queue}: \verb{function(item, priority)}.
-\item \code{interval_index}: \verb{function(item, start, end)}.
+\item \code{flexseq}: entry is the stored user element.
+\item \code{ordered_sequence}: entry is \code{list(item, key)}.
+\item \code{priority_queue}: entry is \code{list(item, priority)}.
+\item \code{interval_index}: entry is \code{list(item, start, end)}.
 }
 
 \code{measure_monoid()} only constructs the specification; it becomes active after

@@ -40,7 +40,7 @@ add_monoids.ordered_sequence <- function(t, monoids, overwrite = FALSE) {
       stop("Reserved monoid names cannot be supplied for ", target, ": ", paste(bad, collapse = ", "))
     }
   }
-  add_monoids.flexseq(t, .oms_adapt_user_monoids(monoids), overwrite = overwrite)
+  add_monoids.flexseq(t, monoids, overwrite = overwrite)
 }
 
 # Runtime: O(log n) near locate point depth.

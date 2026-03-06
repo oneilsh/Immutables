@@ -18,8 +18,8 @@ split_around_by_predicate.flexseq <- function(t, predicate, monoid_name, accumul
   } else {
     split_tree_impl_fast(predicate, i, t, ms, mr, monoid_name)
   }
-  out$left <- .as_flexseq(out$left)
-  out$right <- .as_flexseq(out$right)
+  out$left <- .ft_restore_subclass(.as_flexseq(out$left), t, context = "split_around_by_predicate()")
+  out$right <- .ft_restore_subclass(.as_flexseq(out$right), t, context = "split_around_by_predicate()")
   out
 }
 
@@ -32,7 +32,9 @@ split_by_predicate.flexseq <- function(x, predicate, monoid_name) {
   mr <- ctx$monoid
 
   if(x %isa% Empty) {
-    return(list(left = .as_flexseq(measured_empty(ms)), right = .as_flexseq(measured_empty(ms))))
+    left_empty <- .ft_restore_subclass(.as_flexseq(measured_empty(ms)), x, context = "split_by_predicate()")
+    right_empty <- .ft_restore_subclass(.as_flexseq(measured_empty(ms)), x, context = "split_by_predicate()")
+    return(list(left = left_empty, right = right_empty))
   }
 
   if(predicate(node_measure(x, monoid_name))) {
@@ -42,10 +44,14 @@ split_by_predicate.flexseq <- function(x, predicate, monoid_name) {
       split_tree_impl_fast(predicate, mr$i, x, ms, mr, monoid_name)
     }
     right <- push_front(s$right, s$elem)
-    return(list(left = .as_flexseq(s$left), right = .as_flexseq(right)))
+    left_out <- .ft_restore_subclass(.as_flexseq(s$left), x, context = "split_by_predicate()")
+    right_out <- .ft_restore_subclass(.as_flexseq(right), x, context = "split_by_predicate()")
+    return(list(left = left_out, right = right_out))
   }
 
-  list(left = .as_flexseq(x), right = .as_flexseq(measured_empty(ms)))
+  left_out <- .ft_restore_subclass(.as_flexseq(x), x, context = "split_by_predicate()")
+  right_out <- .ft_restore_subclass(.as_flexseq(measured_empty(ms)), x, context = "split_by_predicate()")
+  list(left = left_out, right = right_out)
 }
 
 #' @method split_at flexseq

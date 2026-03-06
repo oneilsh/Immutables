@@ -13,7 +13,7 @@ locate_by_predicate(
 )
 }
 \arguments{
-\item{t}{A \code{flexseq}.}
+\item{t}{A \code{flexseq} (or subclass).}
 
 \item{predicate}{Function applied to accumulated monoid values.}
 
@@ -47,6 +47,14 @@ This is the read-only analogue of \code{\link[=split_around_by_predicate]{split_
 
 As with split helpers, a common setup is a custom monoid created with
 \code{\link[=measure_monoid]{measure_monoid()}} and attached via \code{\link[=add_monoids]{add_monoids()}}.
+
+\code{elem} is the matched leaf entry for the input structure:
+\itemize{
+\item \code{flexseq}: stored user element.
+\item \code{ordered_sequence}: \code{list(item, key)}.
+\item \code{priority_queue}: \code{list(item, priority)}.
+\item \code{interval_index}: \code{list(item, start, end)}.
+}
 }
 \examples{
 x <- flexseq("a", "b", "c", "d")

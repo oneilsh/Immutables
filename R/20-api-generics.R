@@ -61,9 +61,9 @@ fapply <- function(X, FUN, ...) {
 #'
 #' Measure-function signatures:
 #' - `flexseq`: `measure(entry)` where `entry` is the stored element.
-#' - `ordered_sequence`: `measure(item, key)`.
-#' - `priority_queue`: `measure(item, priority)`.
-#' - `interval_index`: `measure(item, start, end)`.
+#' - `ordered_sequence`: `measure(entry)` where `entry` is `list(item, key)`.
+#' - `priority_queue`: `measure(entry)` where `entry` is `list(item, priority)`.
+#' - `interval_index`: `measure(entry)` where `entry` is `list(item, start, end)`.
 #'
 #' This operation is persistent: `t` is not modified.
 #'
@@ -143,7 +143,7 @@ as_flexseq <- function(x) {
 #' Scans accumulated monoid values and returns the first element where
 #' `predicate` becomes `TRUE`, without rebuilding split trees.
 #'
-#' @param t A `flexseq`.
+#' @param t A `flexseq` (or subclass).
 #' @param predicate Function applied to accumulated monoid values.
 #' @param monoid_name Name of the monoid used for scanning.
 #' @param accumulator Optional starting accumulator value.
@@ -162,6 +162,12 @@ as_flexseq <- function(x) {
 #'
 #' As with split helpers, a common setup is a custom monoid created with
 #' [measure_monoid()] and attached via [add_monoids()].
+#'
+#' `elem` is the matched leaf entry for the input structure:
+#' - `flexseq`: stored user element.
+#' - `ordered_sequence`: `list(item, key)`.
+#' - `priority_queue`: `list(item, priority)`.
+#' - `interval_index`: `list(item, start, end)`.
 #' @examples
 #' x <- flexseq("a", "b", "c", "d")
 #' size_monoid <- measure_monoid(`+`, 0L, function(e) 1L)
@@ -179,7 +185,7 @@ locate_by_predicate <- function(t, predicate, monoid_name, accumulator = NULL, i
 #' Splits at the first point where a `predicate` function becomes `TRUE` 
 #' while scanning the sequence.
 #'
-#' @param t A `flexseq`.
+#' @param t A `flexseq` (or subclass).
 #' @param predicate Function applied to accumulated monoid values.
 #' @param monoid_name Name of the monoid used for scanning.
 #' @param accumulator Optional starting accumulator value.
@@ -191,6 +197,15 @@ locate_by_predicate <- function(t, predicate, monoid_name, accumulator = NULL, i
 #' This function generally requires the sequence be annotated with
 #' a `measure_monoid()`; see the examples and `measure_monoid()`
 #' for more information.
+#'
+#' `elem` is the matched leaf entry for the input structure:
+#' - `flexseq`: stored user element.
+#' - `ordered_sequence`: `list(item, key)`.
+#' - `priority_queue`: `list(item, priority)`.
+#' - `interval_index`: `list(item, start, end)`.
+#'
+#' `left` and `right` preserve subclass when the input is a subclass of
+#' `flexseq`.
 #' @examples
 #' x <- flexseq("a", "b", "c", "d")
 #' 
@@ -220,7 +235,7 @@ split_around_by_predicate <- function(t, predicate, monoid_name, accumulator = N
 #' Splits at the first point where `predicate` becomes `TRUE` while scanning
 #' the sequence.
 #'
-#' @param x A `flexseq`.
+#' @param x A `flexseq` (or subclass).
 #' @param predicate Function applied to accumulated monoid values.
 #' @param monoid_name Name of the monoid used for scanning.
 #' @return A list with fields:
@@ -231,6 +246,9 @@ split_around_by_predicate <- function(t, predicate, monoid_name, accumulator = N
 #'
 #' As with [split_around_by_predicate()], a common setup is a custom monoid
 #' created with [measure_monoid()] and attached via [add_monoids()].
+#'
+#' `left` and `right` preserve subclass when the input is a subclass of
+#' `flexseq`.
 #' @examples
 #' x <- flexseq("a", "b", "c", "d")
 #' size_monoid <- measure_monoid(`+`, 0L, function(e) 1L)

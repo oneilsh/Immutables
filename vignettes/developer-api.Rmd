@@ -45,6 +45,26 @@ x2 <- add_monoids(x, list(width = width_monoid))
 attr(x2, "measures")$width
 ```
 
+## Leaf entry contract
+
+Developer APIs are entry-oriented. `measure_monoid()` measure functions should
+always be `function(entry)`.
+
+- `flexseq`: entry is the stored user element.
+- `ordered_sequence`: entry is `list(item, key)`.
+- `priority_queue`: entry is `list(item, priority)`.
+- `interval_index`: entry is `list(item, start, end)`.
+
+```{r}
+os <- as_ordered_sequence(list("x", "yy"), keys = c(1, 2))
+by_key <- measure_monoid(`+`, 0L, function(entry) as.integer(entry$key))
+os2 <- add_monoids(os, list(by_key = by_key))
+node_measure(os2, "by_key")
+```
+
+`split_around_by_predicate()` and `locate_by_predicate()` return leaf entries in
+that same structure-specific form.
+
 ## Locate with predicate scans
 
 ```{r}
