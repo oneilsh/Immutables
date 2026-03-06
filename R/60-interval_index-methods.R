@@ -5,8 +5,13 @@
 # **Inputs:** `x` interval_index; optional `monoids`.
 # **Outputs:** flexseq of interval entry records.
 # **Used by:** as_flexseq.interval_index().
-.as_flexseq_build.interval_index <- function(x, monoids = NULL) {
-  entries <- as.list.flexseq(x)
+.as_flexseq_build.interval_index <- function(x, monoids = NULL, drop_meta = TRUE) {
+  drop_flag <- .ft_validate_drop_meta(drop_meta)
+  entries <- if(drop_flag) as.list(x) else as.list.flexseq(x)
+  if(drop_flag) {
+    return(.as_flexseq_build.default(entries, monoids = NULL))
+  }
+
   out_monoids <- monoids
   if(is.null(out_monoids)) {
     ms <- attr(x, "monoids", exact = TRUE)
@@ -22,8 +27,8 @@
 # **Inputs:** `x` interval_index.
 # **Outputs:** flexseq.
 # **Used by:** users/tests.
-as_flexseq.interval_index <- function(x) {
-  .as_flexseq_build.interval_index(x, monoids = NULL)
+as_flexseq.interval_index <- function(x, drop_meta = TRUE) {
+  .as_flexseq_build.interval_index(x, monoids = NULL, drop_meta = drop_meta)
 }
 
 # Runtime: O(n).

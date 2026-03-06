@@ -22,7 +22,10 @@ if(requireNamespace("immutables", quietly = TRUE)) {
 
 `priority_queue` is a persistent queue ordered by numeric or comparable
 priority values.
-For full sequence-style operations, cast with `as_flexseq()`.
+For full sequence-style operations, cast with `as_flexseq()`. By default this
+casts to payload items only (`drop_meta = TRUE`); use
+`as_flexseq(..., drop_meta = FALSE)` to keep entry records (`item` +
+`priority`).
 
 ## Creating a queue
 

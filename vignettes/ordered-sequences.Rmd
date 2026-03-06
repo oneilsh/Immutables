@@ -28,6 +28,9 @@ xs <- ordered_sequence("a1", "b1", "b2", "c1", keys = c(1, 2, 2, 3))
 xs
 ```
 
+`as_flexseq(xs)` returns a payload-only `flexseq` by default. Use
+`as_flexseq(xs, drop_meta = FALSE)` to keep entry records (`item`, `key`).
+
 ## Key-based lookup
 
 ```{r}

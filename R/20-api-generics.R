@@ -111,30 +111,43 @@ add_monoids.default <- function(t, monoids, overwrite = FALSE) {
 #'
 #' For specialized immutable subclasses (`priority_queue`,
 #' `ordered_sequence`, `interval_index`), this intentionally drops subclass
-#' semantics and returns a plain `flexseq` over stored entries.
+#' semantics and returns a plain `flexseq`.
 #'
 #' @param x Input object.
+#' @param drop_meta Logical scalar controlling advanced-structure cast style.
+#'   For `priority_queue`, `ordered_sequence`, and `interval_index`:
+#'   - `TRUE` (default): return payload-only elements and drop custom monoids.
+#'   - `FALSE`: return full stored entry records (for example `item` + metadata)
+#'     and preserve cast-down custom monoids.
 #' @return A plain `flexseq`.
 #' @details
 #' This is an S3 generic. Notable method behavior:
-#' - `as_flexseq.flexseq(x)` returns `x` unchanged.
-#' - `as_flexseq.priority_queue(x)` drops queue-only API constraints and removes
-#'   queue-specific monoids.
-#' - `as_flexseq.ordered_sequence(x)` and `as_flexseq.interval_index(x)` drop
-#'   ordered/query semantics and return sequence entries.
+#' - `as_flexseq.flexseq(x, drop_meta=...)` returns `x` unchanged.
+#' - `as_flexseq.priority_queue(x, drop_meta=TRUE)` returns payload items;
+#'   `drop_meta=FALSE` returns `list(item, priority)` entries.
+#' - `as_flexseq.ordered_sequence(x, drop_meta=TRUE)` returns payload items;
+#'   `drop_meta=FALSE` returns `list(item, key)` entries.
+#' - `as_flexseq.interval_index(x, drop_meta=TRUE)` returns payload items;
+#'   `drop_meta=FALSE` returns interval entry records.
+#'
+#' For advanced types with `drop_meta = TRUE`, custom monoids are dropped and
+#' the rebuilt `flexseq` keeps only structural monoids (`.size`,
+#' `.named_count`).
 #' @examples
 #' x <- as_flexseq(1:3)
 #' x
 #'
 #' q <- priority_queue("a", "b", priorities = c(2, 1))
 #' as_flexseq(q)
+#' as_flexseq(q, drop_meta = FALSE)
 #'
 #' o <- ordered_sequence("a", "b", keys = c(2, 1))
 #' as_flexseq(o)
+#' as_flexseq(o, drop_meta = FALSE)
 #' @seealso [flexseq()], [priority_queue()], [ordered_sequence()], [interval_index()]
 #' @export
 # Runtime: O(1) generic dispatch.
-as_flexseq <- function(x) {
+as_flexseq <- function(x, drop_meta = TRUE) {
   UseMethod("as_flexseq")
 }
 
