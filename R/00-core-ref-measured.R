@@ -164,38 +164,50 @@ combine_measures(measures, r) %as% {
   acc
 }
 
-# recursive helper assuming `ms` has already been validated
-# Runtime: best-case O(1) when cached measure is present on structural children;
-# worst-case O(n_subtree) when recursive fallback is required.
-if(FALSE) measure_child_named_impl <- function(x, ms, name, rr) NULL
-measure_child_named_impl(x, ms, name, rr) %::% . : list : character : MeasureMonoid : .
-measure_child_named_impl(x, ms, name, rr) %as% {
+# Hot-path recursive measure helper used by measure recomputation.
+# Avoids repeated typed-wrapper dispatch in deep recursion.
+# Runtime: best-case O(1) on cached structural children; worst-case O(n_subtree).
+.measure_child_named_fast <- function(x, name, rr) {
   if(is_structural_node(x)) {
     cached <- attr(x, "measures", exact = TRUE)
     if(!is.null(cached) && !is.null(cached[[name]])) {
       return(cached[[name]])
     }
 
-    if(x %isa% Empty) {
+    if(inherits(x, "Empty")) {
       return(rr$i)
     }
-    if(x %isa% Single) {
-      return(measure_child_named_impl(.subset2(x, 1), ms, name, rr))
+
+    if(inherits(x, "Single")) {
+      return(.measure_child_named_fast(.subset2(x, 1), name, rr))
     }
-    if(x %isa% Deep) {
-      return(combine_measures(
-        list(
-          measure_child_named_impl(.subset2(x,"prefix"), ms, name, rr),
-          measure_child_named_impl(.subset2(x,"middle"), ms, name, rr),
-          measure_child_named_impl(.subset2(x,"suffix"), ms, name, rr)
-        ),
-        rr
-      ))
+
+    if(inherits(x, "Deep")) {
+      acc <- rr$i
+      acc <- rr$f(acc, .measure_child_named_fast(.subset2(x, "prefix"), name, rr))
+      acc <- rr$f(acc, .measure_child_named_fast(.subset2(x, "middle"), name, rr))
+      acc <- rr$f(acc, .measure_child_named_fast(.subset2(x, "suffix"), name, rr))
+      return(acc)
     }
-    return(combine_measures(lapply(x, measure_child_named_impl, ms = ms, name = name, rr = rr), rr))
+
+    # Digit / Node2 / Node3
+    acc <- rr$i
+    for(el in x) {
+      acc <- rr$f(acc, .measure_child_named_fast(el, name, rr))
+    }
+    return(acc)
   }
 
   rr$measure(x)
+}
+
+# recursive helper assuming `ms` has already been validated
+# Runtime: best-case O(1) when cached measure is present on structural children;
+# worst-case O(n_subtree) when recursive fallback is required.
+if(FALSE) measure_child_named_impl <- function(x, ms, name, rr) NULL
+measure_child_named_impl(x, ms, name, rr) %::% . : list : character : MeasureMonoid : .
+measure_child_named_impl(x, ms, name, rr) %as% {
+  .measure_child_named_fast(x, name, rr)
 }
 
 # compute all cached measures for a structural node across all monoids
@@ -206,8 +218,12 @@ if(FALSE) measure_children <- function(x, monoids) NULL
 measure_children(x, monoids) %::% . : list : list
 measure_children(x, monoids) %as% {
   ms <- monoids
-  out <- lapply(names(ms), function(nm) measure_child_named_impl(x, ms, nm, ms[[nm]]))
-  names(out) <- names(ms)
+  nms <- names(ms)
+  out <- vector("list", length(ms))
+  for(i in seq_along(nms)) {
+    out[[i]] <- .measure_child_named_fast(x, nms[[i]], ms[[i]])
+  }
+  names(out) <- nms
   out
 }
 
@@ -254,17 +270,25 @@ set_measure_with_reuse(x, previous, monoids, recompute_names) %as% {
   }
 
   ms <- monoids
-  rec <- unique(intersect(recompute_names, names(ms)))
+  nms <- names(ms)
+  rec <- unique(intersect(recompute_names, nms))
   old <- if(is_structural_node(previous)) attr(previous, "measures", exact = TRUE) else NULL
+  has_old <- !is.null(old)
+  rec_flags <- rep(FALSE, length(nms))
+  names(rec_flags) <- nms
+  if(length(rec) > 0L) {
+    rec_flags[rec] <- TRUE
+  }
 
   out <- vector("list", length(ms))
-  names(out) <- names(ms)
-  for(nm in names(ms)) {
-    can_reuse <- !(nm %in% rec) && !is.null(old) && !is.null(old[[nm]])
+  names(out) <- nms
+  for(i in seq_along(nms)) {
+    nm <- nms[[i]]
+    can_reuse <- !rec_flags[[nm]] && has_old && !is.null(old[[nm]])
     if(can_reuse) {
-      out[[nm]] <- old[[nm]]
+      out[[i]] <- old[[nm]]
     } else {
-      out[[nm]] <- measure_child_named_impl(x, ms, nm, ms[[nm]])
+      out[[i]] <- .measure_child_named_fast(x, nm, ms[[i]])
     }
   }
 
@@ -284,16 +308,16 @@ rebind_tree_monoids(x, monoids, recompute_names) %as% {
     return(x)
   }
 
-  if(x %isa% Empty) {
+  if(inherits(x, "Empty")) {
     return(set_measure_with_reuse(Empty(), x, monoids, recompute_names))
   }
 
-  if(x %isa% Single) {
+  if(inherits(x, "Single")) {
     child <- rebind_tree_monoids(.subset2(x, 1), monoids, recompute_names)
     return(set_measure_with_reuse(Single(child), x, monoids, recompute_names))
   }
 
-  if(x %isa% Deep) {
+  if(inherits(x, "Deep")) {
     pr <- rebind_tree_monoids(.subset2(x,"prefix"), monoids, recompute_names)
     m <- rebind_tree_monoids(.subset2(x,"middle"), monoids, recompute_names)
     sf <- rebind_tree_monoids(.subset2(x,"suffix"), monoids, recompute_names)
