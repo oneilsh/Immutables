@@ -423,7 +423,4 @@ testthat::test_that("interval_index casts down to flexseq explicitly", {
   testthat::expect_false(".ivx_min_end" %in% ms_full)
   testthat::expect_false(".oms_max_key" %in% ms_full)
   testthat::expect_identical(node_measure(fx_full, "width_sum"), 3)
-
-  testthat::expect_error(as_flexseq(ix, drop_meta = NA), "TRUE or FALSE")
-  testthat::expect_error(as_flexseq(ix, drop_meta = 1), "TRUE or FALSE")
 })

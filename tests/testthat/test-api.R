@@ -24,6 +24,16 @@ testthat::test_that("as_flexseq validates drop_meta and ignores it for plain inp
   from_flex <- as_flexseq(as_flexseq(1:3), drop_meta = FALSE)
   testthat::expect_identical(as.list(from_default), as.list(1:3))
   testthat::expect_identical(as.list(from_flex), as.list(1:3))
+
+  advanced <- list(
+    priority_queue("a", priorities = 1),
+    ordered_sequence("a", keys = 1),
+    interval_index("a", start = 1, end = 2)
+  )
+  for(obj in advanced) {
+    testthat::expect_error(as_flexseq(obj, drop_meta = NA), "TRUE or FALSE")
+    testthat::expect_error(as_flexseq(obj, drop_meta = 1), "TRUE or FALSE")
+  }
 })
 
 testthat::test_that("add_monoids merges and supports overwrite flag", {

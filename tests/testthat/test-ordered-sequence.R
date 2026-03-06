@@ -352,9 +352,6 @@ testthat::test_that("ordered_sequence casts down to flexseq explicitly", {
   testthat::expect_true(all(c(".size", ".named_count", "sum_key") %in% ms_full))
   testthat::expect_false(".oms_max_key" %in% ms_full)
   testthat::expect_identical(node_measure(fx_full, "sum_key"), 3)
-
-  testthat::expect_error(as_flexseq(xs, drop_meta = NA), "TRUE or FALSE")
-  testthat::expect_error(as_flexseq(xs, drop_meta = 1), "TRUE or FALSE")
 })
 
 testthat::test_that("ordered_sequence supports Date keys with stable tie handling", {

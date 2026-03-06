@@ -2,21 +2,19 @@
 
 # Runtime: O(n) from list materialization + linear rebuild.
 # Internal cast-down builder for interval_index -> flexseq.
-# **Inputs:** `x` interval_index; optional `monoids`.
-# **Outputs:** flexseq of interval entry records.
+# **Inputs:** `x` interval_index; `drop_meta`.
+# **Outputs:** flexseq of payload items (`drop_meta=TRUE`) or entry records (`drop_meta=FALSE`).
 # **Used by:** as_flexseq.interval_index().
-.as_flexseq_build.interval_index <- function(x, monoids = NULL, drop_meta = TRUE) {
+.as_flexseq_build.interval_index <- function(x, drop_meta = TRUE) {
   drop_flag <- .ft_validate_drop_meta(drop_meta)
-  entries <- if(drop_flag) as.list(x) else as.list.flexseq(x)
   if(drop_flag) {
+    entries <- as.list(x)
     return(.as_flexseq_build.default(entries, monoids = NULL))
   }
 
-  out_monoids <- monoids
-  if(is.null(out_monoids)) {
-    ms <- attr(x, "monoids", exact = TRUE)
-    out_monoids <- ms[setdiff(names(ms), c(".ivx_max_start", ".ivx_max_end", ".ivx_min_end", ".oms_max_key"))]
-  }
+  entries <- as.list.flexseq(x)
+  ms <- attr(x, "monoids", exact = TRUE)
+  out_monoids <- ms[setdiff(names(ms), c(".ivx_max_start", ".ivx_max_end", ".ivx_min_end", ".oms_max_key"))]
   .as_flexseq_build.default(entries, monoids = out_monoids)
 }
 
@@ -28,7 +26,7 @@
 # **Outputs:** flexseq.
 # **Used by:** users/tests.
 as_flexseq.interval_index <- function(x, drop_meta = TRUE) {
-  .as_flexseq_build.interval_index(x, monoids = NULL, drop_meta = drop_meta)
+  .as_flexseq_build.interval_index(x, drop_meta = drop_meta)
 }
 
 # Runtime: O(n).
