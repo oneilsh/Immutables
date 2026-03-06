@@ -40,6 +40,51 @@ testthat::test_that("insert works on R backend when insertion is at right bounda
   testthat::expect_equal(as.list(ys), list("a", "b", "c"))
 })
 
+testthat::test_that("insert preserves name state for named ordered_sequence", {
+  xs_num <- as_ordered_sequence(
+    setNames(as.list(c("a", "b")), c("ka", "kb")),
+    keys = c(1, 2)
+  )
+  v_num <- "c"
+  names(v_num) <- "kc"
+  ys_num <- insert(xs_num, v_num, key = 2)
+
+  testthat::expect_identical(unname(ys_num[["kc"]]), "c")
+  testthat::expect_identical(attr(ys_num, "measures")$.named_count, as.integer(length(ys_num)))
+  testthat::expect_true(validate_name_state(ys_num))
+
+  xs_date <- as_ordered_sequence(
+    setNames(as.list(c("a", "b")), c("da", "db")),
+    keys = as.Date(c("2024-01-01", "2024-01-03"))
+  )
+  v_date <- "c"
+  names(v_date) <- "dc"
+  ys_date <- insert(xs_date, v_date, key = as.Date("2024-01-02"))
+
+  testthat::expect_identical(unname(ys_date[["dc"]]), "c")
+  testthat::expect_identical(attr(ys_date, "measures")$.named_count, as.integer(length(ys_date)))
+  testthat::expect_true(validate_name_state(ys_date))
+})
+
+testthat::test_that("insert enforces named/unnamed consistency for ordered_sequence", {
+  named <- as_ordered_sequence(
+    setNames(as.list(c("a", "b")), c("ka", "kb")),
+    keys = c(1, 2)
+  )
+  testthat::expect_error(
+    insert(named, "c", key = 3),
+    "mixed named and unnamed"
+  )
+
+  unnamed <- as_ordered_sequence(list("a", "b"), keys = c(1, 2))
+  v_named <- "c"
+  names(v_named) <- "kc"
+  testthat::expect_error(
+    insert(unnamed, v_named, key = 3),
+    "mixed named and unnamed"
+  )
+})
+
 testthat::test_that("lower_bound and upper_bound behave at boundaries", {
   xs <- as_ordered_sequence(list("bbb", "a", "cc", "dddd"), keys = c(3, 1, 2, 4))
 

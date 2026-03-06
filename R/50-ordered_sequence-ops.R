@@ -82,12 +82,36 @@ add_monoids.ordered_sequence <- function(t, monoids, overwrite = FALSE) {
 #' @noRd
 # Insert one (item,key) while preserving sorted order and FIFO tie stability.
 # Used by: insert.ordered_sequence().
+.oms_validate_insert_name_state <- function(x, entry, context = "insert()") {
+  measures <- attr(x, "measures", exact = TRUE)
+  if(is.null(measures)) {
+    stop("Tree has no measures attribute.")
+  }
+  n <- as.integer(measures[[".size"]])
+  nn <- as.integer(measures[[".named_count"]])
+  if(n > 0L && nn != 0L && nn != n) {
+    stop("Invalid tree name state: mixed named and unnamed elements.")
+  }
+  if(n == 0L) {
+    return(invisible(TRUE))
+  }
+  entry_name <- .ft_get_name(entry)
+  if(nn == 0L && !is.null(entry_name)) {
+    stop("Cannot mix named and unnamed elements (", context, " would create mixed named and unnamed tree).")
+  }
+  if(nn == n && is.null(entry_name)) {
+    stop("Cannot mix named and unnamed elements (", context, " would create mixed named and unnamed tree).")
+  }
+  invisible(TRUE)
+}
+
 .oms_insert_impl <- function(x, element, key) {
   .oms_assert_set(x)
   norm <- .oms_normalize_key(key)
   key_type <- .oms_validate_key_type(.oms_key_type_state(x), norm$key_type)
 
-  entry <- .oms_make_entry(element, norm$key)
+  entry <- .oms_make_entry(element, norm$key, name = .ft_effective_name(element))
+  .oms_validate_insert_name_state(x, entry, context = "insert()")
   ms <- attr(x, "monoids", exact = TRUE)
 
   out <- if(.ft_cpp_can_use_oms_insert(ms, key_type)) {

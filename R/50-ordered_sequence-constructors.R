@@ -3,8 +3,13 @@
 # Runtime: O(1).
 # Build one canonical ordered entry payload.
 # Used by: .oms_build_from_items() constructor assembly loop.
-.oms_make_entry <- function(item, key_value) {
-  list(item = item, key = key_value)
+.oms_make_entry <- function(item, key_value, name = NULL) {
+  out <- list(item = item, key = key_value)
+  nm <- .ft_normalize_name(name)
+  if(!is.null(nm)) {
+    out <- .ft_set_name(out, nm)
+  }
+  out
 }
 
 # Runtime: O(n log n) for stable merge sort by key.
