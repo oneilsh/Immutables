@@ -57,6 +57,7 @@
     if(length(bad) > 0L) {
       stop(paste0("Reserved monoid names cannot be supplied for priority queues: ", paste(bad, collapse = ", ")))
     }
+    user <- .pq_adapt_user_monoids(user)
   }
   c(user, .pq_required_monoids())
 }

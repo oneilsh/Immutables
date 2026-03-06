@@ -78,9 +78,17 @@
     flexseq_tree_from = list(required = c("as_flexseq")),
     flexseq_tree_from_named = list(required = c("as_flexseq")),
     flexseq_concat = list(required = c("as_flexseq", "c")),
+    add_monoids_only = list(required = c("as_flexseq", "add_monoids", "measure_monoid")),
+    add_monoids_only_named = list(required = c("as_flexseq", "add_monoids", "measure_monoid")),
     locate_default = list(required = c("as_flexseq", "locate_by_predicate")),
+    locate_custom_cached = list(required = c("as_flexseq", "add_monoids", "measure_monoid", "locate_by_predicate")),
+    locate_custom_cached_named = list(required = c("as_flexseq", "add_monoids", "measure_monoid", "locate_by_predicate")),
     split_tree_default = list(required = c("as_flexseq", "split_around_by_predicate")),
+    split_tree_custom_cached = list(required = c("as_flexseq", "add_monoids", "measure_monoid", "split_around_by_predicate")),
+    split_tree_custom_cached_named = list(required = c("as_flexseq", "add_monoids", "measure_monoid", "split_around_by_predicate")),
     split_default = list(required = c("as_flexseq", "split_by_predicate")),
+    split_custom_cached = list(required = c("as_flexseq", "add_monoids", "measure_monoid", "split_by_predicate")),
+    split_custom_cached_named = list(required = c("as_flexseq", "add_monoids", "measure_monoid", "split_by_predicate")),
     index_integer_single_read = list(required = c("as_flexseq")),
     index_name_single_read = list(required = c("as_flexseq")),
     peek_at_single_read = list(required = c("as_flexseq", "peek_at")),
@@ -145,10 +153,38 @@
     if(!inherits(z, "flexseq")) stop("Scenario contract failed: c(flexseq, flexseq) must return flexseq.")
     return(invisible(TRUE))
   }
+  if(identical(scenario, "add_monoids_only")) {
+    x <- add_monoids(as_flexseq(as.list(1:3)), list(sum = .bench_sum_monoid()))
+    if(!inherits(x, "flexseq")) stop("Scenario contract failed: add_monoids() must return flexseq.")
+    if(!identical(node_measure(x, "sum"), 6)) stop("Scenario contract failed: add_monoids_only cached measure changed.")
+    return(invisible(TRUE))
+  }
+  if(identical(scenario, "add_monoids_only_named")) {
+    vals <- as.list(1:3)
+    names(vals) <- c("a", "b", "c")
+    x <- add_monoids(as_flexseq(vals), list(sum = .bench_sum_monoid()))
+    if(!inherits(x, "flexseq")) stop("Scenario contract failed: named add_monoids() must return flexseq.")
+    if(!identical(node_measure(x, "sum"), 6)) stop("Scenario contract failed: add_monoids_only_named cached measure changed.")
+    return(invisible(TRUE))
+  }
   if(identical(scenario, "locate_default")) {
     t <- as_flexseq(as.list(1:5))
     out <- locate_by_predicate(t, function(v) v >= 3, ".size")
     if(!is.list(out) || is.null(out$found)) stop("Scenario contract failed: locate_by_predicate output shape changed.")
+    return(invisible(TRUE))
+  }
+  if(identical(scenario, "locate_custom_cached")) {
+    t <- add_monoids(as_flexseq(as.list(1:5)), list(sum = .bench_sum_monoid()))
+    out <- locate_by_predicate(t, function(v) v >= 6, "sum")
+    if(!is.list(out) || is.null(out$found)) stop("Scenario contract failed: locate_by_predicate custom monoid output shape changed.")
+    return(invisible(TRUE))
+  }
+  if(identical(scenario, "locate_custom_cached_named")) {
+    vals <- as.list(1:5)
+    names(vals) <- paste0("k", 1:5)
+    t <- add_monoids(as_flexseq(vals), list(sum = .bench_sum_monoid()))
+    out <- locate_by_predicate(t, function(v) v >= 6, "sum")
+    if(!is.list(out) || is.null(out$found)) stop("Scenario contract failed: locate_by_predicate named custom monoid output shape changed.")
     return(invisible(TRUE))
   }
   if(identical(scenario, "split_tree_default")) {
@@ -157,10 +193,38 @@
     if(!is.list(out) || is.null(out$left) || is.null(out$right)) stop("Scenario contract failed: split_around_by_predicate output shape changed.")
     return(invisible(TRUE))
   }
+  if(identical(scenario, "split_tree_custom_cached")) {
+    t <- add_monoids(as_flexseq(as.list(1:5)), list(sum = .bench_sum_monoid()))
+    out <- split_around_by_predicate(t, function(v) v >= 6, "sum")
+    if(!is.list(out) || is.null(out$left) || is.null(out$right)) stop("Scenario contract failed: split_around_by_predicate custom monoid output shape changed.")
+    return(invisible(TRUE))
+  }
+  if(identical(scenario, "split_tree_custom_cached_named")) {
+    vals <- as.list(1:5)
+    names(vals) <- paste0("k", 1:5)
+    t <- add_monoids(as_flexseq(vals), list(sum = .bench_sum_monoid()))
+    out <- split_around_by_predicate(t, function(v) v >= 6, "sum")
+    if(!is.list(out) || is.null(out$left) || is.null(out$right)) stop("Scenario contract failed: named split_around_by_predicate custom monoid output shape changed.")
+    return(invisible(TRUE))
+  }
   if(identical(scenario, "split_default")) {
     t <- as_flexseq(as.list(1:5))
     out <- split_by_predicate(t, function(v) v >= 3, ".size")
     if(!is.list(out) || is.null(out$left) || is.null(out$right)) stop("Scenario contract failed: split_by_predicate output shape changed.")
+    return(invisible(TRUE))
+  }
+  if(identical(scenario, "split_custom_cached")) {
+    t <- add_monoids(as_flexseq(as.list(1:5)), list(sum = .bench_sum_monoid()))
+    out <- split_by_predicate(t, function(v) v >= 6, "sum")
+    if(!is.list(out) || is.null(out$left) || is.null(out$right)) stop("Scenario contract failed: split_by_predicate custom monoid output shape changed.")
+    return(invisible(TRUE))
+  }
+  if(identical(scenario, "split_custom_cached_named")) {
+    vals <- as.list(1:5)
+    names(vals) <- paste0("k", 1:5)
+    t <- add_monoids(as_flexseq(vals), list(sum = .bench_sum_monoid()))
+    out <- split_by_predicate(t, function(v) v >= 6, "sum")
+    if(!is.list(out) || is.null(out$left) || is.null(out$right)) stop("Scenario contract failed: named split_by_predicate custom monoid output shape changed.")
     return(invisible(TRUE))
   }
   if(identical(scenario, "index_integer_single_read")) {
@@ -400,9 +464,17 @@
       flexseq_tree_from = list(n = 4000L),
       flexseq_tree_from_named = list(n = 3000L),
       flexseq_concat = list(n = 800L, reps = 8L),
+      add_monoids_only = list(n = 2000L),
+      add_monoids_only_named = list(n = 2000L),
       locate_default = list(n = 2000L, queries = 40L),
+      locate_custom_cached = list(n = 2000L, queries = 40L),
+      locate_custom_cached_named = list(n = 2000L, queries = 40L),
       split_tree_default = list(n = 2000L, queries = 30L),
+      split_tree_custom_cached = list(n = 2000L, queries = 30L),
+      split_tree_custom_cached_named = list(n = 2000L, queries = 30L),
       split_default = list(n = 2000L, queries = 30L),
+      split_custom_cached = list(n = 2000L, queries = 30L),
+      split_custom_cached_named = list(n = 2000L, queries = 30L),
       index_integer_single_read = list(n = 1000L, queries = 200L),
       index_name_single_read = list(n = 1000L, queries = 200L),
       peek_at_single_read = list(n = 300L, queries = 60L),
@@ -433,9 +505,17 @@
     flexseq_tree_from = list(n = 26000L),
     flexseq_tree_from_named = list(n = 23000L),
     flexseq_concat = list(n = 8000L, reps = 200L),
+    add_monoids_only = list(n = 10000L),
+    add_monoids_only_named = list(n = 10000L),
     locate_default = list(n = 10000L, queries = 200L),
+    locate_custom_cached = list(n = 10000L, queries = 200L),
+    locate_custom_cached_named = list(n = 10000L, queries = 200L),
     split_tree_default = list(n = 5000L, queries = 80L),
+    split_tree_custom_cached = list(n = 5000L, queries = 80L),
+    split_tree_custom_cached_named = list(n = 5000L, queries = 80L),
     split_default = list(n = 5000L, queries = 80L),
+    split_custom_cached = list(n = 5000L, queries = 80L),
+    split_custom_cached_named = list(n = 5000L, queries = 80L),
     index_integer_single_read = list(n = 5000L, queries = 800L),
     index_name_single_read = list(n = 320L, queries = 60L),
     peek_at_single_read = list(n = 800L, queries = 160L),
@@ -486,6 +566,26 @@
   invisible(NULL)
 }
 
+.bench_sum_monoid <- function() {
+  measure_monoid(function(a, b) a + b, 0, function(el) as.numeric(el))
+}
+
+.bench_attach_sum_monoid <- function(vals) {
+  add_monoids(as_flexseq(vals), list(sum = .bench_sum_monoid()))
+}
+
+.bench_scenario_add_monoids_only <- function(n) {
+  vals <- as.list(seq_len(as.integer(n)))
+  invisible(.bench_attach_sum_monoid(vals))
+}
+
+.bench_scenario_add_monoids_only_named <- function(n) {
+  n <- as.integer(n)
+  vals <- as.list(seq_len(n))
+  names(vals) <- paste0("k", seq_len(n))
+  invisible(.bench_attach_sum_monoid(vals))
+}
+
 .bench_scenario_locate_default <- function(n, queries) {
   n <- as.integer(n)
   queries <- as.integer(queries)
@@ -493,6 +593,32 @@
   idx <- sample.int(n, queries, replace = TRUE)
   for(i in idx) {
     invisible(locate_by_predicate(t, function(v) v >= i, ".size"))
+  }
+  invisible(NULL)
+}
+
+.bench_scenario_locate_custom_cached <- function(n, queries) {
+  n <- as.integer(n)
+  queries <- as.integer(queries)
+  t <- .bench_attach_sum_monoid(as.list(seq_len(n)))
+  idx <- sample.int(n, queries, replace = TRUE)
+  targets <- cumsum(seq_len(n))[idx]
+  for(target in targets) {
+    invisible(locate_by_predicate(t, function(v) v >= target, "sum"))
+  }
+  invisible(NULL)
+}
+
+.bench_scenario_locate_custom_cached_named <- function(n, queries) {
+  n <- as.integer(n)
+  queries <- as.integer(queries)
+  vals <- as.list(seq_len(n))
+  names(vals) <- paste0("k", seq_len(n))
+  t <- .bench_attach_sum_monoid(vals)
+  idx <- sample.int(n, queries, replace = TRUE)
+  targets <- cumsum(seq_len(n))[idx]
+  for(target in targets) {
+    invisible(locate_by_predicate(t, function(v) v >= target, "sum"))
   }
   invisible(NULL)
 }
@@ -508,6 +634,32 @@
   invisible(NULL)
 }
 
+.bench_scenario_split_tree_custom_cached <- function(n, queries) {
+  n <- as.integer(n)
+  queries <- as.integer(queries)
+  t <- .bench_attach_sum_monoid(as.list(seq_len(n)))
+  idx <- sample.int(n, queries, replace = TRUE)
+  targets <- cumsum(seq_len(n))[idx]
+  for(target in targets) {
+    invisible(split_around_by_predicate(t, function(v) v >= target, "sum"))
+  }
+  invisible(NULL)
+}
+
+.bench_scenario_split_tree_custom_cached_named <- function(n, queries) {
+  n <- as.integer(n)
+  queries <- as.integer(queries)
+  vals <- as.list(seq_len(n))
+  names(vals) <- paste0("k", seq_len(n))
+  t <- .bench_attach_sum_monoid(vals)
+  idx <- sample.int(n, queries, replace = TRUE)
+  targets <- cumsum(seq_len(n))[idx]
+  for(target in targets) {
+    invisible(split_around_by_predicate(t, function(v) v >= target, "sum"))
+  }
+  invisible(NULL)
+}
+
 .bench_scenario_split_default <- function(n, queries) {
   n <- as.integer(n)
   queries <- as.integer(queries)
@@ -515,6 +667,32 @@
   idx <- sample.int(n, queries, replace = TRUE)
   for(i in idx) {
     invisible(split_by_predicate(t, function(v) v >= i, ".size"))
+  }
+  invisible(NULL)
+}
+
+.bench_scenario_split_custom_cached <- function(n, queries) {
+  n <- as.integer(n)
+  queries <- as.integer(queries)
+  t <- .bench_attach_sum_monoid(as.list(seq_len(n)))
+  idx <- sample.int(n, queries, replace = TRUE)
+  targets <- cumsum(seq_len(n))[idx]
+  for(target in targets) {
+    invisible(split_by_predicate(t, function(v) v >= target, "sum"))
+  }
+  invisible(NULL)
+}
+
+.bench_scenario_split_custom_cached_named <- function(n, queries) {
+  n <- as.integer(n)
+  queries <- as.integer(queries)
+  vals <- as.list(seq_len(n))
+  names(vals) <- paste0("k", seq_len(n))
+  t <- .bench_attach_sum_monoid(vals)
+  idx <- sample.int(n, queries, replace = TRUE)
+  targets <- cumsum(seq_len(n))[idx]
+  for(target in targets) {
+    invisible(split_by_predicate(t, function(v) v >= target, "sum"))
   }
   invisible(NULL)
 }
@@ -943,9 +1121,17 @@
     "flexseq_tree_from",
     "flexseq_tree_from_named",
     "flexseq_concat",
+    "add_monoids_only",
+    "add_monoids_only_named",
     "locate_default",
+    "locate_custom_cached",
+    "locate_custom_cached_named",
     "split_tree_default",
+    "split_tree_custom_cached",
+    "split_tree_custom_cached_named",
     "split_default",
+    "split_custom_cached",
+    "split_custom_cached_named",
     "index_integer_single_read",
     "index_name_single_read",
     "peek_at_single_read",
@@ -979,9 +1165,17 @@
     flexseq_tree_from = do.call(.bench_scenario_flexseq_tree_from, params),
     flexseq_tree_from_named = do.call(.bench_scenario_flexseq_tree_from_named, params),
     flexseq_concat = do.call(.bench_scenario_flexseq_concat, params),
+    add_monoids_only = do.call(.bench_scenario_add_monoids_only, params),
+    add_monoids_only_named = do.call(.bench_scenario_add_monoids_only_named, params),
     locate_default = do.call(.bench_scenario_locate_default, params),
+    locate_custom_cached = do.call(.bench_scenario_locate_custom_cached, params),
+    locate_custom_cached_named = do.call(.bench_scenario_locate_custom_cached_named, params),
     split_tree_default = do.call(.bench_scenario_split_tree_default, params),
+    split_tree_custom_cached = do.call(.bench_scenario_split_tree_custom_cached, params),
+    split_tree_custom_cached_named = do.call(.bench_scenario_split_tree_custom_cached_named, params),
     split_default = do.call(.bench_scenario_split_default, params),
+    split_custom_cached = do.call(.bench_scenario_split_custom_cached, params),
+    split_custom_cached_named = do.call(.bench_scenario_split_custom_cached_named, params),
     index_integer_single_read = do.call(.bench_scenario_index_integer_single_read, params),
     index_name_single_read = do.call(.bench_scenario_index_name_single_read, params),
     peek_at_single_read = do.call(.bench_scenario_peek_at_single_read, params),

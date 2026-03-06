@@ -168,6 +168,37 @@
   isTRUE(endpoint_type %in% c("numeric", "character", "logical"))
 }
 
+# Runtime: O(1).
+.ivx_measure_adapter_matches <- function(fn) {
+  identical(attr(fn, "immutables.measure_adapter", exact = TRUE), "interval_index")
+}
+
+# Runtime: O(1).
+.ivx_wrap_measure <- function(fn) {
+  if(.ivx_measure_adapter_matches(fn)) {
+    return(fn)
+  }
+  wrapped <- function(entry) fn(entry$item, entry$start, entry$end)
+  attr(wrapped, "immutables.measure_adapter") <- "interval_index"
+  wrapped
+}
+
+# Runtime: O(m), where m = number of user-supplied monoids.
+.ivx_adapt_user_monoids <- function(monoids) {
+  if(length(monoids) == 0L) {
+    return(monoids)
+  }
+  out <- monoids
+  nm <- names(out)
+  for(i in seq_along(out)) {
+    monoid_name <- if(is.null(nm)) NULL else nm[[i]]
+    spec <- .normalize_measure_monoid_spec(out[[i]], monoid_name = monoid_name)
+    spec$measure <- .ivx_wrap_measure(spec$measure)
+    out[[i]] <- spec
+  }
+  out
+}
+
 # Runtime: O(m), where m = number of user-supplied monoids.
 # Merges user monoids with required interval (and optional ordered-key) monoids.
 # **Inputs:** optional user `monoids`; optional scalar `endpoint_type`.
@@ -180,6 +211,7 @@
     if(length(bad) > 0L) {
       stop(paste0("Reserved monoid names cannot be supplied for interval_index: ", paste(bad, collapse = ", ")))
     }
+    user <- .ivx_adapt_user_monoids(user)
   }
 
   req <- list(

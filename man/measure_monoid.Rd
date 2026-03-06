@@ -35,6 +35,14 @@ Requirements:
 \item \code{measure()} outputs must be compatible with \code{f} and \code{i}.
 }
 
+For specialized structures, \code{measure} can use structured arguments when added
+via \code{\link[=add_monoids]{add_monoids()}}:
+\itemize{
+\item \code{ordered_sequence}: \verb{function(item, key)}.
+\item \code{priority_queue}: \verb{function(item, priority)}.
+\item \code{interval_index}: \verb{function(item, start, end)}.
+}
+
 \code{measure_monoid()} only constructs the specification; it becomes active after
 being attached to a structure via \code{\link[=add_monoids]{add_monoids()}}.
 }

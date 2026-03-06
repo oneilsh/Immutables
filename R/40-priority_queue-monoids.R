@@ -99,3 +99,34 @@ pq_max_measure_monoid <- function() {
     .pq_max = pq_max_measure_monoid()
   )
 }
+
+# Runtime: O(1).
+.pq_measure_adapter_matches <- function(fn) {
+  identical(attr(fn, "immutables.measure_adapter", exact = TRUE), "priority_queue")
+}
+
+# Runtime: O(1).
+.pq_wrap_measure <- function(fn) {
+  if(.pq_measure_adapter_matches(fn)) {
+    return(fn)
+  }
+  wrapped <- function(entry) fn(entry$item, entry$priority)
+  attr(wrapped, "immutables.measure_adapter") <- "priority_queue"
+  wrapped
+}
+
+# Runtime: O(m), where m = number of user-supplied monoids.
+.pq_adapt_user_monoids <- function(monoids) {
+  if(length(monoids) == 0L) {
+    return(monoids)
+  }
+  out <- monoids
+  nm <- names(out)
+  for(i in seq_along(out)) {
+    monoid_name <- if(is.null(nm)) NULL else nm[[i]]
+    spec <- .normalize_measure_monoid_spec(out[[i]], monoid_name = monoid_name)
+    spec$measure <- .pq_wrap_measure(spec$measure)
+    out[[i]] <- spec
+  }
+  out
+}

@@ -30,6 +30,14 @@ Mechanics:
 \item Structural/reserved monoid names cannot be replaced.
 }
 
+Measure-function signatures:
+\itemize{
+\item \code{flexseq}: \code{measure(entry)} where \code{entry} is the stored element.
+\item \code{ordered_sequence}: \code{measure(item, key)}.
+\item \code{priority_queue}: \code{measure(item, priority)}.
+\item \code{interval_index}: \code{measure(item, start, end)}.
+}
+
 This operation is persistent: \code{t} is not modified.
 
 Use this when you want fast predicate scans (for example with

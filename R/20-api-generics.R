@@ -59,6 +59,12 @@ fapply <- function(X, FUN, ...) {
 #' - Existing monoids are unchanged unless `overwrite = TRUE`.
 #' - Structural/reserved monoid names cannot be replaced.
 #'
+#' Measure-function signatures:
+#' - `flexseq`: `measure(entry)` where `entry` is the stored element.
+#' - `ordered_sequence`: `measure(item, key)`.
+#' - `priority_queue`: `measure(item, priority)`.
+#' - `interval_index`: `measure(item, start, end)`.
+#'
 #' This operation is persistent: `t` is not modified.
 #'
 #' Use this when you want fast predicate scans (for example with

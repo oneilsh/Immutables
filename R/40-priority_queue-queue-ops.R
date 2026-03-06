@@ -11,7 +11,7 @@ add_monoids.priority_queue <- function(t, monoids, overwrite = FALSE) {
       stop("Reserved monoid names cannot be supplied for priority_queue: ", paste(bad, collapse = ", "))
     }
   }
-  add_monoids.flexseq(t, monoids, overwrite = overwrite)
+  add_monoids.flexseq(t, .pq_adapt_user_monoids(monoids), overwrite = overwrite)
 }
 
 # Runtime: O(log n) near right edge, with O(1) local name-state checks.

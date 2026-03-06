@@ -57,7 +57,7 @@ add_monoids.interval_index <- function(t, monoids, overwrite = FALSE) {
       stop("Reserved monoid names cannot be supplied for interval_index: ", paste(bad, collapse = ", "))
     }
   }
-  add_monoids.flexseq(t, monoids, overwrite = overwrite)
+  add_monoids.flexseq(t, .ivx_adapt_user_monoids(monoids), overwrite = overwrite)
 }
 
 # Runtime: O(log n) near split point depth.

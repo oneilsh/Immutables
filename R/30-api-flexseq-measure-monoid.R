@@ -20,6 +20,12 @@
 #' - `i` should satisfy `f(i, x) == x` and `f(x, i) == x`.
 #' - `measure()` outputs must be compatible with `f` and `i`.
 #'
+#' For specialized structures, `measure` can use structured arguments when added
+#' via [add_monoids()]:
+#' - `ordered_sequence`: `function(item, key)`.
+#' - `priority_queue`: `function(item, priority)`.
+#' - `interval_index`: `function(item, start, end)`.
+#'
 #' `measure_monoid()` only constructs the specification; it becomes active after
 #' being attached to a structure via [add_monoids()].
 #' @examples
