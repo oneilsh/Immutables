@@ -236,6 +236,52 @@ peek_max <- function(x) {
   .pq_peek(x, ".pq_max")
 }
 
+# Runtime: O(1).
+#' Minimum Priority Value
+#'
+#' Returns the current minimum priority scalar in the queue.
+#'
+#' @param x A `priority_queue`.
+#' @return Minimum priority value, or `NULL` when `x` is empty.
+#' @details
+#' Uses cached `.pq_min` monoid state.
+#' @examples
+#' q <- priority_queue("a", "b", priorities = c(2, 1))
+#' min_priority(q)
+#' min_priority(priority_queue())
+#' @export
+min_priority <- function(x) {
+  .pq_assert_queue(x)
+  m <- node_measure(x, ".pq_min")
+  if(!isTRUE(m$has)) {
+    return(NULL)
+  }
+  m$priority
+}
+
+# Runtime: O(1).
+#' Maximum Priority Value
+#'
+#' Returns the current maximum priority scalar in the queue.
+#'
+#' @param x A `priority_queue`.
+#' @return Maximum priority value, or `NULL` when `x` is empty.
+#' @details
+#' Uses cached `.pq_max` monoid state.
+#' @examples
+#' q <- priority_queue("a", "b", priorities = c(2, 1))
+#' max_priority(q)
+#' max_priority(priority_queue())
+#' @export
+max_priority <- function(x) {
+  .pq_assert_queue(x)
+  m <- node_measure(x, ".pq_max")
+  if(!isTRUE(m$has)) {
+    return(NULL)
+  }
+  m$priority
+}
+
 # Runtime: O(n) due tie-run scan.
 #' Peek All Minimum-Priority Elements
 #'

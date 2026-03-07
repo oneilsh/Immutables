@@ -43,6 +43,53 @@ add_monoids.ordered_sequence <- function(t, monoids, overwrite = FALSE) {
   add_monoids.flexseq(t, monoids, overwrite = overwrite)
 }
 
+# Runtime: O(log n).
+#' Minimum Key Value
+#'
+#' Returns the smallest key currently present in the ordered sequence.
+#'
+#' @param x An `ordered_sequence`.
+#' @return Minimum key, or `NULL` when `x` is empty.
+#' @details
+#' This follows sequence key order directly.
+#' @examples
+#' x <- ordered_sequence("a", "b", keys = c(2, 1))
+#' min_key(x)
+#' min_key(ordered_sequence())
+#' @export
+min_key <- function(x) {
+  .oms_stop_interval_index(x, "min_key")
+  .oms_assert_set(x)
+  if(length(x) == 0L) {
+    return(NULL)
+  }
+  .ft_get_elem_at(x, 1L)$key
+}
+
+# Runtime: O(1).
+#' Maximum Key Value
+#'
+#' Returns the largest key currently present in the ordered sequence.
+#'
+#' @param x An `ordered_sequence`.
+#' @return Maximum key, or `NULL` when `x` is empty.
+#' @details
+#' Uses cached `.oms_max_key` monoid state.
+#' @examples
+#' x <- ordered_sequence("a", "b", keys = c(2, 1))
+#' max_key(x)
+#' max_key(ordered_sequence())
+#' @export
+max_key <- function(x) {
+  .oms_stop_interval_index(x, "max_key")
+  .oms_assert_set(x)
+  m <- node_measure(x, ".oms_max_key")
+  if(!isTRUE(m$has)) {
+    return(NULL)
+  }
+  m$key
+}
+
 # Runtime: O(log n) near locate point depth.
 # Normalize/validate a key against sequence key_type, then delegate to prepared
 # bound search.

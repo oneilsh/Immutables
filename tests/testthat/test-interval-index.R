@@ -24,6 +24,16 @@ testthat::test_that("interval_index validates endpoints and bounds", {
   testthat::expect_error(as_interval_index("x", start = 1, end = 2, bounds = "bad"), "bounds")
 })
 
+testthat::test_that("min_endpoint/max_endpoint expose endpoint extrema", {
+  ix <- as_interval_index(list("c", "a", "b"), start = c(2, 1, 2), end = c(5, 3, 4))
+  testthat::expect_identical(min_endpoint(ix), 1)
+  testthat::expect_identical(max_endpoint(ix), 5)
+
+  empty <- interval_index()
+  testthat::expect_null(min_endpoint(empty))
+  testthat::expect_null(max_endpoint(empty))
+})
+
 testthat::test_that("insert is persistent and appends at right edge of equal-start block", {
   ix <- as_interval_index(list("a", "b", "c"), start = c(1, 2, 2), end = c(2, 3, 4))
   ix2 <- insert(ix, "d", start = 2, end = 5)

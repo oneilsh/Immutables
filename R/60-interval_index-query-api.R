@@ -1,5 +1,51 @@
 #SO
 
+# Runtime: O(log n).
+#' Minimum Left Endpoint
+#'
+#' Returns the smallest left endpoint (`start`) currently present.
+#'
+#' @param x An `interval_index`.
+#' @return Minimum left endpoint, or `NULL` when `x` is empty.
+#' @details
+#' Because intervals are stored in start order, this reads the first entry's
+#' `start`.
+#' @examples
+#' ix <- interval_index("a", "b", start = c(3, 1), end = c(4, 2))
+#' min_endpoint(ix)
+#' min_endpoint(interval_index())
+#' @export
+min_endpoint <- function(x) {
+  .ivx_assert_index(x)
+  if(length(x) == 0L) {
+    return(NULL)
+  }
+  .ft_get_elem_at(x, 1L)$start
+}
+
+# Runtime: O(1).
+#' Maximum Right Endpoint
+#'
+#' Returns the largest right endpoint (`end`) currently present.
+#'
+#' @param x An `interval_index`.
+#' @return Maximum right endpoint, or `NULL` when `x` is empty.
+#' @details
+#' Uses cached `.ivx_max_end` monoid state.
+#' @examples
+#' ix <- interval_index("a", "b", start = c(3, 1), end = c(4, 2))
+#' max_endpoint(ix)
+#' max_endpoint(interval_index())
+#' @export
+max_endpoint <- function(x) {
+  .ivx_assert_index(x)
+  m <- node_measure(x, ".ivx_max_end")
+  if(!isTRUE(m$has)) {
+    return(NULL)
+  }
+  m$end
+}
+
 # Runtime: O(log n + c), where c is candidate count (worst-case O(n)).
 #' Peek First Interval Containing a Point
 #'

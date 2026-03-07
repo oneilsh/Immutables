@@ -9,6 +9,16 @@ testthat::test_that("constructor sorts by key and preserves stable duplicate ord
   testthat::expect_identical(length(xs), 5L)
 })
 
+testthat::test_that("min_key/max_key expose key extrema", {
+  xs <- as_ordered_sequence(list("bbb", "a", "cc"), keys = c(3, 1, 2))
+  testthat::expect_identical(min_key(xs), 1)
+  testthat::expect_identical(max_key(xs), 3)
+
+  empty <- ordered_sequence()
+  testthat::expect_null(min_key(empty))
+  testthat::expect_null(max_key(empty))
+})
+
 testthat::test_that("insert appends at right edge of equal-key block (FIFO ties)", {
   xs <- as_ordered_sequence(list("bb", "aa", "c"), keys = c(2, 2, 1))
   xs2 <- insert(xs, "dd", key = 2)

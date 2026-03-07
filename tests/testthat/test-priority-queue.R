@@ -15,6 +15,8 @@ testthat::test_that("empty priority_queue scalar peek/pop are non-throwing misse
 
   testthat::expect_null(peek_min(x))
   testthat::expect_null(peek_max(x))
+  testthat::expect_null(min_priority(x))
+  testthat::expect_null(max_priority(x))
 
   pmin <- pop_min(x)
   pmax <- pop_max(x)
@@ -24,6 +26,12 @@ testthat::test_that("empty priority_queue scalar peek/pop are non-throwing misse
   testthat::expect_null(pmax$value)
   testthat::expect_null(pmax$priority)
   testthat::expect_identical(length(pmax$remaining), 0L)
+})
+
+testthat::test_that("min_priority/max_priority read cached extrema", {
+  q <- priority_queue("a", "b", "c", priorities = c(3, 1, 2))
+  testthat::expect_identical(min_priority(q), 1)
+  testthat::expect_identical(max_priority(q), 3)
 })
 
 testthat::test_that("min/max pop uses sequence order on ties", {
