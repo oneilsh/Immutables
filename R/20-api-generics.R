@@ -20,7 +20,8 @@
 #'
 #' For `priority_queue`, `ordered_sequence`, and `interval_index`,
 #' `FUN` receives structured fields (`value` plus metadata) and should return the
-#' new payload value only; ordering metadata is preserved.
+#' new payload value only; ordering metadata is preserved. The name argument is
+#' optional: callbacks that only take value/metadata also work.
 #'
 #' If supported by the method, `preserve_custom_monoids = TRUE` keeps added user
 #' monoids; `FALSE` rebuilds with required structural monoids only.

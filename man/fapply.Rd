@@ -33,7 +33,8 @@ Method signatures:
 
 For \code{priority_queue}, \code{ordered_sequence}, and \code{interval_index},
 \code{FUN} receives structured fields (\code{value} plus metadata) and should return the
-new payload value only; ordering metadata is preserved.
+new payload value only; ordering metadata is preserved. The name argument is
+optional: callbacks that only take value/metadata also work.
 
 If supported by the method, \code{preserve_custom_monoids = TRUE} keeps added user
 monoids; \code{FALSE} rebuilds with required structural monoids only.

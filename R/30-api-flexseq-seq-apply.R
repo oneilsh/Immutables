@@ -43,6 +43,22 @@
   .as_flexseq_build(out, monoids = out_monoids)
 }
 
+# Runtime: O(1) per call-site introspection.
+# Returns TRUE when `f` can accept at least `n` positional args.
+.ft_fun_accepts_n_positional <- function(f, n) {
+  if(is.primitive(f)) {
+    return(TRUE)
+  }
+  fm <- formals(f)
+  if(is.null(fm)) {
+    return(TRUE)
+  }
+  fml_names <- names(fm)
+  has_dots <- any(fml_names == "...")
+  n_fixed <- sum(fml_names != "...")
+  has_dots || (n_fixed >= n)
+}
+
 #' @method fapply flexseq
 #' @export
 #' @noRd

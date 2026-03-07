@@ -41,8 +41,14 @@
       nm <- .ft_get_name(e)
     }
     cur_name <- if(is.null(nm)) "" else nm
-
-    item2 <- f(e$value, e$start, e$end, cur_name, ...)
+    base_args <- list(e$value, e$start, e$end)
+    dot_args <- list(...)
+    call_args <- if(.ft_fun_accepts_n_positional(f, 4L)) {
+      c(base_args, list(cur_name), dot_args)
+    } else {
+      c(base_args, dot_args)
+    }
+    item2 <- do.call(f, call_args)
     entry2 <- .ivx_make_entry(item2, e$start, e$end)
     out_entries[[i]] <- .ft_set_name(entry2, nm)
   }

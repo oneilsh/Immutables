@@ -306,10 +306,14 @@ testthat::test_that("fapply for interval_index updates payload only and keeps in
   ix2 <- fapply(ix, function(value, start, end, name) {
     toupper(value)
   })
+  ix2_noname <- fapply(ix, function(value, start, end) {
+    paste0(value, "@", start, "-", end)
+  })
 
   testthat::expect_s3_class(ix2, "interval_index")
   testthat::expect_equal(unname(as.list(ix2)), list("B", "C", "A"))
   testthat::expect_equal(ix2[["kb"]], "B")
+  testthat::expect_equal(ix2_noname[["kb"]], "b@1-2")
 
   b2 <- lapply(.ivx_entries(ix2), function(e) list(start = e$start, end = e$end))
   testthat::expect_equal(unname(lapply(b2, function(e) e$start)), unname(lapply(b0, function(e) e$start)))

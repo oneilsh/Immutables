@@ -18,8 +18,14 @@
   for(i in seq_len(n)) {
     e <- entries[[i]]
     cur_name <- out_names[[i]]
-
-    item2 <- f(e$value, e$priority, cur_name, ...)
+    base_args <- list(e$value, e$priority)
+    dot_args <- list(...)
+    call_args <- if(.ft_fun_accepts_n_positional(f, 3L)) {
+      c(base_args, list(cur_name), dot_args)
+    } else {
+      c(base_args, dot_args)
+    }
+    item2 <- do.call(f, call_args)
 
     out[[i]] <- list(
       value = item2,
