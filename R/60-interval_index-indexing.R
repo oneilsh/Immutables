@@ -83,9 +83,9 @@ NULL
 }
 
 # Runtime: O(log n) by index, O(n_lookup) by name.
-# Scalar extract method returning payload item (not full entry record).
+# Scalar extract method returning payload value (not full entry record).
 # **Inputs:** `x` interval_index; scalar index/name `i`.
-# **Outputs:** payload item.
+# **Outputs:** payload value.
 # **Used by:** `$.interval_index()`, users.
 #' @rdname sub-.interval_index
 #' @method [[ interval_index
@@ -93,10 +93,10 @@ NULL
 `[[.interval_index` <- function(x, i, ...) {
   .ivx_assert_index(x)
   entry <- `[[.flexseq`(x, i, ...)
-  if(!is.list(entry) || !("item" %in% names(entry))) {
+  if(!is.list(entry) || !("value" %in% names(entry))) {
     stop("Malformed interval_index entry.")
   }
-  entry$item
+  entry$value
 }
 
 # Runtime: O(1).
@@ -125,7 +125,7 @@ NULL
 
 # Name-based scalar read forwarding to `[[.interval_index`.
 # **Inputs:** `x` interval_index; symbol/character `name`.
-# **Outputs:** payload item.
+# **Outputs:** payload value.
 # **Used by:** users.
 #' @rdname sub-.interval_index
 #' @method $ interval_index

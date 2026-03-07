@@ -4,15 +4,15 @@
 \alias{print.flexseq}
 \title{Print a flexseq}
 \usage{
-\method{print}{flexseq}(x, max_elements = 4L, show_internal_monoids = FALSE, ...)
+\method{print}{flexseq}(x, max_elements = 4L, show_custom_monoids = FALSE, ...)
 }
 \arguments{
 \item{x}{A \code{flexseq}.}
 
 \item{max_elements}{Maximum number of elements shown in preview (\code{head + tail}).}
 
-\item{show_internal_monoids}{Logical; include internal monoids in the
-"Custom monoids" line.}
+\item{show_custom_monoids}{Logical; show attached non-default monoids and
+their root cached measures.}
 
 \item{...}{Passed through to per-element \code{print()}.}
 }

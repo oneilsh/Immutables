@@ -29,7 +29,7 @@ xs
 ```
 
 `as_flexseq(xs)` returns a payload-only `flexseq` by default. Use
-`as_flexseq(xs, drop_meta = FALSE)` to keep entry records (`item`, `key`).
+`as_flexseq(xs, drop_meta = FALSE)` to keep entry records (`value`, `key`).
 
 ## Key-based lookup
 
@@ -60,12 +60,12 @@ count_between(xs, 2, 3, include_to = FALSE)
 
 ```{r}
 one <- pop_key(xs, 2)
-one$element
+one$value
 one$key
 one$remaining
 
 all_two <- pop_all_key(xs, 2)
-as.list(all_two$elements)
+as.list(all_two$values)
 all_two$remaining
 ```
 

@@ -12,7 +12,7 @@ pop_back(x)
 \value{
 A list with fields:
 \itemize{
-\item \code{element}: the last element, or \code{NULL} when \code{x} is empty.
+\item \code{value}: the last element, or \code{NULL} when \code{x} is empty.
 \item \code{remaining}: the sequence after removing the last element.
 }
 }
@@ -23,12 +23,12 @@ Returns the last element and the remaining sequence.
 This operation is persistent: \code{x} is not modified.
 
 On empty input, returns a non-throwing miss object with
-\code{element = NULL} and \code{remaining = x}.
+\code{value = NULL} and \code{remaining = x}.
 }
 \examples{
 s <- flexseq("a", "b", "c")
 out <- pop_back(s)
-out$element
+out$value
 out$remaining
 s  # unchanged
 

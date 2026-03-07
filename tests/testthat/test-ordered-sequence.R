@@ -18,8 +18,8 @@ testthat::test_that("insert appends at right edge of equal-key block (FIFO ties)
 
   out1 <- pop_key(xs2, 2)
   out2 <- pop_key(out1$remaining, 2)
-  testthat::expect_equal(out1$element, "bb")
-  testthat::expect_equal(out2$element, "aa")
+  testthat::expect_equal(out1$value, "bb")
+  testthat::expect_equal(out2$value, "aa")
 })
 
 testthat::test_that("insert works on R backend when insertion is at right boundary", {
@@ -94,11 +94,11 @@ testthat::test_that("lower_bound and upper_bound behave at boundaries", {
 
   testthat::expect_true(lb1$found)
   testthat::expect_identical(lb1$index, 2L)
-  testthat::expect_equal(lb1$element, "cc")
+  testthat::expect_equal(lb1$value, "cc")
 
   testthat::expect_true(ub1$found)
   testthat::expect_identical(ub1$index, 3L)
-  testthat::expect_equal(ub1$element, "bbb")
+  testthat::expect_equal(ub1$value, "bbb")
 
   testthat::expect_false(lb9$found)
   testthat::expect_null(lb9$index)
@@ -108,7 +108,7 @@ testthat::test_that("pop_key/pop_all_key removal by key span", {
   xs <- as_ordered_sequence(list("aa", "bb", "c", "dd", "e"), keys = c(2, 2, 1, 2, 1))
 
   one <- pop_key(xs, 2)
-  testthat::expect_equal(one$element, "aa")
+  testthat::expect_equal(one$value, "aa")
   testthat::expect_equal(as.list(one$remaining), list("c", "e", "bb", "dd"))
 
   all <- pop_all_key(xs, 2)
@@ -117,7 +117,7 @@ testthat::test_that("pop_key/pop_all_key removal by key span", {
   testthat::expect_equal(as.list(all$remaining), list("c", "e"))
 
   miss_one <- pop_key(xs, 99)
-  testthat::expect_null(miss_one$element)
+  testthat::expect_null(miss_one$value)
   testthat::expect_equal(as.list(miss_one$remaining), as.list(xs))
 
   miss_all <- pop_all_key(xs, 99)
@@ -148,14 +148,14 @@ testthat::test_that("peek_key/peek_all_key and pop_key are stable within duplica
   testthat::expect_s3_class(peek_all, "ordered_sequence")
   testthat::expect_equal(as.list(peek_all), list("a1", "a2", "a3"))
   out <- pop_key(xs, 1)
-  testthat::expect_equal(out$element, "a1")
+  testthat::expect_equal(out$value, "a1")
   testthat::expect_equal(out$key, 1)
   testthat::expect_equal(as.list(out$remaining), list("a2", "a3", "b1"))
 
   testthat::expect_null(peek_key(xs, 9))
   testthat::expect_identical(length(peek_all_key(xs, 9)), 0L)
   miss <- pop_key(xs, 9)
-  testthat::expect_null(miss$element)
+  testthat::expect_null(miss$value)
   testthat::expect_null(miss$key)
   testthat::expect_equal(as.list(miss$remaining), as.list(xs))
 })
@@ -184,7 +184,7 @@ testthat::test_that("split helpers preserve ordered_sequence subclass", {
   sa <- split_around_by_predicate(xs, function(v) v >= 3L, ".size")
   testthat::expect_s3_class(sa$left, "ordered_sequence")
   testthat::expect_s3_class(sa$right, "ordered_sequence")
-  testthat::expect_equal(sa$elem$item, "cc")
+  testthat::expect_equal(sa$value$value, "cc")
   testthat::expect_equal(as.list(sa$left), list("a", "bb"))
   testthat::expect_equal(as.list(sa$right), list("ddd", "eeee"))
 })
@@ -265,16 +265,16 @@ testthat::test_that("pop helpers preserve ordered class", {
   pb <- pop_back(xs)
   pm <- pop_at(xs, 2)
 
-  testthat::expect_identical(pf$element, "x1")
+  testthat::expect_identical(pf$value, "x1")
   testthat::expect_s3_class(pf$remaining, "ordered_sequence")
   testthat::expect_equal(as.list(pf$remaining), list("x2", "x3"))
 
-  testthat::expect_identical(pb$element, "x3")
+  testthat::expect_identical(pb$value, "x3")
   testthat::expect_s3_class(pb$remaining, "ordered_sequence")
   testthat::expect_equal(as.list(pb$remaining), list("x1", "x2"))
 
   testthat::expect_identical(peek_at(xs, 2), "x2")
-  testthat::expect_identical(pm$element, "x2")
+  testthat::expect_identical(pm$value, "x2")
   testthat::expect_s3_class(pm$remaining, "ordered_sequence")
   testthat::expect_equal(as.list(pm$remaining), list("x1", "x3"))
 })
@@ -282,15 +282,15 @@ testthat::test_that("pop helpers preserve ordered class", {
 testthat::test_that("fapply dispatches for ordered_sequence and no reset_ties arg", {
   xs <- as_ordered_sequence(setNames(list("x1", "x2", "x3"), c("a", "b", "c")), keys = c(1, 1, 2))
 
-  xs_item <- fapply(xs, function(item, key, name) {
-    toupper(item)
+  xs_item <- fapply(xs, function(value, key, name) {
+    toupper(value)
   })
   testthat::expect_s3_class(xs_item, "ordered_sequence")
   testthat::expect_equal(unname(as.list(xs_item)), list("X1", "X2", "X3"))
   testthat::expect_identical(names(as.list(xs_item)), c("a", "b", "c"))
 
-  xs_tagged <- fapply(xs, function(item, key, name) {
-    paste(item, key, name, sep = "|")
+  xs_tagged <- fapply(xs, function(value, key, name) {
+    paste(value, key, name, sep = "|")
   })
   testthat::expect_equal(unname(as.list(xs_tagged)), list("x1|1|a", "x2|1|b", "x3|2|c"))
   testthat::expect_identical(names(as.list(xs_tagged)), c("a", "b", "c"))
@@ -299,13 +299,13 @@ testthat::test_that("fapply dispatches for ordered_sequence and no reset_ties ar
   testthat::expect_equal(peek_key(xs_tagged, 1), "x1|1|a")
 
   testthat::expect_error(fapply(xs, 1), "`FUN` must be a function")
-  testthat::expect_error(fapply(xs, function(item, key, name) item, reset_ties = TRUE), "unused")
+  testthat::expect_error(fapply(xs, function(value, key, name) value, reset_ties = TRUE), "unused")
 })
 
 testthat::test_that("fapply can drop custom monoids for ordered_sequence", {
-  sum_item <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$item))
+  sum_item <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$value))
   xs <- add_monoids(as_ordered_sequence(list(10, 20), keys = c(1, 2)), list(sum_item = sum_item))
-  xs2 <- fapply(xs, function(item, key, name) item + 1, preserve_custom_monoids = FALSE)
+  xs2 <- fapply(xs, function(value, key, name) value + 1, preserve_custom_monoids = FALSE)
 
   ms <- attr(xs2, "monoids", exact = TRUE)
   testthat::expect_true(!is.null(ms[[".size"]]))
@@ -346,7 +346,7 @@ testthat::test_that("ordered_sequence casts down to flexseq explicitly", {
   testthat::expect_false(".oms_max_key" %in% ms)
 
   fx_full <- as_flexseq(xs, drop_meta = FALSE)
-  testthat::expect_equal(fx_full[["kx"]]$item, "x")
+  testthat::expect_equal(fx_full[["kx"]]$value, "x")
   testthat::expect_equal(fx_full[["kx"]]$key, 2)
   ms_full <- names(attr(fx_full, "monoids", exact = TRUE))
   testthat::expect_true(all(c(".size", ".named_count", "sum_key") %in% ms_full))
@@ -365,14 +365,14 @@ testthat::test_that("ordered_sequence supports Date keys with stable tie handlin
   ub <- upper_bound(xs, as.Date("2024-01-01"))
   testthat::expect_true(lb$found)
   testthat::expect_identical(lb$index, 1L)
-  testthat::expect_equal(lb$element, "a1")
+  testthat::expect_equal(lb$value, "a1")
   testthat::expect_s3_class(lb$key, "Date")
   testthat::expect_true(ub$found)
   testthat::expect_identical(ub$index, 3L)
-  testthat::expect_equal(ub$element, "b")
+  testthat::expect_equal(ub$value, "b")
 
   out <- pop_key(xs, as.Date("2024-01-01"))
-  testthat::expect_equal(out$element, "a1")
+  testthat::expect_equal(out$value, "a1")
   testthat::expect_s3_class(out$key, "Date")
   testthat::expect_equal(as.list(out$remaining), list("a2", "b", "c"))
 
@@ -392,8 +392,8 @@ testthat::test_that("ordered_sequence supports POSIXct keys with stable tie hand
 
   out1 <- pop_key(xs, as.POSIXct("2024-01-01 10:00:00", tz = "UTC"))
   out2 <- pop_key(out1$remaining, as.POSIXct("2024-01-01 10:00:00", tz = "UTC"))
-  testthat::expect_equal(out1$element, "early1")
-  testthat::expect_equal(out2$element, "early2")
+  testthat::expect_equal(out1$value, "early1")
+  testthat::expect_equal(out2$value, "early2")
   testthat::expect_s3_class(out1$key, "POSIXct")
 })
 

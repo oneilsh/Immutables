@@ -14,7 +14,7 @@ pop_key(x, key)
 \value{
 A list with fields:
 \itemize{
-\item \code{element}: removed element, or \code{NULL} on miss.
+\item \code{value}: removed element, or \code{NULL} on miss.
 \item \code{key}: removed key, or \code{NULL} on miss.
 \item \code{remaining}: ordered sequence after removal.
 }
@@ -28,7 +28,7 @@ For duplicate keys, the first element in stable sequence order is removed.
 \examples{
 x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
 out <- pop_key(x, 2)
-out$element
+out$value
 out$remaining
 pop_key(x, 10)
 }

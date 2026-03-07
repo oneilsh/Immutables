@@ -80,7 +80,7 @@ add_monoids.ordered_sequence <- function(t, monoids, overwrite = FALSE) {
 
 # Runtime: O(log n) near insertion/split point depth.
 #' @noRd
-# Insert one (item,key) while preserving sorted order and FIFO tie stability.
+# Insert one (value,key) while preserving sorted order and FIFO tie stability.
 # Used by: insert.ordered_sequence().
 .oms_validate_insert_name_state <- function(x, entry, context = "insert()") {
   measures <- attr(x, "measures", exact = TRUE)
@@ -184,7 +184,7 @@ insert.ordered_sequence <- function(x, element, key, ...) {
 #' @return A list with fields:
 #' - `found`: logical flag.
 #' - `index`: one-based position of the first match, or `NULL`.
-#' - `element`: matched element, or `NULL`.
+#' - `value`: matched element, or `NULL`.
 #' - `key`: matched key, or `NULL`.
 #' @details
 #' `lower_bound()` finds the first element with key `>= key`. This includes an
@@ -204,11 +204,11 @@ lower_bound <- function(x, key) {
   n <- length(x)
 
   if(idx > n) {
-    return(list(found = FALSE, index = NULL, element = NULL, key = NULL))
+    return(list(found = FALSE, index = NULL, value = NULL, key = NULL))
   }
 
   entry <- .ft_get_elem_at(x, as.integer(idx))
-  list(found = TRUE, index = idx, element = entry$item, key = entry$key)
+  list(found = TRUE, index = idx, value = entry$value, key = entry$key)
 }
 
 # Runtime: O(log n).
@@ -219,7 +219,7 @@ lower_bound <- function(x, key) {
 #' @return A list with fields:
 #' - `found`: logical flag.
 #' - `index`: one-based position of the first match, or `NULL`.
-#' - `element`: matched element, or `NULL`.
+#' - `value`: matched element, or `NULL`.
 #' - `key`: matched key, or `NULL`.
 #' @details
 #' `upper_bound()` finds the first element with key `> key`. This skips exact
@@ -239,11 +239,11 @@ upper_bound <- function(x, key) {
   n <- length(x)
 
   if(idx > n) {
-    return(list(found = FALSE, index = NULL, element = NULL, key = NULL))
+    return(list(found = FALSE, index = NULL, value = NULL, key = NULL))
   }
 
   entry <- .ft_get_elem_at(x, as.integer(idx))
-  list(found = TRUE, index = idx, element = entry$item, key = entry$key)
+  list(found = TRUE, index = idx, value = entry$value, key = entry$key)
 }
 
 # Runtime: O(log n).
@@ -268,7 +268,7 @@ peek_key <- function(x, key) {
     return(NULL)
   }
   s <- split_around_by_predicate(x, function(v) v >= span$start, ".size")
-  s$elem$item
+  s$value$value
 }
 
 # Runtime: O(log n) near split points.
@@ -304,7 +304,7 @@ peek_all_key <- function(x, key) {
 #' @param x An `ordered_sequence`.
 #' @param key Query key.
 #' @return A list with fields:
-#' - `element`: removed element, or `NULL` on miss.
+#' - `value`: removed element, or `NULL` on miss.
 #' - `key`: removed key, or `NULL` on miss.
 #' - `remaining`: ordered sequence after removal.
 #' @details
@@ -312,7 +312,7 @@ peek_all_key <- function(x, key) {
 #' @examples
 #' x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
 #' out <- pop_key(x, 2)
-#' out$element
+#' out$value
 #' out$remaining
 #' pop_key(x, 10)
 #' @export
@@ -321,13 +321,13 @@ pop_key <- function(x, key) {
   span <- .oms_key_span(x, key)
 
   if(!isTRUE(span$found)) {
-    return(list(element = NULL, key = NULL, remaining = x))
+    return(list(value = NULL, key = NULL, remaining = x))
   }
 
   s <- split_around_by_predicate(x, function(v) v >= span$start, ".size")
   out <- concat_trees(s$left, s$right)
   seq_out <- .ord_wrap_like(x, out)
-  list(element = s$elem$item, key = s$elem$key, remaining = seq_out)
+  list(value = s$value$value, key = s$value$key, remaining = seq_out)
 }
 
 # Runtime: O(log n) near split point depth.

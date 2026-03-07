@@ -67,7 +67,7 @@ node_to_digit(node, monoids) %as% build_digit(as.list(node), monoids)
 
 # viewL: return leftmost element and the remaining tree
 # input: t non-empty FingerTree, measure monoid r.
-# output: list(elem = leftmost element of t, rest = t without that element).
+# output: list(value = leftmost element of t, rest = t without that element).
 # Runtime: O(log n) worst-case.
 if(FALSE) viewL <- function(t, monoids) NULL
 viewL(t, monoids) %::% FingerTree : list : list
@@ -76,7 +76,7 @@ viewL(t, monoids) %as% {
     stop("viewL on Empty")
   }
   if(t %isa% Single) {
-    return(list(elem = .subset2(t, 1), rest = .as_flexseq(with_tree_monoids(measured_empty(monoids), monoids))))
+    return(list(value = .subset2(t, 1), rest = .as_flexseq(with_tree_monoids(measured_empty(monoids), monoids))))
   }
   pr <- .subset2(t,"prefix")
   if(length(pr) > 1) {
@@ -85,27 +85,27 @@ viewL(t, monoids) %as% {
     head <- pr[[1]]
     tail <- pr[2:length(pr)]
     new_pr <- build_digit(tail, monoids)
-    return(list(elem = head, rest = .as_flexseq(build_deep(new_pr, .subset2(t,"middle"), .subset2(t,"suffix"), monoids))))
+    return(list(value = head, rest = .as_flexseq(build_deep(new_pr, .subset2(t,"middle"), .subset2(t,"suffix"), monoids))))
   }
   head <- pr[[1]]
   m <- .subset2(t,"middle")
   if(m %isa% Empty) {
     # Prefix had exactly one element and middle is empty: remaining content is
     # entirely in suffix, so collapse to a minimal tree from that digit.
-    return(list(elem = head, rest = .as_flexseq(digit_to_tree(.subset2(t,"suffix"), monoids))))
+    return(list(value = head, rest = .as_flexseq(digit_to_tree(.subset2(t,"suffix"), monoids))))
   }
   # Prefix had one element but middle is non-empty: pull the leftmost node from
   # middle, expand it to a digit, and use that as the new prefix.
   res <- viewL(m, monoids)
-  node <- res$elem
+  node <- res$value
   m_rest <- res$rest
   new_pr <- node_to_digit(node, monoids)
-  list(elem = head, rest = .as_flexseq(build_deep(new_pr, m_rest, .subset2(t,"suffix"), monoids)))
+  list(value = head, rest = .as_flexseq(build_deep(new_pr, m_rest, .subset2(t,"suffix"), monoids)))
 }
 
 # viewR: return rightmost element and the remaining tree
 # input: t non-empty FingerTree, measure monoid r.
-# output: list(elem = rightmost element of t, rest = t without that element).
+# output: list(value = rightmost element of t, rest = t without that element).
 # Runtime: O(log n) worst-case.
 if(FALSE) viewR <- function(t, monoids) NULL
 viewR(t, monoids) %::% FingerTree : list : list
@@ -114,25 +114,25 @@ viewR(t, monoids) %as% {
     stop("viewR on Empty")
   }
   if(t %isa% Single) {
-    return(list(elem = .subset2(t, 1), rest = .as_flexseq(with_tree_monoids(measured_empty(monoids), monoids))))
+    return(list(value = .subset2(t, 1), rest = .as_flexseq(with_tree_monoids(measured_empty(monoids), monoids))))
   }
   sf <- .subset2(t,"suffix")
   if(length(sf) > 1) {
     head <- sf[[length(sf)]]
     tail <- sf[1:(length(sf) - 1)]
     new_sf <- build_digit(tail, monoids)
-    return(list(elem = head, rest = .as_flexseq(build_deep(.subset2(t,"prefix"), .subset2(t,"middle"), new_sf, monoids))))
+    return(list(value = head, rest = .as_flexseq(build_deep(.subset2(t,"prefix"), .subset2(t,"middle"), new_sf, monoids))))
   }
   head <- sf[[1]]
   m <- .subset2(t,"middle")
   if(m %isa% Empty) {
-    return(list(elem = head, rest = .as_flexseq(digit_to_tree(.subset2(t,"prefix"), monoids))))
+    return(list(value = head, rest = .as_flexseq(digit_to_tree(.subset2(t,"prefix"), monoids))))
   }
   res <- viewR(m, monoids)
-  node <- res$elem
+  node <- res$value
   m_rest <- res$rest
   new_sf <- node_to_digit(node, monoids)
-  list(elem = head, rest = .as_flexseq(build_deep(.subset2(t,"prefix"), m_rest, new_sf, monoids)))
+  list(value = head, rest = .as_flexseq(build_deep(.subset2(t,"prefix"), m_rest, new_sf, monoids)))
 }
 
 # deepL: rebuild Deep, possibly pulling from middle if prefix is empty
@@ -153,7 +153,7 @@ deepL(pr, m, sf, monoids) %as% {
   }
   # Restore a non-empty prefix by borrowing the leftmost node from middle.
   res <- viewL(m, monoids)
-  node <- res$elem
+  node <- res$value
   m_rest <- res$rest
   new_pr <- node_to_digit(node, monoids)
   .as_flexseq(build_deep(new_pr, m_rest, sf, monoids))
@@ -174,7 +174,7 @@ deepR(pr, m, sf, monoids) %as% {
     return(.as_flexseq(digit_to_tree(pr, monoids)))
   }
   res <- viewR(m, monoids)
-  node <- res$elem
+  node <- res$value
   m_rest <- res$rest
   new_sf <- node_to_digit(node, monoids)
   .as_flexseq(build_deep(pr, m_rest, new_sf, monoids))

@@ -52,10 +52,10 @@ NULL
     stop("`[[.priority_queue` supports scalar character names only. Cast first with `as_flexseq()`.")
   }
   entry <- `[[.flexseq`(x, i, ...)
-  if(!is.list(entry) || !("item" %in% names(entry))) {
+  if(!is.list(entry) || !("value" %in% names(entry))) {
     stop("Malformed priority_queue entry.")
   }
-  entry$item
+  entry$value
 }
 
 # Runtime: O(1).

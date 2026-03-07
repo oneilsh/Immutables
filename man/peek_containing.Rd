@@ -16,7 +16,7 @@ peek_containing(x, start, end, bounds = NULL)
 \item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
 }
 \value{
-The payload item from the first match, or \code{NULL} on no match.
+The payload value from the first match, or \code{NULL} on no match.
 }
 \description{
 Peek First Interval Containing a Query Interval

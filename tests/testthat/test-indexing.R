@@ -121,7 +121,7 @@ testthat::test_that("single-element read indexing follows locate_by_predicate(.s
   for(i in 1:8) {
     hit <- locate_by_predicate(t, function(v) v >= i, ".size")
     testthat::expect_true(hit$found)
-    testthat::expect_identical(t[[i]], hit$elem)
+    testthat::expect_identical(t[[i]], hit$value)
   }
 })
 

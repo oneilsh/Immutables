@@ -81,10 +81,10 @@
 #' @export
 `[[.ordered_sequence` <- function(x, i, ...) {
   entry <- `[[.flexseq`(x, i, ...)
-  if(!is.list(entry) || !("item" %in% names(entry))) {
+  if(!is.list(entry) || !("value" %in% names(entry))) {
     stop("Malformed ordered_sequence entry.")
   }
-  entry$item
+  entry$value
 }
 
 # Runtime: O(1).

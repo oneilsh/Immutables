@@ -12,19 +12,19 @@
 \item{...}{Unused.}
 
 \item{drop_meta}{Logical scalar. When \code{FALSE} (default), returns full queue
-entry records (\code{item} + \code{priority}). When \code{TRUE}, returns payload items
+entry records (\code{value} + \code{priority}). When \code{TRUE}, returns payload values
 only.}
 }
 \value{
 A plain list of queue entry records (\code{drop_meta = FALSE}) or payload
-items (\code{drop_meta = TRUE}).
+values (\code{drop_meta = TRUE}).
 }
 \description{
-Returns queue entries as a plain list of records with fields \code{item} and
+Returns queue entries as a plain list of records with fields \code{value} and
 \code{priority}, in queue sequence order.
 }
 \details{
-Each returned element is a record with fields \code{item} and \code{priority}.
+Each returned entry is a record with fields \code{value} and \code{priority}.
 Entry names (when present) are preserved on the returned list.
 }
 \examples{

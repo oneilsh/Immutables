@@ -9,8 +9,8 @@ testthat::test_that("fapply dispatches for flexseq", {
 
 testthat::test_that("fapply dispatches for priority_queue", {
   q <- priority_queue("a", "bb", "ccc", priorities = c(1, 3, 2))
-  q2 <- fapply(q, function(item, priority, name) {
-    toupper(item)
+  q2 <- fapply(q, function(value, priority, name) {
+    toupper(value)
   })
 
   testthat::expect_s3_class(q2, "priority_queue")
@@ -22,15 +22,15 @@ testthat::test_that("fapply dispatches for priority_queue", {
 testthat::test_that("fapply dispatches for ordered_sequence", {
   xs <- as_ordered_sequence(setNames(list("x1", "x2", "x3"), c("a", "b", "c")), keys = c(1, 1, 2))
 
-  xs_item <- fapply(xs, function(item, key, name) {
-    toupper(item)
+  xs_item <- fapply(xs, function(value, key, name) {
+    toupper(value)
   })
   testthat::expect_s3_class(xs_item, "ordered_sequence")
   testthat::expect_equal(unname(as.list(xs_item)), list("X1", "X2", "X3"))
   testthat::expect_identical(names(as.list(xs_item)), c("a", "b", "c"))
 
-  xs_tagged <- fapply(xs, function(item, key, name) {
-    paste(item, key, name, sep = "|")
+  xs_tagged <- fapply(xs, function(value, key, name) {
+    paste(value, key, name, sep = "|")
   })
   testthat::expect_equal(unname(as.list(xs_tagged)), list("x1|1|a", "x2|1|b", "x3|2|c"))
   testthat::expect_identical(names(as.list(xs_tagged)), c("a", "b", "c"))

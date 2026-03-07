@@ -80,7 +80,7 @@ locate_digit_impl <- function(p, i, digit, ms, mr, monoid_name, i_size = 0L) {
 
     if(p(acc_after)) {
       if(is_structural_node(el)) {
-        # If the hit is a structural child, recurse into it so `elem` is a leaf
+        # If the hit is a structural child, recurse into it so `value` is a leaf
         # value and metadata stays consistent with leaf-level locate semantics.
         return(locate_tree_impl_fast(p, acc, el, ms, mr, monoid_name, size_before))
       }
@@ -89,7 +89,7 @@ locate_digit_impl <- function(p, i, digit, ms, mr, monoid_name, i_size = 0L) {
       right_measure <- locate_sequence_measure(right, ms, monoid_name, mr)
       return(list(
         found = TRUE,
-        elem = el,
+        value = el,
         left_measure = acc,
         hit_measure = acc_after,
         right_measure = right_measure,
@@ -101,7 +101,7 @@ locate_digit_impl <- function(p, i, digit, ms, mr, monoid_name, i_size = 0L) {
     size_before <- size_before + n_el
   }
 
-  list(found = FALSE, elem = NULL, left_measure = acc, hit_measure = NULL, right_measure = NULL, index = NULL)
+  list(found = FALSE, value = NULL, left_measure = acc, hit_measure = NULL, right_measure = NULL, index = NULL)
 }
 
 # Runtime: O(log n) near locate point depth.
@@ -123,7 +123,7 @@ locate_tree_impl_fast <- function(p, i, t, ms, mr, monoid_name, i_size = 0L) {
   }
 
   if(t %isa% Empty) {
-    return(list(found = FALSE, elem = NULL, left_measure = i, hit_measure = NULL, right_measure = NULL, index = NULL))
+    return(list(found = FALSE, value = NULL, left_measure = i, hit_measure = NULL, right_measure = NULL, index = NULL))
   }
 
   if(t %isa% Single) {

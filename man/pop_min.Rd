@@ -12,7 +12,7 @@ pop_min(x)
 \value{
 A list with fields:
 \itemize{
-\item \code{element}: removed element, or \code{NULL} when \code{x} is empty.
+\item \code{value}: removed element, or \code{NULL} when \code{x} is empty.
 \item \code{priority}: removed priority, or \code{NULL} when \code{x} is empty.
 \item \code{remaining}: queue after removal.
 }
@@ -27,7 +27,7 @@ element in queue order is removed.
 \examples{
 x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
 out <- pop_min(x)
-out$element
+out$value
 out$priority
 out$remaining
 pop_min(priority_queue())

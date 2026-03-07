@@ -27,7 +27,7 @@ locate_by_predicate(
 If \code{include_metadata = FALSE}, a list with:
 \itemize{
 \item \code{found}: logical flag.
-\item \code{elem}: matched element when found, otherwise \code{NULL}.
+\item \code{value}: matched element when found, otherwise \code{NULL}.
 }
 
 If \code{include_metadata = TRUE}, adds \code{metadata} with:
@@ -48,12 +48,12 @@ This is the read-only analogue of \code{\link[=split_around_by_predicate]{split_
 As with split helpers, a common setup is a custom monoid created with
 \code{\link[=measure_monoid]{measure_monoid()}} and attached via \code{\link[=add_monoids]{add_monoids()}}.
 
-\code{elem} is the matched leaf entry for the input structure:
+\code{value} is the matched leaf entry for the input structure:
 \itemize{
 \item \code{flexseq}: stored user element.
-\item \code{ordered_sequence}: \code{list(item, key)}.
-\item \code{priority_queue}: \code{list(item, priority)}.
-\item \code{interval_index}: \code{list(item, start, end)}.
+\item \code{ordered_sequence}: \code{list(value, key)}.
+\item \code{priority_queue}: \code{list(value, priority)}.
+\item \code{interval_index}: \code{list(value, start, end)}.
 }
 }
 \examples{

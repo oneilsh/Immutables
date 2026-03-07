@@ -19,7 +19,7 @@
 #' - `fapply.interval_index(X, FUN, ..., preserve_custom_monoids = TRUE)`
 #'
 #' For `priority_queue`, `ordered_sequence`, and `interval_index`,
-#' `FUN` receives structured fields (`item` plus metadata) and should return the
+#' `FUN` receives structured fields (`value` plus metadata) and should return the
 #' new payload value only; ordering metadata is preserved.
 #'
 #' If supported by the method, `preserve_custom_monoids = TRUE` keeps added user
@@ -29,13 +29,13 @@
 #' fapply(x, toupper)
 #'
 #' q <- priority_queue(one = "a", two = "b", priorities = c(2, 1))
-#' fapply(q, function(item, priority, name) paste0(item, priority))
+#' fapply(q, function(value, priority, name) paste0(value, priority))
 #'
 #' o <- ordered_sequence(one = "a", two = "b", keys = c(2, 1))
-#' fapply(o, function(item, key, name) paste0(item, "_", key))
+#' fapply(o, function(value, key, name) paste0(value, "_", key))
 #'
 #' ix <- interval_index(one = "a", two = "b", start = c(1, 3), end = c(2, 4))
-#' fapply(ix, function(item, start, end, name) paste0(item, "[", start, ",", end, "]"))
+#' fapply(ix, function(value, start, end, name) paste0(value, "[", start, ",", end, "]"))
 #' @seealso [flexseq()], [priority_queue()], [ordered_sequence()], [interval_index()]
 #' @export
 fapply <- function(X, FUN, ...) {
@@ -61,9 +61,9 @@ fapply <- function(X, FUN, ...) {
 #'
 #' Measure-function signatures:
 #' - `flexseq`: `measure(entry)` where `entry` is the stored element.
-#' - `ordered_sequence`: `measure(entry)` where `entry` is `list(item, key)`.
-#' - `priority_queue`: `measure(entry)` where `entry` is `list(item, priority)`.
-#' - `interval_index`: `measure(entry)` where `entry` is `list(item, start, end)`.
+#' - `ordered_sequence`: `measure(entry)` where `entry` is `list(value, key)`.
+#' - `priority_queue`: `measure(entry)` where `entry` is `list(value, priority)`.
+#' - `interval_index`: `measure(entry)` where `entry` is `list(value, start, end)`.
 #'
 #' This operation is persistent: `t` is not modified.
 #'
@@ -117,16 +117,16 @@ add_monoids.default <- function(t, monoids, overwrite = FALSE) {
 #' @param drop_meta Logical scalar controlling advanced-structure cast style.
 #'   For `priority_queue`, `ordered_sequence`, and `interval_index`:
 #'   - `TRUE` (default): return payload-only elements and drop custom monoids.
-#'   - `FALSE`: return full stored entry records (for example `item` + metadata)
+#'   - `FALSE`: return full stored entry records (for example `value` + metadata)
 #'     and preserve cast-down custom monoids.
 #' @return A plain `flexseq`.
 #' @details
 #' This is an S3 generic. Notable method behavior:
 #' - `as_flexseq.flexseq(x, drop_meta=...)` returns `x` unchanged.
 #' - `as_flexseq.priority_queue(x, drop_meta=TRUE)` returns payload items;
-#'   `drop_meta=FALSE` returns `list(item, priority)` entries.
+#'   `drop_meta=FALSE` returns `list(value, priority)` entries.
 #' - `as_flexseq.ordered_sequence(x, drop_meta=TRUE)` returns payload items;
-#'   `drop_meta=FALSE` returns `list(item, key)` entries.
+#'   `drop_meta=FALSE` returns `list(value, key)` entries.
 #' - `as_flexseq.interval_index(x, drop_meta=TRUE)` returns payload items;
 #'   `drop_meta=FALSE` returns interval entry records.
 #'
@@ -163,7 +163,7 @@ as_flexseq <- function(x, drop_meta = TRUE) {
 #' @param include_metadata Logical; include scan metadata.
 #' @return If `include_metadata = FALSE`, a list with:
 #' - `found`: logical flag.
-#' - `elem`: matched element when found, otherwise `NULL`.
+#' - `value`: matched element when found, otherwise `NULL`.
 #'
 #' If `include_metadata = TRUE`, adds `metadata` with:
 #' - `left_measure`
@@ -176,11 +176,11 @@ as_flexseq <- function(x, drop_meta = TRUE) {
 #' As with split helpers, a common setup is a custom monoid created with
 #' [measure_monoid()] and attached via [add_monoids()].
 #'
-#' `elem` is the matched leaf entry for the input structure:
+#' `value` is the matched leaf entry for the input structure:
 #' - `flexseq`: stored user element.
-#' - `ordered_sequence`: `list(item, key)`.
-#' - `priority_queue`: `list(item, priority)`.
-#' - `interval_index`: `list(item, start, end)`.
+#' - `ordered_sequence`: `list(value, key)`.
+#' - `priority_queue`: `list(value, priority)`.
+#' - `interval_index`: `list(value, start, end)`.
 #' @examples
 #' x <- flexseq("a", "b", "c", "d")
 #' size_monoid <- measure_monoid(`+`, 0L, function(e) 1L)
@@ -204,18 +204,18 @@ locate_by_predicate <- function(t, predicate, monoid_name, accumulator = NULL, i
 #' @param accumulator Optional starting accumulator value.
 #' @return A list with fields:
 #' - `left`: elements before the split point.
-#' - `elem`: the matched element at the split point.
+#' - `value`: the matched element at the split point.
 #' - `right`: elements after the split point.
 #' @details
 #' This function generally requires the sequence be annotated with
 #' a `measure_monoid()`; see the examples and `measure_monoid()`
 #' for more information.
 #'
-#' `elem` is the matched leaf entry for the input structure:
+#' `value` is the matched leaf entry for the input structure:
 #' - `flexseq`: stored user element.
-#' - `ordered_sequence`: `list(item, key)`.
-#' - `priority_queue`: `list(item, priority)`.
-#' - `interval_index`: `list(item, start, end)`.
+#' - `ordered_sequence`: `list(value, key)`.
+#' - `priority_queue`: `list(value, priority)`.
+#' - `interval_index`: `list(value, start, end)`.
 #'
 #' `left` and `right` preserve subclass when the input is a subclass of
 #' `flexseq`.
@@ -282,7 +282,7 @@ split_by_predicate <- function(x, predicate, monoid_name) {
 #' @param x A `flexseq`.
 #' @param at A single positive integer position or a single character name.
 #' @param pull_index Controls output shape:
-#' - `FALSE` (default): returns `list(left, elem, right)`.
+#' - `FALSE` (default): returns `list(left, value, right)`.
 #' - `TRUE`: returns `list(left, right)`.
 #' @return A split result with shape controlled by `pull_index`.
 #' @details

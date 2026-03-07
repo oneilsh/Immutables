@@ -147,14 +147,14 @@ insert.priority_queue <- function(x, element, priority, name = NULL, ...) {
   } else {
     locate_tree_impl_fast(pred, mr$i, x, ms, mr, monoid_name, 0L)
   }
-  loc$elem[["item"]]
+  loc$value[["value"]]
 }
 
 # Runtime: O(log n) near split point depth.
 .pq_extract <- function(x, monoid_name) {
   .pq_assert_queue(x)
   if(length(x) == 0L) {
-    return(list(element = NULL, priority = NULL, remaining = x))
+    return(list(value = NULL, priority = NULL, remaining = x))
   }
 
   target <- node_measure(x, monoid_name)
@@ -172,8 +172,8 @@ insert.priority_queue <- function(x, element, priority, name = NULL, ...) {
   rest <- .pq_wrap_like(x, rest)
 
   list(
-    element = s$elem[["item"]],
-    priority = s$elem[["priority"]],
+    value = s$value[["value"]],
+    priority = s$value[["priority"]],
     remaining = rest
   )
 }
@@ -281,7 +281,7 @@ peek_all_max <- function(x) {
 #'
 #' @param x A `priority_queue`.
 #' @return A list with fields:
-#' - `element`: removed element, or `NULL` when `x` is empty.
+#' - `value`: removed element, or `NULL` when `x` is empty.
 #' - `priority`: removed priority, or `NULL` when `x` is empty.
 #' - `remaining`: queue after removal.
 #' @details
@@ -290,7 +290,7 @@ peek_all_max <- function(x) {
 #' @examples
 #' x <- priority_queue("a", "b", "c", priorities = c(2, 1, 1))
 #' out <- pop_min(x)
-#' out$element
+#' out$value
 #' out$priority
 #' out$remaining
 #' pop_min(priority_queue())
@@ -306,7 +306,7 @@ pop_min <- function(x) {
 #'
 #' @param x A `priority_queue`.
 #' @return A list with fields:
-#' - `element`: removed element, or `NULL` when `x` is empty.
+#' - `value`: removed element, or `NULL` when `x` is empty.
 #' - `priority`: removed priority, or `NULL` when `x` is empty.
 #' - `remaining`: queue after removal.
 #' @details
@@ -315,7 +315,7 @@ pop_min <- function(x) {
 #' @examples
 #' x <- priority_queue("a", "b", "c", priorities = c(2, 3, 3))
 #' out <- pop_max(x)
-#' out$element
+#' out$value
 #' out$priority
 #' out$remaining
 #' pop_max(priority_queue())

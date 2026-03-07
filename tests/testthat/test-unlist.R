@@ -35,7 +35,7 @@ testthat::test_that("as.list.priority_queue supports drop_meta", {
   bare <- as.list(q, drop_meta = TRUE)
 
   testthat::expect_identical(names(full), c("kx", "ky"))
-  testthat::expect_identical(full[[1]]$item, "x")
+  testthat::expect_identical(full[[1]]$value, "x")
   testthat::expect_identical(full[[1]]$priority, 2)
   testthat::expect_identical(bare, list(kx = "x", ky = "y"))
   testthat::expect_error(as.list(q, drop_meta = NA), "TRUE or FALSE")

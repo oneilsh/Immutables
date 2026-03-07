@@ -13,7 +13,7 @@ split_at(x, at, pull_index = FALSE)
 
 \item{pull_index}{Controls output shape:
 \itemize{
-\item \code{FALSE} (default): returns \code{list(left, elem, right)}.
+\item \code{FALSE} (default): returns \code{list(left, value, right)}.
 \item \code{TRUE}: returns \code{list(left, right)}.
 }}
 }

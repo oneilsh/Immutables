@@ -219,14 +219,14 @@ push_front <- function(x, value) {
   # Ordered/interval subclasses store internal entry records; public end-ops
   # return payload items to match user-facing sequence semantics.
   if(inherits(x, "interval_index")) {
-    if(is.list(element) && ("item" %in% names(element))) {
-      return(element$item)
+    if(is.list(element) && ("value" %in% names(element))) {
+      return(element$value)
     }
     return(element)
   }
   if(inherits(x, "ordered_sequence")) {
-    if(is.list(element) && ("item" %in% names(element))) {
-      return(element$item)
+    if(is.list(element) && ("value" %in% names(element))) {
+      return(element$value)
     }
     return(element)
   }
@@ -430,17 +430,17 @@ peek_at <- function(x, index) {
 #'
 #' @param x A `flexseq`.
 #' @return A list with fields:
-#' - `element`: the first element, or `NULL` when `x` is empty.
+#' - `value`: the first element, or `NULL` when `x` is empty.
 #' - `remaining`: the sequence after removing the first element.
 #' @details
 #' This operation is persistent: `x` is not modified.
 #'
 #' On empty input, returns a non-throwing miss object with
-#' `element = NULL` and `remaining = x`.
+#' `value = NULL` and `remaining = x`.
 #' @examples
 #' s <- flexseq("a", "b", "c")
 #' out <- pop_front(s)
-#' out$element
+#' out$value
 #' out$remaining
 #' s  # unchanged
 #'
@@ -459,11 +459,11 @@ pop_front <- function(x) {
   }
   n <- length(x)
   if(n == 0L) {
-    return(list(element = NULL, remaining = x))
+    return(list(value = NULL, remaining = x))
   }
   element <- .ft_unwrap_public_value(x, x[[1L]])
   remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_front()") else x[seq.int(2L, n)]
-  list(element = element, remaining = remaining)
+  list(value = element, remaining = remaining)
 }
 
 #' Pop the Back Element
@@ -472,17 +472,17 @@ pop_front <- function(x) {
 #'
 #' @param x A `flexseq`.
 #' @return A list with fields:
-#' - `element`: the last element, or `NULL` when `x` is empty.
+#' - `value`: the last element, or `NULL` when `x` is empty.
 #' - `remaining`: the sequence after removing the last element.
 #' @details
 #' This operation is persistent: `x` is not modified.
 #'
 #' On empty input, returns a non-throwing miss object with
-#' `element = NULL` and `remaining = x`.
+#' `value = NULL` and `remaining = x`.
 #' @examples
 #' s <- flexseq("a", "b", "c")
 #' out <- pop_back(s)
-#' out$element
+#' out$value
 #' out$remaining
 #' s  # unchanged
 #'
@@ -501,11 +501,11 @@ pop_back <- function(x) {
   }
   n <- length(x)
   if(n == 0L) {
-    return(list(element = NULL, remaining = x))
+    return(list(value = NULL, remaining = x))
   }
   element <- .ft_unwrap_public_value(x, x[[n]])
   remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_back()") else x[seq_len(n - 1L)]
-  list(element = element, remaining = remaining)
+  list(value = element, remaining = remaining)
 }
 
 #' Pop an Element by Position
@@ -515,18 +515,18 @@ pop_back <- function(x) {
 #' @param x A `flexseq`.
 #' @param index One-based position to remove.
 #' @return A list with fields:
-#' - `element`: the element at `index`, or `NULL` when `index` is out of bounds.
+#' - `value`: the element at `index`, or `NULL` when `index` is out of bounds.
 #' - `remaining`: the sequence after removing the selected element.
 #' @details
 #' This operation is persistent: `x` is not modified.
 #'
 #' Positive integer indices beyond `length(x)` return a non-throwing miss object
-#' with `element = NULL` and `remaining = x`.
+#' with `value = NULL` and `remaining = x`.
 #' Invalid indices (`NA`, non-integer, `<= 0`, or length not equal to 1) error.
 #' @examples
 #' x <- flexseq("a", "b", "c", "d")
 #' out <- pop_at(x, 3)
-#' out$element
+#' out$value
 #' out$remaining
 #' x  # unchanged
 #'
@@ -547,7 +547,7 @@ pop_at <- function(x, index) {
   n <- length(x)
   idx <- .ft_validate_scalar_position_missable(index, n)
   if(is.null(idx)) {
-    return(list(element = NULL, remaining = x))
+    return(list(value = NULL, remaining = x))
   }
   selected <- .ft_strip_name(.ft_get_elem_at(x, idx))
   element <- .ft_unwrap_public_value(x, selected)
@@ -561,7 +561,7 @@ pop_at <- function(x, index) {
   } else {
     x[c(seq_len(idx - 1L), seq.int(idx + 1L, n))]
   }
-  list(element = element, remaining = remaining)
+  list(value = element, remaining = remaining)
 }
 
 #' Insert Elements at a Position

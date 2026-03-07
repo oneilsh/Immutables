@@ -24,7 +24,7 @@ if(requireNamespace("immutables", quietly = TRUE)) {
 priority values.
 For full sequence-style operations, cast with `as_flexseq()`. By default this
 casts to payload items only (`drop_meta = TRUE`); use
-`as_flexseq(..., drop_meta = FALSE)` to keep entry records (`item` +
+`as_flexseq(..., drop_meta = FALSE)` to keep entry records (`value` +
 `priority`).
 
 ## Creating a queue
@@ -47,7 +47,7 @@ peek_max(x)
 
 ```{r}
 x2 <- pop_min(x)
-x2$element
+x2$value
 x2$priority
 x2$remaining
 ```
@@ -60,7 +60,7 @@ maximum priority.
 ```{r}
 peek_all_min(x)
 p_all <- pop_all_min(x)
-as.list(p_all$elements)
+as.list(p_all$values)
 p_all$remaining
 ```
 

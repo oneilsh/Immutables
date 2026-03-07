@@ -4,12 +4,15 @@
 \alias{print.interval_index}
 \title{Print an Interval Index Summary}
 \usage{
-\method{print}{interval_index}(x, max_elements = 4L, ...)
+\method{print}{interval_index}(x, max_elements = 4L, show_custom_monoids = FALSE, ...)
 }
 \arguments{
 \item{x}{An \code{interval_index}.}
 
 \item{max_elements}{Maximum number of elements shown in the preview.}
+
+\item{show_custom_monoids}{Logical; show attached non-default monoids and
+their root cached measures.}
 
 \item{...}{Passed through to per-element \code{print()}.}
 }
@@ -26,6 +29,9 @@ ix <- interval_index(
   start = c(20, 30, 10), end = c(25, 37, 24)
 )
 print(ix, max_elements = 4)
+width_sum <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$end - entry$start))
+ix3 <- add_monoids(interval_index(1, 2, start = c(1, 3), end = c(2, 5)), list(width_sum = width_sum))
+print(ix3, max_elements = 0, show_custom_monoids = TRUE)
 
 ix2 <- interval_index(1, 2, 3, start = c(2, 4, 6), end = c(3, 5, 8), bounds = "[]")
 print(ix2, max_elements = 3)

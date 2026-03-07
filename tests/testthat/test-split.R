@@ -3,7 +3,7 @@ testthat::test_that("split_around_by_predicate returns distinguished element and
   t <- add_monoids(as_flexseq(letters[1:6]), list(count = mr))
 
   s <- split_around_by_predicate(t, function(v) v >= 4, ".size")
-  testthat::expect_identical(s$elem, "d")
+  testthat::expect_identical(s$value, "d")
   testthat::expect_identical(attr(s$left, "measures")$.size, 3)
   testthat::expect_identical(attr(s$right, "measures")$.size, 2)
 })
@@ -50,7 +50,7 @@ testthat::test_that("split_around_by_predicate respects custom accumulator offse
   t <- as_flexseq(letters[1:5])
 
   s <- split_around_by_predicate(t, function(v) v >= 8, ".size", accumulator = 5)
-  testthat::expect_identical(s$elem, "c")
+  testthat::expect_identical(s$value, "c")
   testthat::expect_identical(attr(s$left, "measures")$.size, 2)
   testthat::expect_identical(attr(s$right, "measures")$.size, 2)
 })
@@ -65,7 +65,7 @@ testthat::test_that("split_at supports scalar integer index", {
 
   s <- split_at(t, 4)
   testthat::expect_identical(tree_chars(s$left), "abc")
-  testthat::expect_identical(s$elem, "d")
+  testthat::expect_identical(s$value, "d")
   testthat::expect_identical(tree_chars(s$right), "ef")
 
   s2 <- split_at(t, 4, pull_index = TRUE)
@@ -77,7 +77,7 @@ testthat::test_that("split_at supports scalar name", {
   t <- as_flexseq(setNames(as.list(letters[1:6]), LETTERS[1:6]))
 
   s <- split_at(t, "D")
-  testthat::expect_identical(.ft_strip_name(s$elem), "d")
+  testthat::expect_identical(.ft_strip_name(s$value), "d")
   testthat::expect_identical(attr(s$left, "measures")$.size, 3)
   testthat::expect_identical(attr(s$right, "measures")$.size, 2)
 

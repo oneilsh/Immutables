@@ -102,15 +102,15 @@ testthat::test_that("add_monoids blocks reserved monoid names by type", {
 
 testthat::test_that("advanced structures require entry-style measure functions", {
   pq <- priority_queue("a", priorities = 1)
-  pq_tuple <- measure_monoid(`+`, 0, function(item, priority) as.numeric(priority))
+  pq_tuple <- measure_monoid(`+`, 0, function(value, priority) as.numeric(priority))
   testthat::expect_error(add_monoids(pq, list(m = pq_tuple)))
 
   os <- as_ordered_sequence(list("a"), keys = 1)
-  os_tuple <- measure_monoid(`+`, 0, function(item, key) as.numeric(key))
+  os_tuple <- measure_monoid(`+`, 0, function(value, key) as.numeric(key))
   testthat::expect_error(add_monoids(os, list(m = os_tuple)))
 
   ix <- as_interval_index(list("a"), start = 1, end = 2)
-  ix_tuple <- measure_monoid(`+`, 0, function(item, start, end) as.numeric(end - start))
+  ix_tuple <- measure_monoid(`+`, 0, function(value, start, end) as.numeric(end - start))
   testthat::expect_error(add_monoids(ix, list(m = ix_tuple)))
 })
 
@@ -138,18 +138,25 @@ testthat::test_that("peek/pop helpers work and are persistent", {
   testthat::expect_identical(peek_at(x, 2), "b")
 
   pf <- pop_front(x)
-  testthat::expect_identical(pf$element, "a")
+  testthat::expect_identical(pf$value, "a")
   testthat::expect_identical(as.list(pf$remaining), as.list(letters[2:4]))
 
   pb <- pop_back(x)
-  testthat::expect_identical(pb$element, "d")
+  testthat::expect_identical(pb$value, "d")
   testthat::expect_identical(as.list(pb$remaining), as.list(letters[1:3]))
 
   pm <- pop_at(x, 3)
-  testthat::expect_identical(pm$element, "c")
+  testthat::expect_identical(pm$value, "c")
   testthat::expect_identical(as.list(pm$remaining), as.list(c("a", "b", "d")))
 
   testthat::expect_identical(as.list(x), as.list(letters[1:4]))
+})
+
+testthat::test_that("legacy payload field names are absent after value rename", {
+  x <- as_flexseq(letters[1:2])
+  out <- pop_front(x)
+  testthat::expect_identical(out$value, "a")
+  testthat::expect_null(out$element)
 })
 
 testthat::test_that("peek/pop helpers return non-throwing miss results on empty input", {
@@ -161,11 +168,11 @@ testthat::test_that("peek/pop helpers return non-throwing miss results on empty 
   pf <- pop_front(x)
   pb <- pop_back(x)
   pa <- pop_at(x, 1)
-  testthat::expect_null(pf$element)
+  testthat::expect_null(pf$value)
   testthat::expect_identical(length(pf$remaining), 0L)
-  testthat::expect_null(pb$element)
+  testthat::expect_null(pb$value)
   testthat::expect_identical(length(pb$remaining), 0L)
-  testthat::expect_null(pa$element)
+  testthat::expect_null(pa$value)
   testthat::expect_identical(length(pa$remaining), 0L)
 })
 
@@ -177,7 +184,7 @@ testthat::test_that("peek_at/pop_at validate positional index shape and treat ou
 
   testthat::expect_error(pop_at(x, 0), "positive integer")
   miss <- pop_at(x, 5)
-  testthat::expect_null(miss$element)
+  testthat::expect_null(miss$value)
   testthat::expect_identical(as.list(miss$remaining), as.list(x))
   testthat::expect_error(pop_at(x, c(1, 2)), "single positive integer")
 })

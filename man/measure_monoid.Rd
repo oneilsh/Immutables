@@ -38,9 +38,9 @@ Requirements:
 Developer APIs are leaf-entry oriented:
 \itemize{
 \item \code{flexseq}: entry is the stored user element.
-\item \code{ordered_sequence}: entry is \code{list(item, key)}.
-\item \code{priority_queue}: entry is \code{list(item, priority)}.
-\item \code{interval_index}: entry is \code{list(item, start, end)}.
+\item \code{ordered_sequence}: entry is \code{list(value, key)}.
+\item \code{priority_queue}: entry is \code{list(value, priority)}.
+\item \code{interval_index}: entry is \code{list(value, start, end)}.
 }
 
 \code{measure_monoid()} only constructs the specification; it becomes active after

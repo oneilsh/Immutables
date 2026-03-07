@@ -43,7 +43,7 @@ split_by_predicate.flexseq <- function(x, predicate, monoid_name) {
     } else {
       split_tree_impl_fast(predicate, mr$i, x, ms, mr, monoid_name)
     }
-    right <- push_front(s$right, s$elem)
+    right <- push_front(s$right, s$value)
     left_out <- .ft_restore_subclass(.as_flexseq(s$left), x, context = "split_by_predicate()")
     right_out <- .ft_restore_subclass(.as_flexseq(right), x, context = "split_by_predicate()")
     return(list(left = left_out, right = right_out))

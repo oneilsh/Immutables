@@ -13,7 +13,7 @@ as_flexseq(x, drop_meta = TRUE)
 For \code{priority_queue}, \code{ordered_sequence}, and \code{interval_index}:
 \itemize{
 \item \code{TRUE} (default): return payload-only elements and drop custom monoids.
-\item \code{FALSE}: return full stored entry records (for example \code{item} + metadata)
+\item \code{FALSE}: return full stored entry records (for example \code{value} + metadata)
 and preserve cast-down custom monoids.
 }}
 }
@@ -36,9 +36,9 @@ This is an S3 generic. Notable method behavior:
 \itemize{
 \item \code{as_flexseq.flexseq(x, drop_meta=...)} returns \code{x} unchanged.
 \item \code{as_flexseq.priority_queue(x, drop_meta=TRUE)} returns payload items;
-\code{drop_meta=FALSE} returns \code{list(item, priority)} entries.
+\code{drop_meta=FALSE} returns \code{list(value, priority)} entries.
 \item \code{as_flexseq.ordered_sequence(x, drop_meta=TRUE)} returns payload items;
-\code{drop_meta=FALSE} returns \code{list(item, key)} entries.
+\code{drop_meta=FALSE} returns \code{list(value, key)} entries.
 \item \code{as_flexseq.interval_index(x, drop_meta=TRUE)} returns payload items;
 \code{drop_meta=FALSE} returns interval entry records.
 }

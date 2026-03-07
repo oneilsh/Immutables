@@ -32,7 +32,7 @@ Method signatures:
 }
 
 For \code{priority_queue}, \code{ordered_sequence}, and \code{interval_index},
-\code{FUN} receives structured fields (\code{item} plus metadata) and should return the
+\code{FUN} receives structured fields (\code{value} plus metadata) and should return the
 new payload value only; ordering metadata is preserved.
 
 If supported by the method, \code{preserve_custom_monoids = TRUE} keeps added user
@@ -43,13 +43,13 @@ x <- flexseq("a", "b", "c")
 fapply(x, toupper)
 
 q <- priority_queue(one = "a", two = "b", priorities = c(2, 1))
-fapply(q, function(item, priority, name) paste0(item, priority))
+fapply(q, function(value, priority, name) paste0(value, priority))
 
 o <- ordered_sequence(one = "a", two = "b", keys = c(2, 1))
-fapply(o, function(item, key, name) paste0(item, "_", key))
+fapply(o, function(value, key, name) paste0(value, "_", key))
 
 ix <- interval_index(one = "a", two = "b", start = c(1, 3), end = c(2, 4))
-fapply(ix, function(item, start, end, name) paste0(item, "[", start, ",", end, "]"))
+fapply(ix, function(value, start, end, name) paste0(value, "[", start, ",", end, "]"))
 }
 \seealso{
 \code{\link[=flexseq]{flexseq()}}, \code{\link[=priority_queue]{priority_queue()}}, \code{\link[=ordered_sequence]{ordered_sequence()}}, \code{\link[=interval_index]{interval_index()}}

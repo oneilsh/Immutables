@@ -14,7 +14,7 @@ pop_at(x, index)
 \value{
 A list with fields:
 \itemize{
-\item \code{element}: the element at \code{index}, or \code{NULL} when \code{index} is out of bounds.
+\item \code{value}: the element at \code{index}, or \code{NULL} when \code{index} is out of bounds.
 \item \code{remaining}: the sequence after removing the selected element.
 }
 }
@@ -25,13 +25,13 @@ Returns the selected element and the remaining sequence.
 This operation is persistent: \code{x} is not modified.
 
 Positive integer indices beyond \code{length(x)} return a non-throwing miss object
-with \code{element = NULL} and \code{remaining = x}.
+with \code{value = NULL} and \code{remaining = x}.
 Invalid indices (\code{NA}, non-integer, \verb{<= 0}, or length not equal to 1) error.
 }
 \examples{
 x <- flexseq("a", "b", "c", "d")
 out <- pop_at(x, 3)
-out$element
+out$value
 out$remaining
 x  # unchanged
 

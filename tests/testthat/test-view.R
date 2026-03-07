@@ -4,11 +4,11 @@ testthat::test_that("viewL and viewR return boundary element and remainder", {
   ms <- attr(t, "monoids")
 
   vl <- immutables:::viewL(t, ms)
-  testthat::expect_identical(vl$elem, "a")
+  testthat::expect_identical(vl$value, "a")
   testthat::expect_identical(tree_chars(vl$rest), "bcde")
 
   vr <- immutables:::viewR(t, ms)
-  testthat::expect_identical(vr$elem, "e")
+  testthat::expect_identical(vr$value, "e")
   testthat::expect_identical(tree_chars(vr$rest), "abcd")
 })
 
@@ -19,8 +19,8 @@ testthat::test_that("viewL/viewR on Single produce Empty remainder", {
   vl <- immutables:::viewL(t, ms)
   vr <- immutables:::viewR(t, ms)
 
-  testthat::expect_identical(vl$elem, "x")
-  testthat::expect_identical(vr$elem, "x")
+  testthat::expect_identical(vl$value, "x")
+  testthat::expect_identical(vr$value, "x")
   testthat::expect_true(vl$rest %isa% Empty)
   testthat::expect_true(vr$rest %isa% Empty)
 })

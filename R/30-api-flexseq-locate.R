@@ -10,12 +10,12 @@ locate_by_predicate.flexseq <- function(t, predicate, monoid_name, accumulator =
 
   if(t %isa% Empty) {
     if(!isTRUE(include_metadata)) {
-      return(list(found = FALSE, elem = NULL))
+      return(list(found = FALSE, value = NULL))
     }
     i0 <- if(is.null(accumulator)) mr$i else accumulator
     return(list(
       found = FALSE,
-      elem = NULL,
+      value = NULL,
       metadata = list(left_measure = i0, hit_measure = NULL, right_measure = NULL, index = NULL)
     ))
   }
@@ -25,11 +25,11 @@ locate_by_predicate.flexseq <- function(t, predicate, monoid_name, accumulator =
 
   if(!predicate(total)) {
     if(!isTRUE(include_metadata)) {
-      return(list(found = FALSE, elem = NULL))
+      return(list(found = FALSE, value = NULL))
     }
     return(list(
       found = FALSE,
-      elem = NULL,
+      value = NULL,
       metadata = list(left_measure = total, hit_measure = NULL, right_measure = NULL, index = NULL)
     ))
   }
@@ -40,12 +40,12 @@ locate_by_predicate.flexseq <- function(t, predicate, monoid_name, accumulator =
     locate_tree_impl_fast(predicate, i, t, ms, mr, monoid_name, 0L)
   }
   if(!isTRUE(include_metadata)) {
-    return(list(found = res$found, elem = res$elem))
+    return(list(found = res$found, value = res$value))
   }
 
   list(
     found = res$found,
-    elem = res$elem,
+    value = res$value,
     metadata = list(
       left_measure = res$left_measure,
       hit_measure = res$hit_measure,

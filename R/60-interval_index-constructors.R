@@ -1,13 +1,13 @@
 #SO
 
 # Canonical interval entry constructor.
-# **Inputs:** payload `item`; scalar `start`/`end`.
-# **Outputs:** entry list(item,start,end,key) with key==start.
+# **Inputs:** payload `value`; scalar `start`/`end`.
+# **Outputs:** entry list(value,start,end,key) with key==start.
 # **Used by:** constructor/insert/apply/parse rebuild paths.
-.ivx_make_entry <- function(item, start, end) {
+.ivx_make_entry <- function(value, start, end) {
   # `key` mirrors `start` so interval entries remain compatible with ordered
   # key monoid paths (e.g. `.oms_max_key`) when those monoids are present.
-  list(item = item, start = start, end = end, key = start)
+  list(value = value, start = start, end = end, key = start)
 }
 
 
@@ -115,7 +115,7 @@
 }
 
 # Runtime: O(n log n) from sort + bulk build.
-# Core builder from user item/start/end vectors.
+# Core builder from user value/start/end vectors.
 # **Inputs:**
 #
 # - `items`: list payloads.

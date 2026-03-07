@@ -23,19 +23,19 @@ as_flexseq.priority_queue <- function(x, drop_meta = TRUE) {
 
 #' Coerce Priority Queue to List
 #'
-#' Returns queue entries as a plain list of records with fields `item` and
+#' Returns queue entries as a plain list of records with fields `value` and
 #' `priority`, in queue sequence order.
 #'
 #' @method as.list priority_queue
 #' @param x A `priority_queue`.
 #' @param ... Unused.
 #' @param drop_meta Logical scalar. When `FALSE` (default), returns full queue
-#'   entry records (`item` + `priority`). When `TRUE`, returns payload items
+#'   entry records (`value` + `priority`). When `TRUE`, returns payload values
 #'   only.
 #' @return A plain list of queue entry records (`drop_meta = FALSE`) or payload
-#'   items (`drop_meta = TRUE`).
+#'   values (`drop_meta = TRUE`).
 #' @details
-#' Each returned element is a record with fields `item` and `priority`.
+#' Each returned entry is a record with fields `value` and `priority`.
 #' Entry names (when present) are preserved on the returned list.
 #' @examples
 #' q <- priority_queue("a", "b", priorities = c(2, 1))
@@ -51,9 +51,9 @@ as.list.priority_queue <- function(x, ..., drop_meta = FALSE) {
     return(entries)
   }
 
-  items <- lapply(entries, function(e) e$item)
-  names(items) <- names(entries)
-  items
+  values <- lapply(entries, function(e) e$value)
+  names(values) <- names(entries)
+  values
 }
 
 #' Plot a Priority Queue Tree

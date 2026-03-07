@@ -71,7 +71,7 @@ snapshot_tree <- function(t) {
 snapshot_split <- function(s) {
   list(
     left = snapshot_tree(s$left),
-    elem = immutables:::.ft_strip_name(s$elem),
+    value = immutables:::.ft_strip_name(s$value),
     right = snapshot_tree(s$right)
   )
 }
@@ -79,7 +79,7 @@ snapshot_split <- function(s) {
 snapshot_locate <- function(x) {
   list(
     found = x$found,
-    elem = if(isTRUE(x$found)) immutables:::.ft_strip_name(x$elem) else NULL,
+    value = if(isTRUE(x$found)) immutables:::.ft_strip_name(x$value) else NULL,
     index = x$index,
     left_measure = x$left_measure,
     hit_measure = x$hit_measure,
@@ -300,7 +300,7 @@ testthat::test_that("backend parity: peek/pop_at helpers", {
     out <- pop_at(t, 5)
     list(
       peek = peek_at(t, 3),
-      popped = out$element,
+      popped = out$value,
       remaining = snapshot_tree(out$remaining)
     )
   })
@@ -438,13 +438,13 @@ testthat::test_that("backend parity: interval_index insert and queries", {
       within_first = peek_within(y, 2, 5),
       within = as.list(peek_all_within(y, 2, 5)),
       pop_point_first = list(
-        element = p0$element,
+        value = p0$value,
         start = p0$start,
         end = p0$end,
         remaining = as.list(p0$remaining)
       ),
       pop_first = list(
-        element = p1$element,
+        value = p1$value,
         start = p1$start,
         end = p1$end,
         remaining = as.list(p1$remaining)
@@ -459,7 +459,7 @@ testthat::test_that("backend parity: interval_index insert and queries", {
 
 testthat::test_that("backend parity: interval_index user monoid recomputation", {
   expect_backend_identical({
-    sum_item <- measure_monoid(function(a, b) a + b, 0, function(entry) as.numeric(entry$item))
+    sum_item <- measure_monoid(function(a, b) a + b, 0, function(entry) as.numeric(entry$value))
     width_sum <- measure_monoid(function(a, b) a + b, 0, function(entry) as.numeric(entry$end - entry$start))
 
     x <- add_monoids(as_interval_index(
@@ -468,7 +468,7 @@ testthat::test_that("backend parity: interval_index user monoid recomputation", 
       end = c(3, 5, 6)
     ), list(sum_item = sum_item, width_sum = width_sum))
     y <- insert(x, 40, start = 3, end = 4)
-    z <- fapply(y, function(item, start, end, name) item + 1)
+    z <- fapply(y, function(value, start, end, name) value + 1)
     s <- peek_all_overlaps(z, 2, 3, bounds = "[)")
     p <- pop_all_overlaps(z, 2, 3, bounds = "[)")
 

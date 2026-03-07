@@ -80,7 +80,7 @@
     step("ft_cpp_locate", .ft_cpp_locate(base_plain, function(v) v >= 4, ms, ".size", 0))
     step("ft_cpp_split_tree", .ft_cpp_split_tree(base_plain, function(v) v >= 4, ms, ".size", 0))
 
-    step("ft_cpp_oms_insert", .ft_cpp_oms_insert(x_oms, list(item = "new", key = 2), ms_oms, key_type_oms))
+    step("ft_cpp_oms_insert", .ft_cpp_oms_insert(x_oms, list(value = "new", key = 2), ms_oms, key_type_oms))
 
     step("insert", insert(x_oms, "newer", key = 2))
     step("insert_interval_index", insert(x_ivx, "newer", start = 2, end = 5))

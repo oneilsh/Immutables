@@ -6,7 +6,7 @@
 #' @param x An `interval_index`.
 #' @param point Query point.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
-#' @return The payload item from the first match, or `NULL` on no match.
+#' @return The payload value from the first match, or `NULL` on no match.
 #' @details
 #' Returns the first match in canonical interval order. Use [peek_all_point()] to
 #' retrieve all matches as an `interval_index` slice.
@@ -101,7 +101,7 @@ pop_all_point <- function(x, point, bounds = NULL) {
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
-#' @return The payload item from the first match, or `NULL` on no match.
+#' @return The payload value from the first match, or `NULL` on no match.
 #' @details
 #' Returns the first match in canonical interval order. Use
 #' [peek_all_overlaps()] to retrieve all matches as an `interval_index` slice.
@@ -151,7 +151,7 @@ peek_all_overlaps <- function(x, start, end, bounds = NULL) {
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
-#' @return The payload item from the first match, or `NULL` on no match.
+#' @return The payload value from the first match, or `NULL` on no match.
 #' @details
 #' Returns the first match in canonical interval order. Use
 #' [peek_all_containing()] to retrieve all matches as an `interval_index` slice.
@@ -196,7 +196,7 @@ peek_all_containing <- function(x, start, end, bounds = NULL) {
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
-#' @return The payload item from the first match, or `NULL` on no match.
+#' @return The payload value from the first match, or `NULL` on no match.
 #' @details
 #' Returns the first match in canonical interval order. Use [peek_all_within()]
 #' to retrieve all matches as an `interval_index` slice.

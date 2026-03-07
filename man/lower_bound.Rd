@@ -16,7 +16,7 @@ A list with fields:
 \itemize{
 \item \code{found}: logical flag.
 \item \code{index}: one-based position of the first match, or \code{NULL}.
-\item \code{element}: matched element, or \code{NULL}.
+\item \code{value}: matched element, or \code{NULL}.
 \item \code{key}: matched key, or \code{NULL}.
 }
 }

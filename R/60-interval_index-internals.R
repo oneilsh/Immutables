@@ -131,23 +131,23 @@
 # **Used by:** full-tree validation during subclass restore.
 .ivx_parse_entry <- function(entry, context = "interval_index", endpoint_type = NULL) {
   if(!is.list(entry)) {
-    stop(context, " entries must be named lists with fields: item, start, end (optional: key).")
+    stop(context, " entries must be named lists with fields: value, start, end (optional: key).")
   }
 
   nm <- names(entry)
   if(is.null(nm) || any(is.na(nm)) || any(nm == "")) {
-    stop(context, " entries must be named lists with fields: item, start, end (optional: key).")
+    stop(context, " entries must be named lists with fields: value, start, end (optional: key).")
   }
   if(anyDuplicated(nm) > 0L) {
     stop(context, " entry fields must be unique.")
   }
 
-  bad <- setdiff(nm, c("item", "start", "end", "key"))
+  bad <- setdiff(nm, c("value", "start", "end", "key"))
   if(length(bad) > 0L) {
     stop(context, " entry contains unsupported field(s): ", paste(bad, collapse = ", "))
   }
-  if(!("item" %in% nm) || !("start" %in% nm) || !("end" %in% nm)) {
-    stop(context, " entries must include `item`, `start`, and `end`.")
+  if(!("value" %in% nm) || !("start" %in% nm) || !("end" %in% nm)) {
+    stop(context, " entries must include `value`, `start`, and `end`.")
   }
 
   norm <- .ivx_normalize_interval(entry[["start"]], entry[["end"]], endpoint_type = endpoint_type)
@@ -161,7 +161,7 @@
   }
 
   list(
-    entry = .ivx_make_entry(entry[["item"]], norm$start, norm$end),
+    entry = .ivx_make_entry(entry[["value"]], norm$start, norm$end),
     endpoint_type = norm$endpoint_type
   )
 }

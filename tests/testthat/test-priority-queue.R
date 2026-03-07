@@ -18,10 +18,10 @@ testthat::test_that("empty priority_queue scalar peek/pop are non-throwing misse
 
   pmin <- pop_min(x)
   pmax <- pop_max(x)
-  testthat::expect_null(pmin$element)
+  testthat::expect_null(pmin$value)
   testthat::expect_null(pmin$priority)
   testthat::expect_identical(length(pmin$remaining), 0L)
-  testthat::expect_null(pmax$element)
+  testthat::expect_null(pmax$value)
   testthat::expect_null(pmax$priority)
   testthat::expect_identical(length(pmax$remaining), 0L)
 })
@@ -30,19 +30,19 @@ testthat::test_that("min/max pop uses sequence order on ties", {
   q <- priority_queue("a", "b", "c", "d", priorities = c(2, 1, 1, 2))
 
   e1 <- pop_min(q)
-  testthat::expect_equal(e1$element, "b")
+  testthat::expect_equal(e1$value, "b")
   testthat::expect_equal(e1$priority, 1)
 
   e2 <- pop_min(e1$remaining)
-  testthat::expect_equal(e2$element, "c")
+  testthat::expect_equal(e2$value, "c")
   testthat::expect_equal(e2$priority, 1)
 
   x1 <- pop_max(q)
-  testthat::expect_equal(x1$element, "a")
+  testthat::expect_equal(x1$value, "a")
   testthat::expect_equal(x1$priority, 2)
 
   x2 <- pop_max(x1$remaining)
-  testthat::expect_equal(x2$element, "d")
+  testthat::expect_equal(x2$value, "d")
   testthat::expect_equal(x2$priority, 2)
 })
 
@@ -53,33 +53,33 @@ testthat::test_that("bulk extrema helpers return full tie runs", {
   pmax <- peek_all_max(q)
   testthat::expect_s3_class(pmin, "priority_queue")
   testthat::expect_s3_class(pmax, "priority_queue")
-  testthat::expect_equal(lapply(as.list(pmin), function(e) e$item), list("b", "c"))
-  testthat::expect_equal(lapply(as.list(pmax), function(e) e$item), list("a", "d"))
+  testthat::expect_equal(lapply(as.list(pmin), function(e) e$value), list("b", "c"))
+  testthat::expect_equal(lapply(as.list(pmax), function(e) e$value), list("a", "d"))
 
   out_min <- pop_all_min(q)
   testthat::expect_s3_class(out_min$elements, "priority_queue")
   testthat::expect_s3_class(out_min$remaining, "priority_queue")
-  testthat::expect_equal(lapply(as.list(out_min$elements), function(e) e$item), list("b", "c"))
-  testthat::expect_equal(lapply(as.list(out_min$remaining), function(e) e$item), list("a", "d"))
+  testthat::expect_equal(lapply(as.list(out_min$elements), function(e) e$value), list("b", "c"))
+  testthat::expect_equal(lapply(as.list(out_min$remaining), function(e) e$value), list("a", "d"))
 
   out_max <- pop_all_max(q)
   testthat::expect_s3_class(out_max$elements, "priority_queue")
   testthat::expect_s3_class(out_max$remaining, "priority_queue")
-  testthat::expect_equal(lapply(as.list(out_max$elements), function(e) e$item), list("a", "d"))
-  testthat::expect_equal(lapply(as.list(out_max$remaining), function(e) e$item), list("b", "c"))
+  testthat::expect_equal(lapply(as.list(out_max$elements), function(e) e$value), list("a", "d"))
+  testthat::expect_equal(lapply(as.list(out_max$remaining), function(e) e$value), list("b", "c"))
 })
 
 testthat::test_that("bulk extrema single-element removal preserves pq measures", {
   q <- priority_queue("a", "b", "c", priorities = c(3, 1, 2))
 
   out_min <- pop_all_min(q)
-  testthat::expect_equal(lapply(as.list(out_min$elements), function(e) e$item), list("b"))
+  testthat::expect_equal(lapply(as.list(out_min$elements), function(e) e$value), list("b"))
   testthat::expect_equal(peek_min(out_min$remaining), "c")
   testthat::expect_equal(peek_max(out_min$remaining), "a")
   testthat::expect_no_error(capture.output(print(out_min$remaining)))
 
   out_max <- pop_all_max(q)
-  testthat::expect_equal(lapply(as.list(out_max$elements), function(e) e$item), list("a"))
+  testthat::expect_equal(lapply(as.list(out_max$elements), function(e) e$value), list("a"))
   testthat::expect_equal(peek_min(out_max$remaining), "b")
   testthat::expect_equal(peek_max(out_max$remaining), "c")
   testthat::expect_no_error(capture.output(print(out_max$remaining)))
@@ -94,7 +94,7 @@ testthat::test_that("as.list.priority_queue returns entry records in queue seque
   out <- as.list(q)
   testthat::expect_type(out, "list")
   testthat::expect_identical(names(out), c("kx", "ky", "kz"))
-  testthat::expect_equal(unname(lapply(out, function(e) e$item)), list("x", "y", "z"))
+  testthat::expect_equal(unname(lapply(out, function(e) e$value)), list("x", "y", "z"))
   testthat::expect_equal(unname(lapply(out, function(e) e$priority)), as.list(c(2, 1, 3)))
 })
 
@@ -111,8 +111,8 @@ testthat::test_that("insert is persistent and supports names", {
 
 testthat::test_that("priority_queue disallows sequence-style mutation helpers", {
   q <- priority_queue("b", "c", priorities = c(2, 3))
-  testthat::expect_error(push_front(q, list(item = "a", priority = 1)), "Cast first")
-  testthat::expect_error(push_back(q, list(item = "d", priority = 4)), "Cast first")
+  testthat::expect_error(push_front(q, list(value = "a", priority = 1)), "Cast first")
+  testthat::expect_error(push_back(q, list(value = "d", priority = 4)), "Cast first")
   testthat::expect_error(peek_front(q), "not supported for priority_queue")
   testthat::expect_error(peek_back(q), "not supported for priority_queue")
   testthat::expect_error(peek_at(q, 1), "not supported for priority_queue")
@@ -141,7 +141,7 @@ testthat::test_that("priority_queue disallows positional/logical indexing and re
   testthat::expect_error(q[[1]], "scalar character names only")
   testthat::expect_error(q[1:2], "character name indexing only")
   testthat::expect_error(q[c(TRUE, FALSE)], "character name indexing only")
-  testthat::expect_error({ q[[1]] <- list(item = "x", priority = 5) }, "Cast first")
+  testthat::expect_error({ q[[1]] <- list(value = "x", priority = 5) }, "Cast first")
   testthat::expect_error({ q[c(1, 2)] <- list("u", "v") }, "Cast first")
 })
 
@@ -172,7 +172,7 @@ testthat::test_that("priority_queue casts down to flexseq explicitly", {
   testthat::expect_error(node_measure(x, "sum_priority"), "Missing cached measure")
 
   x_full <- as_flexseq(q_named, drop_meta = FALSE)
-  testthat::expect_equal(x_full[["kx"]]$item, "x")
+  testthat::expect_equal(x_full[["kx"]]$value, "x")
   testthat::expect_equal(x_full[["kx"]]$priority, 2)
   ms_full <- names(attr(x_full, "monoids", exact = TRUE))
   testthat::expect_true("sum_priority" %in% ms_full)
@@ -190,8 +190,8 @@ testthat::test_that("fapply maps priority queue items with read-only metadata", 
   q <- priority_queue("a", "bb", "ccc", priorities = c(1, 3, 2))
   q2 <- fapply(
     q,
-    function(item, priority, name) {
-      toupper(item)
+    function(value, priority, name) {
+      toupper(value)
     }
   )
 
@@ -210,20 +210,20 @@ testthat::test_that("fapply respects sequence order for ties", {
     c("a", "b", "c"),
     priorities = c(1, 1, 1)
   )
-  q2 <- fapply(q, function(item, priority, name) toupper(item))
+  q2 <- fapply(q, function(value, priority, name) toupper(value))
 
   # All priorities tie; left-most in sequence wins.
   testthat::expect_equal(peek_min(q2), "A")
   p1 <- pop_min(q2)
   p2 <- pop_min(p1$remaining)
-  testthat::expect_equal(p1$element, "A")
-  testthat::expect_equal(p2$element, "B")
+  testthat::expect_equal(p1$value, "A")
+  testthat::expect_equal(p2$value, "B")
 })
 
 testthat::test_that("fapply preserves priority queue entry names", {
   q <- as_priority_queue(setNames(as.list(c("x", "y")), c("kx", "ky")), priorities = c(2, 1))
-  q2 <- fapply(q, function(item, priority, name) {
-    paste(name, item, sep = ":")
+  q2 <- fapply(q, function(value, priority, name) {
+    paste(name, value, sep = ":")
   })
 
   testthat::expect_equal(q2[["kx"]], "kx:x")
@@ -232,9 +232,9 @@ testthat::test_that("fapply preserves priority queue entry names", {
 })
 
 testthat::test_that("fapply can drop custom monoids for priority_queue", {
-  sum_item <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$item))
+  sum_item <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$value))
   q <- add_monoids(priority_queue(1, 2, priorities = c(2, 1)), list(sum_item = sum_item))
-  q2 <- fapply(q, function(item, priority, name) item * 10, preserve_custom_monoids = FALSE)
+  q2 <- fapply(q, function(value, priority, name) value * 10, preserve_custom_monoids = FALSE)
 
   ms <- attr(q2, "monoids", exact = TRUE)
   testthat::expect_true(!is.null(ms[[".size"]]))
@@ -271,7 +271,7 @@ testthat::test_that("priority_queue blocks split helpers and allows locate helpe
 
   loc <- locate_by_predicate(q, function(v) v >= 1, ".size", include_metadata = TRUE)
   testthat::expect_true(loc$found)
-  testthat::expect_identical(loc$elem$item, "a")
+  testthat::expect_identical(loc$value$value, "a")
   testthat::expect_identical(loc$metadata$index, 1L)
 })
 
@@ -284,13 +284,13 @@ testthat::test_that("priority_queue supports Date priorities with FIFO ties", {
 
   out1 <- pop_min(q)
   out2 <- pop_min(out1$remaining)
-  testthat::expect_equal(out1$element, "early1")
-  testthat::expect_equal(out2$element, "early2")
+  testthat::expect_equal(out1$value, "early1")
+  testthat::expect_equal(out2$value, "early2")
   testthat::expect_s3_class(out1$priority, "Date")
   testthat::expect_true(inherits(out2$priority, "Date"))
 
   q2 <- insert(q, "early3", priority = as.Date("2024-01-01"))
-  testthat::expect_equal(pop_min(pop_min(q2)$remaining)$element, "early2")
+  testthat::expect_equal(pop_min(pop_min(q2)$remaining)$value, "early2")
 })
 
 testthat::test_that("priority_queue supports POSIXct priorities with type-preserving pops", {
@@ -302,7 +302,7 @@ testthat::test_that("priority_queue supports POSIXct priorities with type-preser
 
   testthat::expect_equal(peek_min(q), "early1")
   out <- pop_min(q)
-  testthat::expect_equal(out$element, "early1")
+  testthat::expect_equal(out$value, "early1")
   testthat::expect_s3_class(out$priority, "POSIXct")
   testthat::expect_s3_class(out$priority, "POSIXt")
 })

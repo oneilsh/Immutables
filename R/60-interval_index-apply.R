@@ -5,7 +5,7 @@
 # **Inputs:**
 #
 # - `x`: interval_index.
-# - `f`: function(item, start, end, name, ...) -> new item.
+# - `f`: function(value, start, end, name, ...) -> new value.
 # - `...`: forwarded to `f`.
 # - `preserve_custom_monoids`: scalar logical.
 # **Outputs:** interval_index with transformed payload items.
@@ -42,7 +42,7 @@
     }
     cur_name <- if(is.null(nm)) "" else nm
 
-    item2 <- f(e$item, e$start, e$end, cur_name, ...)
+    item2 <- f(e$value, e$start, e$end, cur_name, ...)
     entry2 <- .ivx_make_entry(item2, e$start, e$end)
     out_entries[[i]] <- .ft_set_name(entry2, nm)
   }

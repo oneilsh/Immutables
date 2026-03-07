@@ -353,7 +353,7 @@
   if(!isTRUE(hit$found)) {
     stop("Index out of bounds.")
   }
-  hit$elem
+  hit$value
 }
 
 # bulk positional read helper preserving ft_name metadata.

@@ -22,9 +22,9 @@
 #'
 #' Developer APIs are leaf-entry oriented:
 #' - `flexseq`: entry is the stored user element.
-#' - `ordered_sequence`: entry is `list(item, key)`.
-#' - `priority_queue`: entry is `list(item, priority)`.
-#' - `interval_index`: entry is `list(item, start, end)`.
+#' - `ordered_sequence`: entry is `list(value, key)`.
+#' - `priority_queue`: entry is `list(value, priority)`.
+#' - `interval_index`: entry is `list(value, start, end)`.
 #'
 #' `measure_monoid()` only constructs the specification; it becomes active after
 #' being attached to a structure via [add_monoids()].

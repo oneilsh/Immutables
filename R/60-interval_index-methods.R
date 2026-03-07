@@ -49,7 +49,7 @@ as_flexseq.interval_index <- function(x, drop_meta = TRUE) {
 as.list.interval_index <- function(x, ...) {
   .ivx_assert_index(x)
   entries <- as.list.flexseq(x, ...)
-  out <- lapply(entries, function(e) e$item)
+  out <- lapply(entries, function(e) e$value)
   names(out) <- names(entries)
   out
 }

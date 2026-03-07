@@ -56,5 +56,5 @@
 
 # Runtime: O(n) in number of selected entries.
 .oms_extract_items <- function(entries) {
-  lapply(entries, function(e) e$item)
+  lapply(entries, function(e) e$value)
 }

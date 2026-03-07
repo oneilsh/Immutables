@@ -46,7 +46,7 @@ peek_front(x4)
 peek_back(x4)
 
 pf <- pop_front(x4)
-pf$element
+pf$value
 pf$remaining
 ```
 

@@ -12,7 +12,7 @@ pop_front(x)
 \value{
 A list with fields:
 \itemize{
-\item \code{element}: the first element, or \code{NULL} when \code{x} is empty.
+\item \code{value}: the first element, or \code{NULL} when \code{x} is empty.
 \item \code{remaining}: the sequence after removing the first element.
 }
 }
@@ -23,12 +23,12 @@ Returns the first element and the remaining sequence.
 This operation is persistent: \code{x} is not modified.
 
 On empty input, returns a non-throwing miss object with
-\code{element = NULL} and \code{remaining = x}.
+\code{value = NULL} and \code{remaining = x}.
 }
 \examples{
 s <- flexseq("a", "b", "c")
 out <- pop_front(s)
-out$element
+out$value
 out$remaining
 s  # unchanged
 

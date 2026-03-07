@@ -51,9 +51,9 @@ Developer APIs are entry-oriented. `measure_monoid()` measure functions should
 always be `function(entry)`.
 
 - `flexseq`: entry is the stored user element.
-- `ordered_sequence`: entry is `list(item, key)`.
-- `priority_queue`: entry is `list(item, priority)`.
-- `interval_index`: entry is `list(item, start, end)`.
+- `ordered_sequence`: entry is `list(value, key)`.
+- `priority_queue`: entry is `list(value, priority)`.
+- `interval_index`: entry is `list(value, start, end)`.
 
 ```{r}
 os <- as_ordered_sequence(list("x", "yy"), keys = c(1, 2))
@@ -72,7 +72,7 @@ p <- predicate(function(v) v >= 5L)
 
 loc <- locate_by_predicate(x2, p, "width", include_metadata = TRUE)
 loc$found
-loc$elem
+loc$value
 loc$metadata
 ```
 
@@ -81,7 +81,7 @@ loc$metadata
 ```{r}
 s1 <- split_around_by_predicate(x2, function(v) v >= 5L, "width")
 s1$left
-s1$elem
+s1$value
 s1$right
 
 s2 <- split_by_predicate(x2, function(v) v >= 5L, "width")

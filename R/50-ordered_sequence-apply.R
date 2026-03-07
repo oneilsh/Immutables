@@ -23,8 +23,8 @@
     e <- entries[[i]]
     cur_name <- out_names[[i]]
 
-    item2 <- f(e$item, e$key, cur_name, ...)
-    out[[i]] <- .oms_make_entry(item = item2, key_value = e$key)
+    item2 <- f(e$value, e$key, cur_name, ...)
+    out[[i]] <- .oms_make_entry(value = item2, key_value = e$key)
   }
 
   if(any(out_names != "")) {

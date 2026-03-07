@@ -38,7 +38,7 @@ split_digit_impl <- function(p, i, digit, ms, mr, monoid_name) {
     if(p(acc)) {
       left <- if(idx == 1) list() else digit[1:(idx - 1)]
       right <- if(idx == length(digit)) list() else digit[(idx + 1):length(digit)]
-      return(list(left = left, elem = el, right = right))
+      return(list(left = left, value = el, right = right))
     }
   }
 

@@ -4,12 +4,15 @@
 \alias{print.ordered_sequence}
 \title{Print an Ordered Sequence Summary}
 \usage{
-\method{print}{ordered_sequence}(x, max_elements = 4L, ...)
+\method{print}{ordered_sequence}(x, max_elements = 4L, show_custom_monoids = FALSE, ...)
 }
 \arguments{
 \item{x}{An \code{ordered_sequence}.}
 
 \item{max_elements}{Maximum number of elements shown in the preview.}
+
+\item{show_custom_monoids}{Logical; show attached non-default monoids and
+their root cached measures.}
 
 \item{...}{Passed through to per-element \code{print()}.}
 }
@@ -22,6 +25,9 @@ Prints a compact summary and head/tail preview in key order.
 \examples{
 xs <- ordered_sequence(one = "a", two = "b", three = "c", keys = c(20, 30, 10))
 print(xs, max_elements = 4)
+sum_key <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$key))
+ys2 <- add_monoids(ordered_sequence("a", "b", keys = c(2, 1)), list(sum_key = sum_key))
+print(ys2, max_elements = 0, show_custom_monoids = TRUE)
 
 ys <- ordered_sequence("x", "y", "z", keys = c(2, 1, 3))
 print(ys, max_elements = 3)

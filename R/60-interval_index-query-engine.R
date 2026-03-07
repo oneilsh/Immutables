@@ -215,7 +215,7 @@
   if(identical(which, "all")) {
     return(list(elements = .ivx_empty_like(x), remaining = x))
   }
-  list(element = NULL, start = NULL, end = NULL, remaining = x)
+  list(value = NULL, start = NULL, end = NULL, remaining = x)
 }
 
 # Runtime: O(s), where s is traversed subtree size after aggressive pruning 
@@ -353,9 +353,9 @@
 #
 # **Outputs:**
 #
-# - peek/first: element item or NULL.
+# - peek/first: element value or NULL.
 # - peek/all: interval_index slice of matches (possibly empty).
-# - pop/first: list(element,start,end,remaining).
+# - pop/first: list(value,start,end,remaining).
 # - pop/all: list(elements=<interval_index>, remaining=<interval_index>).
 #
 # **Used by:** public query API (peek_*/pop_* endpoints).
@@ -418,11 +418,11 @@
       return(.ivx_query_pop_miss(x, which = which))
     }
 
-    # First-hit branches can return item directly (peek) or pop by absolute
+    # First-hit branches can return value directly (peek) or pop by absolute
     # index without rebuilding candidate partitions.
     if(identical(which, "first")) {
       if(identical(mode, "peek")) {
-        return(entries[[first_i]]$item)
+        return(entries[[first_i]]$value)
       }
       abs_idx <- as.integer(span$start + first_i - 1L)
       return(.ivx_pop_positions(x, abs_idx, which = "first"))
@@ -459,7 +459,7 @@
       if(!isTRUE(hit$first_found)) {
         return(.ivx_query_peek_miss(x, which = which))
       }
-      return(hit$first_entry$item)
+      return(hit$first_entry$value)
     }
 
     if(length(hit$matched_entries) == 0L) {
@@ -546,7 +546,7 @@
 # **Inputs:** `x` interval_index; integer-like `positions`; `which` in {"first","all"}.
 # **Outputs:**
 #
-# - which = "first": list(element=<payload item>, start=<scalar>, end=<scalar>, remaining=<interval_index>).
+# - which = "first": list(value =<payload value>, start=<scalar>, end=<scalar>, remaining=<interval_index>).
 # - which = "all": list(elements=<interval_index slice at `positions`>,
 #   remaining=<interval_index with those positions removed>).
 #
@@ -558,14 +558,14 @@
     if(identical(which, "all")) {
       return(list(elements = .ivx_empty_like(x), remaining = x))
     }
-    return(list(element = NULL, start = NULL, end = NULL, remaining = x))
+    return(list(value = NULL, start = NULL, end = NULL, remaining = x))
   }
 
   if(identical(which, "first")) {
     idx <- as.integer(positions[[1]])
     entry <- .ft_get_elem_at(x, idx)
     remaining <- .ivx_remove_positions(x, idx)
-    return(list(element = entry$item, start = entry$start, end = entry$end, remaining = remaining))
+    return(list(value = entry$value, start = entry$start, end = entry$end, remaining = remaining))
   }
 
   matched <- .ivx_slice_positions(x, positions)

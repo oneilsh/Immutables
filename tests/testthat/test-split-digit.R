@@ -4,17 +4,17 @@ testthat::test_that("split_digit handles first/middle/last boundaries", {
   d <- Digit("a", "b", "c")
 
   s1 <- immutables:::split_digit(function(v) v >= 1, 0, d, ms, "count")
-  testthat::expect_identical(s1$elem, "a")
+  testthat::expect_identical(s1$value, "a")
   testthat::expect_identical(unclass(s1$left), list())
   testthat::expect_identical(unclass(s1$right), list("b", "c"))
 
   s2 <- immutables:::split_digit(function(v) v >= 2, 0, d, ms, "count")
-  testthat::expect_identical(s2$elem, "b")
+  testthat::expect_identical(s2$value, "b")
   testthat::expect_identical(unclass(s2$left), list("a"))
   testthat::expect_identical(unclass(s2$right), list("c"))
 
   s3 <- immutables:::split_digit(function(v) v >= 3, 0, d, ms, "count")
-  testthat::expect_identical(s3$elem, "c")
+  testthat::expect_identical(s3$value, "c")
   testthat::expect_identical(unclass(s3$left), list("a", "b"))
   testthat::expect_identical(unclass(s3$right), list())
 })
@@ -27,7 +27,7 @@ testthat::test_that("split_digit works when digit holds nodes", {
   d <- Digit(n2, n3)
 
   s <- immutables:::split_digit(function(v) v >= 3, 0, d, ms, "count")
-  testthat::expect_true(s$elem %isa% Node)
+  testthat::expect_true(s$value %isa% Node)
   testthat::expect_identical(length(s$left), 1L)
   testthat::expect_identical(length(s$right), 0L)
 })

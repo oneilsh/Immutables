@@ -19,7 +19,7 @@ split_around_by_predicate(t, predicate, monoid_name, accumulator = NULL)
 A list with fields:
 \itemize{
 \item \code{left}: elements before the split point.
-\item \code{elem}: the matched element at the split point.
+\item \code{value}: the matched element at the split point.
 \item \code{right}: elements after the split point.
 }
 }
@@ -32,12 +32,12 @@ This function generally requires the sequence be annotated with
 a \code{measure_monoid()}; see the examples and \code{measure_monoid()}
 for more information.
 
-\code{elem} is the matched leaf entry for the input structure:
+\code{value} is the matched leaf entry for the input structure:
 \itemize{
 \item \code{flexseq}: stored user element.
-\item \code{ordered_sequence}: \code{list(item, key)}.
-\item \code{priority_queue}: \code{list(item, priority)}.
-\item \code{interval_index}: \code{list(item, start, end)}.
+\item \code{ordered_sequence}: \code{list(value, key)}.
+\item \code{priority_queue}: \code{list(value, priority)}.
+\item \code{interval_index}: \code{list(value, start, end)}.
 }
 
 \code{left} and \code{right} preserve subclass when the input is a subclass of

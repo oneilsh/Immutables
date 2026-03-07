@@ -313,7 +313,7 @@ void collect_leaves_impl(SEXP x, std::vector<SEXP>& out) {
 
 SEXP oms_entry_key(SEXP entry) {
   if(TYPEOF(entry) != VECSXP || XLENGTH(entry) < 2) {
-    stop("ordered entries must be list(item, key).");
+    stop("ordered entries must be list(value, key).");
   }
   List e(entry);
   SEXP key = e[1];
@@ -1319,7 +1319,7 @@ List locate_digit_impl_cpp(
 
       return List::create(
         _["found"] = true,
-        _["elem"] = el,
+        _["value"] = el,
         _["left_measure"] = acc.get(),
         _["hit_measure"] = acc_after,
         _["right_measure"] = right_measure,
@@ -1333,7 +1333,7 @@ List locate_digit_impl_cpp(
 
   return List::create(
     _["found"] = false,
-    _["elem"] = R_NilValue,
+    _["value"] = R_NilValue,
     _["left_measure"] = acc.get(),
     _["hit_measure"] = R_NilValue,
     _["right_measure"] = R_NilValue,
@@ -1361,7 +1361,7 @@ List locate_tree_impl_cpp(
   if(has_class(t, "Empty")) {
     return List::create(
       _["found"] = false,
-      _["elem"] = R_NilValue,
+      _["value"] = R_NilValue,
       _["left_measure"] = i,
       _["hit_measure"] = R_NilValue,
       _["right_measure"] = R_NilValue,
@@ -1486,7 +1486,7 @@ SEXP deepL_cpp(SEXP pr, SEXP m, SEXP sf, const List& monoids) {
     return digit_to_tree_cpp(List(sf), monoids);
   }
   List res = viewL_cpp(m, monoids);
-  Shield<SEXP> node(static_cast<SEXP>(res["elem"]));
+  Shield<SEXP> node(static_cast<SEXP>(res["value"]));
   Shield<SEXP> m_rest(static_cast<SEXP>(res["rest"]));
   Shield<SEXP> new_pr(node_to_digit_cpp(node, monoids));
   return make_deep(new_pr, m_rest, sf, monoids);
@@ -1500,7 +1500,7 @@ SEXP deepR_cpp(SEXP pr, SEXP m, SEXP sf, const List& monoids) {
     return digit_to_tree_cpp(List(pr), monoids);
   }
   List res = viewR_cpp(m, monoids);
-  Shield<SEXP> node(static_cast<SEXP>(res["elem"]));
+  Shield<SEXP> node(static_cast<SEXP>(res["value"]));
   Shield<SEXP> m_rest(static_cast<SEXP>(res["rest"]));
   Shield<SEXP> new_sf(node_to_digit_cpp(node, monoids));
   return make_deep(pr, m_rest, new_sf, monoids);
@@ -1512,7 +1512,7 @@ List viewL_cpp(SEXP t, const List& monoids) {
   }
   if(has_class(t, "Single")) {
     List s(t);
-    return List::create(_["elem"] = s[0], _["rest"] = make_empty(monoids));
+    return List::create(_["value"] = s[0], _["rest"] = make_empty(monoids));
   }
 
   List d(t);
@@ -1523,7 +1523,7 @@ List viewL_cpp(SEXP t, const List& monoids) {
     for(int i = 1; i < pr.size(); ++i) tail[i - 1] = pr[i];
     Shield<SEXP> new_pr(build_digit_cpp(tail, monoids));
     return List::create(
-      _["elem"] = head,
+      _["value"] = head,
       _["rest"] = make_deep(new_pr, d["middle"], d["suffix"], monoids)
     );
   }
@@ -1531,13 +1531,13 @@ List viewL_cpp(SEXP t, const List& monoids) {
   Shield<SEXP> head(static_cast<SEXP>(pr[0]));
   Shield<SEXP> m(static_cast<SEXP>(d["middle"]));
   if(has_class(m, "Empty")) {
-    return List::create(_["elem"] = head, _["rest"] = digit_to_tree_cpp(List(d["suffix"]), monoids));
+    return List::create(_["value"] = head, _["rest"] = digit_to_tree_cpp(List(d["suffix"]), monoids));
   }
   List res = viewL_cpp(m, monoids);
-  Shield<SEXP> node(static_cast<SEXP>(res["elem"]));
+  Shield<SEXP> node(static_cast<SEXP>(res["value"]));
   Shield<SEXP> m_rest(static_cast<SEXP>(res["rest"]));
   Shield<SEXP> new_pr(node_to_digit_cpp(node, monoids));
-  return List::create(_["elem"] = head, _["rest"] = make_deep(new_pr, m_rest, d["suffix"], monoids));
+  return List::create(_["value"] = head, _["rest"] = make_deep(new_pr, m_rest, d["suffix"], monoids));
 }
 
 List viewR_cpp(SEXP t, const List& monoids) {
@@ -1546,7 +1546,7 @@ List viewR_cpp(SEXP t, const List& monoids) {
   }
   if(has_class(t, "Single")) {
     List s(t);
-    return List::create(_["elem"] = s[0], _["rest"] = make_empty(monoids));
+    return List::create(_["value"] = s[0], _["rest"] = make_empty(monoids));
   }
 
   List d(t);
@@ -1557,7 +1557,7 @@ List viewR_cpp(SEXP t, const List& monoids) {
     for(int i = 0; i < sf.size() - 1; ++i) tail[i] = sf[i];
     Shield<SEXP> new_sf(build_digit_cpp(tail, monoids));
     return List::create(
-      _["elem"] = head,
+      _["value"] = head,
       _["rest"] = make_deep(d["prefix"], d["middle"], new_sf, monoids)
     );
   }
@@ -1565,13 +1565,13 @@ List viewR_cpp(SEXP t, const List& monoids) {
   Shield<SEXP> head(static_cast<SEXP>(sf[0]));
   Shield<SEXP> m(static_cast<SEXP>(d["middle"]));
   if(has_class(m, "Empty")) {
-    return List::create(_["elem"] = head, _["rest"] = digit_to_tree_cpp(List(d["prefix"]), monoids));
+    return List::create(_["value"] = head, _["rest"] = digit_to_tree_cpp(List(d["prefix"]), monoids));
   }
   List res = viewR_cpp(m, monoids);
-  Shield<SEXP> node(static_cast<SEXP>(res["elem"]));
+  Shield<SEXP> node(static_cast<SEXP>(res["value"]));
   Shield<SEXP> m_rest(static_cast<SEXP>(res["rest"]));
   Shield<SEXP> new_sf(node_to_digit_cpp(node, monoids));
-  return List::create(_["elem"] = head, _["rest"] = make_deep(d["prefix"], m_rest, new_sf, monoids));
+  return List::create(_["value"] = head, _["rest"] = make_deep(d["prefix"], m_rest, new_sf, monoids));
 }
 
 List split_digit_cpp(
@@ -1596,7 +1596,7 @@ List split_digit_cpp(
       for(int j = 0; j < idx; ++j) left[j] = digit[j];
       List right(digit.size() - idx - 1);
       for(int j = idx + 1; j < digit.size(); ++j) right[j - idx - 1] = digit[j];
-      return List::create(_["left"] = left, _["elem"] = el, _["right"] = right);
+      return List::create(_["left"] = left, _["value"] = el, _["right"] = right);
     }
     acc.set(acc_after);
   }
@@ -1620,7 +1620,7 @@ List split_tree_impl_cpp(
     List s(t);
     return List::create(
       _["left"] = make_empty(monoids),
-      _["elem"] = s[0],
+      _["value"] = s[0],
       _["right"] = make_empty(monoids)
     );
   }
@@ -1638,25 +1638,25 @@ List split_tree_impl_cpp(
     Shield<SEXP> left_tree(digit_to_tree_cpp(as<List>(s["left"]), monoids));
     Shield<SEXP> right_digit(build_digit_cpp(as<List>(s["right"]), monoids));
     Shield<SEXP> right_tree(deepL_cpp(right_digit, middle, suffix, monoids));
-    return List::create(_["left"] = left_tree, _["elem"] = s["elem"], _["right"] = right_tree);
+    return List::create(_["left"] = left_tree, _["value"] = s["value"], _["right"] = right_tree);
   }
 
   if(predicate_true(predicate, vm)) {
     List sm = split_tree_impl_cpp(predicate, vpr, middle, monoids, monoid_name, monoid_spec);
     Shield<SEXP> inode(monoid_combine(vpr, node_measure_named(sm["left"], monoid_name), monoid_name, monoid_spec, &f));
-    List sx = split_digit_cpp(predicate, inode, List(sm["elem"]), monoid_name, monoid_spec);
+    List sx = split_digit_cpp(predicate, inode, List(sm["value"]), monoid_name, monoid_spec);
     Shield<SEXP> left_digit(build_digit_cpp(as<List>(sx["left"]), monoids));
     Shield<SEXP> right_digit(build_digit_cpp(as<List>(sx["right"]), monoids));
     Shield<SEXP> left_tree(deepR_cpp(prefix, sm["left"], left_digit, monoids));
     Shield<SEXP> right_tree(deepL_cpp(right_digit, sm["right"], suffix, monoids));
-    return List::create(_["left"] = left_tree, _["elem"] = sx["elem"], _["right"] = right_tree);
+    return List::create(_["left"] = left_tree, _["value"] = sx["value"], _["right"] = right_tree);
   }
 
   List s = split_digit_cpp(predicate, vm, List(suffix), monoid_name, monoid_spec);
   Shield<SEXP> left_digit(build_digit_cpp(as<List>(s["left"]), monoids));
   Shield<SEXP> left_tree(deepR_cpp(prefix, middle, left_digit, monoids));
   Shield<SEXP> right_tree(digit_to_tree_cpp(as<List>(s["right"]), monoids));
-  return List::create(_["left"] = left_tree, _["elem"] = s["elem"], _["right"] = right_tree);
+  return List::create(_["left"] = left_tree, _["value"] = s["value"], _["right"] = right_tree);
 }
 
 bool oms_measure_has_gt_key(SEXP measure, SEXP key, const std::string& key_type) {
@@ -1716,7 +1716,7 @@ List oms_split_digit_gt_key(const List& digit, SEXP key, const std::string& key_
       for(int j = idx + 1; j < digit.size(); ++j) {
         right[j - idx - 1] = digit[j];
       }
-      return List::create(_["left"] = left, _["elem"] = el, _["right"] = right);
+      return List::create(_["left"] = left, _["value"] = el, _["right"] = right);
     }
   }
 
@@ -1737,7 +1737,7 @@ List oms_split_tree_gt_key(
     List s(t);
     return List::create(
       _["left"] = make_empty(monoids),
-      _["elem"] = s[0],
+      _["value"] = s[0],
       _["right"] = make_empty(monoids)
     );
   }
@@ -1752,17 +1752,17 @@ List oms_split_tree_gt_key(
     Shield<SEXP> left_tree(digit_to_tree_cpp(as<List>(s["left"]), monoids));
     Shield<SEXP> right_digit(build_digit_cpp(as<List>(s["right"]), monoids));
     Shield<SEXP> right_tree(deepL_cpp(right_digit, middle, suffix, monoids));
-    return List::create(_["left"] = left_tree, _["elem"] = s["elem"], _["right"] = right_tree);
+    return List::create(_["left"] = left_tree, _["value"] = s["value"], _["right"] = right_tree);
   }
 
   if(oms_tree_has_gt_key(middle, key, key_type)) {
     List sm = oms_split_tree_gt_key(middle, key, key_type, monoids);
-    List sx = oms_split_digit_gt_key(List(sm["elem"]), key, key_type);
+    List sx = oms_split_digit_gt_key(List(sm["value"]), key, key_type);
     Shield<SEXP> left_digit(build_digit_cpp(as<List>(sx["left"]), monoids));
     Shield<SEXP> right_digit(build_digit_cpp(as<List>(sx["right"]), monoids));
     Shield<SEXP> left_tree(deepR_cpp(prefix, sm["left"], left_digit, monoids));
     Shield<SEXP> right_tree(deepL_cpp(right_digit, sm["right"], suffix, monoids));
-    return List::create(_["left"] = left_tree, _["elem"] = sx["elem"], _["right"] = right_tree);
+    return List::create(_["left"] = left_tree, _["value"] = sx["value"], _["right"] = right_tree);
   }
 
   if(oms_tree_has_gt_key(suffix, key, key_type)) {
@@ -1770,7 +1770,7 @@ List oms_split_tree_gt_key(
     Shield<SEXP> left_digit(build_digit_cpp(as<List>(s["left"]), monoids));
     Shield<SEXP> left_tree(deepR_cpp(prefix, middle, left_digit, monoids));
     Shield<SEXP> right_tree(digit_to_tree_cpp(as<List>(s["right"]), monoids));
-    return List::create(_["left"] = left_tree, _["elem"] = s["elem"], _["right"] = right_tree);
+    return List::create(_["left"] = left_tree, _["value"] = s["value"], _["right"] = right_tree);
   }
 
   stop("oms_split_tree_gt_key precondition violated: no element with key > target.");
@@ -1783,7 +1783,7 @@ SEXP oms_insert_cpp_impl(SEXP x, SEXP entry, const List& monoids, const std::str
   }
 
   List s = oms_split_tree_gt_key(x, key, key_type, monoids);
-  Shield<SEXP> right_with_hit(add_left_cpp(s["right"], s["elem"], monoids));
+  Shield<SEXP> right_with_hit(add_left_cpp(s["right"], s["value"], monoids));
   Shield<SEXP> left_plus_entry(add_right_cpp(s["left"], entry, monoids));
   List ts(0);
   return app3_cpp(left_plus_entry, ts, right_with_hit, monoids);

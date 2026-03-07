@@ -35,12 +35,12 @@
 }
 
 # Runtime: O(1).
-# Build one canonical entry (`list(item, priority)` + optional name) while
+# Build one canonical entry (`list(value, priority)` + optional name) while
 # threading the queue priority_type invariant.
 # Used by: constructors and insert paths.
-.pq_make_entry <- function(item, priority, priority_type = NULL, name = NULL) {
+.pq_make_entry <- function(value, priority, priority_type = NULL, name = NULL) {
   resolved <- .pq_resolve_priority(priority, priority_type = priority_type)
-  out <- list(item = item, priority = resolved$priority)
+  out <- list(value = value, priority = resolved$priority)
   list(
     entry = .ft_set_name(out, name),
     priority_type = resolved$priority_type

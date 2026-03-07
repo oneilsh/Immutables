@@ -21,7 +21,7 @@
 
   rest <- concat_trees(s$left, s$right)
   rest <- .pq_wrap_like(q, rest)
-  list(entry = s$elem, remaining = rest)
+  list(entry = s$value, remaining = rest)
 }
 
 #' Print a Priority Queue Summary
@@ -30,11 +30,16 @@
 #'
 #' @param x A `priority_queue`.
 #' @param max_elements Maximum number of elements shown in the preview.
+#' @param show_custom_monoids Logical; show attached non-default monoids and
+#'   their root cached measures.
 #' @param ... Passed through to per-element `print()`.
 #' @return Invisibly returns `x`.
 #' @examples
 #' q <- priority_queue(one = 1, two = 2, three = 3, priorities = c(20, 30, 10))
 #' print(q, max_elements = 4)
+#' sum_item <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$value))
+#' q3 <- add_monoids(priority_queue(1, 2, priorities = c(2, 1)), list(sum_item = sum_item))
+#' print(q3, max_elements = 0, show_custom_monoids = TRUE)
 #'
 #' q2 <- priority_queue(1, 2, 3, priorities = c(2, 1, 3))
 #' print(q2, max_elements = 3)
@@ -42,9 +47,10 @@
 #' print(priority_queue())
 #' @export
 # Runtime: O(k log n), where k = shown elements.
-print.priority_queue <- function(x, max_elements = 4L, ...) {
+print.priority_queue <- function(x, max_elements = 4L, show_custom_monoids = FALSE, ...) {
   .pq_assert_queue(x)
   max_elements <- .ft_validate_print_max_elements(max_elements)
+  show_custom <- .ft_validate_show_custom_monoids(show_custom_monoids)
 
   n <- as.integer(node_measure(x, ".size"))
   nn <- as.integer(node_measure(x, ".named_count"))
@@ -54,6 +60,9 @@ print.priority_queue <- function(x, max_elements = 4L, ...) {
     minm <- node_measure(x, ".pq_min")
     maxm <- node_measure(x, ".pq_max")
     cat("Minimum priority: ", .ft_format_scalar(minm$priority), ", Maximum priority: ", .ft_format_scalar(maxm$priority), "\n", sep = "")
+  }
+  if(show_custom) {
+    .ft_print_custom_monoids(x, excluded_names = c(".size", ".named_count", ".pq_min", ".pq_max"))
   }
   if(n == 0L || max_elements == 0L) {
     return(invisible(x))
@@ -90,7 +99,7 @@ print.priority_queue <- function(x, max_elements = 4L, ...) {
     } else {
       cat("(priority ", .ft_format_scalar(entry$priority), ")\n", sep = "")
     }
-    print(entry$item, ...)
+    print(entry$value, ...)
     cat("\n")
   }
 
@@ -103,7 +112,7 @@ print.priority_queue <- function(x, max_elements = 4L, ...) {
     } else {
       cat("(priority ", .ft_format_scalar(entry$priority), ")\n", sep = "")
     }
-    print(entry$item, ...)
+    print(entry$value, ...)
     cat("\n")
   }
   invisible(x)

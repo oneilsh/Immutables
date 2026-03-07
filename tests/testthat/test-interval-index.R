@@ -133,13 +133,13 @@ testthat::test_that("relation query/pop contracts hold across all bounds tokens"
       }
 
       if(length(expect_all) == 0L) {
-        testthat::expect_null(pop_first$element)
+        testthat::expect_null(pop_first$value)
         testthat::expect_null(pop_first$start)
         testthat::expect_null(pop_first$end)
         testthat::expect_equal(as.list(pop_first$remaining), vals)
       } else {
         i <- idx[[1L]]
-        testthat::expect_equal(pop_first$element, vals[[i]])
+        testthat::expect_equal(pop_first$value, vals[[i]])
         testthat::expect_equal(pop_first$start, starts[[i]])
         testthat::expect_equal(pop_first$end, ends[[i]])
         testthat::expect_equal(as.list(pop_first$remaining), vals[-i])
@@ -189,7 +189,7 @@ testthat::test_that("pop helpers follow first/all contracts and preserve persist
   )
 
   first <- pop_overlaps(ix, 2, 3)
-  testthat::expect_equal(first$element, "A")
+  testthat::expect_equal(first$value, "A")
   testthat::expect_equal(first$start, 1)
   testthat::expect_equal(first$end, 2)
   testthat::expect_s3_class(first$remaining, "interval_index")
@@ -200,7 +200,7 @@ testthat::test_that("pop helpers follow first/all contracts and preserve persist
   testthat::expect_identical(length(all$remaining), 0L)
 
   point_first <- pop_point(ix, 2)
-  testthat::expect_equal(point_first$element, "A")
+  testthat::expect_equal(point_first$value, "A")
   testthat::expect_equal(point_first$start, 1)
   testthat::expect_equal(point_first$end, 2)
   testthat::expect_equal(as.list(point_first$remaining), list("B", "D", "C"))
@@ -211,7 +211,7 @@ testthat::test_that("pop helpers follow first/all contracts and preserve persist
   testthat::expect_equal(as.list(point_all$remaining), list("C"))
 
   miss_first <- pop_within(ix, 9, 10)
-  testthat::expect_null(miss_first$element)
+  testthat::expect_null(miss_first$value)
   testthat::expect_null(miss_first$start)
   testthat::expect_null(miss_first$end)
   testthat::expect_equal(as.list(miss_first$remaining), as.list(ix))
@@ -222,7 +222,7 @@ testthat::test_that("pop helpers follow first/all contracts and preserve persist
   testthat::expect_equal(as.list(miss_all$remaining), as.list(ix))
 
   miss_point_first <- pop_point(ix, 9)
-  testthat::expect_null(miss_point_first$element)
+  testthat::expect_null(miss_point_first$value)
   testthat::expect_null(miss_point_first$start)
   testthat::expect_null(miss_point_first$end)
   testthat::expect_equal(as.list(miss_point_first$remaining), as.list(ix))
@@ -303,8 +303,8 @@ testthat::test_that("fapply for interval_index updates payload only and keeps in
   )
   b0 <- lapply(.ivx_entries(ix), function(e) list(start = e$start, end = e$end))
 
-  ix2 <- fapply(ix, function(item, start, end, name) {
-    toupper(item)
+  ix2 <- fapply(ix, function(value, start, end, name) {
+    toupper(value)
   })
 
   testthat::expect_s3_class(ix2, "interval_index")
@@ -317,8 +317,8 @@ testthat::test_that("fapply for interval_index updates payload only and keeps in
 
   testthat::expect_error(fapply(ix, 1), "`FUN` must be a function")
 
-  ix3 <- fapply(ix, function(item, start, end, name) {
-    list(old = item, at = c(start, end), nm = name)
+  ix3 <- fapply(ix, function(value, start, end, name) {
+    list(old = value, at = c(start, end), nm = name)
   })
   testthat::expect_type(ix3[[1]], "list")
   testthat::expect_named(ix3[[1]], c("old", "at", "nm"))
@@ -329,7 +329,7 @@ testthat::test_that("fapply for interval_index updates payload only and keeps in
 })
 
 testthat::test_that("interval_index recomputes user monoids across insert, fapply, and slices", {
-  sum_item <- measure_monoid(function(a, b) a + b, 0, function(entry) as.numeric(entry$item))
+  sum_item <- measure_monoid(function(a, b) a + b, 0, function(entry) as.numeric(entry$value))
   width_sum <- measure_monoid(function(a, b) a + b, 0, function(entry) as.numeric(entry$end - entry$start))
 
   ix <- add_monoids(as_interval_index(
@@ -344,7 +344,7 @@ testthat::test_that("interval_index recomputes user monoids across insert, fappl
   testthat::expect_equal(node_measure(ix2, "sum_item"), 100)
   testthat::expect_equal(node_measure(ix2, "width_sum"), 8)
 
-  ix3 <- fapply(ix2, function(item, start, end, name) item + 1)
+  ix3 <- fapply(ix2, function(value, start, end, name) value + 1)
   testthat::expect_equal(node_measure(ix3, "sum_item"), 104)
   testthat::expect_equal(node_measure(ix3, "width_sum"), 8)
 
@@ -374,9 +374,9 @@ testthat::test_that("interval_index custom monoids accept entry measure argument
 })
 
 testthat::test_that("fapply can drop custom monoids for interval_index", {
-  sum_item <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$item))
+  sum_item <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$value))
   ix <- add_monoids(as_interval_index(as.list(c(10, 20)), start = c(1, 3), end = c(2, 5)), list(sum_item = sum_item))
-  ix2 <- fapply(ix, function(item, start, end, name) item + 1, preserve_custom_monoids = FALSE)
+  ix2 <- fapply(ix, function(value, start, end, name) value + 1, preserve_custom_monoids = FALSE)
 
   ms <- attr(ix2, "monoids", exact = TRUE)
   testthat::expect_true(!is.null(ms[[".size"]]))
@@ -413,7 +413,7 @@ testthat::test_that("interval_index casts down to flexseq explicitly", {
   testthat::expect_false(".oms_max_key" %in% ms)
 
   fx_full <- as_flexseq(ix, drop_meta = FALSE)
-  testthat::expect_equal(fx_full[["ix"]]$item, "x")
+  testthat::expect_equal(fx_full[["ix"]]$value, "x")
   testthat::expect_equal(fx_full[["ix"]]$start, 1)
   testthat::expect_equal(fx_full[["ix"]]$end, 2)
   ms_full <- names(attr(fx_full, "monoids", exact = TRUE))

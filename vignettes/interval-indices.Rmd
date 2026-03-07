@@ -56,13 +56,13 @@ peek_within(ix, 1, 4)
 
 ```{r}
 p1 <- pop_point(ix, 2)
-p1$element
+p1$value
 p1$start
 p1$end
 p1$remaining
 
 p_all <- pop_all_overlaps(ix, 2, 3)
-as.list(p_all$elements)
+as.list(p_all$values)
 p_all$remaining
 ```
 

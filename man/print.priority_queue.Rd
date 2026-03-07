@@ -4,12 +4,15 @@
 \alias{print.priority_queue}
 \title{Print a Priority Queue Summary}
 \usage{
-\method{print}{priority_queue}(x, max_elements = 4L, ...)
+\method{print}{priority_queue}(x, max_elements = 4L, show_custom_monoids = FALSE, ...)
 }
 \arguments{
 \item{x}{A \code{priority_queue}.}
 
 \item{max_elements}{Maximum number of elements shown in the preview.}
+
+\item{show_custom_monoids}{Logical; show attached non-default monoids and
+their root cached measures.}
 
 \item{...}{Passed through to per-element \code{print()}.}
 }
@@ -22,6 +25,9 @@ Prints a compact summary with priority range and a head/tail preview.
 \examples{
 q <- priority_queue(one = 1, two = 2, three = 3, priorities = c(20, 30, 10))
 print(q, max_elements = 4)
+sum_item <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$value))
+q3 <- add_monoids(priority_queue(1, 2, priorities = c(2, 1)), list(sum_item = sum_item))
+print(q3, max_elements = 0, show_custom_monoids = TRUE)
 
 q2 <- priority_queue(1, 2, 3, priorities = c(2, 1, 3))
 print(q2, max_elements = 3)

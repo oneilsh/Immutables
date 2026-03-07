@@ -19,10 +19,10 @@
     e <- entries[[i]]
     cur_name <- out_names[[i]]
 
-    item2 <- f(e$item, e$priority, cur_name, ...)
+    item2 <- f(e$value, e$priority, cur_name, ...)
 
     out[[i]] <- list(
-      item = item2,
+      value = item2,
       priority = e$priority
     )
   }
