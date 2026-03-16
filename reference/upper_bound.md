@@ -26,7 +26,7 @@ A list with fields:
 
 - `index`: one-based position of the first match, or `NULL`.
 
-- `element`: matched element, or `NULL`.
+- `value`: matched element, or `NULL`.
 
 - `key`: matched key, or `NULL`.
 
@@ -51,7 +51,7 @@ upper_bound(x, 2)
 #> $index
 #> NULL
 #> 
-#> $element
+#> $value
 #> NULL
 #> 
 #> $key
@@ -64,7 +64,7 @@ upper_bound(x, 10)
 #> $index
 #> NULL
 #> 
-#> $element
+#> $value
 #> NULL
 #> 
 #> $key

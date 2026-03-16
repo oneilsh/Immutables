@@ -18,7 +18,7 @@ pop_back(x)
 
 A list with fields:
 
-- `element`: the last element, or `NULL` when `x` is empty.
+- `value`: the last element, or `NULL` when `x` is empty.
 
 - `remaining`: the sequence after removing the last element.
 
@@ -26,7 +26,7 @@ A list with fields:
 
 This operation is persistent: `x` is not modified.
 
-On empty input, returns a non-throwing miss object with `element = NULL`
+On empty input, returns a non-throwing miss object with `value = NULL`
 and `remaining = x`.
 
 ## Examples
@@ -34,7 +34,7 @@ and `remaining = x`.
 ``` r
 s <- flexseq("a", "b", "c")
 out <- pop_back(s)
-out$element
+out$value
 #> [1] "c"
 out$remaining
 #> Unnamed flexseq with 2 elements.
@@ -63,7 +63,7 @@ s  # unchanged
 #> 
 
 pop_back(flexseq())
-#> $element
+#> $value
 #> NULL
 #> 
 #> $remaining

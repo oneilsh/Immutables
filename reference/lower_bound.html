@@ -15,11 +15,16 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/index.html">Getting Started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference API</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">Getting Started with flexseq</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">flexseq</a></li>
     <li><a class="dropdown-item" href="../articles/priority-queues.html">Priority Queues</a></li>
+    <li><a class="dropdown-item" href="../articles/ordered-sequences.html">Ordered Sequences</a></li>
+    <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
+    <li><a class="dropdown-item" href="../articles/algorithm-demos.html">Algorithm Demos</a></li>
+    <li><a class="dropdown-item" href="../articles/developer-api.html">Developer API</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -62,7 +67,7 @@
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list with fields:</p><ul><li><p><code>found</code>: logical flag.</p></li>
 <li><p><code>index</code>: one-based position of the first match, or <code>NULL</code>.</p></li>
-<li><p><code>element</code>: matched element, or <code>NULL</code>.</p></li>
+<li><p><code>value</code>: matched element, or <code>NULL</code>.</p></li>
 <li><p><code>key</code>: matched key, or <code>NULL</code>.</p></li>
 </ul></div>
     <div class="section level2">
@@ -86,7 +91,7 @@ inclusive range scans.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $index</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $element</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "b"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $key</span>
@@ -99,7 +104,7 @@ inclusive range scans.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $index</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $element</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $key</span>

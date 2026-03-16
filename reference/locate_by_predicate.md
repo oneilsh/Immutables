@@ -19,7 +19,7 @@ locate_by_predicate(
 
 - t:
 
-  A `flexseq`.
+  A `flexseq` (or subclass).
 
 - predicate:
 
@@ -43,7 +43,7 @@ If `include_metadata = FALSE`, a list with:
 
 - `found`: logical flag.
 
-- `elem`: matched element when found, otherwise `NULL`.
+- `value`: matched element when found, otherwise `NULL`.
 
 If `include_metadata = TRUE`, adds `metadata` with:
 
@@ -65,6 +65,16 @@ As with split helpers, a common setup is a custom monoid created with
 and attached via
 [`add_monoids()`](https://oneilsh.github.io/immutables/reference/add_monoids.md).
 
+`value` is the matched leaf entry for the input structure:
+
+- `flexseq`: stored user element.
+
+- `ordered_sequence`: `list(value, key)`.
+
+- `priority_queue`: `list(value, priority)`.
+
+- `interval_index`: `list(value, start, end)`.
+
 ## Examples
 
 ``` r
@@ -76,14 +86,14 @@ locate_by_predicate(x2, function(v) v >= 3L, "size")
 #> $found
 #> [1] TRUE
 #> 
-#> $elem
+#> $value
 #> [1] "c"
 #> 
 locate_by_predicate(x2, function(v) v >= 3L, "size", include_metadata = TRUE)
 #> $found
 #> [1] TRUE
 #> 
-#> $elem
+#> $value
 #> [1] "c"
 #> 
 #> $metadata

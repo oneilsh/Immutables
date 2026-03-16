@@ -17,11 +17,16 @@ predicate becomes TRUE, without rebuilding split trees."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/index.html">Getting Started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference API</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">Getting Started with flexseq</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">flexseq</a></li>
     <li><a class="dropdown-item" href="../articles/priority-queues.html">Priority Queues</a></li>
+    <li><a class="dropdown-item" href="../articles/ordered-sequences.html">Ordered Sequences</a></li>
+    <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
+    <li><a class="dropdown-item" href="../articles/algorithm-demos.html">Algorithm Demos</a></li>
+    <li><a class="dropdown-item" href="../articles/developer-api.html">Developer API</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -60,7 +65,7 @@ predicate becomes TRUE, without rebuilding split trees."></head><body>
 
 
 <dl><dt id="arg-t">t<a class="anchor" aria-label="anchor" href="#arg-t"></a></dt>
-<dd><p>A <code>flexseq</code>.</p></dd>
+<dd><p>A <code>flexseq</code> (or subclass).</p></dd>
 
 
 <dt id="arg-predicate">predicate<a class="anchor" aria-label="anchor" href="#arg-predicate"></a></dt>
@@ -82,7 +87,7 @@ predicate becomes TRUE, without rebuilding split trees."></head><body>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>If <code>include_metadata = FALSE</code>, a list with:</p><ul><li><p><code>found</code>: logical flag.</p></li>
-<li><p><code>elem</code>: matched element when found, otherwise <code>NULL</code>.</p></li>
+<li><p><code>value</code>: matched element when found, otherwise <code>NULL</code>.</p></li>
 </ul><p>If <code>include_metadata = TRUE</code>, adds <code>metadata</code> with:</p><ul><li><p><code>left_measure</code></p></li>
 <li><p><code>hit_measure</code></p></li>
 <li><p><code>right_measure</code></p></li>
@@ -93,7 +98,11 @@ predicate becomes TRUE, without rebuilding split trees."></head><body>
     <p>This is the read-only analogue of <code><a href="split_around_by_predicate.html">split_around_by_predicate()</a></code>.</p>
 <p>As with split helpers, a common setup is a custom monoid created with
 <code><a href="measure_monoid.html">measure_monoid()</a></code> and attached via <code><a href="add_monoids.html">add_monoids()</a></code>.</p>
-    </div>
+<p><code>value</code> is the matched leaf entry for the input structure:</p><ul><li><p><code>flexseq</code>: stored user element.</p></li>
+<li><p><code>ordered_sequence</code>: <code>list(value, key)</code>.</p></li>
+<li><p><code>priority_queue</code>: <code>list(value, priority)</code>.</p></li>
+<li><p><code>interval_index</code>: <code>list(value, start, end)</code>.</p></li>
+</ul></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -105,14 +114,14 @@ predicate becomes TRUE, without rebuilding split trees."></head><body>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $found</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $elem</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "c"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu">locate_by_predicate</span><span class="op">(</span><span class="va">x2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;=</span> <span class="fl">3L</span>, <span class="st">"size"</span>, include_metadata <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $found</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $elem</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "c"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $metadata</span>

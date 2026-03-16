@@ -280,6 +280,29 @@ of the API or underlying implementations change.
   benchmark coverage now includes `interval_index_overlaps_all_stress`.
   Risk: C++-enabled mixed-query scenarios may need follow-up tuning
   despite improved forced-R fallback times.
+- `local`: `meta/bench_runner.R` now includes first-class custom-monoid
+  scenarios for flexseq (`add_monoids_only*`, `locate_custom_cached*`,
+  `split_tree_custom_cached*`, `split_custom_cached*`) so one-time
+  attach cost and steady-state cached-query cost can be benchmarked
+  without touching the stale auto-running `meta/bench.R`. Risk:
+  quick/full suites are broader; compare by scenario and params, not
+  just run label.
+- `local`: `Rprof` on `add_monoids(as_flexseq(...), list(sum=...))`
+  points to
+  `add_monoids.flexseq -> rebind_tree_monoids -> set_measure_with_reuse`
+  as the dominant path, with large self time in repeated lookup/dispatch
+  helpers (`get0`, `get_lr`); the lightweight subtype measure wrapper is
+  not the bottleneck. Risk: attach-cost optimizations likely need
+  per-node recompute/lookup reductions rather than API-surface tweaks.
+- `local`: add-monoid attach path now uses fast internal recursion
+  helpers in `R/00-core-ref-measured.R` (`.measure_child_named_fast` +
+  loop-based `measure_children`/`set_measure_with_reuse`), keeping typed
+  wrappers only at API boundaries. Measured impact:
+  `add_monoids_only(n=10000,use_cpp=TRUE)` improved from ~19.9s to
+  ~16.1-16.3s (~18-20% faster); profile still dominated by
+  lookup/dispatch (`get0`, `get_lr`) under `rebind_tree_monoids`. Risk:
+  further wins likely need deeper reduction in typed-dispatch overhead,
+  not just local loop cleanup.
 - C++ GC safety in `src/ft_cpp.cpp` — recurring “\$ operator is invalid
   for atomic vectors” root cause and fix patterns:
   - **Root cause**: bare `SEXP` variables holding newly-allocated R

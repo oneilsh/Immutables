@@ -17,11 +17,16 @@ tree metadata."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/index.html">Getting Started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference API</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">Getting Started with flexseq</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">flexseq</a></li>
     <li><a class="dropdown-item" href="../articles/priority-queues.html">Priority Queues</a></li>
+    <li><a class="dropdown-item" href="../articles/ordered-sequences.html">Ordered Sequences</a></li>
+    <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
+    <li><a class="dropdown-item" href="../articles/algorithm-demos.html">Algorithm Demos</a></li>
+    <li><a class="dropdown-item" href="../articles/developer-api.html">Developer API</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -71,12 +76,16 @@ tree metadata.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>A measure monoid has three parts:</p><ul><li><p><code>measure(element)</code>: maps each element to a measure value.</p></li>
+    <p>A measure monoid has three parts:</p><ul><li><p><code>measure(entry)</code>: maps each stored leaf entry to a measure value.</p></li>
 <li><p><code>f(left, right)</code>: combines two measure values.</p></li>
 <li><p><code>i</code>: identity value for <code>f</code>.</p></li>
 </ul><p>Requirements:</p><ul><li><p><code>f</code> should be associative.</p></li>
 <li><p><code>i</code> should satisfy <code>f(i, x) == x</code> and <code>f(x, i) == x</code>.</p></li>
 <li><p><code>measure()</code> outputs must be compatible with <code>f</code> and <code>i</code>.</p></li>
+</ul><p>Developer APIs are leaf-entry oriented:</p><ul><li><p><code>flexseq</code>: entry is the stored user element.</p></li>
+<li><p><code>ordered_sequence</code>: entry is <code>list(value, key)</code>.</p></li>
+<li><p><code>priority_queue</code>: entry is <code>list(value, priority)</code>.</p></li>
+<li><p><code>interval_index</code>: entry is <code>list(value, start, end)</code>.</p></li>
 </ul><p><code>measure_monoid()</code> only constructs the specification; it becomes active after
 being attached to a structure via <code><a href="add_monoids.html">add_monoids()</a></code>.</p>
     </div>
@@ -91,7 +100,6 @@ being attached to a structure via <code><a href="add_monoids.html">add_monoids()
 <span class="r-in"><span><span class="fu"><a href="split_around_by_predicate.html">split_around_by_predicate</a></span><span class="op">(</span><span class="va">x2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;=</span> <span class="fl">6</span>, <span class="st">"sum"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $left</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unnamed flexseq with 2 elements.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Custom monoids: sum</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Elements:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -102,12 +110,11 @@ being attached to a structure via <code><a href="add_monoids.html">add_monoids()
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $elem</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $right</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unnamed flexseq with 2 elements.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Custom monoids: sum</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Elements:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

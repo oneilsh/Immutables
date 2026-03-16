@@ -43,7 +43,7 @@ to remove all matches.
 ``` r
 ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
 pop_overlaps(ix, 2, 3)
-#> $element
+#> $value
 #> NULL
 #> 
 #> $start

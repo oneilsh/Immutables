@@ -45,6 +45,19 @@ Mechanics:
 
 - Structural/reserved monoid names cannot be replaced.
 
+Measure-function signatures:
+
+- `flexseq`: `measure(entry)` where `entry` is the stored element.
+
+- `ordered_sequence`: `measure(entry)` where `entry` is
+  `list(value, key)`.
+
+- `priority_queue`: `measure(entry)` where `entry` is
+  `list(value, priority)`.
+
+- `interval_index`: `measure(entry)` where `entry` is
+  `list(value, start, end)`.
+
 This operation is persistent: `t` is not modified.
 
 Use this when you want fast predicate scans (for example with
@@ -72,7 +85,6 @@ attr(x2, "measures")$sum
 split_around_by_predicate(x2, function(v) v >= 30, "sum")
 #> $left
 #> Unnamed flexseq with 1 element.
-#> Custom monoids: sum
 #> 
 #> Elements:
 #> 
@@ -80,12 +92,11 @@ split_around_by_predicate(x2, function(v) v >= 30, "sum")
 #> [1] 10
 #> 
 #> 
-#> $elem
+#> $value
 #> [1] 20
 #> 
 #> $right
 #> Unnamed flexseq with 1 element.
-#> Custom monoids: sum
 #> 
 #> Elements:
 #> 

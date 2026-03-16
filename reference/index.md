@@ -66,6 +66,9 @@ ends, O(log n) indexing and replacement, and efficient split/concat.
 - [`as.list(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/as.list.flexseq.md)
   : Coerce a Sequence to Base List
 
+- [`unlist(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/unlist.flexseq.md)
+  : Coerce a Sequence to an Atomic Vector
+
 - [`plot(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/plot.flexseq.md)
   : Plot a Sequence Tree
 
@@ -111,6 +114,12 @@ for full sequence operations.
 - [`pop_all_max()`](https://oneilsh.github.io/immutables/reference/pop_all_max.md)
   : Pop All Maximum-Priority Elements
 
+- [`min_priority()`](https://oneilsh.github.io/immutables/reference/min_priority.md)
+  : Minimum Priority Value
+
+- [`max_priority()`](https://oneilsh.github.io/immutables/reference/max_priority.md)
+  : Maximum Priority Value
+
 - [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
   : Fapply with S3 dispatch
 
@@ -124,6 +133,9 @@ for full sequence operations.
 
 - [`as.list(`*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/as.list.priority_queue.md)
   : Coerce Priority Queue to List
+
+- [`unlist(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/unlist.flexseq.md)
+  : Coerce a Sequence to an Atomic Vector
 
 - [`print(`*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/print.priority_queue.md)
   : Print a Priority Queue Summary
@@ -182,6 +194,12 @@ is not supported.
 - [`count_between()`](https://oneilsh.github.io/immutables/reference/count_between.md)
   : Count Elements in a Key Range
 
+- [`min_key()`](https://oneilsh.github.io/immutables/reference/min_key.md)
+  : Minimum Key Value
+
+- [`max_key()`](https://oneilsh.github.io/immutables/reference/max_key.md)
+  : Maximum Key Value
+
 - [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
   : Fapply with S3 dispatch
 
@@ -202,6 +220,9 @@ is not supported.
 - [`as.list(`*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/as.list.ordered_sequence.md)
   : Coerce Ordered Sequence to List
 
+- [`unlist(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/unlist.flexseq.md)
+  : Coerce a Sequence to an Atomic Vector
+
 - [`plot(`*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/plot.ordered_sequence.md)
   : Plot an Ordered Sequence Tree
 
@@ -220,9 +241,6 @@ query/pop helpers over ordered interval endpoints.
 
 - [`insert()`](https://oneilsh.github.io/immutables/reference/insert.md)
   : Insert an Element
-
-- [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
-  : Fapply with S3 dispatch
 
 - [`peek_point()`](https://oneilsh.github.io/immutables/reference/peek_point.md)
   : Peek First Interval Containing a Point
@@ -272,6 +290,15 @@ query/pop helpers over ordered interval endpoints.
 - [`pop_all_within()`](https://oneilsh.github.io/immutables/reference/pop_all_within.md)
   : Pop All Intervals Within a Query Interval
 
+- [`min_endpoint()`](https://oneilsh.github.io/immutables/reference/min_endpoint.md)
+  : Minimum Left Endpoint
+
+- [`max_endpoint()`](https://oneilsh.github.io/immutables/reference/max_endpoint.md)
+  : Maximum Right Endpoint
+
+- [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+  : Fapply with S3 dispatch
+
 - [`` `[`( ``*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.interval_index.md)
   [`` `[[`( ``*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.interval_index.md)
   [`` `[<-`( ``*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.interval_index.md)
@@ -288,6 +315,9 @@ query/pop helpers over ordered interval endpoints.
 
 - [`as.list(`*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/as.list.interval_index.md)
   : Coerce Interval Index to List
+
+- [`unlist(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/unlist.flexseq.md)
+  : Coerce a Sequence to an Atomic Vector
 
 - [`plot(`*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/plot.interval_index.md)
   : Plot an Interval Index Tree

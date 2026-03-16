@@ -26,7 +26,7 @@ A list with fields:
 
 - `index`: one-based position of the first match, or `NULL`.
 
-- `element`: matched element, or `NULL`.
+- `value`: matched element, or `NULL`.
 
 - `key`: matched key, or `NULL`.
 
@@ -51,7 +51,7 @@ lower_bound(x, 2)
 #> $index
 #> [1] 2
 #> 
-#> $element
+#> $value
 #> [1] "b"
 #> 
 #> $key
@@ -64,7 +64,7 @@ lower_bound(x, 10)
 #> $index
 #> NULL
 #> 
-#> $element
+#> $value
 #> NULL
 #> 
 #> $key

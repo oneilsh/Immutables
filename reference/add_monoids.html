@@ -17,11 +17,16 @@ immutable structure."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/index.html">Getting Started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference API</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">Getting Started with flexseq</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">flexseq</a></li>
     <li><a class="dropdown-item" href="../articles/priority-queues.html">Priority Queues</a></li>
+    <li><a class="dropdown-item" href="../articles/ordered-sequences.html">Ordered Sequences</a></li>
+    <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
+    <li><a class="dropdown-item" href="../articles/algorithm-demos.html">Algorithm Demos</a></li>
+    <li><a class="dropdown-item" href="../articles/developer-api.html">Developer API</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -76,6 +81,10 @@ names. If <code>FALSE</code>, existing names are kept.</p></dd>
 <li><p>New monoids are computed for all elements and cached in the returned object.</p></li>
 <li><p>Existing monoids are unchanged unless <code>overwrite = TRUE</code>.</p></li>
 <li><p>Structural/reserved monoid names cannot be replaced.</p></li>
+</ul><p>Measure-function signatures:</p><ul><li><p><code>flexseq</code>: <code>measure(entry)</code> where <code>entry</code> is the stored element.</p></li>
+<li><p><code>ordered_sequence</code>: <code>measure(entry)</code> where <code>entry</code> is <code>list(value, key)</code>.</p></li>
+<li><p><code>priority_queue</code>: <code>measure(entry)</code> where <code>entry</code> is <code>list(value, priority)</code>.</p></li>
+<li><p><code>interval_index</code>: <code>measure(entry)</code> where <code>entry</code> is <code>list(value, start, end)</code>.</p></li>
 </ul><p>This operation is persistent: <code>t</code> is not modified.</p>
 <p>Use this when you want fast predicate scans (for example with
 <code><a href="locate_by_predicate.html">locate_by_predicate()</a></code>, <code><a href="split_by_predicate.html">split_by_predicate()</a></code>, <code><a href="split_around_by_predicate.html">split_around_by_predicate()</a></code>)
@@ -100,7 +109,6 @@ driven by domain-specific accumulated values.</p>
 <span class="r-in"><span><span class="fu"><a href="split_around_by_predicate.html">split_around_by_predicate</a></span><span class="op">(</span><span class="va">x2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;=</span> <span class="fl">30</span>, <span class="st">"sum"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $left</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unnamed flexseq with 1 element.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Custom monoids: sum</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Elements:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -108,12 +116,11 @@ driven by domain-specific accumulated values.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $elem</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $right</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unnamed flexseq with 1 element.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Custom monoids: sum</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Elements:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

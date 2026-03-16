@@ -17,11 +17,16 @@ while scanning the sequence."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/index.html">Getting Started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference API</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">Getting Started with flexseq</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">flexseq</a></li>
     <li><a class="dropdown-item" href="../articles/priority-queues.html">Priority Queues</a></li>
+    <li><a class="dropdown-item" href="../articles/ordered-sequences.html">Ordered Sequences</a></li>
+    <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
+    <li><a class="dropdown-item" href="../articles/algorithm-demos.html">Algorithm Demos</a></li>
+    <li><a class="dropdown-item" href="../articles/developer-api.html">Developer API</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -54,7 +59,7 @@ while scanning the sequence.</p>
 
 
 <dl><dt id="arg-t">t<a class="anchor" aria-label="anchor" href="#arg-t"></a></dt>
-<dd><p>A <code>flexseq</code>.</p></dd>
+<dd><p>A <code>flexseq</code> (or subclass).</p></dd>
 
 
 <dt id="arg-predicate">predicate<a class="anchor" aria-label="anchor" href="#arg-predicate"></a></dt>
@@ -72,7 +77,7 @@ while scanning the sequence.</p>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list with fields:</p><ul><li><p><code>left</code>: elements before the split point.</p></li>
-<li><p><code>elem</code>: the matched element at the split point.</p></li>
+<li><p><code>value</code>: the matched element at the split point.</p></li>
 <li><p><code>right</code>: elements after the split point.</p></li>
 </ul></div>
     <div class="section level2">
@@ -80,6 +85,12 @@ while scanning the sequence.</p>
     <p>This function generally requires the sequence be annotated with
 a <code><a href="measure_monoid.html">measure_monoid()</a></code>; see the examples and <code><a href="measure_monoid.html">measure_monoid()</a></code>
 for more information.</p>
+<p><code>value</code> is the matched leaf entry for the input structure:</p><ul><li><p><code>flexseq</code>: stored user element.</p></li>
+<li><p><code>ordered_sequence</code>: <code>list(value, key)</code>.</p></li>
+<li><p><code>priority_queue</code>: <code>list(value, priority)</code>.</p></li>
+<li><p><code>interval_index</code>: <code>list(value, start, end)</code>.</p></li>
+</ul><p><code>left</code> and <code>right</code> preserve subclass when the input is a subclass of
+<code>flexseq</code>.</p>
     </div>
 
     <div class="section level2">
@@ -98,7 +109,6 @@ for more information.</p>
 <span class="r-in"><span><span class="fu">split_around_by_predicate</span><span class="op">(</span><span class="va">x2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;=</span> <span class="fl">3L</span>, <span class="st">"size"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $left</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unnamed flexseq with 2 elements.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Custom monoids: size</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Elements:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -109,12 +119,11 @@ for more information.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "b"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $elem</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "c"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $right</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unnamed flexseq with 1 element.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Custom monoids: size</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Elements:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -127,14 +136,12 @@ for more information.</p>
 <span class="r-in"><span><span class="fu">split_around_by_predicate</span><span class="op">(</span><span class="va">x2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;=</span> <span class="fl">1L</span>, <span class="st">"size"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $left</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unnamed flexseq with 0 elements.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Custom monoids: size</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $elem</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "a"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $right</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unnamed flexseq with 3 elements.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Custom monoids: size</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Elements:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -153,7 +160,6 @@ for more information.</p>
 <span class="r-in"><span><span class="fu">split_around_by_predicate</span><span class="op">(</span><span class="va">x2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;=</span> <span class="fl">4L</span>, <span class="st">"size"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $left</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unnamed flexseq with 3 elements.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Custom monoids: size</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Elements:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -167,12 +173,11 @@ for more information.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "c"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $elem</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "d"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $right</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Unnamed flexseq with 0 elements.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Custom monoids: size</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>

@@ -54,7 +54,7 @@ lower_bound(xs, 2)
 #> $index
 #> [1] 2
 #> 
-#> $element
+#> $value
 #> [1] "bb"
 #> 
 #> $key

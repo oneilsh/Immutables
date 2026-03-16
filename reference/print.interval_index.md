@@ -7,7 +7,7 @@ payload elements.
 
 ``` r
 # S3 method for class 'interval_index'
-print(x, max_elements = 4L, ...)
+print(x, max_elements = 4L, show_custom_monoids = FALSE, ...)
 ```
 
 ## Arguments
@@ -19,6 +19,11 @@ print(x, max_elements = 4L, ...)
 - max_elements:
 
   Maximum number of elements shown in the preview.
+
+- show_custom_monoids:
+
+  Logical; show attached non-default monoids and their root cached
+  measures.
 
 - ...:
 
@@ -50,6 +55,12 @@ print(ix, max_elements = 4)
 #> $two (interval [30, 37))
 #> [1] 2
 #> 
+width_sum <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$end - entry$start))
+ix3 <- add_monoids(interval_index(1, 2, start = c(1, 3), end = c(2, 5)), list(width_sum = width_sum))
+print(ix3, max_elements = 0, show_custom_monoids = TRUE)
+#> Unnamed interval_index with 2 elements, default bounds [start, end).
+#> Custom monoids + measures:
+#>   width_sum: 3
 
 ix2 <- interval_index(1, 2, 3, start = c(2, 4, 6), end = c(3, 5, 8), bounds = "[]")
 print(ix2, max_elements = 3)

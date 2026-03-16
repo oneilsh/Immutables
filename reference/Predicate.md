@@ -32,7 +32,7 @@ locate_by_predicate(x, p, ".size")
 #> $found
 #> [1] TRUE
 #> 
-#> $elem
+#> $value
 #> [1] "c"
 #> 
 ```

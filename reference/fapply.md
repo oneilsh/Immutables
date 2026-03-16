@@ -42,8 +42,9 @@ Method signatures:
 - `fapply.interval_index(X, FUN, ..., preserve_custom_monoids = TRUE)`
 
 For `priority_queue`, `ordered_sequence`, and `interval_index`, `FUN`
-receives structured fields (`item` plus metadata) and should return the
-new payload value only; ordering metadata is preserved.
+receives structured fields (`value` plus metadata) and should return the
+new payload value only; ordering metadata is preserved. The name
+argument is optional: callbacks that only take value/metadata also work.
 
 If supported by the method, `preserve_custom_monoids = TRUE` keeps added
 user monoids; `FALSE` rebuilds with required structural monoids only.
@@ -75,7 +76,7 @@ fapply(x, toupper)
 #> 
 
 q <- priority_queue(one = "a", two = "b", priorities = c(2, 1))
-fapply(q, function(item, priority, name) paste0(item, priority))
+fapply(q, function(value, priority, name) paste0(value, priority))
 #> Named priority_queue with 2 elements.
 #> Minimum priority: 1, Maximum priority: 2
 #> 
@@ -89,7 +90,7 @@ fapply(q, function(item, priority, name) paste0(item, priority))
 #> 
 
 o <- ordered_sequence(one = "a", two = "b", keys = c(2, 1))
-fapply(o, function(item, key, name) paste0(item, "_", key))
+fapply(o, function(value, key, name) paste0(value, "_", key))
 #> Named ordered_sequence with 2 elements.
 #> 
 #> Elements (by key order):
@@ -102,7 +103,7 @@ fapply(o, function(item, key, name) paste0(item, "_", key))
 #> 
 
 ix <- interval_index(one = "a", two = "b", start = c(1, 3), end = c(2, 4))
-fapply(ix, function(item, start, end, name) paste0(item, "[", start, ",", end, "]"))
+fapply(ix, function(value, start, end, name) paste0(value, "[", start, ",", end, "]"))
 #> Named interval_index with 2 elements, default bounds [start, end).
 #> 
 #> Elements (by interval start order):

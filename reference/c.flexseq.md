@@ -69,20 +69,10 @@ c(as_flexseq(q1), as_flexseq(q2))
 #> Elements:
 #> 
 #> [[1]]
-#> $item
 #> [1] "a"
 #> 
-#> $priority
-#> [1] 2
-#> 
-#> 
 #> [[2]]
-#> $item
 #> [1] "b"
-#> 
-#> $priority
-#> [1] 1
-#> 
 #> 
 
 o1 <- ordered_sequence("a", keys = 1)

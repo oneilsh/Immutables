@@ -19,7 +19,7 @@ pop_max(x)
 
 A list with fields:
 
-- `element`: removed element, or `NULL` when `x` is empty.
+- `value`: removed element, or `NULL` when `x` is empty.
 
 - `priority`: removed priority, or `NULL` when `x` is empty.
 
@@ -35,7 +35,7 @@ earliest element in queue order is removed.
 ``` r
 x <- priority_queue("a", "b", "c", priorities = c(2, 3, 3))
 out <- pop_max(x)
-out$element
+out$value
 #> [1] "b"
 out$priority
 #> [1] 3
@@ -52,7 +52,7 @@ out$remaining
 #> [1] "c"
 #> 
 pop_max(priority_queue())
-#> $element
+#> $value
 #> NULL
 #> 
 #> $priority

@@ -19,11 +19,16 @@ to R's side-effect-free functional nature."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/index.html">Getting Started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference API</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">Getting Started with flexseq</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">flexseq</a></li>
     <li><a class="dropdown-item" href="../articles/priority-queues.html">Priority Queues</a></li>
+    <li><a class="dropdown-item" href="../articles/ordered-sequences.html">Ordered Sequences</a></li>
+    <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
+    <li><a class="dropdown-item" href="../articles/algorithm-demos.html">Algorithm Demos</a></li>
+    <li><a class="dropdown-item" href="../articles/developer-api.html">Developer API</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -64,7 +69,7 @@ point as well as interval overlaps/contains/within queries. Items are kept
 in start-order enabling ordered sequence operations and sweep-line
 algorithms.</p></li>
 </ul><p>Backed by monoid-annotated 2-3 fingertrees as described by
-<a href="https://doi.org/10.1017/S0956796805005769" class="external-link">Hinze and Paterson</a>, most operations are constant time, amortized constant time, or $O((n))$ (indexing $k$ elements is $O(k (n))$). Core functions are implemented in C++ (via Rcpp) for speed, with matching pure-R reference implementations using <code>lambda.r</code> syntax to match the paper.</p>
+<a href="https://doi.org/10.1017/S0956796805005769" class="external-link">Hinze and Paterson</a>, most operations are constant time, amortized constant time, or $O(\log(n))$ (indexing $k$ elements is $O(k \log(n))$). Core functions are implemented in C++ (via Rcpp) for speed, with matching pure-R reference implementations using <code>lambda.r</code> syntax to match the paper.</p>
 <p>Finally, the developer API supports the addition of custom structures via combinations of monoids and measures; see vignettes for details.</p><ul><li><p>Hinze, R. and Paterson, R. (2006), <em>Finger trees: a simple general-purpose data structure</em>.</p></li>
 </ul></div>
     <div class="section level2">

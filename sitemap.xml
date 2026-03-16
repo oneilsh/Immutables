@@ -3,8 +3,12 @@
 <url><loc>https://oneilsh.github.io/immutables/AGENTS.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/LICENSE-text.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/LICENSE.html</loc></url>
+<url><loc>https://oneilsh.github.io/immutables/articles/algorithm-demos.html</loc></url>
+<url><loc>https://oneilsh.github.io/immutables/articles/developer-api.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/articles/flexseq.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/articles/index.html</loc></url>
+<url><loc>https://oneilsh.github.io/immutables/articles/interval-indices.html</loc></url>
+<url><loc>https://oneilsh.github.io/immutables/articles/ordered-sequences.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/articles/priority-queues.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/authors.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/index.html</loc></url>
@@ -38,7 +42,13 @@
 <url><loc>https://oneilsh.github.io/immutables/reference/length.priority_queue.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/locate_by_predicate.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/lower_bound.html</loc></url>
+<url><loc>https://oneilsh.github.io/immutables/reference/max_endpoint.html</loc></url>
+<url><loc>https://oneilsh.github.io/immutables/reference/max_key.html</loc></url>
+<url><loc>https://oneilsh.github.io/immutables/reference/max_priority.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/measure_monoid.html</loc></url>
+<url><loc>https://oneilsh.github.io/immutables/reference/min_endpoint.html</loc></url>
+<url><loc>https://oneilsh.github.io/immutables/reference/min_key.html</loc></url>
+<url><loc>https://oneilsh.github.io/immutables/reference/min_priority.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/ordered_sequence.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/peek_all_containing.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/peek_all_key.html</loc></url>
@@ -96,6 +106,7 @@
 <url><loc>https://oneilsh.github.io/immutables/reference/sub-.ordered_sequence.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/sub-.priority_queue.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/tree_from.html</loc></url>
+<url><loc>https://oneilsh.github.io/immutables/reference/unlist.flexseq.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/upper_bound.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/validate_name_state.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/validate_tree.html</loc></url>

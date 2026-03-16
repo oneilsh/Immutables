@@ -22,7 +22,7 @@ split_at(x, at, pull_index = FALSE)
 
   Controls output shape:
 
-  - `FALSE` (default): returns `list(left, elem, right)`.
+  - `FALSE` (default): returns `list(left, value, right)`.
 
   - `TRUE`: returns `list(left, right)`.
 
@@ -56,7 +56,7 @@ split_at(x, 3)
 #> [1] "b"
 #> 
 #> 
-#> $elem
+#> $value
 #> [1] "c"
 #> 
 #> $right
@@ -105,7 +105,7 @@ split_at(n, "b")
 #> [1] 1
 #> 
 #> 
-#> $elem
+#> $value
 #> [1] 2
 #> attr(,"ft_name")
 #> [1] "b"

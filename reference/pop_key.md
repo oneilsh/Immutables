@@ -22,7 +22,7 @@ pop_key(x, key)
 
 A list with fields:
 
-- `element`: removed element, or `NULL` on miss.
+- `value`: removed element, or `NULL` on miss.
 
 - `key`: removed key, or `NULL` on miss.
 
@@ -38,7 +38,7 @@ removed.
 ``` r
 x <- ordered_sequence("a", "b", "c", keys = c(1, 2, 2))
 out <- pop_key(x, 2)
-out$element
+out$value
 #> [1] "b"
 out$remaining
 #> Unnamed ordered_sequence with 2 elements.
@@ -52,7 +52,7 @@ out$remaining
 #> [1] "c"
 #> 
 pop_key(x, 10)
-#> $element
+#> $value
 #> NULL
 #> 
 #> $key

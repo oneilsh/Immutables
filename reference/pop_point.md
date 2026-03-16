@@ -39,7 +39,7 @@ to remove all matches.
 ``` r
 ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
 pop_point(ix, 2)
-#> $element
+#> $value
 #> [1] "a"
 #> 
 #> $start

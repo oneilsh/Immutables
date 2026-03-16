@@ -1,6 +1,15 @@
 # Priority Queues
 
-## Creating a priority queue
+## What is a priority queue?
+
+`priority_queue` is a persistent queue ordered by numeric or comparable
+priority values. For full sequence-style operations, cast with
+[`as_flexseq()`](https://oneilsh.github.io/immutables/reference/as_flexseq.md).
+By default this casts to payload items only (`drop_meta = TRUE`); use
+`as_flexseq(..., drop_meta = FALSE)` to keep entry records (`value` +
+`priority`).
+
+## Creating a queue
 
 ``` r
 x <- priority_queue("task_a", "task_b", "task_c", priorities = c(3, 1, 2))
@@ -20,7 +29,7 @@ x
 #> [1] "task_a"
 ```
 
-## Peeking at extremes
+## Peeking min and max
 
 ``` r
 peek_min(x)
@@ -29,7 +38,7 @@ peek_max(x)
 #> [1] "task_a"
 ```
 
-## Popping elements
+## Popping one element
 
 [`pop_min()`](https://oneilsh.github.io/immutables/reference/pop_min.md)
 and
@@ -38,7 +47,7 @@ return both the element and the updated queue.
 
 ``` r
 x2 <- pop_min(x)
-x2$element
+x2$value
 #> [1] "task_b"
 x2$priority
 #> [1] 1
@@ -55,7 +64,7 @@ x2$remaining
 #> [1] "task_a"
 ```
 
-## Bulk extrema (tie runs)
+## Popping a full tie run
 
 Use bulk helpers to read/remove all elements tied at the current minimum
 or maximum priority.
@@ -69,18 +78,10 @@ peek_all_min(x)
 #> 
 #> (priority 1)
 #> [1] "task_b"
-pop_all_min(x)
-#> $elements
-#> Unnamed priority_queue with 1 element.
-#> Minimum priority: 1, Maximum priority: 1
-#> 
-#> Elements (by priority):
-#> 
-#> (priority 1)
-#> [1] "task_b"
-#> 
-#> 
-#> $remaining
+p_all <- pop_all_min(x)
+as.list(p_all$values)
+#> list()
+p_all$remaining
 #> Unnamed priority_queue with 2 elements.
 #> Minimum priority: 2, Maximum priority: 3
 #> 
@@ -102,7 +103,7 @@ empty_q <- priority_queue()
 peek_min(empty_q)
 #> NULL
 pop_min(empty_q)
-#> $element
+#> $value
 #> NULL
 #> 
 #> $priority
@@ -112,7 +113,7 @@ pop_min(empty_q)
 #> Unnamed priority_queue with 0 elements.
 ```
 
-## Inserting elements
+## Inserting
 
 ``` r
 x3 <- insert(x, "task_d", priority = 0)
@@ -137,7 +138,7 @@ peek_min(x3)
 #> [1] "task_d"
 ```
 
-## Persistence
+## Persistence recap
 
 The original queue is unchanged.
 

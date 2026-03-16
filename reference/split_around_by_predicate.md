@@ -13,7 +13,7 @@ split_around_by_predicate(t, predicate, monoid_name, accumulator = NULL)
 
 - t:
 
-  A `flexseq`.
+  A `flexseq` (or subclass).
 
 - predicate:
 
@@ -33,7 +33,7 @@ A list with fields:
 
 - `left`: elements before the split point.
 
-- `elem`: the matched element at the split point.
+- `value`: the matched element at the split point.
 
 - `right`: elements after the split point.
 
@@ -44,6 +44,19 @@ This function generally requires the sequence be annotated with a
 see the examples and
 [`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md)
 for more information.
+
+`value` is the matched leaf entry for the input structure:
+
+- `flexseq`: stored user element.
+
+- `ordered_sequence`: `list(value, key)`.
+
+- `priority_queue`: `list(value, priority)`.
+
+- `interval_index`: `list(value, start, end)`.
+
+`left` and `right` preserve subclass when the input is a subclass of
+`flexseq`.
 
 ## Examples
 
@@ -62,7 +75,6 @@ x2 <- add_monoids(x, list(size = size_monoid))
 split_around_by_predicate(x2, function(v) v >= 3L, "size")
 #> $left
 #> Unnamed flexseq with 2 elements.
-#> Custom monoids: size
 #> 
 #> Elements:
 #> 
@@ -73,12 +85,11 @@ split_around_by_predicate(x2, function(v) v >= 3L, "size")
 #> [1] "b"
 #> 
 #> 
-#> $elem
+#> $value
 #> [1] "c"
 #> 
 #> $right
 #> Unnamed flexseq with 1 element.
-#> Custom monoids: size
 #> 
 #> Elements:
 #> 
@@ -91,14 +102,12 @@ split_around_by_predicate(x2, function(v) v >= 3L, "size")
 split_around_by_predicate(x2, function(v) v >= 1L, "size")
 #> $left
 #> Unnamed flexseq with 0 elements.
-#> Custom monoids: size
 #> 
-#> $elem
+#> $value
 #> [1] "a"
 #> 
 #> $right
 #> Unnamed flexseq with 3 elements.
-#> Custom monoids: size
 #> 
 #> Elements:
 #> 
@@ -117,7 +126,6 @@ split_around_by_predicate(x2, function(v) v >= 1L, "size")
 split_around_by_predicate(x2, function(v) v >= 4L, "size")
 #> $left
 #> Unnamed flexseq with 3 elements.
-#> Custom monoids: size
 #> 
 #> Elements:
 #> 
@@ -131,11 +139,10 @@ split_around_by_predicate(x2, function(v) v >= 4L, "size")
 #> [1] "c"
 #> 
 #> 
-#> $elem
+#> $value
 #> [1] "d"
 #> 
 #> $right
 #> Unnamed flexseq with 0 elements.
-#> Custom monoids: size
 #> 
 ```

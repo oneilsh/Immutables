@@ -17,11 +17,16 @@ structures with type-specific dispatch."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/index.html">Getting Started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference API</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">Getting Started with flexseq</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/flexseq.html">flexseq</a></li>
     <li><a class="dropdown-item" href="../articles/priority-queues.html">Priority Queues</a></li>
+    <li><a class="dropdown-item" href="../articles/ordered-sequences.html">Ordered Sequences</a></li>
+    <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
+    <li><a class="dropdown-item" href="../articles/algorithm-demos.html">Algorithm Demos</a></li>
+    <li><a class="dropdown-item" href="../articles/developer-api.html">Developer API</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -77,8 +82,9 @@ structures with type-specific dispatch.</p>
 <li><p><code>fapply.ordered_sequence(X, FUN, ..., preserve_custom_monoids = TRUE)</code></p></li>
 <li><p><code>fapply.interval_index(X, FUN, ..., preserve_custom_monoids = TRUE)</code></p></li>
 </ul><p>For <code>priority_queue</code>, <code>ordered_sequence</code>, and <code>interval_index</code>,
-<code>FUN</code> receives structured fields (<code>item</code> plus metadata) and should return the
-new payload value only; ordering metadata is preserved.</p>
+<code>FUN</code> receives structured fields (<code>value</code> plus metadata) and should return the
+new payload value only; ordering metadata is preserved. The name argument is
+optional: callbacks that only take value/metadata also work.</p>
 <p>If supported by the method, <code>preserve_custom_monoids = TRUE</code> keeps added user
 monoids; <code>FALSE</code> rebuilds with required structural monoids only.</p>
     </div>
@@ -106,7 +112,7 @@ monoids; <code>FALSE</code> rebuilds with required structural monoids only.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu"><a href="priority_queue.html">priority_queue</a></span><span class="op">(</span>one <span class="op">=</span> <span class="st">"a"</span>, two <span class="op">=</span> <span class="st">"b"</span>, priorities <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">fapply</span><span class="op">(</span><span class="va">q</span>, <span class="kw">function</span><span class="op">(</span><span class="va">item</span>, <span class="va">priority</span>, <span class="va">name</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">item</span>, <span class="va">priority</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">fapply</span><span class="op">(</span><span class="va">q</span>, <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">priority</span>, <span class="va">name</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">value</span>, <span class="va">priority</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Named priority_queue with 2 elements.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Minimum priority: 1, Maximum priority: 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -120,7 +126,7 @@ monoids; <code>FALSE</code> rebuilds with required structural monoids only.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="ordered_sequence.html">ordered_sequence</a></span><span class="op">(</span>one <span class="op">=</span> <span class="st">"a"</span>, two <span class="op">=</span> <span class="st">"b"</span>, keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">fapply</span><span class="op">(</span><span class="va">o</span>, <span class="kw">function</span><span class="op">(</span><span class="va">item</span>, <span class="va">key</span>, <span class="va">name</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">item</span>, <span class="st">"_"</span>, <span class="va">key</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">fapply</span><span class="op">(</span><span class="va">o</span>, <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">key</span>, <span class="va">name</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">value</span>, <span class="st">"_"</span>, <span class="va">key</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Named ordered_sequence with 2 elements.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Elements (by key order):</span>
@@ -133,7 +139,7 @@ monoids; <code>FALSE</code> rebuilds with required structural monoids only.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">ix</span> <span class="op">&lt;-</span> <span class="fu"><a href="interval_index.html">interval_index</a></span><span class="op">(</span>one <span class="op">=</span> <span class="st">"a"</span>, two <span class="op">=</span> <span class="st">"b"</span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>, end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">fapply</span><span class="op">(</span><span class="va">ix</span>, <span class="kw">function</span><span class="op">(</span><span class="va">item</span>, <span class="va">start</span>, <span class="va">end</span>, <span class="va">name</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">item</span>, <span class="st">"["</span>, <span class="va">start</span>, <span class="st">","</span>, <span class="va">end</span>, <span class="st">"]"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">fapply</span><span class="op">(</span><span class="va">ix</span>, <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">start</span>, <span class="va">end</span>, <span class="va">name</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">value</span>, <span class="st">"["</span>, <span class="va">start</span>, <span class="st">","</span>, <span class="va">end</span>, <span class="st">"]"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Named interval_index with 2 elements, default bounds [start, end).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Elements (by interval start order):</span>

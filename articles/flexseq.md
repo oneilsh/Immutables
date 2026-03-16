@@ -1,9 +1,9 @@
-# Getting Started with flexseq
+# flexseq
 
-## Creating sequences
+## What is a flexseq?
 
-`flexseq` objects are persistent (immutable) sequences. Each update
-returns a new object.
+`flexseq` is a persistent sequence type. All updates return a new object
+and keep the original unchanged.
 
 ``` r
 x <- flexseq(1, 2, 3)
@@ -42,33 +42,11 @@ x2
 #> [1] "e"
 ```
 
-## Indexing
+## End operations
 
 ``` r
-x2[[3]]
-#> [1] "c"
-
-x3 <- x2[c(1, 3, 5)]
+x3 <- push_back(x2, "f")
 x3
-#> Unnamed flexseq with 3 elements.
-#> 
-#> Elements:
-#> 
-#> [[1]]
-#> [1] "a"
-#> 
-#> [[2]]
-#> [1] "c"
-#> 
-#> [[3]]
-#> [1] "e"
-```
-
-## Pushing at either end
-
-``` r
-x4 <- push_back(x2, "f")
-x4
 #> Unnamed flexseq with 6 elements.
 #> 
 #> Elements:
@@ -87,8 +65,8 @@ x4
 #> [[6]]
 #> [1] "f"
 
-x5 <- push_front(x4, "start")
-x5
+x4 <- push_front(x3, "start")
+x4
 #> Unnamed flexseq with 7 elements.
 #> 
 #> Elements:
@@ -108,16 +86,14 @@ x5
 #> [1] "f"
 ```
 
-## Peeking and popping
-
 ``` r
-peek_front(x5)
+peek_front(x4)
 #> [1] "start"
-peek_back(x5)
+peek_back(x4)
 #> [1] "f"
 
-pf <- pop_front(x5)
-pf$element
+pf <- pop_front(x4)
+pf$value
 #> [1] "start"
 pf$remaining
 #> Unnamed flexseq with 6 elements.
@@ -139,7 +115,29 @@ pf$remaining
 #> [1] "f"
 ```
 
-## Named sequences
+## Indexing and slicing
+
+``` r
+x2[[3]]
+#> [1] "c"
+
+x5 <- x2[c(1, 3, 5)]
+x5
+#> Unnamed flexseq with 3 elements.
+#> 
+#> Elements:
+#> 
+#> [[1]]
+#> [1] "a"
+#> 
+#> [[2]]
+#> [1] "c"
+#> 
+#> [[3]]
+#> [1] "e"
+```
+
+## Names
 
 ``` r
 x_named <- as_flexseq(list(a = 1, b = 2, c = 3))
@@ -163,11 +161,11 @@ x_named$c
 #> [1] 3
 ```
 
-## Concatenation
+## Transforming and combining
 
 ``` r
 x6 <- as_flexseq(4:6)
-x7 <- c(x, x6)
+x7 <- c(x, x6)  # c() is supported for flexseq
 x7
 #> Unnamed flexseq with 6 elements.
 #> 
@@ -186,11 +184,7 @@ x7
 #> 
 #> [[6]]
 #> [1] 6
-```
 
-## Applying a transform
-
-``` r
 x8 <- as_flexseq(1:5)
 fapply(x8, function(el) el * 10)
 #> Unnamed flexseq with 5 elements.
@@ -210,4 +204,40 @@ fapply(x8, function(el) el * 10)
 #> 
 #> [[5]]
 #> [1] 50
+```
+
+## Persistence recap
+
+``` r
+x
+#> Unnamed flexseq with 3 elements.
+#> 
+#> Elements:
+#> 
+#> [[1]]
+#> [1] 1
+#> 
+#> [[2]]
+#> [1] 2
+#> 
+#> [[3]]
+#> [1] 3
+x4
+#> Unnamed flexseq with 7 elements.
+#> 
+#> Elements:
+#> 
+#> [[1]]
+#> [1] "start"
+#> 
+#> [[2]]
+#> [1] "a"
+#> 
+#> ... (skipping 3 elements)
+#> 
+#> [[6]]
+#> [1] "e"
+#> 
+#> [[7]]
+#> [1] "f"
 ```

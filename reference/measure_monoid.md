@@ -31,7 +31,7 @@ An object of class `measure_monoid`.
 
 A measure monoid has three parts:
 
-- `measure(element)`: maps each element to a measure value.
+- `measure(entry)`: maps each stored leaf entry to a measure value.
 
 - `f(left, right)`: combines two measure values.
 
@@ -44,6 +44,16 @@ Requirements:
 - `i` should satisfy `f(i, x) == x` and `f(x, i) == x`.
 
 - `measure()` outputs must be compatible with `f` and `i`.
+
+Developer APIs are leaf-entry oriented:
+
+- `flexseq`: entry is the stored user element.
+
+- `ordered_sequence`: entry is `list(value, key)`.
+
+- `priority_queue`: entry is `list(value, priority)`.
+
+- `interval_index`: entry is `list(value, start, end)`.
 
 `measure_monoid()` only constructs the specification; it becomes active
 after being attached to a structure via
@@ -60,7 +70,6 @@ attr(x2, "measures")$sum
 split_around_by_predicate(x2, function(v) v >= 6, "sum")
 #> $left
 #> Unnamed flexseq with 2 elements.
-#> Custom monoids: sum
 #> 
 #> Elements:
 #> 
@@ -71,12 +80,11 @@ split_around_by_predicate(x2, function(v) v >= 6, "sum")
 #> [1] 2
 #> 
 #> 
-#> $elem
+#> $value
 #> [1] 3
 #> 
 #> $right
 #> Unnamed flexseq with 2 elements.
-#> Custom monoids: sum
 #> 
 #> Elements:
 #> 

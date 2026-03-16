@@ -6,7 +6,7 @@ Print a flexseq
 
 ``` r
 # S3 method for class 'flexseq'
-print(x, max_elements = 4L, show_internal_monoids = FALSE, ...)
+print(x, max_elements = 4L, show_custom_monoids = FALSE, ...)
 ```
 
 ## Arguments
@@ -19,9 +19,10 @@ print(x, max_elements = 4L, show_internal_monoids = FALSE, ...)
 
   Maximum number of elements shown in preview (`head + tail`).
 
-- show_internal_monoids:
+- show_custom_monoids:
 
-  Logical; include internal monoids in the "Custom monoids" line.
+  Logical; show attached non-default monoids and their root cached
+  measures.
 
 - ...:
 

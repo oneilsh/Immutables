@@ -13,7 +13,7 @@ split_by_predicate(x, predicate, monoid_name)
 
 - x:
 
-  A `flexseq`.
+  A `flexseq` (or subclass).
 
 - predicate:
 
@@ -43,6 +43,9 @@ a common setup is a custom monoid created with
 and attached via
 [`add_monoids()`](https://oneilsh.github.io/immutables/reference/add_monoids.md).
 
+`left` and `right` preserve subclass when the input is a subclass of
+`flexseq`.
+
 ## Examples
 
 ``` r
@@ -52,7 +55,6 @@ x2 <- add_monoids(x, list(size = size_monoid))
 split_by_predicate(x2, function(v) v >= 3L, "size")
 #> $left
 #> Unnamed flexseq with 2 elements.
-#> Custom monoids: size
 #> 
 #> Elements:
 #> 
@@ -65,7 +67,6 @@ split_by_predicate(x2, function(v) v >= 3L, "size")
 #> 
 #> $right
 #> Unnamed flexseq with 2 elements.
-#> Custom monoids: size
 #> 
 #> Elements:
 #> 
@@ -81,11 +82,9 @@ split_by_predicate(x2, function(v) v >= 3L, "size")
 split_by_predicate(x2, function(v) v >= 1L, "size")
 #> $left
 #> Unnamed flexseq with 0 elements.
-#> Custom monoids: size
 #> 
 #> $right
 #> Unnamed flexseq with 4 elements.
-#> Custom monoids: size
 #> 
 #> Elements:
 #> 

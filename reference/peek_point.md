@@ -24,7 +24,7 @@ peek_point(x, point, bounds = NULL)
 
 ## Value
 
-The payload item from the first match, or `NULL` on no match.
+The payload value from the first match, or `NULL` on no match.
 
 ## Details
 

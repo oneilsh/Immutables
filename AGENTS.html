@@ -15,11 +15,16 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="articles/index.html">Getting Started</a></li>
+<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference API</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/flexseq.html">Getting Started with flexseq</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/flexseq.html">flexseq</a></li>
     <li><a class="dropdown-item" href="articles/priority-queues.html">Priority Queues</a></li>
+    <li><a class="dropdown-item" href="articles/ordered-sequences.html">Ordered Sequences</a></li>
+    <li><a class="dropdown-item" href="articles/interval-indices.html">Interval Indices</a></li>
+    <li><a class="dropdown-item" href="articles/algorithm-demos.html">Algorithm Demos</a></li>
+    <li><a class="dropdown-item" href="articles/developer-api.html">Developer API</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json"></form></li>
@@ -237,6 +242,12 @@
 <code>local</code>: pure-R core execution now routes through reference implementations for <code>tree_from</code> bulk build, <code>concat/app3</code>, and end-op append/prepend paths; legacy core fast-R files were removed and CI now includes a forced-R backend test workflow (<code>r-backend-reference</code>). Risk: fallback mode can be slower, but behavior is now easier to audit against tests/parity.</li>
 <li>
 <code>local</code>: interval_index now maintains additional reserved subtree monoids (<code>.ivx_max_end</code>, <code>.ivx_min_end</code>) and routes <code>peek_*</code>/<code>pop_*</code> relation operations through a shared pruning-aware query engine; <code>pop_* (which='all')</code> uses span partition + linear rebuild and benchmark coverage now includes <code>interval_index_overlaps_all_stress</code>. Risk: C++-enabled mixed-query scenarios may need follow-up tuning despite improved forced-R fallback times.</li>
+<li>
+<code>local</code>: <code>meta/bench_runner.R</code> now includes first-class custom-monoid scenarios for flexseq (<code>add_monoids_only*</code>, <code>locate_custom_cached*</code>, <code>split_tree_custom_cached*</code>, <code>split_custom_cached*</code>) so one-time attach cost and steady-state cached-query cost can be benchmarked without touching the stale auto-running <code>meta/bench.R</code>. Risk: quick/full suites are broader; compare by scenario and params, not just run label.</li>
+<li>
+<code>local</code>: <code>Rprof</code> on <code>add_monoids(as_flexseq(...), list(sum=...))</code> points to <code>add_monoids.flexseq -&gt; rebind_tree_monoids -&gt; set_measure_with_reuse</code> as the dominant path, with large self time in repeated lookup/dispatch helpers (<code>get0</code>, <code>get_lr</code>); the lightweight subtype measure wrapper is not the bottleneck. Risk: attach-cost optimizations likely need per-node recompute/lookup reductions rather than API-surface tweaks.</li>
+<li>
+<code>local</code>: add-monoid attach path now uses fast internal recursion helpers in <code>R/00-core-ref-measured.R</code> (<code>.measure_child_named_fast</code> + loop-based <code>measure_children</code>/<code>set_measure_with_reuse</code>), keeping typed wrappers only at API boundaries. Measured impact: <code>add_monoids_only(n=10000,use_cpp=TRUE)</code> improved from ~19.9s to ~16.1-16.3s (~18-20% faster); profile still dominated by lookup/dispatch (<code>get0</code>, <code>get_lr</code>) under <code>rebind_tree_monoids</code>. Risk: further wins likely need deeper reduction in typed-dispatch overhead, not just local loop cleanup.</li>
 <li>C++ GC safety in <code>src/ft_cpp.cpp</code> — recurring “$ operator is invalid for atomic vectors” root cause and fix patterns:
 <ul><li>
 <strong>Root cause</strong>: bare <code>SEXP</code> variables holding newly-allocated R objects (from R function calls or <code>make_*</code> helpers) are invisible to R’s GC, which does not scan the C++ stack. Any subsequent R allocation (including Rcpp <code>Function::operator()</code> building its call via <code>Rf_lang3</code>) can trigger GC and collect these temporaries.</li>

@@ -22,7 +22,7 @@ pop_at(x, index)
 
 A list with fields:
 
-- `element`: the element at `index`, or `NULL` when `index` is out of
+- `value`: the element at `index`, or `NULL` when `index` is out of
   bounds.
 
 - `remaining`: the sequence after removing the selected element.
@@ -32,7 +32,7 @@ A list with fields:
 This operation is persistent: `x` is not modified.
 
 Positive integer indices beyond `length(x)` return a non-throwing miss
-object with `element = NULL` and `remaining = x`. Invalid indices (`NA`,
+object with `value = NULL` and `remaining = x`. Invalid indices (`NA`,
 non-integer, `<= 0`, or length not equal to 1) error.
 
 ## Examples
@@ -40,7 +40,7 @@ non-integer, `<= 0`, or length not equal to 1) error.
 ``` r
 x <- flexseq("a", "b", "c", "d")
 out <- pop_at(x, 3)
-out$element
+out$value
 #> [1] "c"
 out$remaining
 #> Unnamed flexseq with 3 elements.
@@ -75,7 +75,7 @@ x  # unchanged
 #> 
 
 pop_at(x, 10)
-#> $element
+#> $value
 #> NULL
 #> 
 #> $remaining

@@ -6,7 +6,7 @@ Print a compact summary of a finger tree
 
 ``` r
 # S3 method for class 'FingerTree'
-print(x, max_elements = 4L, show_internal_monoids = FALSE, ...)
+print(x, max_elements = 4L, show_custom_monoids = FALSE, ...)
 
 # S3 method for class 'Deep'
 print(x, ...)
@@ -29,10 +29,10 @@ print(x, ...)
   Maximum number of elements shown in preview (`head + tail`). Default
   `4`.
 
-- show_internal_monoids:
+- show_custom_monoids:
 
-  Logical; show internal monoids (`.size`, `.named_count`). Default
-  `FALSE`.
+  Logical; show attached non-default monoids and their root cached
+  measures. Default `FALSE`.
 
 - ...:
 
@@ -66,6 +66,11 @@ print(x, max_elements = 4)
 #> $f
 #> [1] 6
 #> 
+sum_m <- measure_monoid(`+`, 0, function(el) as.numeric(el))
+print(add_monoids(as_flexseq(1:3), list(sum = sum_m)), max_elements = 0, show_custom_monoids = TRUE)
+#> Unnamed flexseq with 3 elements.
+#> Custom monoids + measures:
+#>   sum: 6
 
 y <- as_flexseq(as.list(1:6))
 print(y, max_elements = 3)
