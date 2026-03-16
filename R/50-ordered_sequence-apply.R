@@ -19,17 +19,22 @@
   out <- vector("list", n)
   out_names <- if(is.null(names(entries))) rep("", n) else names(entries)
 
+  dot_args <- list(...)
+  accepts_name <- .ft_fun_accepts_n_positional(f, 3L)
+  has_dots <- length(dot_args) > 0L
+
   for(i in seq_len(n)) {
     e <- entries[[i]]
     cur_name <- out_names[[i]]
-    base_args <- list(e$value, e$key)
-    dot_args <- list(...)
-    call_args <- if(.ft_fun_accepts_n_positional(f, 3L)) {
-      c(base_args, list(cur_name), dot_args)
+    item2 <- if(accepts_name && !has_dots) {
+      f(e$value, e$key, cur_name)
+    } else if(!accepts_name && !has_dots) {
+      f(e$value, e$key)
+    } else if(accepts_name) {
+      do.call(f, c(list(e$value, e$key, cur_name), dot_args))
     } else {
-      c(base_args, dot_args)
+      do.call(f, c(list(e$value, e$key), dot_args))
     }
-    item2 <- do.call(f, call_args)
     out[[i]] <- .oms_make_entry(value = item2, key_value = e$key)
   }
 

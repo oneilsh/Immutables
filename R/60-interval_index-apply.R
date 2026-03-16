@@ -27,30 +27,31 @@
 
   out_entries <- vector("list", n)
 
+  dot_args <- list(...)
+  accepts_name <- .ft_fun_accepts_n_positional(f, 4L)
+  has_dots <- length(dot_args) > 0L
+
   for(i in seq_len(n)) {
     e <- entries[[i]]
+    # inline .ft_get_name / .ft_normalize_name to avoid lambda.r dispatch per element
     nm <- attr(e, "ft_name", exact = TRUE)
-    if(
-      is.null(nm) ||
-      length(nm) == 0L ||
-      !is.character(nm) ||
-      length(nm) != 1L ||
-      is.na(nm) ||
-      !nzchar(nm)
-    ) {
-      nm <- .ft_get_name(e)
+    if(!is.null(nm) && (!is.character(nm) || length(nm) != 1L || is.na(nm) || !nzchar(nm))) {
+      nm <- NULL
     }
     cur_name <- if(is.null(nm)) "" else nm
-    base_args <- list(e$value, e$start, e$end)
-    dot_args <- list(...)
-    call_args <- if(.ft_fun_accepts_n_positional(f, 4L)) {
-      c(base_args, list(cur_name), dot_args)
+    item2 <- if(accepts_name && !has_dots) {
+      f(e$value, e$start, e$end, cur_name)
+    } else if(!accepts_name && !has_dots) {
+      f(e$value, e$start, e$end)
+    } else if(accepts_name) {
+      do.call(f, c(list(e$value, e$start, e$end, cur_name), dot_args))
     } else {
-      c(base_args, dot_args)
+      do.call(f, c(list(e$value, e$start, e$end), dot_args))
     }
-    item2 <- do.call(f, call_args)
     entry2 <- .ivx_make_entry(item2, e$start, e$end)
-    out_entries[[i]] <- .ft_set_name(entry2, nm)
+    # inline .ft_set_name to avoid lambda.r dispatch per element
+    if(!is.null(nm)) attr(entry2, "ft_name") <- nm
+    out_entries[[i]] <- entry2
   }
 
   ms <- if(isTRUE(preserve_custom_monoids)) {
