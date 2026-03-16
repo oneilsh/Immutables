@@ -102,4 +102,5 @@ all elements must be non-NULL and unique. Every write-like operation returns a n
 - [Priority Queues](priority-queues.html)
 - [Ordered Sequences](ordered-sequences.html)
 - [Interval Indices](interval-indices.html)
+- [Algorithm Demos](algorithm-demos.html)
 - [Developer API](developer-api.html)

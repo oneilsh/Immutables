@@ -59,7 +59,8 @@ always be `function(entry)`.
 os <- as_ordered_sequence(list("x", "yy"), keys = c(1, 2))
 by_key <- measure_monoid(`+`, 0L, function(entry) as.integer(entry$key))
 os2 <- add_monoids(os, list(by_key = by_key))
-node_measure(os2, "by_key")
+loc_key <- locate_by_predicate(os2, function(v) v >= 3L, "by_key", include_metadata = TRUE)
+loc_key$metadata$hit_measure
 ```
 
 `split_around_by_predicate()` and `locate_by_predicate()` return leaf entries in

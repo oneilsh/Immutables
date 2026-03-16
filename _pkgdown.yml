@@ -29,6 +29,8 @@ navbar:
           href: articles/ordered-sequences.html
         - text: "Interval Indices"
           href: articles/interval-indices.html
+        - text: "Algorithm Demos"
+          href: articles/algorithm-demos.html
         - text: "Developer API"
           href: articles/developer-api.html
 
@@ -37,6 +39,7 @@ articles:
     desc: "Main overview and package entrypoint."
     contents:
       - index
+      - algorithm-demos
   - title: "Flexible Sequence (flexseq)"
     desc: "General persistent sequence usage."
     contents:
@@ -102,6 +105,8 @@ reference:
       - pop_max
       - pop_all_min
       - pop_all_max
+      - min_priority
+      - max_priority
       - fapply
       - "[.priority_queue"
       - "[[.priority_queue"
@@ -129,6 +134,8 @@ reference:
       - elements_between
       - count_key
       - count_between
+      - min_key
+      - max_key
       - fapply
       - "[.ordered_sequence"
       - "print.ordered_sequence"
@@ -145,7 +152,6 @@ reference:
       - interval_index
       - as_interval_index
       - insert
-      - fapply
       - peek_point
       - peek_all_point
       - pop_point
@@ -162,6 +168,9 @@ reference:
       - pop_all_containing
       - pop_within
       - pop_all_within
+      - min_endpoint
+      - max_endpoint
+      - fapply
       - "[.interval_index"
       - "print.interval_index"
       - "length.interval_index"
