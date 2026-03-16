@@ -719,15 +719,23 @@
     v <- .ft_set_name(value, nm)
     return(`[[<-.flexseq`(x, pos, v))
   }
-  ms <- resolve_tree_monoids(x, required = TRUE)
+  ms <- attr(x, "monoids", exact = TRUE)
+  if(is.null(ms)) stop("Tree has no monoids attribute.")
   n <- as.integer(node_measure(x, ".size"))
   idx <- .ft_assert_int_indices(i, n)
   if(length(idx) != 1L) {
     stop("[[<- expects exactly one index.")
   }
+  use_cpp <- .ft_cpp_can_use(ms)
+  .split_here <- if(use_cpp) {
+    function(pred) .ft_cpp_split_tree(x, pred, ms, ".size", ms[[".size"]]$i)
+  } else {
+    function(pred) split_around_by_predicate(x, pred, ".size")
+  }
   if(is.null(value)) {
-    s <- split_around_by_predicate(x, function(v) v >= idx, ".size")
-    return(.ft_restore_subclass(.ft_concat_same_monoids(s$left, s$right, ms), x, context = "[[<-"))
+    s <- .split_here(function(v) v >= idx)
+    concat_out <- if(use_cpp) .ft_cpp_concat(s$left, s$right, ms) else .ft_concat_same_monoids(s$left, s$right, ms)
+    return(.ft_restore_subclass(concat_out, x, context = "[[<-"))
   }
   old <- NULL
   nm <- .ft_effective_name(value)
@@ -753,7 +761,8 @@
   }
   value <- .ft_set_name(value, nm)
 
-  s <- split_around_by_predicate(x, function(v) v >= idx, ".size")
+  s <- .split_here(function(v) v >= idx)
   left_plus <- push_back(s$left, value)
-  .ft_restore_subclass(.ft_concat_same_monoids(left_plus, s$right, ms), x, context = "[[<-")
+  concat_out <- if(use_cpp) .ft_cpp_concat(left_plus, s$right, ms) else .ft_concat_same_monoids(left_plus, s$right, ms)
+  .ft_restore_subclass(concat_out, x, context = "[[<-")
 }

@@ -461,6 +461,13 @@ pop_front <- function(x) {
   if(n == 0L) {
     return(list(value = NULL, remaining = x))
   }
+  ms <- attr(x, "monoids", exact = TRUE)
+  if(.ft_cpp_can_use(ms)) {
+    s <- .ft_cpp_split_tree(x, function(v) v >= 1L, ms, ".size", ms[[".size"]]$i)
+    element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
+    remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_front()") else .ft_restore_subclass(s$right, x, context = "pop_front()")
+    return(list(value = element, remaining = remaining))
+  }
   s <- split_around_by_predicate(x, function(v) v >= 1L, ".size")
   element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
   remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_front()") else s$right
@@ -503,6 +510,13 @@ pop_back <- function(x) {
   n <- length(x)
   if(n == 0L) {
     return(list(value = NULL, remaining = x))
+  }
+  ms <- attr(x, "monoids", exact = TRUE)
+  if(.ft_cpp_can_use(ms)) {
+    s <- .ft_cpp_split_tree(x, function(v) v >= n, ms, ".size", ms[[".size"]]$i)
+    element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
+    remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_back()") else .ft_restore_subclass(s$left, x, context = "pop_back()")
+    return(list(value = element, remaining = remaining))
   }
   s <- split_around_by_predicate(x, function(v) v >= n, ".size")
   element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
@@ -551,12 +565,22 @@ pop_at <- function(x, index) {
   if(is.null(idx)) {
     return(list(value = NULL, remaining = x))
   }
+  ms <- attr(x, "monoids", exact = TRUE)
+  if(.ft_cpp_can_use(ms)) {
+    s <- .ft_cpp_split_tree(x, function(v) v >= idx, ms, ".size", ms[[".size"]]$i)
+    element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
+    remaining <- if(n == 1L) {
+      .ft_empty_same_type(x, context = "pop_at()")
+    } else {
+      .ft_restore_subclass(.ft_cpp_concat(s$left, s$right, ms), x, context = "pop_at()")
+    }
+    return(list(value = element, remaining = remaining))
+  }
   s <- split_around_by_predicate(x, function(v) v >= idx, ".size")
   element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
   remaining <- if(n == 1L) {
     .ft_empty_same_type(x, context = "pop_at()")
   } else {
-    ms <- resolve_tree_monoids(x, required = TRUE)
     .ft_restore_subclass(.ft_concat_same_monoids(s$left, s$right, ms), x, context = "pop_at()")
   }
   list(value = element, remaining = remaining)

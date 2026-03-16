@@ -3,7 +3,7 @@
 # mark a structural tree as a user-facing flexseq object.
 # Runtime: O(1).
 .as_flexseq <- function(x) {
-  if(!is_structural_node(x)) {
+  if(!inherits(x, "FingerTree")) {
     stop("Expected a structural tree node.")
   }
   class(x) <- unique(c("flexseq", setdiff(class(x), "list")))
@@ -14,7 +14,7 @@
 # Runtime: O(1) for flexseq/ordered_sequence/priority_queue, O(n) when
 # interval_index restore validation is required.
 .ft_restore_subclass <- function(out, source, context = "flexseq operation") {
-  if(!is_structural_node(out)) {
+  if(!inherits(out, "FingerTree")) {
     stop("Expected a structural tree node.")
   }
   if(inherits(source, "interval_index")) {
