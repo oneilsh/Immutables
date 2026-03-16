@@ -9,10 +9,10 @@ vignette: >
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-if(requireNamespace("immutables", quietly = TRUE)) {
-  library(immutables)
-} else if(requireNamespace("pkgload", quietly = TRUE)) {
+if(requireNamespace("pkgload", quietly = TRUE)) {
   pkgload::load_all(".", quiet = TRUE)
+} else if(requireNamespace("immutables", quietly = TRUE)) {
+  library(immutables)
 } else {
   stop("Need either installed 'immutables' or the 'pkgload' package to render this vignette.")
 }
