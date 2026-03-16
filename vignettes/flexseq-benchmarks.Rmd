@@ -1,0 +1,76 @@
+---
+title: "Benchmarking flexseq Against Base R and rstackdeque"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Benchmarking flexseq Against Base R and rstackdeque}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+if(requireNamespace("immutables", quietly = TRUE)) {
+  library(immutables)
+} else if(requireNamespace("pkgload", quietly = TRUE)) {
+  pkgload::load_all(".", quiet = TRUE)
+} else {
+  stop("Need either installed 'immutables' or the 'pkgload' package to render this vignette.")
+}
+source(file.path("helpers", "flexseq_benchmark_helpers.R"), local = TRUE)
+run_benchmarks <- flexseq_benchmark_should_run()
+bench_sizes <- flexseq_benchmark_default_sizes()
+bench_repeats <- flexseq_benchmark_default_repeats()
+```
+
+## Method
+
+This article adapts the operation-by-operation style used in Barry (2018),
+while narrowing the comparison set to `flexseq`, base R lists, and
+`rstackdeque`.
+
+- Each timing cell builds a fresh object of size `n`, then times one operation.
+- Sequence timings compare `append`, middle `replace`, middle `get`, and middle
+  `remove`.
+- Queue timings compare FIFO `enqueue` at the back and `dequeue` from the front.
+- The reduced article grid uses sizes `r paste(bench_sizes, collapse = ", ")`
+  with `r bench_repeats` repeats per cell.
+- Middle reads use `[[` for both `flexseq` and base lists; middle removal times
+  the updated sequence (`pop_at(... )$remaining` for `flexseq`).
+
+```{r benchmark-note, eval = !run_benchmarks}
+cat(
+  paste(
+    "Live benchmark chunks are skipped by default.",
+    "Set IMMUTABLES_RUN_BENCHMARK_VIGNETTE=1 before rendering to run the reduced grid and regenerate the plots."
+  )
+)
+```
+
+```{r run-benchmarks, eval = run_benchmarks, cache = FALSE}
+bench_results <- run_flexseq_benchmark_vignette(
+  sizes = bench_sizes,
+  repeats = bench_repeats
+)
+```
+
+## Sequence operations
+
+```{r sequence-plot, eval = run_benchmarks, fig.width = 8, fig.height = 5.5}
+bench_results$sequence_plot
+```
+
+## Queue/dequeue operations
+
+```{r queue-plot, eval = run_benchmarks, fig.width = 8, fig.height = 4.8}
+bench_results$queue_plot
+```
+
+## Notes
+
+- `flexseq` sequence updates stay competitive while keeping persistence
+  semantics explicit.
+- Queue timings use the same FIFO direction across implementations:
+  `push_back()`/`pop_front()` for `flexseq`, `insert_back()`/`without_front()`
+  for `rstackdeque`, and append/front-removal for base lists.
+- These figures are meant for article exposition rather than internal
+  regression tracking.

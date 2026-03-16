@@ -99,6 +99,7 @@ all elements must be non-NULL and unique. Every write-like operation returns a n
 ## Next Articles
 
 - [flexseq](flexseq.html)
+- [flexseq Benchmarks](flexseq-benchmarks.html)
 - [Priority Queues](priority-queues.html)
 - [Ordered Sequences](ordered-sequences.html)
 - [Interval Indices](interval-indices.html)
