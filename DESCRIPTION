@@ -18,10 +18,13 @@ Imports:
 LinkingTo:
     Rcpp
 Suggests:
+    ggplot2,
     igraph,
     knitr,
+    microbenchmark,
     pkgdown,
     rmarkdown,
+    rstackdeque,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr

@@ -42,3 +42,13 @@ concat_trees <- function(x, y) {
 
   .as_flexseq(concat(x2, y2, merged))
 }
+
+# Internal: concat two trees that already share identical monoids.
+# Skips monoid harmonization. Uses C++ fast path when available.
+# Runtime: O(log(min(n1, n2))) via C++; R fallback is slower.
+.ft_concat_same_monoids <- function(x, y, monoids) {
+  if(.ft_cpp_can_use(monoids)) {
+    return(.ft_cpp_concat(x, y, monoids))
+  }
+  concat(x, y, monoids)
+}

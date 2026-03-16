@@ -461,8 +461,9 @@ pop_front <- function(x) {
   if(n == 0L) {
     return(list(value = NULL, remaining = x))
   }
-  element <- .ft_unwrap_public_value(x, x[[1L]])
-  remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_front()") else x[seq.int(2L, n)]
+  s <- split_around_by_predicate(x, function(v) v >= 1L, ".size")
+  element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
+  remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_front()") else s$right
   list(value = element, remaining = remaining)
 }
 
@@ -503,8 +504,9 @@ pop_back <- function(x) {
   if(n == 0L) {
     return(list(value = NULL, remaining = x))
   }
-  element <- .ft_unwrap_public_value(x, x[[n]])
-  remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_back()") else x[seq_len(n - 1L)]
+  s <- split_around_by_predicate(x, function(v) v >= n, ".size")
+  element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
+  remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_back()") else s$left
   list(value = element, remaining = remaining)
 }
 
@@ -533,7 +535,7 @@ pop_back <- function(x) {
 #' pop_at(x, 10)
 #' try(pop_at(x, 0))
 #' @export
-# Runtime: O(log n) for one read plus O(k log n) index subset to rebuild.
+# Runtime: O(log n) for split plus O(log n) concat.
 pop_at <- function(x, index) {
   if(inherits(x, "interval_index")) {
     stop("`pop_at()` is not supported for interval_index. Use interval query helpers (`peek_*`, `pop_*`, and `peek_point()` for point lookup).")
@@ -549,17 +551,13 @@ pop_at <- function(x, index) {
   if(is.null(idx)) {
     return(list(value = NULL, remaining = x))
   }
-  selected <- .ft_strip_name(.ft_get_elem_at(x, idx))
-  element <- .ft_unwrap_public_value(x, selected)
-
+  s <- split_around_by_predicate(x, function(v) v >= idx, ".size")
+  element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
   remaining <- if(n == 1L) {
     .ft_empty_same_type(x, context = "pop_at()")
-  } else if(idx == 1L) {
-    x[seq.int(2L, n)]
-  } else if(idx == n) {
-    x[seq_len(n - 1L)]
   } else {
-    x[c(seq_len(idx - 1L), seq.int(idx + 1L, n))]
+    ms <- resolve_tree_monoids(x, required = TRUE)
+    .ft_restore_subclass(.ft_concat_same_monoids(s$left, s$right, ms), x, context = "pop_at()")
   }
   list(value = element, remaining = remaining)
 }

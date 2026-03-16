@@ -705,7 +705,7 @@
 #' x4[[2]] <- NULL
 #' x4
 #' @export
-# Runtime: O(n) via split + push_back + concat.
+# Runtime: O(log n) via split + push_back + concat.
 `[[<-.flexseq` <- function(x, i, value) {
   if(is.character(i) && length(i) == 1L && !is.na(i)) {
     pos <- .ft_match_name_indices(x, i, strict_missing = TRUE)
@@ -727,7 +727,7 @@
   }
   if(is.null(value)) {
     s <- split_around_by_predicate(x, function(v) v >= idx, ".size")
-    return(.ft_restore_subclass(concat(s$left, s$right, ms), x, context = "[[<-"))
+    return(.ft_restore_subclass(.ft_concat_same_monoids(s$left, s$right, ms), x, context = "[[<-"))
   }
   old <- NULL
   nm <- .ft_effective_name(value)
@@ -755,5 +755,5 @@
 
   s <- split_around_by_predicate(x, function(v) v >= idx, ".size")
   left_plus <- push_back(s$left, value)
-  .ft_restore_subclass(concat(left_plus, s$right, ms), x, context = "[[<-")
+  .ft_restore_subclass(.ft_concat_same_monoids(left_plus, s$right, ms), x, context = "[[<-")
 }
