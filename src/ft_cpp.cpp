@@ -1659,6 +1659,79 @@ List split_tree_impl_cpp(
   return List::create(_["left"] = left_tree, _["value"] = s["value"], _["right"] = right_tree);
 }
 
+// Callback-free index-based split. Avoids all R<->C++ predicate callbacks.
+// Returns {left: tree, value: single_element, right: tree}.
+// i = accumulated element count before this subtree (0 for root call).
+// target_idx = 1-based index of the element to extract.
+
+List split_tree_at_index_cpp(int i, int target_idx, SEXP t, const List& monoids);
+
+List split_digit_at_index_cpp(int i, int target_idx, const List& digit, const List& monoids) {
+  for(int idx = 0; idx < digit.size(); ++idx) {
+    SEXP el = digit[idx];
+    int n_el = (int)child_size(el);
+    int acc_after = i + n_el;
+    if(acc_after >= target_idx) {
+      List left(idx);
+      for(int j = 0; j < idx; ++j) left[j] = digit[j];
+      List right(digit.size() - idx - 1);
+      for(int j = idx + 1; j < digit.size(); ++j) right[j - idx - 1] = digit[j];
+      return List::create(_["left"] = left, _["value"] = el, _["right"] = right);
+    }
+    i = acc_after;
+  }
+  stop("split_digit_at_index: precondition violated");
+}
+
+List split_tree_at_index_cpp(int i, int target_idx, SEXP t, const List& monoids) {
+  if(has_class(t, "Empty")) {
+    stop("split_tree_at_index requires a non-empty tree");
+  }
+
+  if(has_class(t, "Single")) {
+    List s(t);
+    return List::create(
+      _["left"] = make_empty(monoids),
+      _["value"] = s[0],
+      _["right"] = make_empty(monoids)
+    );
+  }
+
+  List d(t);
+  SEXP prefix = d["prefix"];
+  SEXP middle = d["middle"];
+  SEXP suffix = d["suffix"];
+
+  int vpr = i + (int)child_size(prefix);
+  int vm  = vpr + (int)child_size(middle);
+
+  if(vpr >= target_idx) {
+    List s = split_digit_at_index_cpp(i, target_idx, List(prefix), monoids);
+    Shield<SEXP> left_tree(digit_to_tree_cpp(as<List>(s["left"]), monoids));
+    Shield<SEXP> right_digit(build_digit_cpp(as<List>(s["right"]), monoids));
+    Shield<SEXP> right_tree(deepL_cpp(right_digit, middle, suffix, monoids));
+    return List::create(_["left"] = left_tree, _["value"] = s["value"], _["right"] = right_tree);
+  }
+
+  if(vm >= target_idx) {
+    List sm = split_tree_at_index_cpp(vpr, target_idx, middle, monoids);
+    SEXP sm_left = sm["left"];
+    int sm_left_size = (int)child_size(sm_left);
+    List sx = split_digit_at_index_cpp(vpr + sm_left_size, target_idx, List(static_cast<SEXP>(sm["value"])), monoids);
+    Shield<SEXP> left_digit(build_digit_cpp(as<List>(sx["left"]), monoids));
+    Shield<SEXP> right_digit(build_digit_cpp(as<List>(sx["right"]), monoids));
+    Shield<SEXP> left_tree(deepR_cpp(prefix, sm_left, left_digit, monoids));
+    Shield<SEXP> right_tree(deepL_cpp(right_digit, sm["right"], suffix, monoids));
+    return List::create(_["left"] = left_tree, _["value"] = sx["value"], _["right"] = right_tree);
+  }
+
+  List s = split_digit_at_index_cpp(vm, target_idx, List(suffix), monoids);
+  Shield<SEXP> left_digit(build_digit_cpp(as<List>(s["left"]), monoids));
+  Shield<SEXP> left_tree(deepR_cpp(prefix, middle, left_digit, monoids));
+  Shield<SEXP> right_tree(digit_to_tree_cpp(as<List>(s["right"]), monoids));
+  return List::create(_["left"] = left_tree, _["value"] = s["value"], _["right"] = right_tree);
+}
+
 bool oms_measure_has_gt_key(SEXP measure, SEXP key, const std::string& key_type) {
   if(TYPEOF(measure) != VECSXP || XLENGTH(measure) < 2) {
     stop("Invalid .oms_max_key measure payload.");
@@ -1891,6 +1964,23 @@ extern "C" SEXP ft_cpp_split_tree(SEXP t, SEXP predicate_, SEXP monoids_, SEXP m
   }
   List monoid_spec(monoid_spec_sexp);
   return split_tree_impl_cpp(predicate, i_, t, monoids, monoid_name, monoid_spec);
+  END_RCPP
+}
+
+// Callback-free index-based split: no R<->C++ predicate callbacks.
+// idx is a 1-based integer position.
+extern "C" SEXP ft_cpp_split_at_index(SEXP t, SEXP idx_, SEXP monoids_) {
+  BEGIN_RCPP
+  IntegerVector idx(idx_);
+  if(idx.size() != 1 || IntegerVector::is_na(idx[0])) {
+    stop("`idx` must be a single non-missing integer.");
+  }
+  int target = idx[0];
+  if(target <= 0) {
+    stop("`idx` must be a positive integer.");
+  }
+  List monoids(monoids_);
+  return split_tree_at_index_cpp(0, target, t, monoids);
   END_RCPP
 }
 

@@ -538,8 +538,7 @@
     pos <- .ft_match_name_indices(x, i, strict_missing = TRUE)
     return(.ft_strip_name(.ft_get_elem_at(x, pos)))
   }
-  ms <- resolve_tree_monoids(x, required = TRUE)
-  n <- as.integer(node_measure(x, ".size"))
+  n <- .ft_size(x)
   idx <- .ft_assert_int_indices(i, n)
   if(length(idx) != 1L) {
     stop("[[ expects exactly one index.")
@@ -721,34 +720,35 @@
   }
   ms <- attr(x, "monoids", exact = TRUE)
   if(is.null(ms)) stop("Tree has no monoids attribute.")
-  n <- as.integer(node_measure(x, ".size"))
+  n <- .ft_size(x)
   idx <- .ft_assert_int_indices(i, n)
   if(length(idx) != 1L) {
     stop("[[<- expects exactly one index.")
   }
   use_cpp <- .ft_cpp_can_use(ms)
   .split_here <- if(use_cpp) {
-    function(pred) .ft_cpp_split_tree(x, pred, ms, ".size", ms[[".size"]]$i)
+    function(i) .ft_cpp_split_at_index(x, i, ms)
   } else {
-    function(pred) split_around_by_predicate(x, pred, ".size")
+    function(i) split_around_by_predicate(x, function(v) v >= i, ".size")
   }
   if(is.null(value)) {
-    s <- .split_here(function(v) v >= idx)
+    s <- .split_here(idx)
     concat_out <- if(use_cpp) .ft_cpp_concat(s$left, s$right, ms) else .ft_concat_same_monoids(s$left, s$right, ms)
     return(.ft_restore_subclass(concat_out, x, context = "[[<-"))
   }
+  n_named <- .ft_named_count(x)
+  nm <- .ft_get_name_fast(value)
+  if(is.null(nm)) nm <- .ft_name_from_value(value)
   old <- NULL
-  nm <- .ft_effective_name(value)
-  if(is.null(nm)) {
+  if(is.null(nm) && n_named > 0L) {
     old <- .ft_get_elem_at(x, idx)
-    nm <- .ft_get_name(old)
+    nm <- .ft_get_name_fast(old)
   }
-  n_named <- as.integer(node_measure(x, ".named_count"))
   if(n > 0L && n_named == n && !is.null(nm)) {
     if(is.null(old)) {
       old <- .ft_get_elem_at(x, idx)
     }
-    old_nm <- .ft_get_name(old)
+    old_nm <- .ft_get_name_fast(old)
     if(is.null(old_nm)) {
       stop("Invalid name state: mixed named and unnamed elements are not allowed.")
     }
@@ -759,10 +759,10 @@
       }
     }
   }
-  value <- .ft_set_name(value, nm)
+  value <- .ft_set_name_fast(value, nm)
 
-  s <- .split_here(function(v) v >= idx)
-  left_plus <- push_back(s$left, value)
+  s <- .split_here(idx)
+  left_plus <- .ft_push_back_raw(s$left, value, ms)
   concat_out <- if(use_cpp) .ft_cpp_concat(left_plus, s$right, ms) else .ft_concat_same_monoids(left_plus, s$right, ms)
   .ft_restore_subclass(concat_out, x, context = "[[<-")
 }

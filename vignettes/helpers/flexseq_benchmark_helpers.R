@@ -10,7 +10,7 @@ flexseq_benchmark_default_sizes <- function() {
 }
 
 flexseq_benchmark_default_repeats <- function() {
-  10L
+  30L
 }
 
 flexseq_benchmark_should_run <- function() {
@@ -130,12 +130,6 @@ flexseq_benchmark_queue_apply <- function(implementation, operation, fixture, ap
   )
 }
 
-.flexseq_benchmark_measure_once <- function(expr) {
-  .flexseq_benchmark_require("microbenchmark")
-  bm <- suppressWarnings(microbenchmark::microbenchmark(force(expr), times = 1L))
-  as.numeric(summary(bm, unit = "us")[["mean"]])
-}
-
 run_flexseq_sequence_benchmark_cell <- function(
   implementation,
   operation,
@@ -143,28 +137,29 @@ run_flexseq_sequence_benchmark_cell <- function(
   inputs,
   repeats = flexseq_benchmark_default_repeats()
 ) {
+  .flexseq_benchmark_require("microbenchmark")
   n <- as.integer(n)
   repeats <- as.integer(repeats)
   if(n %% 2L != 0L) {
     stop("Sequence benchmark sizes must be even.")
   }
   values <- inputs$sequence_values[seq_len(n)]
-  times <- vapply(
-    seq_len(repeats),
-    function(i) {
-      fixture <- flexseq_benchmark_make_sequence_fixture(implementation, values)
-      .flexseq_benchmark_measure_once(
-        flexseq_benchmark_sequence_apply(
-          implementation = implementation,
-          operation = operation,
-          fixture = fixture,
-          append_value = inputs$append_value,
-          replace_value = inputs$replace_value
-        )
-      )
-    },
-    numeric(1)
-  )
+  fixture <- flexseq_benchmark_make_sequence_fixture(implementation, values)
+  mid <- as.integer(n / 2L)
+  append_value <- inputs$append_value
+  replace_value <- inputs$replace_value
+
+  gc(FALSE)
+  bm <- suppressWarnings(microbenchmark::microbenchmark(
+    flexseq_benchmark_sequence_apply(
+      implementation = implementation,
+      operation = operation,
+      fixture = fixture,
+      append_value = append_value,
+      replace_value = replace_value
+    ),
+    times = repeats
+  ))
 
   data.frame(
     family = "sequence",
@@ -172,7 +167,7 @@ run_flexseq_sequence_benchmark_cell <- function(
     operation = operation,
     n = n,
     `repeat` = seq_len(repeats),
-    time_us = times,
+    time_us = as.numeric(bm$time) / 1000,
     check.names = FALSE,
     stringsAsFactors = FALSE
   )
@@ -185,24 +180,23 @@ run_flexseq_queue_benchmark_cell <- function(
   inputs,
   repeats = flexseq_benchmark_default_repeats()
 ) {
+  .flexseq_benchmark_require("microbenchmark")
   n <- as.integer(n)
   repeats <- as.integer(repeats)
   values <- rep(inputs$queue_value, n)
-  times <- vapply(
-    seq_len(repeats),
-    function(i) {
-      fixture <- flexseq_benchmark_make_queue_fixture(implementation, values)
-      .flexseq_benchmark_measure_once(
-        flexseq_benchmark_queue_apply(
-          implementation = implementation,
-          operation = operation,
-          fixture = fixture,
-          append_value = inputs$queue_append_value
-        )
-      )
-    },
-    numeric(1)
-  )
+  fixture <- flexseq_benchmark_make_queue_fixture(implementation, values)
+  append_value <- inputs$queue_append_value
+
+  gc(FALSE)
+  bm <- suppressWarnings(microbenchmark::microbenchmark(
+    flexseq_benchmark_queue_apply(
+      implementation = implementation,
+      operation = operation,
+      fixture = fixture,
+      append_value = append_value
+    ),
+    times = repeats
+  ))
 
   data.frame(
     family = "queue",
@@ -210,7 +204,7 @@ run_flexseq_queue_benchmark_cell <- function(
     operation = operation,
     n = n,
     `repeat` = seq_len(repeats),
-    time_us = times,
+    time_us = as.numeric(bm$time) / 1000,
     check.names = FALSE,
     stringsAsFactors = FALSE
   )
@@ -325,7 +319,7 @@ plot_flexseq_benchmark_results <- function(summary_results, family) {
     ggplot2::geom_line(linewidth = 0.6) +
     ggplot2::geom_point(size = 1.6) +
     ggplot2::facet_wrap(~ operation, scales = "free_y") +
-    ggplot2::scale_x_continuous(labels = scales::label_comma()) +
+    ggplot2::scale_x_log10(labels = scales::label_comma()) +
     ggplot2::labs(
       title = title,
       x = "Number of elements",

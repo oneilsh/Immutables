@@ -80,6 +80,12 @@
   .Call("ft_cpp_split_tree", t, predicate, monoids, monoid_name, accumulator, PACKAGE = "immutables")
 }
 
+# Runtime: O(log n). Callback-free index-based split; no R<->C++ predicate overhead.
+# idx is a 1-based integer position.
+.ft_cpp_split_at_index <- function(t, idx, monoids) {
+  .Call("ft_cpp_split_at_index", t, as.integer(idx), monoids, PACKAGE = "immutables")
+}
+
 # Runtime: O(n) worst-case, O(k) until first matched name.
 .ft_cpp_find_name_position <- function(t, name) {
   .Call("ft_cpp_find_name_position", t, name, PACKAGE = "immutables")

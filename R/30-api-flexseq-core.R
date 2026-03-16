@@ -1,5 +1,33 @@
 #SO
 
+# Fast plain-R helpers that bypass lambda.r dispatch overhead (~100-190us/call).
+# These are hot-path equivalents of lambda.r-defined functions.
+
+# Runtime: O(1). Fast replacement for node_measure(x, ".size").
+.ft_size <- function(x) {
+  as.integer(attr(x, "measures", exact = TRUE)[[".size"]])
+}
+
+# Runtime: O(1). Fast replacement for node_measure(x, ".named_count").
+.ft_named_count <- function(x) {
+  as.integer(attr(x, "measures", exact = TRUE)[[".named_count"]])
+}
+
+# Runtime: O(1). Fast replacement for .ft_get_name(el) (skips lambda.r dispatch).
+.ft_get_name_fast <- function(el) {
+  nm <- attr(el, "ft_name", exact = TRUE)
+  if(is.null(nm)) return(NULL)
+  if(!is.character(nm) || length(nm) != 1L || is.na(nm) || !nzchar(nm)) return(NULL)
+  nm
+}
+
+# Runtime: O(1). Fast replacement for .ft_set_name(el, name) (skips lambda.r dispatch).
+# Caller must pass NULL or a validated non-empty string.
+.ft_set_name_fast <- function(el, name) {
+  attr(el, "ft_name") <- name
+  el
+}
+
 # mark a structural tree as a user-facing flexseq object.
 # Runtime: O(1).
 .as_flexseq <- function(x) {
@@ -229,7 +257,7 @@ plot.flexseq <- function(x, ...) {
 #' @export
 # Runtime: O(1) using cached `.size` measure.
 length.flexseq <- function(x) {
-  as.integer(node_measure(x, ".size"))
+  .ft_size(x)
 }
 
 #' Coerce a Sequence to Base List

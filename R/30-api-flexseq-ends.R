@@ -1,5 +1,17 @@
 #SO
 
+# Internal: push a pre-prepared element (ft_name already set) without re-checking
+# name state. Used by [[<- after all name validation has already been done.
+# Runtime: O(log n) tree update.
+.ft_push_back_raw <- function(x, element, monoids) {
+  out <- if(.ft_cpp_can_use(monoids)) {
+    .ft_cpp_add_right(x, element, monoids)
+  } else {
+    add_right(x, element, monoids)
+  }
+  .ft_restore_subclass(out, x, context = "push")
+}
+
 # dispatch add-right through C++/R backend and restore class stack.
 # Runtime: O(log n) tree update + subclass restoration.
 .ft_push_back_dispatch <- function(x, element, monoids, context = "push_back()") {
@@ -62,7 +74,7 @@
 
   element <- value
   if(named_count == 0L) {
-    element_name <- .ft_get_name(element)
+    element_name <- .ft_get_name_fast(element)
     if(is.null(element_name)) {
       element_name <- .ft_name_from_value(element)
     }
@@ -80,7 +92,10 @@
   }
 
   # Named tree mode: inserted element must carry a usable name.
-  element_name <- .ft_effective_name(element)
+  element_name <- .ft_get_name_fast(element)
+  if(is.null(element_name)) {
+    element_name <- .ft_name_from_value(element)
+  }
   if(is.null(element_name)) {
     stop("Cannot mix named and unnamed elements (push_back would create mixed named and unnamed tree).")
   }
@@ -175,7 +190,7 @@ push_front <- function(x, value) {
 
   element <- value
   if(named_count == 0L) {
-    element_name <- .ft_get_name(element)
+    element_name <- .ft_get_name_fast(element)
     if(is.null(element_name)) {
       element_name <- .ft_name_from_value(element)
     }
@@ -193,7 +208,10 @@ push_front <- function(x, value) {
   }
 
   # Named tree mode: inserted element must carry a usable name.
-  element_name <- .ft_effective_name(element)
+  element_name <- .ft_get_name_fast(element)
+  if(is.null(element_name)) {
+    element_name <- .ft_name_from_value(element)
+  }
   if(is.null(element_name)) {
     stop("Cannot mix named and unnamed elements (push_front would create mixed named and unnamed tree).")
   }
@@ -457,13 +475,13 @@ pop_front <- function(x) {
   if(!inherits(x, "flexseq")) {
     stop("`x` must be a flexseq.")
   }
-  n <- length(x)
+  n <- .ft_size(x)
   if(n == 0L) {
     return(list(value = NULL, remaining = x))
   }
   ms <- attr(x, "monoids", exact = TRUE)
   if(.ft_cpp_can_use(ms)) {
-    s <- .ft_cpp_split_tree(x, function(v) v >= 1L, ms, ".size", ms[[".size"]]$i)
+    s <- .ft_cpp_split_at_index(x, 1L, ms)
     element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
     remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_front()") else .ft_restore_subclass(s$right, x, context = "pop_front()")
     return(list(value = element, remaining = remaining))
@@ -507,13 +525,13 @@ pop_back <- function(x) {
   if(!inherits(x, "flexseq")) {
     stop("`x` must be a flexseq.")
   }
-  n <- length(x)
+  n <- .ft_size(x)
   if(n == 0L) {
     return(list(value = NULL, remaining = x))
   }
   ms <- attr(x, "monoids", exact = TRUE)
   if(.ft_cpp_can_use(ms)) {
-    s <- .ft_cpp_split_tree(x, function(v) v >= n, ms, ".size", ms[[".size"]]$i)
+    s <- .ft_cpp_split_at_index(x, n, ms)
     element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
     remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_back()") else .ft_restore_subclass(s$left, x, context = "pop_back()")
     return(list(value = element, remaining = remaining))
@@ -567,7 +585,7 @@ pop_at <- function(x, index) {
   }
   ms <- attr(x, "monoids", exact = TRUE)
   if(.ft_cpp_can_use(ms)) {
-    s <- .ft_cpp_split_tree(x, function(v) v >= idx, ms, ".size", ms[[".size"]]$i)
+    s <- .ft_cpp_split_at_index(x, idx, ms)
     element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
     remaining <- if(n == 1L) {
       .ft_empty_same_type(x, context = "pop_at()")

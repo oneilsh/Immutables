@@ -130,6 +130,7 @@ cpp_wrapper_coverage <- list(
   .ft_cpp_oms_insert = c("ordered_sequence insert"),
   .ft_cpp_locate = c("locate_by_predicate"),
   .ft_cpp_split_tree = c("split_around_by_predicate", "split_by_predicate", "interval_index insert and queries"),
+  .ft_cpp_split_at_index = c("[[ read (integer/name)", "[[<- replacement and deletion", "peek/pop_at helpers"),
   .ft_cpp_find_name_position = c("$ read", "[ read (integer/logical/name)"),
   .ft_cpp_get_by_index = c("[[ read (integer/name)"),
   .ft_cpp_get_many_by_index = c("[ read (integer/logical/name)"),
