@@ -23,8 +23,8 @@ navbar:
       menu:
         - text: "flexseq"
           href: articles/flexseq.html
-        - text: "flexseq Benchmarks"
-          href: articles/flexseq-benchmarks.html
+        - text: "Benchmarks"
+          href: articles/benchmarks.html
         - text: "Priority Queues"
           href: articles/priority-queues.html
         - text: "Ordered Sequences"
@@ -46,7 +46,10 @@ articles:
     desc: "General persistent sequence usage."
     contents:
       - flexseq
-      - flexseq-benchmarks
+  - title: "Benchmarks"
+    desc: "Performance comparisons across all collection types."
+    contents:
+      - benchmarks
   - title: "Priority Queue"
     desc: "Queue-oriented priority operations."
     contents:

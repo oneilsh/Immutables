@@ -1,0 +1,120 @@
+---
+title: "Benchmarking immutables Collections"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Benchmarking immutables Collections}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+if(requireNamespace("pkgload", quietly = TRUE)) {
+  pkgload::load_all(".", quiet = TRUE)
+} else if(requireNamespace("immutables", quietly = TRUE)) {
+  library(immutables)
+} else {
+  stop("Need either installed 'immutables' or the 'pkgload' package to render this vignette.")
+}
+source(file.path("helpers", "benchmark_helpers.R"), local = TRUE)
+run_benchmarks <- benchmark_should_run()
+```
+
+## Method
+
+This article measures individual operation times for each collection type
+provided by `immutables`, following the operation-by-operation style of
+Barry (2018). Each timing cell builds a fresh data structure of size *n*,
+then uses `microbenchmark` to time one operation. We report the median of
+`r benchmark_default_repeats()` repetitions per cell.
+
+Comparisons use idiomatic base R implementations as controls:
+
+- **Sequences and queues**: base R lists (plus `rstackdeque` for queues).
+- **Priority queues**: parallel value and priority vectors with
+  `which.min()`/`which.max()`.
+- **Interval queries**: a `data.frame` with start/end columns, filtered
+  with vectorized comparisons. When the Bioconductor package `IRanges` is
+  available, it is included as a third comparison.
+
+All `immutables` structures are persistent — operations return new
+structures without modifying the input. The base R baselines are
+copy-on-write but not persistent in the same sense; we benchmark the
+cost of producing the updated copy.
+
+```{r benchmark-note, eval = !run_benchmarks}
+cat(
+  "Live benchmark chunks are skipped by default.",
+  "Set IMMUTABLES_RUN_BENCHMARK_VIGNETTE=1 before rendering",
+  "to run the full grid."
+)
+```
+
+```{r run-benchmarks, eval = run_benchmarks, cache = FALSE}
+bench_results <- run_benchmark_vignette()
+```
+
+## Sequence operations
+
+Seven operations on sequences of 100 to 500,000 elements. Append,
+prepend, concatenate, and split exploit the finger tree's O(log n)
+structural sharing; get, replace, and remove at the middle exercise
+index-based splitting.
+
+```{r sequence-plot, eval = run_benchmarks, fig.width = 9, fig.height = 7}
+bench_results$sequence_plot
+```
+
+## Queue operations
+
+FIFO enqueue (push to back) and dequeue (pop from front) compared across
+`flexseq`, `rstackdeque`, and base R lists. Both `flexseq` and
+`rstackdeque` provide O(log n) or amortized O(1) queue operations; base
+R's `c()` and `[-1]` are O(n).
+
+```{r queue-plot, eval = run_benchmarks, fig.width = 8, fig.height = 4.8}
+bench_results$queue_plot
+```
+
+## Priority queue operations
+
+Insert, peek, and pop operations for min and max priority. The base R
+baseline stores values and priorities as parallel vectors and uses
+`which.min()` / `which.max()` for queries — O(n) per call. The
+`priority_queue` from `immutables` maintains a sorted finger tree with
+cached min/max monoids, giving O(log n) insert and pop.
+
+```{r pq-plot, eval = run_benchmarks, fig.width = 9, fig.height = 7}
+bench_results$pq_plot
+```
+
+## Interval queries
+
+Insert and three query types (single-point lookup, all-point matches,
+and range overlap) on a collection of intervals with integer endpoints.
+The base R baseline stores intervals in a `data.frame` and filters with
+vectorized comparisons — simple and fast for small *n*, but O(n) per
+query. `interval_index` uses an augmented finger tree for O(log n + k)
+queries, where *k* is the number of matches.
+
+```{r ivx-plot, eval = run_benchmarks, fig.width = 9, fig.height = 6}
+bench_results$ivx_plot
+```
+
+## Notes
+
+- All `immutables` operations are persistent: the original structure is
+  never modified. Base R list operations produce shallow copies via
+  copy-on-write.
+- Sequence **append** and **prepend** are O(log n) for `flexseq` vs O(n)
+  for base R; the crossover is visible at moderate sizes.
+- **Get middle** (`[[`) is O(log n) for `flexseq` vs O(1) for base R —
+  `flexseq` will always be slower here. This is the cost of tree-based
+  indexing.
+- Queue and priority queue operations show the expected O(log n) vs O(n)
+  separation at larger sizes.
+- Interval query performance depends on the number of matches (*k*). The
+  benchmark uses a fixed query point and range, so *k* varies with *n*
+  and the random interval layout.
+- These figures are meant for article exposition rather than internal
+  regression tracking.
