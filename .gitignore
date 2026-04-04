@@ -12,3 +12,5 @@ docs/
 .Rprofile
 /doc/
 /Meta/
+..Rcheck/
+.claude

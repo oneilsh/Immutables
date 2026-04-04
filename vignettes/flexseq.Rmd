@@ -6,8 +6,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
-```{r setup, include = FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 if(requireNamespace("immutables", quietly = TRUE)) {
   library(immutables)
@@ -18,9 +17,10 @@ if(requireNamespace("immutables", quietly = TRUE)) {
 }
 ```
 
+
 ## What is a flexseq?
 
-`flexseq` is a persistent sequence type.
+`flexseq` is a persistent sequence type, with many of the same features as an R `list()`, including storing arbitrary items.
 All updates return a new object and keep the original unchanged.
 
 ```{r}
@@ -30,8 +30,14 @@ x
 x2 <- as_flexseq(letters[1:5])
 x2
 ```
+## Indexing and Slicing, Names
+
+As the output above suggests, they may be indexed and subsetted like lists. Flexseqs may be named, but if any are named they must all have unique non-`NULL` names. Named flexseqs and named access is somewhat slower 
+
 
 ## End operations
+
+Flexseqs support pushing new elements onto the front or back of the sequences, peeking at the front or back (i.e., getting a copy of the first or last item), and popping from the front or back, which returns the removed element and a copy of the flexseq input with that item removed.
 
 ```{r}
 x3 <- push_back(x2, "f")
@@ -40,7 +46,6 @@ x3
 x4 <- push_front(x3, "start")
 x4
 ```
-
 ```{r}
 peek_front(x4)
 peek_back(x4)
@@ -50,6 +55,7 @@ pf$value
 pf$remaining
 ```
 
+
 ## Indexing and slicing
 
 ```{r}
@@ -57,6 +63,9 @@ x2[[3]]
 
 x5 <- x2[c(1, 3, 5)]
 x5
+```
+```{r}
+
 ```
 
 ## Names
@@ -86,3 +95,4 @@ fapply(x8, function(el) el * 10)
 x
 x4
 ```
+<!-- RNOTEBOOK_RMD_STATE eyJ2ZXJzaW9uIjoyLCJjb2RlQ2VsbFN0YXRlcyI6W3siZmluZ2VycHJpbnQiOiJ7XCJsYW5ndWFnZVwiOlwiclwiLFwiY29kZVwiOlwia25pdHI6Om9wdHNfY2h1bmskc2V0KGNvbGxhcHNlID0gVFJVRSwgY29tbWVudCA9IFxcXCIjPlxcXCIpXFxuaWYocmVxdWlyZU5hbWVzcGFjZShcXFwiaW1tdXRhYmxlc1xcXCIsIHF1aWV0bHkgPSBUUlVFKSkge1xcbiAgbGlicmFyeShpbW11dGFibGVzKVxcbn0gZWxzZSBpZihyZXF1aXJlTmFtZXNwYWNlKFxcXCJwa2dsb2FkXFxcIiwgcXVpZXRseSA9IFRSVUUpKSB7XFxuICBwa2dsb2FkOjpsb2FkX2FsbChcXFwiLlxcXCIsIHF1aWV0ID0gVFJVRSlcXG59IGVsc2Uge1xcbiAgc3RvcChcXFwiTmVlZCBlaXRoZXIgaW5zdGFsbGVkICdpbW11dGFibGVzJyBvciB0aGUgJ3BrZ2xvYWQnIHBhY2thZ2UgdG8gcmVuZGVyIHRoaXMgdmlnbmV0dGUuXFxcIilcXG59XCIsXCJvcHRpb25zXCI6e1wiaW5jbHVkZVwiOmZhbHNlLFwibGFiZWxcIjpcInNldHVwXCJ9fSIsInJlc3VsdCI6bnVsbH0seyJmaW5nZXJwcmludCI6IntcImxhbmd1YWdlXCI6XCJyXCIsXCJjb2RlXCI6XCJ4IDwtIGZsZXhzZXEoMSwgMiwgMylcXG54XFxuXFxueDIgPC0gYXNfZmxleHNlcShsZXR0ZXJzWzE6NV0pXFxueDJcIixcIm9wdGlvbnNcIjp7fX0iLCJyZXN1bHQiOnsidHlwZSI6InJlc3VsdCIsImNodW5rX2lkIjoibmItMyIsImNvbnNvbGUiOiJVbm5hbWVkIGZsZXhzZXEgd2l0aCAzIGVsZW1lbnRzLlxuXG5FbGVtZW50czpcblxuW1sxXV1cblsxXSAxXG5cbltbMl1dXG5bMV0gMlxuXG5bWzNdXVxuWzFdIDNcblxuVW5uYW1lZCBmbGV4c2VxIHdpdGggNSBlbGVtZW50cy5cblxuRWxlbWVudHM6XG5cbltbMV1dXG5bMV0gXCJhXCJcblxuW1syXV1cblsxXSBcImJcIlxuXG4uLi4gKHNraXBwaW5nIDEgZWxlbWVudClcblxuW1s0XV1cblsxXSBcImRcIlxuXG5bWzVdXVxuWzFdIFwiZVwiXG4iLCJjb25zb2xlX3NlZ21lbnRzIjpbeyJjb2RlIjoieCA8LSBmbGV4c2VxKDEsIDIsIDMpIiwib3V0cHV0IjoiIn0seyJjb2RlIjoieCIsIm91dHB1dCI6IlVubmFtZWQgZmxleHNlcSB3aXRoIDMgZWxlbWVudHMuXG5cbkVsZW1lbnRzOlxuXG5bWzFdXVxuWzFdIDFcblxuW1syXV1cblsxXSAyXG5cbltbM11dXG5bMV0gM1xuIn0seyJjb2RlIjoieDIgPC0gYXNfZmxleHNlcShsZXR0ZXJzWzE6NV0pIiwib3V0cHV0IjoiIn0seyJjb2RlIjoieDIiLCJvdXRwdXQiOiJVbm5hbWVkIGZsZXhzZXEgd2l0aCA1IGVsZW1lbnRzLlxuXG5FbGVtZW50czpcblxuW1sxXV1cblsxXSBcImFcIlxuXG5bWzJdXVxuWzFdIFwiYlwiXG5cbi4uLiAoc2tpcHBpbmcgMSBlbGVtZW50KVxuXG5bWzRdXVxuWzFdIFwiZFwiXG5cbltbNV1dXG5bMV0gXCJlXCJcbiJ9XSwic3Rkb3V0IjoiVW5uYW1lZCBmbGV4c2VxIHdpdGggMyBlbGVtZW50cy5cblxuRWxlbWVudHM6XG5cbltbMV1dXG5bMV0gMVxuXG5bWzJdXVxuWzFdIDJcblxuW1szXV1cblsxXSAzXG5cblVubmFtZWQgZmxleHNlcSB3aXRoIDUgZWxlbWVudHMuXG5cbkVsZW1lbnRzOlxuXG5bWzFdXVxuWzFdIFwiYVwiXG5cbltbMl1dXG5bMV0gXCJiXCJcblxuLi4uIChza2lwcGluZyAxIGVsZW1lbnQpXG5cbltbNF1dXG5bMV0gXCJkXCJcblxuW1s1XV1cblsxXSBcImVcIlxuIiwic3RkZXJyIjoiIiwicGxvdHMiOltdLCJkYXRhZnJhbWVzIjpbXSwiZXJyb3IiOm51bGwsInNvdXJjZV9jb2RlIjoieCA8LSBmbGV4c2VxKDEsIDIsIDMpXG54XG5cbngyIDwtIGFzX2ZsZXhzZXEobGV0dGVyc1sxOjVdKVxueDIiLCJwbG90c19odG1sIjpbXX19LHsiZmluZ2VycHJpbnQiOiJ7XCJsYW5ndWFnZVwiOlwiclwiLFwiY29kZVwiOlwieDMgPC0gcHVzaF9iYWNrKHgyLCBcXFwiZlxcXCIpXFxueDNcXG5cXG54NCA8LSBwdXNoX2Zyb250KHgzLCBcXFwic3RhcnRcXFwiKVxcbng0XCIsXCJvcHRpb25zXCI6e319IiwicmVzdWx0Ijp7InR5cGUiOiJyZXN1bHQiLCJjaHVua19pZCI6Im5iLTUiLCJjb25zb2xlIjoiIiwiY29uc29sZV9zZWdtZW50cyI6W3siY29kZSI6IngzIDwtIHB1c2hfYmFjayh4MiwgXCJmXCIpIiwib3V0cHV0IjoiIn1dLCJzdGRvdXQiOiIiLCJzdGRlcnIiOiIiLCJwbG90cyI6W10sImRhdGFmcmFtZXMiOltdLCJlcnJvciI6ImNvdWxkIG5vdCBmaW5kIGZ1bmN0aW9uIFwicHVzaF9iYWNrXCIiLCJzb3VyY2VfY29kZSI6IngzIDwtIHB1c2hfYmFjayh4MiwgXCJmXCIpXG54M1xuXG54NCA8LSBwdXNoX2Zyb250KHgzLCBcInN0YXJ0XCIpXG54NCIsInBsb3RzX2h0bWwiOltdfX0seyJmaW5nZXJwcmludCI6IntcImxhbmd1YWdlXCI6XCJyXCIsXCJjb2RlXCI6XCJwZWVrX2Zyb250KHg0KVxcbnBlZWtfYmFjayh4NClcXG5cXG5wZiA8LSBwb3BfZnJvbnQoeDQpXFxucGYkdmFsdWVcXG5wZiRyZW1haW5pbmdcIixcIm9wdGlvbnNcIjp7fX0iLCJyZXN1bHQiOm51bGx9LHsiZmluZ2VycHJpbnQiOiJ7XCJsYW5ndWFnZVwiOlwiclwiLFwiY29kZVwiOlwieDJbWzNdXVxcblxcbng1IDwtIHgyW2MoMSwgMywgNSldXFxueDVcIixcIm9wdGlvbnNcIjp7fX0iLCJyZXN1bHQiOm51bGx9LHsiZmluZ2VycHJpbnQiOiJ7XCJsYW5ndWFnZVwiOlwiclwiLFwiY29kZVwiOlwiXCIsXCJvcHRpb25zXCI6e319IiwicmVzdWx0IjpudWxsfSx7ImZpbmdlcnByaW50Ijoie1wibGFuZ3VhZ2VcIjpcInJcIixcImNvZGVcIjpcInhfbmFtZWQgPC0gYXNfZmxleHNlcShsaXN0KGEgPSAxLCBiID0gMiwgYyA9IDMpKVxcbnhfbmFtZWRcXG5cXG54X25hbWVkW1tcXFwiYlxcXCJdXVxcbnhfbmFtZWQkY1wiLFwib3B0aW9uc1wiOnt9fSIsInJlc3VsdCI6bnVsbH0seyJmaW5nZXJwcmludCI6IntcImxhbmd1YWdlXCI6XCJyXCIsXCJjb2RlXCI6XCJ4NiA8LSBhc19mbGV4c2VxKDQ6NilcXG54NyA8LSBjKHgsIHg2KSAgIyBjKCkgaXMgc3VwcG9ydGVkIGZvciBmbGV4c2VxXFxueDdcXG5cXG54OCA8LSBhc19mbGV4c2VxKDE6NSlcXG5mYXBwbHkoeDgsIGZ1bmN0aW9uKGVsKSBlbCAqIDEwKVwiLFwib3B0aW9uc1wiOnt9fSIsInJlc3VsdCI6bnVsbH0seyJmaW5nZXJwcmludCI6IntcImxhbmd1YWdlXCI6XCJyXCIsXCJjb2RlXCI6XCJ4XFxueDRcIixcIm9wdGlvbnNcIjp7fX0iLCJyZXN1bHQiOm51bGx9XSwiY29kZUNlbGxSZXN1bHRzIjpbXX0= -->

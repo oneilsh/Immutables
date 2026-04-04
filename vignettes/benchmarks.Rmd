@@ -6,115 +6,766 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
-```{r setup, include = FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-if(requireNamespace("pkgload", quietly = TRUE)) {
-  pkgload::load_all(".", quiet = TRUE)
-} else if(requireNamespace("immutables", quietly = TRUE)) {
+
+loaded <- tryCatch({
+  pkgload::load_all(quiet = TRUE)
+  TRUE
+}, error = function(e) FALSE)
+
+if(!loaded) {
   library(immutables)
-} else {
-  stop("Need either installed 'immutables' or the 'pkgload' package to render this vignette.")
 }
-source(file.path("helpers", "benchmark_helpers.R"), local = TRUE)
-run_benchmarks <- benchmark_should_run()
+
+library(microbenchmark)
+library(ggplot2)
+
+run_benchmarks <- identical(Sys.getenv("IMMUTABLES_RUN_BENCHMARK_VIGNETTE"), "1")
+repeats <- 8L
+
+append_benchmark_rows <- function(rows, impl, op, n, time_us) {
+  push_front(rows, data.frame(
+    impl = impl,
+    op = op,
+    n = n,
+    time_us = time_us
+  ))
+}
+
+run_fresh_benchmark <- function(repeats, setup, bench) {
+  gc(FALSE)
+  time_us <- numeric(repeats)
+
+  for(rep_idx in seq_len(repeats)) {
+    state <- setup()
+    benchmark_run <- local({
+      microbenchmark(bench(state), times = 1L)
+    })
+    time_us[[rep_idx]] <- benchmark_run$time[[1L]] / 1000
+  }
+
+  time_us
+}
 ```
+
 
 ## Method
 
 This article measures individual operation times for each collection type
-provided by `immutables`, following the operation-by-operation style of
-Barry (2018). Each timing cell builds a fresh data structure of size *n*,
-then uses `microbenchmark` to time one operation. We report the median of
-`r benchmark_default_repeats()` repetitions per cell.
+provided by `immutables`. Each recorded repetition rebuilds the fixture for
+size *n*, then uses `microbenchmark(..., times = 1)` to time one operation on
+that fresh state.
 
-Comparisons use idiomatic base R implementations as controls:
+Comparisons use base R implementations and select structures from
+`rstackdeque` and `IRanges`:
 
-- **Sequences and queues**: base R lists (plus `rstackdeque` for queues).
-- **Priority queues**: parallel value and priority vectors with
-  `which.min()`/`which.max()`.
-- **Interval queries**: a `data.frame` with start/end columns, filtered
-  with vectorized comparisons. When the Bioconductor package `IRanges` is
-  available, it is included as a third comparison.
+- **Sequences and queue operations**:
+  - immutables: `flexseq()`
+  - base R: `list()`
+  - `rstackdeque`: `rpqueue()`
+- **Priority operations**:
+  - immutables: `priority_queue()`
+  - base R: parallel value and priority vectors with
+    `which.min()` / `which.max()`
+- **Interval operations**:
+  - immutables: `interval_index()`
+  - base R: `data.frame` with start/end columns, filtered with vectorized
+    comparisons
+  - `IRanges`: `IRanges()`
 
-All `immutables` structures are persistent — operations return new
-structures without modifying the input. The base R baselines are
-copy-on-write but not persistent in the same sense; we benchmark the
-cost of producing the updated copy.
 
-```{r benchmark-note, eval = !run_benchmarks}
-cat(
-  "Live benchmark chunks are skipped by default.",
-  "Set IMMUTABLES_RUN_BENCHMARK_VIGNETTE=1 before rendering",
-  "to run the full grid."
-)
-```
-
-```{r run-benchmarks, eval = run_benchmarks, cache = FALSE}
-bench_results <- run_benchmark_vignette()
-```
 
 ## Sequence operations
 
-Seven operations on sequences of 100 to 500,000 elements. Append,
-prepend, concatenate, and split exploit the finger tree's O(log n)
-structural sharing; get, replace, and remove at the middle exercise
-index-based splitting.
+Seven operations on sequences of 1,024 to 131,072 elements. Append, prepend,
+concatenate, and split exploit the finger tree's O(log n) structural sharing;
+get, replace, and remove at the middle exercise index-based splitting.
 
-```{r sequence-plot, eval = run_benchmarks, fig.width = 9, fig.height = 7}
-bench_results$sequence_plot
+```{r sequence-bench, eval=run_benchmarks, cache=FALSE}
+repeats <- 6L
+
+sequence_sizes <- 2^(10 + 0:6)
+sequence_rows <- flexseq()
+
+for(sequence_size in sequence_sizes) {
+  cat("Sequence ops, size ", sequence_size, "\n")
+  make_sequence_values <- function() {
+    as.list(sprintf("v_%06d", seq_len(sequence_size)))
+  }
+  middle_index <- as.integer(sequence_size / 2)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(flex_sequence = as_flexseq(make_sequence_values())),
+    bench = function(state) push_back(state$flex_sequence, "z")
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "flexseq", "append", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(flex_sequence = as_flexseq(make_sequence_values())),
+    bench = function(state) push_front(state$flex_sequence, "z")
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "flexseq", "prepend", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(flex_sequence = as_flexseq(make_sequence_values()), middle_index = middle_index),
+    bench = function(state) state$flex_sequence[[state$middle_index]]
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "flexseq", "get middle", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(flex_sequence = as_flexseq(make_sequence_values()), middle_index = middle_index),
+    bench = function(state) {
+      updated_sequence <- state$flex_sequence
+      updated_sequence[[state$middle_index]] <- "y"
+      updated_sequence
+    }
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "flexseq", "replace middle", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(flex_sequence = as_flexseq(make_sequence_values()), middle_index = middle_index),
+    bench = function(state) pop_at(state$flex_sequence, state$middle_index)$remaining
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "flexseq", "remove middle", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      left = as_flexseq(make_sequence_values()),
+      right = as_flexseq(make_sequence_values())
+    ),
+    bench = function(state) c(state$left, state$right)
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "flexseq", "concatenate", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(flex_sequence = as_flexseq(make_sequence_values()), middle_index = middle_index),
+    bench = function(state) split_at(state$flex_sequence, state$middle_index)
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "flexseq", "split at middle", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(base_list_sequence = make_sequence_values()),
+    bench = function(state) c(state$base_list_sequence, list("z"))
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "base R list", "append", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(base_list_sequence = make_sequence_values()),
+    bench = function(state) c(list("z"), state$base_list_sequence)
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "base R list", "prepend", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(base_list_sequence = make_sequence_values(), middle_index = middle_index),
+    bench = function(state) state$base_list_sequence[[state$middle_index]]
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "base R list", "get middle", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(base_list_sequence = make_sequence_values(), middle_index = middle_index),
+    bench = function(state) {
+      updated_list_sequence <- state$base_list_sequence
+      updated_list_sequence[[state$middle_index]] <- "y"
+      updated_list_sequence
+    }
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "base R list", "replace middle", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(base_list_sequence = make_sequence_values(), middle_index = middle_index),
+    bench = function(state) state$base_list_sequence[-state$middle_index]
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "base R list", "remove middle", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      left = make_sequence_values(),
+      right = make_sequence_values()
+    ),
+    bench = function(state) c(state$left, state$right)
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "base R list", "concatenate", sequence_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(base_list_sequence = make_sequence_values(), middle_index = middle_index),
+    bench = function(state) {
+      list(
+        left = state$base_list_sequence[seq_len(state$middle_index - 1L)],
+        value = state$base_list_sequence[[state$middle_index]],
+        right = state$base_list_sequence[(state$middle_index + 1L):sequence_size]
+      )
+    }
+  )
+  sequence_rows <- append_benchmark_rows(sequence_rows, "base R list", "split at middle", sequence_size, time_us)
+}
+
+seq_results <- do.call(rbind, as.list(sequence_rows))
 ```
+
+
+```{r sequence-plot, eval=run_benchmarks, fig.width=9, fig.height=7}
+seq_all <- seq_results
+seq_all$time_ms <- seq_all$time_us / 1000
+
+sorted_sizes <- sort(unique(seq_all$n))
+pow_labels <- lapply(sorted_sizes, function(s) bquote(2^.(log2(s)))) |> as.character()
+seq_all$n_cat <- factor(seq_all$n, levels = sorted_sizes)
+
+ggplot(seq_all, aes(x = n_cat, y = time_ms, color = impl)) +
+  geom_point(position = position_jitter(width = 0.15, height = 0)) +
+  facet_wrap(~ op, scales = "free_y") +
+  scale_x_discrete(labels = pow_labels) +
+  labs(
+    title = "Sequence Operations",
+    x = "Number of elements",
+    y = "Time (ms)",
+    color = "Implementation"
+  ) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+```
+
 
 ## Queue operations
 
 FIFO enqueue (push to back) and dequeue (pop from front) compared across
 `flexseq`, `rstackdeque`, and base R lists. Both `flexseq` and
-`rstackdeque` provide O(log n) or amortized O(1) queue operations; base
-R's `c()` and `[-1]` are O(n).
+`rstackdeque` provide O(log n) or amortized O(1) queue operations; base R's
+`c()` and `[-1]` are O(n).
 
-```{r queue-plot, eval = run_benchmarks, fig.width = 8, fig.height = 4.8}
-bench_results$queue_plot
+```{r queue-bench, eval=run_benchmarks, cache=FALSE}
+queue_sizes <- 2^(10 + 0:7)
+queue_rows <- flexseq()
+
+for(queue_size in queue_sizes) {
+  make_queue_items <- function() {
+    as.list(rep("queue_item", queue_size))
+  }
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(flex_queue = as_flexseq(make_queue_items())),
+    bench = function(state) push_back(state$flex_queue, "d")
+  )
+  queue_rows <- append_benchmark_rows(queue_rows, "flexseq", "enqueue", queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(flex_queue = as_flexseq(make_queue_items())),
+    bench = function(state) pop_front(state$flex_queue)$remaining
+  )
+  queue_rows <- append_benchmark_rows(queue_rows, "flexseq", "dequeue", queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(rstackdeque_queue = rstackdeque::as.rpqueue(make_queue_items())),
+    bench = function(state) rstackdeque::insert_back(state$rstackdeque_queue, "d")
+  )
+  queue_rows <- append_benchmark_rows(queue_rows, "rstackdeque", "enqueue", queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(rstackdeque_queue = rstackdeque::as.rpqueue(make_queue_items())),
+    bench = function(state) rstackdeque::without_front(state$rstackdeque_queue)
+  )
+  queue_rows <- append_benchmark_rows(queue_rows, "rstackdeque", "dequeue", queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(base_list_queue = make_queue_items()),
+    bench = function(state) c(state$base_list_queue, list("d"))
+  )
+  queue_rows <- append_benchmark_rows(queue_rows, "base R list", "enqueue", queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(base_list_queue = make_queue_items()),
+    bench = function(state) state$base_list_queue[-1L]
+  )
+  queue_rows <- append_benchmark_rows(queue_rows, "base R list", "dequeue", queue_size, time_us)
+}
+
+queue_results <- do.call(rbind, as.list(queue_rows))
 ```
+```{r queue-plot, eval=run_benchmarks, fig.width=8, fig.height=4.8}
+queue_all <- queue_results
+queue_all$time_ms <- queue_all$time_us / 1000
+queue_all$n_cat <- factor(queue_all$n, levels = sort(unique(queue_all$n)))
+
+ggplot(queue_all, aes(x = n_cat, y = time_ms, color = impl)) +
+  geom_boxplot() +
+  facet_wrap(~ op, scales = "free_y") +
+  labs(
+    title = "Queue Operations",
+    x = "Number of elements",
+    y = "Time (ms)",
+    color = "Implementation"
+  ) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+```
+
 
 ## Priority queue operations
 
 Insert, peek, and pop operations for min and max priority. The base R
 baseline stores values and priorities as parallel vectors and uses
-`which.min()` / `which.max()` for queries — O(n) per call. The
-`priority_queue` from `immutables` maintains a sorted finger tree with
-cached min/max monoids, giving O(log n) insert and pop.
+`which.min()` / `which.max()` for queries, so those reads are O(n) per call.
+`priority_queue` maintains a sorted finger tree with cached min/max monoids,
+giving O(log n) insert and pop.
 
-```{r pq-plot, eval = run_benchmarks, fig.width = 9, fig.height = 7}
-bench_results$pq_plot
+```{r pq-bench, eval=run_benchmarks, cache=FALSE}
+priority_queue_sizes <- c(100, 500, 1000, 5000, 10000, 50000)
+priority_queue_rows <- flexseq()
+
+set.seed(42)
+max_priority_queue_size <- max(priority_queue_sizes)
+all_priority_values <- sprintf("val_%06d", seq_len(max_priority_queue_size))
+all_priority_weights <- runif(max_priority_queue_size)
+
+for(priority_queue_size in priority_queue_sizes) {
+  priority_values <- as.list(all_priority_values[seq_len(priority_queue_size)])
+  priority_weights <- all_priority_weights[seq_len(priority_queue_size)]
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      priority_queue_fixture = as_priority_queue(priority_values, priorities = priority_weights)
+    ),
+    bench = function(state) insert(state$priority_queue_fixture, "val_new", 0.5)
+  )
+  priority_queue_rows <- append_benchmark_rows(priority_queue_rows, "priority_queue", "insert", priority_queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      priority_queue_fixture = as_priority_queue(priority_values, priorities = priority_weights)
+    ),
+    bench = function(state) peek_min(state$priority_queue_fixture)
+  )
+  priority_queue_rows <- append_benchmark_rows(priority_queue_rows, "priority_queue", "peek min", priority_queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      priority_queue_fixture = as_priority_queue(priority_values, priorities = priority_weights)
+    ),
+    bench = function(state) pop_min(state$priority_queue_fixture)$remaining
+  )
+  priority_queue_rows <- append_benchmark_rows(priority_queue_rows, "priority_queue", "pop min", priority_queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      priority_queue_fixture = as_priority_queue(priority_values, priorities = priority_weights)
+    ),
+    bench = function(state) peek_max(state$priority_queue_fixture)
+  )
+  priority_queue_rows <- append_benchmark_rows(priority_queue_rows, "priority_queue", "peek max", priority_queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      priority_queue_fixture = as_priority_queue(priority_values, priorities = priority_weights)
+    ),
+    bench = function(state) pop_max(state$priority_queue_fixture)$remaining
+  )
+  priority_queue_rows <- append_benchmark_rows(priority_queue_rows, "priority_queue", "pop max", priority_queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      base_priority_queue = list(
+        values = all_priority_values[seq_len(priority_queue_size)],
+        priorities = priority_weights
+      )
+    ),
+    bench = function(state) {
+      list(
+        values = c(state$base_priority_queue$values, "val_new"),
+        priorities = c(state$base_priority_queue$priorities, 0.5)
+      )
+    }
+  )
+  priority_queue_rows <- append_benchmark_rows(priority_queue_rows, "base R", "insert", priority_queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      base_priority_queue = list(
+        values = all_priority_values[seq_len(priority_queue_size)],
+        priorities = priority_weights
+      )
+    ),
+    bench = function(state) {
+      state$base_priority_queue$values[which.min(state$base_priority_queue$priorities)]
+    }
+  )
+  priority_queue_rows <- append_benchmark_rows(priority_queue_rows, "base R", "peek min", priority_queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      base_priority_queue = list(
+        values = all_priority_values[seq_len(priority_queue_size)],
+        priorities = priority_weights
+      )
+    ),
+    bench = function(state) {
+      min_index <- which.min(state$base_priority_queue$priorities)
+      list(
+        values = state$base_priority_queue$values[-min_index],
+        priorities = state$base_priority_queue$priorities[-min_index]
+      )
+    }
+  )
+  priority_queue_rows <- append_benchmark_rows(priority_queue_rows, "base R", "pop min", priority_queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      base_priority_queue = list(
+        values = all_priority_values[seq_len(priority_queue_size)],
+        priorities = priority_weights
+      )
+    ),
+    bench = function(state) {
+      state$base_priority_queue$values[which.max(state$base_priority_queue$priorities)]
+    }
+  )
+  priority_queue_rows <- append_benchmark_rows(priority_queue_rows, "base R", "peek max", priority_queue_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      base_priority_queue = list(
+        values = all_priority_values[seq_len(priority_queue_size)],
+        priorities = priority_weights
+      )
+    ),
+    bench = function(state) {
+      max_index <- which.max(state$base_priority_queue$priorities)
+      list(
+        values = state$base_priority_queue$values[-max_index],
+        priorities = state$base_priority_queue$priorities[-max_index]
+      )
+    }
+  )
+  priority_queue_rows <- append_benchmark_rows(priority_queue_rows, "base R", "pop max", priority_queue_size, time_us)
+}
+
+pq_results <- do.call(rbind, as.list(priority_queue_rows))
 ```
+
+
+```{r pq-plot, eval=run_benchmarks, fig.width=9, fig.height=7}
+pq_all <- pq_results
+pq_all$time_ms <- pq_all$time_us / 1000
+pq_medians <- aggregate(time_us ~ impl + op + n, data = pq_results, FUN = median)
+pq_medians$time_ms <- pq_medians$time_us / 1000
+
+ggplot(pq_all, aes(x = n, y = time_ms, color = impl)) +
+  geom_point(alpha = 0.25, size = 1.2, position = position_jitter(width = 0.03)) +
+  geom_line(data = pq_medians, linewidth = 0.6) +
+  geom_point(data = pq_medians, size = 1.8) +
+  facet_wrap(~ op, scales = "free_y") +
+  scale_x_log10(labels = scales::label_comma()) +
+  scale_y_log10(labels = scales::label_comma()) +
+  labs(
+    title = "Priority Queue Operations",
+    x = "Number of elements",
+    y = "Time (ms)",
+    color = "Implementation"
+  ) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+```
+
 
 ## Interval queries
 
-Insert and three query types (single-point lookup, all-point matches,
-and range overlap) on a collection of intervals with integer endpoints.
-The base R baseline stores intervals in a `data.frame` and filters with
-vectorized comparisons — simple and fast for small *n*, but O(n) per
-query. `interval_index` uses an augmented finger tree for O(log n + k)
-queries, where *k* is the number of matches.
+Insert and three query types (single-point lookup, all-point matches, and
+range overlap) on a collection of intervals with integer endpoints. The base R
+baseline stores intervals in a `data.frame` and filters with vectorized
+comparisons, which is simple and fast for small *n* but O(n) per query.
+`interval_index` uses an augmented finger tree for O(log n + k) queries, where
+*k* is the number of matches.
 
-```{r ivx-plot, eval = run_benchmarks, fig.width = 9, fig.height = 6}
-bench_results$ivx_plot
+```{r ivx-bench, eval=run_benchmarks, cache=FALSE}
+interval_index_sizes <- c(100, 500, 1000, 5000, 10000, 50000)
+interval_index_rows <- flexseq()
+
+set.seed(123)
+max_interval_index_size <- max(interval_index_sizes)
+all_interval_starts <- sort(sample.int(max_interval_index_size * 10L, max_interval_index_size))
+all_interval_widths <- sample.int(100L, max_interval_index_size, replace = TRUE)
+all_interval_ends <- all_interval_starts + all_interval_widths
+all_interval_values <- sprintf("interval_%06d", seq_len(max_interval_index_size))
+
+query_point <- all_interval_starts[as.integer(max_interval_index_size / 2)] + 10L
+query_lower_bound <- all_interval_starts[as.integer(max_interval_index_size * 0.4)]
+query_upper_bound <- all_interval_starts[as.integer(max_interval_index_size * 0.5)]
+
+has_iranges <- requireNamespace("IRanges", quietly = TRUE) &&
+  requireNamespace("S4Vectors", quietly = TRUE)
+
+for(interval_index_size in interval_index_sizes) {
+  interval_starts <- all_interval_starts[seq_len(interval_index_size)]
+  interval_ends <- all_interval_ends[seq_len(interval_index_size)]
+  interval_values <- all_interval_values[seq_len(interval_index_size)]
+  inserted_interval_start <- all_interval_starts[as.integer(max_interval_index_size / 2)]
+  inserted_interval_end <- inserted_interval_start + 50L
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      interval_index_fixture = as_interval_index(
+        as.list(interval_values),
+        start = interval_starts,
+        end = interval_ends,
+        bounds = "[]"
+      )
+    ),
+    bench = function(state) {
+      insert(state$interval_index_fixture, "interval_new", inserted_interval_start, inserted_interval_end)
+    }
+  )
+  interval_index_rows <- append_benchmark_rows(interval_index_rows, "interval_index", "insert", interval_index_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      interval_index_fixture = as_interval_index(
+        as.list(interval_values),
+        start = interval_starts,
+        end = interval_ends,
+        bounds = "[]"
+      )
+    ),
+    bench = function(state) peek_point(state$interval_index_fixture, query_point, bounds = "[]")
+  )
+  interval_index_rows <- append_benchmark_rows(interval_index_rows, "interval_index", "point query", interval_index_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      interval_index_fixture = as_interval_index(
+        as.list(interval_values),
+        start = interval_starts,
+        end = interval_ends,
+        bounds = "[]"
+      )
+    ),
+    bench = function(state) peek_all_point(state$interval_index_fixture, query_point, bounds = "[]")
+  )
+  interval_index_rows <- append_benchmark_rows(interval_index_rows, "interval_index", "all point matches", interval_index_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      interval_index_fixture = as_interval_index(
+        as.list(interval_values),
+        start = interval_starts,
+        end = interval_ends,
+        bounds = "[]"
+      )
+    ),
+    bench = function(state) {
+      peek_all_overlaps(state$interval_index_fixture, query_lower_bound, query_upper_bound, bounds = "[]")
+    }
+  )
+  interval_index_rows <- append_benchmark_rows(interval_index_rows, "interval_index", "overlap query", interval_index_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      base_interval_data = data.frame(
+        start = interval_starts,
+        end = interval_ends,
+        value = interval_values,
+        stringsAsFactors = FALSE
+      )
+    ),
+    bench = function(state) {
+      rbind(
+        state$base_interval_data,
+        data.frame(
+          start = inserted_interval_start,
+          end = inserted_interval_end,
+          value = "interval_new",
+          stringsAsFactors = FALSE
+        )
+      )
+    }
+  )
+  interval_index_rows <- append_benchmark_rows(interval_index_rows, "base R", "insert", interval_index_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      base_interval_data = data.frame(
+        start = interval_starts,
+        end = interval_ends,
+        value = interval_values,
+        stringsAsFactors = FALSE
+      )
+    ),
+    bench = function(state) {
+      matching_rows <- which(state$base_interval_data$start <= query_point & query_point <= state$base_interval_data$end)
+      if(length(matching_rows)) state$base_interval_data$value[matching_rows[1L]] else NULL
+    }
+  )
+  interval_index_rows <- append_benchmark_rows(interval_index_rows, "base R", "point query", interval_index_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      base_interval_data = data.frame(
+        start = interval_starts,
+        end = interval_ends,
+        value = interval_values,
+        stringsAsFactors = FALSE
+      )
+    ),
+    bench = function(state) {
+      state$base_interval_data[
+        state$base_interval_data$start <= query_point & query_point <= state$base_interval_data$end,
+        ,
+        drop = FALSE
+      ]
+    }
+  )
+  interval_index_rows <- append_benchmark_rows(interval_index_rows, "base R", "all point matches", interval_index_size, time_us)
+
+  time_us <- run_fresh_benchmark(
+    repeats,
+    setup = function() list(
+      base_interval_data = data.frame(
+        start = interval_starts,
+        end = interval_ends,
+        value = interval_values,
+        stringsAsFactors = FALSE
+      )
+    ),
+    bench = function(state) {
+      state$base_interval_data[
+        state$base_interval_data$start <= query_upper_bound &
+        state$base_interval_data$end >= query_lower_bound,
+        ,
+        drop = FALSE
+      ]
+    }
+  )
+  interval_index_rows <- append_benchmark_rows(interval_index_rows, "base R", "overlap query", interval_index_size, time_us)
+
+  if(has_iranges) {
+    time_us <- run_fresh_benchmark(
+      repeats,
+      setup = function() list(
+        iranges_fixture = list(
+          iranges = IRanges::IRanges(start = interval_starts, end = interval_ends),
+          values = interval_values
+        )
+      ),
+      bench = function(state) {
+        list(
+          iranges = c(
+            state$iranges_fixture$iranges,
+            IRanges::IRanges(start = inserted_interval_start, end = inserted_interval_end)
+          ),
+          values = c(state$iranges_fixture$values, "interval_new")
+        )
+      }
+    )
+    interval_index_rows <- append_benchmark_rows(interval_index_rows, "IRanges", "insert", interval_index_size, time_us)
+
+    time_us <- run_fresh_benchmark(
+      repeats,
+      setup = function() list(
+        iranges_fixture = list(
+          iranges = IRanges::IRanges(start = interval_starts, end = interval_ends),
+          values = interval_values
+        )
+      ),
+      bench = function(state) {
+        point_query_range <- IRanges::IRanges(start = query_point, width = 1L)
+        overlap_hits <- IRanges::findOverlaps(point_query_range, state$iranges_fixture$iranges)
+        subject_hit_indices <- S4Vectors::subjectHits(overlap_hits)
+        if(length(subject_hit_indices)) state$iranges_fixture$values[subject_hit_indices[1L]] else NULL
+      }
+    )
+    interval_index_rows <- append_benchmark_rows(interval_index_rows, "IRanges", "point query", interval_index_size, time_us)
+
+    time_us <- run_fresh_benchmark(
+      repeats,
+      setup = function() list(
+        iranges_fixture = list(
+          iranges = IRanges::IRanges(start = interval_starts, end = interval_ends),
+          values = interval_values
+        )
+      ),
+      bench = function(state) {
+        point_query_range <- IRanges::IRanges(start = query_point, width = 1L)
+        overlap_hits <- IRanges::findOverlaps(point_query_range, state$iranges_fixture$iranges)
+        state$iranges_fixture$values[S4Vectors::subjectHits(overlap_hits)]
+      }
+    )
+    interval_index_rows <- append_benchmark_rows(interval_index_rows, "IRanges", "all point matches", interval_index_size, time_us)
+
+    time_us <- run_fresh_benchmark(
+      repeats,
+      setup = function() list(
+        iranges_fixture = list(
+          iranges = IRanges::IRanges(start = interval_starts, end = interval_ends),
+          values = interval_values
+        )
+      ),
+      bench = function(state) {
+        overlap_query_range <- IRanges::IRanges(start = query_lower_bound, end = query_upper_bound)
+        overlap_hits <- IRanges::findOverlaps(overlap_query_range, state$iranges_fixture$iranges)
+        state$iranges_fixture$values[S4Vectors::subjectHits(overlap_hits)]
+      }
+    )
+    interval_index_rows <- append_benchmark_rows(interval_index_rows, "IRanges", "overlap query", interval_index_size, time_us)
+  }
+}
+
+ivx_results <- do.call(rbind, as.list(interval_index_rows))
 ```
+```{r ivx-plot, eval=run_benchmarks, fig.width=9, fig.height=6}
+ivx_all <- ivx_results
+ivx_all$time_ms <- ivx_all$time_us / 1000
+ivx_medians <- aggregate(time_us ~ impl + op + n, data = ivx_results, FUN = median)
+ivx_medians$time_ms <- ivx_medians$time_us / 1000
 
-## Notes
-
-- All `immutables` operations are persistent: the original structure is
-  never modified. Base R list operations produce shallow copies via
-  copy-on-write.
-- Sequence **append** and **prepend** are O(log n) for `flexseq` vs O(n)
-  for base R; the crossover is visible at moderate sizes.
-- **Get middle** (`[[`) is O(log n) for `flexseq` vs O(1) for base R —
-  `flexseq` will always be slower here. This is the cost of tree-based
-  indexing.
-- Queue and priority queue operations show the expected O(log n) vs O(n)
-  separation at larger sizes.
-- Interval query performance depends on the number of matches (*k*). The
-  benchmark uses a fixed query point and range, so *k* varies with *n*
-  and the random interval layout.
-- These figures are meant for article exposition rather than internal
-  regression tracking.
+ggplot(ivx_all, aes(x = n, y = time_ms, color = impl)) +
+  geom_point(alpha = 0.25, size = 1.2, position = position_jitter(width = 0.03)) +
+  geom_line(data = ivx_medians, linewidth = 0.6) +
+  geom_point(data = ivx_medians, size = 1.8) +
+  facet_wrap(~ op, scales = "free_y") +
+  scale_x_log10(labels = scales::label_comma()) +
+  scale_y_log10(labels = scales::label_comma()) +
+  labs(
+    title = "Interval Index Queries",
+    x = "Number of elements",
+    y = "Time (ms)",
+    color = "Implementation"
+  ) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+```
