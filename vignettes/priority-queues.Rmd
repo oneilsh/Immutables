@@ -6,87 +6,94 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
-```{r setup, include = FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-if(requireNamespace("immutables", quietly = TRUE)) {
+loaded <- tryCatch({
+  pkgload::load_all(quiet = TRUE)
+  TRUE
+}, error = function(e) FALSE)
+
+if(!loaded) {
   library(immutables)
-} else if(requireNamespace("pkgload", quietly = TRUE)) {
-  pkgload::load_all(".", quiet = TRUE)
-} else {
-  stop("Need either installed 'immutables' or the 'pkgload' package to render this vignette.")
 }
 ```
 
-## What is a priority queue?
 
-`priority_queue` is a persistent queue ordered by numeric or comparable
-priority values.
+## Priority queue basics
+
+`priority_queue` is a persistent structure that associates elements with priority values, typically numeric or character (string). They provide
+fast access to elements by min or max priority, and insertion of new 
+elements with given priorities. 
+
+All operations are persistent, and return modified copies. Peeking at the min/max returns the stored element (which may be any type), 
+popping returnes a list with `$element` containing the stored element
+and `$remaining` a priority queue without those elements.
+```{r}
+x <- priority_queue("task_a", "task_b", "task_c", priorities = c(3, 1, 2))
+x
+
+peek_min(x) # "task_b"
+res <- pop_max(x)
+
+res$element
+res$priority
+res$remaining
+```
+## Priority ties
+
+In the case of multiple identical priorities, peek/pop for min/max return a *single element*, in their original insertion order. Their "all" counterparts (`peek_all_min`, `pop_all_max`, etc.) return two priorities: in `$elements` the elements peeked/popped and in `$remaining` the other elements.
+```{r}
+y <- priority_queue() |>
+  insert("Jones", priority = "B") |>
+  insert("Smith", priority = "A") |>
+  insert("Adams", priority = "A")
+
+peek_min(y)
+peek_all_min(y)
+
+res1 <- pop_min(y)
+res1$element
+res1$priority
+res1$remaining
+
+res2 <- pop_all_min(y)
+
+res2$elements
+res2$remaining
+```
+Priority queues can be converted to R lists with `as.list()`. The `drop_meta` parameter defaulting to `FALSE` controls whether priority values are included.
+
+```{r}
+as.list(res2$elements )
+as.list(res2$elements, drop_meta = TRUE)
+```
+
+## Empty queues
+
+Peek/pop helpers are non-throwing on empty queues, `length()` allows for empty checking.
+
+```{r}
+empty_q <- priority_queue()
+length(empty_q)
+peek_min(empty_q)
+pop_min(empty_q)
+```
+## Casting to `flexseq`
+
 For full sequence-style operations, cast with `as_flexseq()`. By default this
 casts to payload items only (`drop_meta = TRUE`); use
 `as_flexseq(..., drop_meta = FALSE)` to keep entry records (`value` +
 `priority`).
 
-## Creating a queue
 
 ```{r}
-x <- priority_queue("task_a", "task_b", "task_c", priorities = c(3, 1, 2))
-x
-```
+library(immutables)
 
-## Peeking min and max
+y <- priority_queue() |>
+  insert("Jones", priority = "B") |>
+  insert("Smith", priority = "A") |>
+  insert("Adams", priority = "A")
 
-```{r}
-peek_min(x)
-peek_max(x)
-```
-
-## Popping one element
-
-`pop_min()` and `pop_max()` return both the element and the updated queue.
-
-```{r}
-x2 <- pop_min(x)
-x2$value
-x2$priority
-x2$remaining
-```
-
-## Popping a full tie run
-
-Use bulk helpers to read/remove all elements tied at the current minimum or
-maximum priority.
-
-```{r}
-peek_all_min(x)
-p_all <- pop_all_min(x)
-as.list(p_all$values)
-p_all$remaining
-```
-
-## Empty queues
-
-Scalar peek/pop helpers are non-throwing on empty queues.
-
-```{r}
-empty_q <- priority_queue()
-peek_min(empty_q)
-pop_min(empty_q)
-```
-
-## Inserting
-
-```{r}
-x3 <- insert(x, "task_d", priority = 0)
-x3
-peek_min(x3)
-```
-
-## Persistence recap
-
-The original queue is unchanged.
-
-```{r}
-peek_min(x)
-length(x)
+as_flexseq(y)
+as_flexseq(y, drop_meta = FALSE)
 ```
