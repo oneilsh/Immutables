@@ -52,9 +52,17 @@ res$value
 res$priority
 res$remaining
 ```
+
+The `as_priority_queue()` variant builds a queue from a vector or list of elements paired with a priority vector — useful when priorities are already in a separate vector.
+
+```{r}
+q <- as_priority_queue(letters[1:4], priorities = c(3, 1, 2, 1))
+q
+```
+
 ## Priority ties
 
-In the case of multiple identical priorities, peek/pop for min/max return a *single element*, in their original insertion order. Their "all" counterparts (`peek_all_min`, `pop_all_max`, etc.) return two priorities: in `$elements` the elements peeked/popped and in `$remaining` the other elements.
+In the case of multiple identical priorities, peek/pop for min/max return a *single element*, in their original insertion order. Their "all" counterparts (`peek_all_min`, `pop_all_max`, etc.) return two priorities: in `$elements` the elements peeked/popped and in `$remaining` the other elements. `peek_all_max` and `pop_all_max` behave symmetrically on the maximum-priority tie run.
 ```{r}
 y <- priority_queue() |>
   insert("Jones", priority = "B") |>
@@ -91,6 +99,42 @@ length(empty_q)
 peek_min(empty_q)
 pop_min(empty_q)
 ```
+
+## Priority values
+
+`min_priority()` and `max_priority()` return the current extrema *priority* (not the stored element), in O(1) via cached monoid state.
+
+```{r}
+q <- priority_queue("a", "b", "c", priorities = c(3, 1, 2))
+min_priority(q)
+max_priority(q)
+min_priority(priority_queue())  # NULL when empty
+```
+
+## Named priorities
+
+Priority queues can carry names, set either at construction or on `insert()`. Names support read-only indexing via `[`, `[[`, and `$` — this is the *only* indexing form `priority_queue` supports. Positional indexing and all replacement forms (`[<-`, `[[<-`, `$<-`) error; cast to `as_flexseq()` first to mutate.
+
+```{r}
+q <- priority_queue(a = "task-a", b = "task-b", priorities = c(2, 1)) |>
+  insert("task-c", priority = 3, name = "c")
+
+q[["b"]]
+q[c("a", "c")]
+
+try(q[1])         # positional indexing blocked
+try(q$a <- "!!")  # replacement blocked
+```
+
+## Transforming
+
+`fapply()` maps a function over queue elements while preserving priorities. The function receives `(value, priority)`, or `(value, priority, name)` if it accepts a third argument — priorities and names are passed in read-only, and the return value replaces the stored element.
+
+```{r}
+q <- priority_queue("alice", "bob", "carol", priorities = c(3, 1, 2))
+fapply(q, function(value, priority) toupper(value))
+```
+
 ## Casting to `flexseq`
 
 For full sequence-style operations, cast with `as_flexseq()`. This returns

@@ -57,7 +57,7 @@ x
 ```
 ## End operations
 
-Flexseqs support pushing new elements onto the front or back of the sequences, peeking at the front or back (i.e., getting a copy of the first or last item), and popping from the front or back, which returns the removed element and a copy of the flexseq input with that item removed.
+Flexseqs support pushing new elements onto the front or back of the sequences, peeking at the front or back (i.e., getting a copy of the first or last item), and popping from the front or back, which returns the removed element and a copy of the flexseq input with that item removed. `pop_front()` and `pop_back()` both return a list with fields `$value` and `$remaining`; `peek_back()` is the symmetric counterpart to `peek_front()`.
 
 ```{r}
 x <- as_flexseq(4:6)
@@ -73,9 +73,25 @@ xpopped <- pop_front(x)
 xpopped$value
 xpopped$remaining
 ```
+## Positional operations
+
+Beyond the ends, flexseqs support arbitrary-position persistent operations. `peek_at()` is the non-throwing positional read (compare with `[[`, which errors when out of bounds); `pop_at()` removes an element at a given index and returns `$value`/`$remaining`; `insert_at()` inserts before a given index, or at `length(x) + 1` to append.
+
+```{r}
+x <- flexseq("a", "b", "c", "d")
+
+peek_at(x, 10)  # NULL, no error
+
+out <- pop_at(x, 2)
+out$value
+out$remaining
+
+insert_at(x, 3, c("x", "y"))
+```
+
 ## Indexing and slicing
 
-In general indexing and slicing works as it does with lists: `[]` returns a sublist indexed by integer (by position), character vector 
+In general indexing and slicing works as it does with lists: `[]` returns a sublist indexed by integer (by position), character vector
 (by name if named), or logical vector (by inclusion).
 
 Note that these operations are generally expensive, $O(k\log n)$ where
@@ -102,4 +118,16 @@ c(x, x2)
 
 x <- as_flexseq(1:3)
 fapply(x, function(el) el * 10)
+```
+
+## Converting to base R
+
+Flexseqs convert back to standard R structures with `as.list()` (preserves names and list semantics) and `unlist()` (atomic vector when possible). `length()` returns the element count in O(1), and `str()` gives a compact diagnostic display.
+
+```{r}
+x <- flexseq(a = 1, b = 2, c = 3)
+
+as.list(x)
+unlist(x)
+length(x)
 ```
