@@ -38,8 +38,9 @@ fast access to elements by min or max priority, and insertion of new
 elements with given priorities. 
 
 All operations are persistent, and return modified copies. Peeking at the min/max returns the stored element (which may be any type), 
-popping returnes a list with `$element` containing the stored element
-and `$remaining` a priority queue without those elements.
+popping returns a list with `$value` containing the stored element, `$priority` the priority,
+and `$remaining` the rest of the priority queue without those elements.
+
 ```{r}
 x <- priority_queue("task_a", "task_b", "task_c", priorities = c(3, 1, 2))
 x
