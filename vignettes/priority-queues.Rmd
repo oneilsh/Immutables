@@ -7,7 +7,19 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  error    = FALSE   # default, but make it explicit: errors halt the build
+)
+
+options(
+  warn = 2,                     # warnings become errors
+  warnPartialMatchDollar = TRUE, # $elem matching $element → warning → error
+  warnPartialMatchArgs   = TRUE,
+  warnPartialMatchAttr   = TRUE
+)
+
 loaded <- tryCatch({
   pkgload::load_all(quiet = TRUE)
   TRUE
@@ -32,10 +44,10 @@ and `$remaining` a priority queue without those elements.
 x <- priority_queue("task_a", "task_b", "task_c", priorities = c(3, 1, 2))
 x
 
-peek_min(x) # "task_b"
+peek_min(x)
 res <- pop_max(x)
 
-res$element
+res$value
 res$priority
 res$remaining
 ```
@@ -52,7 +64,7 @@ peek_min(y)
 peek_all_min(y)
 
 res1 <- pop_min(y)
-res1$element
+res1$value
 res1$priority
 res1$remaining
 
@@ -64,8 +76,8 @@ res2$remaining
 Priority queues can be converted to R lists with `as.list()`. The `drop_meta` parameter defaulting to `FALSE` controls whether priority values are included.
 
 ```{r}
-as.list(res2$elements )
-as.list(res2$elements, drop_meta = TRUE)
+as.list(res2$elements) |> str()
+as.list(res2$elements, drop_meta = TRUE) |> str()
 ```
 
 ## Empty queues
@@ -87,8 +99,6 @@ casts to payload items only (`drop_meta = TRUE`); use
 
 
 ```{r}
-library(immutables)
-
 y <- priority_queue() |>
   insert("Jones", priority = "B") |>
   insert("Smith", priority = "A") |>
