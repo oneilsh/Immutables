@@ -138,15 +138,7 @@ flexseq <- function(...) {
   .as_flexseq_build(list(...), monoids = NULL)
 }
 
-#' Coerce to a Persistent Flexible Sequence
-#'
-#' For `priority_queue` inputs, this explicitly drops queue behavior and returns
-#' a plain `flexseq` so full sequence operations are available. By default this
-#' cast drops entry metadata and keeps payload values only.
-#'
-#' For `ordered_sequence` and `interval_index` inputs, this explicitly drops
-#' ordered/interval behavior and returns a plain `flexseq`. Use
-#' `drop_meta = FALSE` to preserve stored entry records.
+#' Internal builder dispatched by `as_flexseq()` methods.
 #'
 # Runtime: O(1) generic dispatch.
 #' @noRd
@@ -163,16 +155,14 @@ flexseq <- function(...) {
 #' @method as_flexseq default
 #' @export
 # Runtime: O(n) over element count via linear bulk tree construction.
-as_flexseq.default <- function(x, drop_meta = TRUE) {
-  .ft_validate_drop_meta(drop_meta)
+as_flexseq.default <- function(x) {
   .as_flexseq_build.default(x, monoids = NULL)
 }
 
 #' @method as_flexseq flexseq
 #' @export
 # Runtime: O(1).
-as_flexseq.flexseq <- function(x, drop_meta = TRUE) {
-  .ft_validate_drop_meta(drop_meta)
+as_flexseq.flexseq <- function(x) {
   x
 }
 

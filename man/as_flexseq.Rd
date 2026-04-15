@@ -4,18 +4,10 @@
 \alias{as_flexseq}
 \title{Coerce Objects to \code{flexseq}}
 \usage{
-as_flexseq(x, drop_meta = TRUE)
+as_flexseq(x)
 }
 \arguments{
 \item{x}{Input object.}
-
-\item{drop_meta}{Logical scalar controlling advanced-structure cast style.
-For \code{priority_queue}, \code{ordered_sequence}, and \code{interval_index}:
-\itemize{
-\item \code{TRUE} (default): return payload-only elements and drop custom monoids.
-\item \code{FALSE}: return full stored entry records (for example \code{value} + metadata)
-and preserve cast-down custom monoids.
-}}
 }
 \value{
 A plain \code{flexseq}.
@@ -34,18 +26,18 @@ semantics and returns a plain \code{flexseq}.
 
 This is an S3 generic. Notable method behavior:
 \itemize{
-\item \code{as_flexseq.flexseq(x, drop_meta=...)} returns \code{x} unchanged.
-\item \code{as_flexseq.priority_queue(x, drop_meta=TRUE)} returns payload items;
-\code{drop_meta=FALSE} returns \code{list(value, priority)} entries.
-\item \code{as_flexseq.ordered_sequence(x, drop_meta=TRUE)} returns payload items;
-\code{drop_meta=FALSE} returns \code{list(value, key)} entries.
-\item \code{as_flexseq.interval_index(x, drop_meta=TRUE)} returns payload items;
-\code{drop_meta=FALSE} returns interval entry records.
+\item \code{as_flexseq.flexseq(x)} returns \code{x} unchanged.
+\item \code{as_flexseq.priority_queue(x)} returns payload items.
+\item \code{as_flexseq.ordered_sequence(x)} returns payload items.
+\item \code{as_flexseq.interval_index(x)} returns payload items.
 }
 
-For advanced types with \code{drop_meta = TRUE}, custom monoids are dropped and
-the rebuilt \code{flexseq} keeps only structural monoids (\code{.size},
-\code{.named_count}).
+For advanced types, custom monoids are dropped and the rebuilt \code{flexseq}
+keeps only structural monoids (\code{.size}, \code{.named_count}). For
+\code{priority_queue}, a flexseq of full entry records can be obtained by
+composing with \code{\link[=as.list]{as.list()}}: \code{as_flexseq(as.list(x))}. For
+\code{ordered_sequence} and \code{interval_index}, \code{as.list()} also returns
+payload-only lists, so no direct record-preserving cast is provided.
 }
 \examples{
 x <- as_flexseq(1:3)
@@ -53,11 +45,9 @@ x
 
 q <- priority_queue("a", "b", priorities = c(2, 1))
 as_flexseq(q)
-as_flexseq(q, drop_meta = FALSE)
 
 o <- ordered_sequence("a", "b", keys = c(2, 1))
 as_flexseq(o)
-as_flexseq(o, drop_meta = FALSE)
 }
 \seealso{
 \code{\link[=flexseq]{flexseq()}}, \code{\link[=priority_queue]{priority_queue()}}, \code{\link[=ordered_sequence]{ordered_sequence()}}, \code{\link[=interval_index]{interval_index()}}

@@ -16,24 +16,15 @@ testthat::test_that("flexseq class does not inherit from list and length is elem
   testthat::expect_identical(length(t), 5L)
 })
 
-testthat::test_that("as_flexseq validates drop_meta and ignores it for plain inputs", {
-  testthat::expect_error(as_flexseq(1:3, drop_meta = NA), "TRUE or FALSE")
-  testthat::expect_error(as_flexseq(1:3, drop_meta = 1), "TRUE or FALSE")
-
-  from_default <- as_flexseq(1:3, drop_meta = FALSE)
-  from_flex <- as_flexseq(as_flexseq(1:3), drop_meta = FALSE)
+testthat::test_that("as_flexseq returns payload-only flexseq and rejects extra args", {
+  from_default <- as_flexseq(1:3)
+  from_flex <- as_flexseq(as_flexseq(1:3))
   testthat::expect_identical(as.list(from_default), as.list(1:3))
   testthat::expect_identical(as.list(from_flex), as.list(1:3))
 
-  advanced <- list(
-    priority_queue("a", priorities = 1),
-    ordered_sequence("a", keys = 1),
-    interval_index("a", start = 1, end = 2)
-  )
-  for(obj in advanced) {
-    testthat::expect_error(as_flexseq(obj, drop_meta = NA), "TRUE or FALSE")
-    testthat::expect_error(as_flexseq(obj, drop_meta = 1), "TRUE or FALSE")
-  }
+  # drop_meta was removed; passing it should error (no `...` fallthrough).
+  testthat::expect_error(as_flexseq(1:3, drop_meta = TRUE))
+  testthat::expect_error(as_flexseq(as_flexseq(1:3), drop_meta = FALSE))
 })
 
 testthat::test_that("add_monoids merges and supports overwrite flag", {

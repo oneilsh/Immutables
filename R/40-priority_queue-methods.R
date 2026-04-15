@@ -1,24 +1,11 @@
 #SO
 
-# Runtime: O(n) from list materialization + linear rebuild.
-.as_flexseq_build.priority_queue <- function(x, drop_meta = TRUE) {
-  drop_flag <- .ft_validate_drop_meta(drop_meta)
-  if(drop_flag) {
-    entries <- as.list(x, drop_meta = TRUE)
-    return(.as_flexseq_build.default(entries, monoids = NULL))
-  }
-
-  entries <- as.list.flexseq(x)
-  ms <- attr(x, "monoids", exact = TRUE)
-  out_monoids <- ms[setdiff(names(ms), c(".pq_min", ".pq_max"))]
-  .as_flexseq_build.default(entries, monoids = out_monoids)
-}
-
 #' @method as_flexseq priority_queue
 #' @export
 # Runtime: O(n) from list materialization + linear rebuild.
-as_flexseq.priority_queue <- function(x, drop_meta = TRUE) {
-  .as_flexseq_build.priority_queue(x, drop_meta = drop_meta)
+as_flexseq.priority_queue <- function(x) {
+  entries <- as.list(x, drop_meta = TRUE)
+  .as_flexseq_build.default(entries, monoids = NULL)
 }
 
 #' Coerce Priority Queue to List

@@ -93,11 +93,10 @@ pop_min(empty_q)
 ```
 ## Casting to `flexseq`
 
-For full sequence-style operations, cast with `as_flexseq()`. By default this
-casts to payload items only (`drop_meta = TRUE`); use
-`as_flexseq(..., drop_meta = FALSE)` to keep entry records (`value` +
-`priority`).
-
+For full sequence-style operations, cast with `as_flexseq()`. This returns
+payload items only; priority metadata and any custom monoids are dropped. To
+instead obtain a `flexseq` of entry records (`value` + `priority`), compose
+with `as.list()`.
 
 ```{r}
 y <- priority_queue() |>
@@ -106,5 +105,5 @@ y <- priority_queue() |>
   insert("Adams", priority = "A")
 
 as_flexseq(y)
-as_flexseq(y, drop_meta = FALSE)
+as_flexseq(as.list(y))
 ```

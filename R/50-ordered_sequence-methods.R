@@ -1,24 +1,11 @@
 #SO
 
-# Runtime: O(n) from list materialization + linear rebuild.
-.as_flexseq_build.ordered_sequence <- function(x, drop_meta = TRUE) {
-  drop_flag <- .ft_validate_drop_meta(drop_meta)
-  if(drop_flag) {
-    entries <- as.list(x)
-    return(.as_flexseq_build.default(entries, monoids = NULL))
-  }
-
-  entries <- as.list.flexseq(x)
-  ms <- attr(x, "monoids", exact = TRUE)
-  out_monoids <- ms[setdiff(names(ms), c(".oms_max_key"))]
-  .as_flexseq_build.default(entries, monoids = out_monoids)
-}
-
 #' @method as_flexseq ordered_sequence
 #' @export
 # Runtime: O(n) from list materialization + linear rebuild.
-as_flexseq.ordered_sequence <- function(x, drop_meta = TRUE) {
-  .as_flexseq_build.ordered_sequence(x, drop_meta = drop_meta)
+as_flexseq.ordered_sequence <- function(x) {
+  entries <- as.list(x)
+  .as_flexseq_build.default(entries, monoids = NULL)
 }
 
 #' Plot an Ordered Sequence Tree

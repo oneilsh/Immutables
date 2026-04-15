@@ -354,14 +354,6 @@ testthat::test_that("ordered_sequence casts down to flexseq explicitly", {
   testthat::expect_false("sum_key" %in% ms)
   testthat::expect_error(node_measure(fx, "sum_key"), "Missing cached measure")
   testthat::expect_false(".oms_max_key" %in% ms)
-
-  fx_full <- as_flexseq(xs, drop_meta = FALSE)
-  testthat::expect_equal(fx_full[["kx"]]$value, "x")
-  testthat::expect_equal(fx_full[["kx"]]$key, 2)
-  ms_full <- names(attr(fx_full, "monoids", exact = TRUE))
-  testthat::expect_true(all(c(".size", ".named_count", "sum_key") %in% ms_full))
-  testthat::expect_false(".oms_max_key" %in% ms_full)
-  testthat::expect_identical(node_measure(fx_full, "sum_key"), 3)
 })
 
 testthat::test_that("ordered_sequence supports Date keys with stable tie handling", {

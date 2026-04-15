@@ -32,8 +32,8 @@ ix <- interval_index(
 ix
 ```
 
-`as_flexseq(ix)` returns payload-only values by default. Use
-`as_flexseq(ix, drop_meta = FALSE)` to keep interval entry records.
+`as_flexseq(ix)` returns payload-only values; interval bounds and any custom
+monoids are dropped.
 
 ## Point query
 

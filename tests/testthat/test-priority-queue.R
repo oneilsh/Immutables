@@ -179,15 +179,6 @@ testthat::test_that("priority_queue casts down to flexseq explicitly", {
   testthat::expect_false("sum_priority" %in% ms)
   testthat::expect_error(node_measure(x, "sum_priority"), "Missing cached measure")
 
-  x_full <- as_flexseq(q_named, drop_meta = FALSE)
-  testthat::expect_equal(x_full[["kx"]]$value, "x")
-  testthat::expect_equal(x_full[["kx"]]$priority, 2)
-  ms_full <- names(attr(x_full, "monoids", exact = TRUE))
-  testthat::expect_true("sum_priority" %in% ms_full)
-  testthat::expect_identical(node_measure(x_full, "sum_priority"), 3)
-  testthat::expect_false(".pq_min" %in% ms_full)
-  testthat::expect_false(".pq_max" %in% ms_full)
-
   x_unnamed <- as_flexseq(priority_queue("x", "y", priorities = c(2, 1)))
   x2 <- push_back(x_unnamed, "z")
   testthat::expect_s3_class(x2, "flexseq")
