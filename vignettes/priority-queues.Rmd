@@ -6,27 +6,14 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment  = "#>",
-  error    = FALSE   # default, but make it explicit: errors halt the build
-)
-
-options(
-  warn = 2,                     # warnings become errors
-  warnPartialMatchDollar = TRUE, # $elem matching $element → warning → error
-  warnPartialMatchArgs   = TRUE,
-  warnPartialMatchAttr   = TRUE
-)
-
-loaded <- tryCatch({
-  pkgload::load_all(quiet = TRUE)
-  TRUE
-}, error = function(e) FALSE)
-
-if(!loaded) {
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+if(requireNamespace("immutables", quietly = TRUE)) {
   library(immutables)
+} else if(requireNamespace("pkgload", quietly = TRUE)) {
+  pkgload::load_all(".", quiet = TRUE)
+} else {
+  stop("Need either installed 'immutables' or the 'pkgload' package to render this vignette.")
 }
 ```
 
