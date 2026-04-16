@@ -192,7 +192,6 @@ reference:
       - split_around_by_predicate
       - split_by_predicate
       - measure_monoid
-      - predicate
       - validate_tree
       - validate_name_state
       - plot_structure

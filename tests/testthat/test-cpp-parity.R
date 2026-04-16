@@ -188,15 +188,6 @@ testthat::test_that("backend parity: MeasureMonoid constructor/use", {
   })
 })
 
-testthat::test_that("backend parity: predicate constructor/use", {
-  expect_backend_identical({
-    p <- predicate(function(v) v >= 3)
-    t <- as_flexseq(letters[1:6])
-    loc <- locate_by_predicate(t, p, ".size", include_metadata = TRUE)
-    snapshot_locate(loc)
-  })
-})
-
 testthat::test_that("backend parity: empty_tree", {
   expect_backend_identical({
     snapshot_tree(flexseq())

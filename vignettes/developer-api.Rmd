@@ -43,14 +43,14 @@ accumulating measure values at each element. The calculation for the first
 element also uses `f`, which is where `i` is used, as the other input. 
 
 
-```{r eval=FALSE}
-# elements:  x1,  x2,  x3
-# measures:  m1,  m2,  m3,  ...
-# monoid-accumulated measures (infix notation):
-#  v1 = i %f% m1
-#  v2 = (i %f% m1) %f% m2            = v1 %f% m2
-#  v3 = ((i %f% m1) %f% m2) %f% m3   = v2 %f% m3
-#  ...
+```
+elements:  x1,  x2,  x3
+measures:  m1,  m2,  m3,  ...
+monoid-accumulated measures (infix notation):
+  v1 = i %f% m1
+  v2 = (i %f% m1) %f% m2            = v1 %f% m2
+  v3 = ((i %f% m1) %f% m2) %f% m3   = v2 %f% m3
+  ...
 ```
 
 This left-to-rightness is only well defined for `flexseq`s (using element order 
@@ -109,7 +109,7 @@ error.
 
 ## Leaf entry contract
 
-The provided `measure` function receives a structure-specific *entry* — not just the
+The provided `measure` function receives a structure-specific *entry*, not just the
 stored value. The entry shapes are:
 
 - **`flexseq`**: the stored element directly.
@@ -179,14 +179,6 @@ sa$value
 sa$right
 ```
 
-The `predicate()` wrapper marks a function as a predicate (optional but documents
-intent):
-
-```{r}
-p <- predicate(function(v) v >= 30)
-locate_by_predicate(x, p, "sum")
-```
-
 Both split variants accept an optional `accumulator` argument to start scanning
 from a value other than the monoid identity. `split_at()` is a convenience
 wrapper that splits by position using the built-in `.size` monoid (which counts nodes;
@@ -197,33 +189,111 @@ split_at(x, at = 5)
 ```
 
 
+## Built-in monoids in action
+
+As described by [Hinze and Paterson](https://www.cs.ox.ac.uk/ralf.hinze/publications/FingerTrees.pdf),
+this monoid + predicate pattern is remarkably flexible. 
+The `priority_queue` and `ordered_sequence` types for example are not actually separate
+data structures, but monoid-annotated `flexseq`s plus thin wrappers that
+invoke `locate_by_predicate()` and friends with the right predicate. The
+same primitives introduced above power every `peek_*`, `pop_*`, and bound
+query in the package. (Interval indices also follow these patterns, but
+are more complex than would be useful to review here.)
+
+### Priority queue: `.pq_min` and `.pq_max`
+
+Priority queues store elements in insertion order, not priority order, so a
+linear scan would be the only way to find the min-priority element without
+some extra bookkeeping. That bookkeeping is `.pq_min` (and its twin
+`.pq_max`): a monoid whose cached value at every internal node is the
+smallest priority anywhere in that subtree, combined by picking the side
+with the smaller priority (left-most on ties, which preserves first-in
+first-out for equal priorities).
+
+`pop_min(q)` then works in three lines of logic: read the root aggregate
+as the *target* priority, form the predicate "has the accumulated subtree
+absorbed a slot with this priority yet?", and hand it to
+`split_around_by_predicate()` over `.pq_min`. The descent uses cached
+subtree aggregates to prune branches whose min is a different value, so
+the whole thing runs in $O(\log n)$ even though the leaves themselves are
+not in priority order.
+
+### Ordered sequence: `.oms_max_key`
+
+An ordered sequence is a `flexseq` whose elements are kept sorted by key.
+Its built-in `.oms_max_key` monoid caches the largest key in each subtree,
+combined by picking the larger of its two inputs.
+
+Because the sequence is already key-ordered, the accumulated max-key is
+monotonically non-decreasing left-to-right, so a predicate like "is the
+running max at least my query?" transitions from `FALSE` to `TRUE` exactly
+once at the correct location.
+The `lower_bound()` function wires that predicate into `locate_by_predicate()` on
+`.oms_max_key` and returns the first element with key at or above the
+target; `peek_key()`, `pop_key()`, `count_between()`, and the rest all
+follow the same template with different predicate shapes and 
+splitting/concatenating.
+
+In practice, `.pq_min`, `.oms_max_key` and other measures are stored as lists,
+containing the measure of interest (min priority value, max key value) as well
+as other helper information such as the key type to ensure consistent 
+comparisons. The identity `i` and associative combining function `f` operate
+on list-based measures of the right shape.
+
+
 ## Example: DNA prefix search
 
 Custom monoids and predicate splits combine naturally for index-style queries.
 Here we build a persistent subsequence index over a DNA string and use it to find
 all positions where a query pattern occurs as a prefix.
 
-The idea: store each position's subsequence as a key in an `ordered_sequence`,
-so entries are sorted lexicographically. Then a prefix search becomes two splits —
-one to find where the prefix range begins, and one to find where it ends.
-
 ```{r}
-sequence <- "ACGCGCTCGCGCTTGACGCGCCAG"
-query <- "CGCGC"
+sequence <- "ACGCGCTCGCGCATAGTCGCGCCTG"
+query <- "CGCGC" # goal: find indices where query occurs
 ```
 
-Define a monoid that tracks the maximum key (subsequence string) seen so far. The
+The idea is to store each position in the string as a value, keyed on a subsequence long
+enough to contain the query (we'll keep 10-letter subsequences):
+
+```
+key: ACGCGC..., value = 1
+key: CGCGCT..., value = 2
+key: GCGCTC..., value = 3
+...
+```
+
+However, ordered sequences actually store their values in key-order:
+
+```
+key: ACGCGC..., value = 1
+key: AGTCGC..., value = 15
+key: ATAGTC..., value = 13
+...
+```
+
+Since they are in key-order, matches will be found in a run: all subsequences
+starting with the query will be next to each other. To extract them we just
+need to find the first one (a splitting operation over a monoid), and the last
+(another splitting operation over a monoid).
+
+First we define a monoid that tracks the maximum key (subsequence string) seen so far. The
 built-in `.oms_max_key` monoid already tracks this, but we define our own to
-illustrate the pattern:
+illustrate the pattern. Recall from above that the measuring function takes a list
+with shape `list(value = ..., key = ...)` when used with an `ordered_sequence`;
+in this case we just need it to return the key as the measure.
+
+We can add the monoid to an empty tree, and values for new entries will be automatically
+computed on addition/removal etc.
 
 ```{r}
-max_seq <- measure_monoid(max, -Inf, function(entry) entry$key)
+max_seq <- measure_monoid(max, i = -Inf, measure = function(entry) entry$key)
 
 subseqs <- ordered_sequence()
 subseqs <- add_monoids(subseqs, list(max_seq = max_seq))
 ```
 
-Index every position in the DNA string by its length-10 subsequence:
+Next we index every position in the DNA string by its length-10 subsequence,
+inserting them into the structure:
 
 ```{r}
 for(i in 1:nchar(sequence)) {
@@ -234,8 +304,8 @@ for(i in 1:nchar(sequence)) {
 subseqs
 ```
 
-Now search for all subsequences starting with the query. First, split to find
-where keys `>=` the query begin:
+Now we can search for all subsequences starting with the query. First, split to find
+the first entry where the measure is `>=` the query:
 
 ```{r}
 first_split <- split_by_predicate(subseqs, function(m) query <= m, "max_seq")
@@ -243,9 +313,16 @@ first_split$left
 first_split$right
 ```
 
-If the first key in `$right` starts with the query, split again to find where
-matching keys end. The second predicate fires when the key is strictly greater
-than the query *and* no longer starts with it:
+And empty `$right` indicates no matches (all measures are less than the query).
+If it's not empty, but the first measure in `$right` does not start with the
+query, then there again no matches (the key is between the left and right
+but doesn't match).
+
+If the first key in `$right` *does* start with the query, then there is at least one 
+match, and all matches would be in `$right`. We can split again to find where
+matching keys end with a different predicate, one that fires on the first measure
+that iis strictly greater than the query *and* no longer starts with it (resulting
+in the index of the first non-match in the run).
 
 ```{r}
 if(length(first_split$right) > 0) {
