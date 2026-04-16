@@ -18,10 +18,10 @@ right <- as_flexseq(as.list(letters[16:26]), monoids = size_monoids)
 
 # Shared monoid names warn during concat by design.
 both <- suppressWarnings(c(left, right))
-plot_tree(both, vertex.size = 9, title = "concat")
+plot_structure(both, vertex.size = 9, title = "concat")
 
 valued <- as_flexseq(letters, values = sample(1:26), monoids = size_monoids)
-plot_tree(valued, vertex.size = 9, title = "valued")
+plot_structure(valued, vertex.size = 9, title = "valued")
 
 char_concat <- measure_monoid(
   function(a, b) paste0(a, b),

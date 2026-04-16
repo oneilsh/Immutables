@@ -18,83 +18,270 @@ if(requireNamespace("pkgload", quietly = TRUE)) {
 }
 ```
 
-## Scope
+Every immutables structure is built on finger trees annotated with *monoids* —
+cached summaries that support O(log n) search and split. This vignette covers
+the developer API for defining custom monoids, using predicate-based locate and
+split operations, and validating tree invariants. These operations work
+uniformly across `flexseq`, `ordered_sequence`, `priority_queue`, and
+`interval_index`.
 
-This vignette sketches low-level APIs used to extend/query immutable
-structures:
 
-- `measure_monoid()`
-- `add_monoids()`
-- `predicate()`
-- `locate_by_predicate()`
-- `split_around_by_predicate()` / `split_by_predicate()`
-- `validate_tree()` / `validate_name_state()`
+## Measures and monoids
 
-## Define and attach a monoid
+A monoid is defined by three pieces: a binary combining function `f`, an
+identity value `i`, and a `measure` function that maps a single leaf entry to
+its measure value. The combining function *must* be associative 
+(`f(a, b) == f(b, a)`), and the identity must satisfy `f(i, x) == x` and `f(x, i) == x`. 
+
+Measure values typically represent something you would want to aggregate over a 
+subset of elements, with different measures and aggregations resulting in unique
+properties.
+
+When operating on `flexseq`s,
+you can think of a monoid's `f` as being applied left-to-right (a left fold), 
+accumulating measure values at each element. The calculation for the first 
+element also uses `f`, which is where `i` is used, as the other input. 
+
+
+```{r eval=FALSE}
+# elements:  x1,  x2,  x3
+# measures:  m1,  m2,  m3,  ...
+# monoid-accumulated measures (infix notation):
+#  v1 = i %f% m1
+#  v2 = (i %f% m1) %f% m2            = v1 %f% m2
+#  v3 = ((i %f% m1) %f% m2) %f% m3   = v2 %f% m3
+#  ...
+```
+
+This left-to-rightness is only well defined for `flexseq`s (using element order 
+defined by the user in construction), `ordered_sequence`s (always ordered by key), 
+and `interval_index`s (always ordered by interval start). Priority queue element
+order is maintained internally with new elements being added on the right, not
+in priority order. There may still be uses for monoids that aggregate priority values. 
+This is because we can compute an aggregate 
+over any *subsequence*, not just prefixes. Internally elements
+are stored as leaf nodes in a tree structure, and aggregating measures upward
+can be done purely recursively, and cached for fast access at any level.
+
+This monoid keeps track of the sum of values:
 
 ```{r}
-x <- flexseq("a", "bb", "ccc", "dddd")
-
-width_monoid <- measure_monoid(
+sum_monoid <- measure_monoid(
   f = `+`,
-  i = 0L,
-  measure = function(el) nchar(el)
+  i = 0,
+  measure = function(el) el
 )
-
-x2 <- add_monoids(x, list(width = width_monoid))
-attr(x2, "measures")$width
 ```
+
+Next we attach it to
+a structure with `add_monoids()`, which accepts a named list of monoids. 
+We can pass `show_custom_monoids = TRUE` to `print()` to see this new information:
+
+```{r}
+set.seed(42)
+task_times <- runif(20, min = 1, max = 10) |>
+  round(digits = 1) |>
+  as_flexseq()
+
+x <- add_monoids(task_times, list(sum = sum_monoid))
+
+print(x, show_custom_monoids = TRUE)
+```
+
+The `plot_structure()` functions visualizes the internal tree layout. Passing a function to
+`node_label` lets us render both leaf values and cached structural measures:
+
+```{r fig.height=4, fig.width=10}
+plot(x, node_label = function(node) {
+  if(node$type == "Element") sprintf("%.1f\nΣ=%.1f", node$element, node$measures$sum)
+  else sprintf("Σ=%.1f", node$measures$sum)
+})
+```
+
+Each structural node's label is drawn from its cached `sum` measure — the total
+of the leaves beneath it — while each element shows its own value. The
+`node$measures` list carries every monoid attached to the tree (including the
+built-in `.size` and `.named_count`), so the same pattern generalizes to any
+monoid. See `?plot.flexseq` for more details, including handling list-valued
+measures like a priority queue's `.pq_min`.
+
+The tree now caches cumulative sum annotations at every internal node,
+enabling O(log n) search by accumulated sum. Setting `overwrite = TRUE`
+replaces an existing monoid with the same name.
+
+Each structure type reserves certain monoid names for internal use (e.g. `.size`,
+`.named_count`, `.pq_min`). Attempting to add a monoid with a reserved name will
+error.
+
 
 ## Leaf entry contract
 
-Developer APIs are entry-oriented. `measure_monoid()` measure functions should
-always be `function(entry)`.
+The `measure` function receives a structure-specific *entry* — not just the
+stored value. The entry shapes are:
 
-- `flexseq`: entry is the stored user element.
-- `ordered_sequence`: entry is `list(value, key)`.
-- `priority_queue`: entry is `list(value, priority)`.
-- `interval_index`: entry is `list(value, start, end)`.
+- **`flexseq`**: the stored element directly.
+- **`ordered_sequence`**: `list(value, key)`.
+- **`priority_queue`**: `list(value, priority)`.
+- **`interval_index`**: `list(value, start, end)`.
+
+This means a monoid that works on one structure type may not work on another.
+Here is a monoid that sums keys on an `ordered_sequence`:
 
 ```{r}
-os <- as_ordered_sequence(list("x", "yy"), keys = c(1, 2))
-by_key <- measure_monoid(`+`, 0L, function(entry) as.integer(entry$key))
-os2 <- add_monoids(os, list(by_key = by_key))
-loc_key <- locate_by_predicate(os2, function(v) v >= 3L, "by_key", include_metadata = TRUE)
-loc_key$metadata$hit_measure
+key_sum <- measure_monoid(`+`, 0L, function(entry) as.integer(entry$key))
+
+os <- as_ordered_sequence(c("alice", "bob", "carol"), keys = c(10, 20, 30))
+os <- add_monoids(os, list(key_sum = key_sum))
+os
 ```
 
-`split_around_by_predicate()` and `locate_by_predicate()` return leaf entries in
-that same structure-specific form.
 
-## Locate with predicate scans
+## Locating and splitting by predicate
+
+Predicate-based operations scan accumulated monoid values left-to-right and find
+the first point where a predicate transitions from `FALSE` to `TRUE`. The
+predicate must be *monotonic*: once it returns `TRUE`, it must stay `TRUE` for
+all subsequent accumulated values. This is what enables the O(log n) search.
+
+`locate_by_predicate()` finds the first element where the predicate fires,
+without splitting the tree. With `include_metadata = TRUE` it returns additional
+scan information:
 
 ```{r}
-p <- predicate(function(v) v >= 5L)
-
-loc <- locate_by_predicate(x2, p, "width", include_metadata = TRUE)
+loc <- locate_by_predicate(x, function(v) v >= 15, "sum", include_metadata = TRUE)
 loc$found
 loc$value
 loc$metadata
 ```
 
-## Split with predicate scans
+The metadata includes `left_measure` (accumulated value before the match),
+`hit_measure` (the matched element's own measure), `right_measure` (accumulated
+value of everything after), and `index` (1-based position).
+
+`split_by_predicate()` splits the structure at the predicate point, returning
+`$left` and `$right`. The matched element is the first element of `$right`:
 
 ```{r}
-s1 <- split_around_by_predicate(x2, function(v) v >= 5L, "width")
-s1$left
-s1$value
-s1$right
-
-s2 <- split_by_predicate(x2, function(v) v >= 5L, "width")
-s2$left
-s2$right
+s <- split_by_predicate(x, function(v) v >= 15, "sum")
+s$left
+s$right
 ```
 
-## Invariant checks
-
-These are intended for debugging and tests.
+`split_around_by_predicate()` is similar but extracts the matched element into a
+separate `$value` field:
 
 ```{r}
-validate_tree(x2)
-validate_name_state(as_flexseq(list(a = 1, b = 2)))
+sa <- split_around_by_predicate(x, function(v) v >= 15, "sum")
+sa$left
+sa$value
+sa$right
+```
+
+The `predicate()` wrapper marks a function as a predicate (optional but documents
+intent):
+
+```{r}
+p <- predicate(function(v) v >= 30)
+locate_by_predicate(x, p, "sum")
+```
+
+Both split variants accept an optional `accumulator` argument to start scanning
+from a value other than the monoid identity. `split_at()` is a convenience
+wrapper that splits by position using the built-in `.size` monoid:
+
+```{r}
+split_at(x, 2)
+```
+
+
+## Example: DNA prefix search
+
+Custom monoids and predicate splits combine naturally for index-style queries.
+Here we build a persistent subsequence index over a DNA string and use it to find
+all positions where a query pattern occurs as a prefix.
+
+The idea: store each position's subsequence as a key in an `ordered_sequence`,
+so entries are sorted lexicographically. Then a prefix search becomes two splits —
+one to find where the prefix range begins, and one to find where it ends.
+
+```{r}
+sequence <- "ACGCGCTCGCGCTTGACGCGCCAG"
+query <- "CGCGC"
+```
+
+Define a monoid that tracks the maximum key (subsequence string) seen so far. The
+built-in `.oms_max_key` monoid already tracks this, but we define our own to
+illustrate the pattern:
+
+```{r}
+max_seq <- measure_monoid(max, -Inf, function(entry) entry$key)
+
+subseqs <- ordered_sequence()
+subseqs <- add_monoids(subseqs, list(max_seq = max_seq))
+```
+
+Index every position in the DNA string by its length-10 subsequence:
+
+```{r}
+for(i in 1:nchar(sequence)) {
+  subseq <- substr(sequence, i, i + 10)
+  subseqs <- insert(subseqs, i, key = subseq)
+}
+
+subseqs
+```
+
+Now search for all subsequences starting with the query. First, split to find
+where keys `>=` the query begin:
+
+```{r}
+first_split <- split_by_predicate(subseqs, function(m) query <= m, "max_seq")
+first_split$left
+first_split$right
+```
+
+If the first key in `$right` starts with the query, split again to find where
+matching keys end. The second predicate fires when the key is strictly greater
+than the query *and* no longer starts with it:
+
+```{r}
+if(length(first_split$right) > 0) {
+  first_key <- min_key(first_split$right)
+
+  if(startsWith(first_key, query)) {
+    second_split <- split_by_predicate(
+      first_split$right,
+      function(m) query < m & !startsWith(m, query),
+      "max_seq"
+    )
+    matches <- second_split$left
+  }
+}
+
+matches
+```
+
+Extract the original string positions from the matching entries:
+
+```{r}
+positions <- fapply(matches, function(value, key) value) |> unlist()
+positions
+
+# verify: each position is a prefix match
+for(pos in positions) {
+  cat(pos, ":", substr(sequence, pos, pos + nchar(query) - 1), "\n")
+}
+```
+
+
+## Validation helpers
+
+`validate_tree()` checks structural invariants (monoid consistency, node
+structure) across the entire tree. `validate_name_state()` verifies that a tree
+is either fully unnamed or fully named with unique, non-empty names. Both are
+O(n) and intended for debugging and tests, not hot paths.
+
+```{r}
+validate_tree(x)
+validate_name_state(flexseq(a = 1, b = 2, c = 3))
 ```

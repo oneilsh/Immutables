@@ -7,17 +7,82 @@
 \method{plot}{flexseq}(x, ...)
 }
 \arguments{
-\item{x}{A \code{flexseq}.}
+\item{x}{A \code{flexseq} (or subclass).}
 
-\item{...}{Passed to the internal tree plotting routine.}
+\item{...}{Passed to the internal tree plotting routine. The most useful
+arguments are \code{vertex.size}, \code{edge.width}, \code{label_edges}, \code{title}, and
+\code{node_label} (see below). Remaining \code{...} is passed to
+\code{igraph::plot.igraph}.}
 }
 \description{
 Plot a Sequence Tree
 }
 \details{
 Visualizes the internal finger-tree structure, not a value-level chart.
+Requires the \code{igraph} package to be installed (listed in Suggests).
+
+\code{node_label} controls vertex labels. Presets:
+\itemize{
+\item \code{"value"} (default) — payload for elements, blank for structural nodes.
+\item \code{"type"} — node class (\code{Element}, \code{Digit}, \code{Deep}, \code{Node2}, \code{Node3},
+\code{Single}, \code{Empty}).
+\item \code{"both"} — \code{type} and \code{value} on separate lines.
+\item \code{"none"} — no labels.
+}
+
+Alternatively, \code{node_label} accepts a function \verb{function(node)} returning a
+single character string per vertex. The \code{node} list has fields:
+\itemize{
+\item \code{id} — internal graph vertex id (string).
+\item \code{type} — same values as the \code{"type"} preset.
+\item \code{label} — the default label (payload for elements, \code{""} for structural).
+\item \code{measures} — a named list of accumulated monoid values for the subtree
+rooted at this node. For structural nodes these are the cached values;
+for element leaves, each entry is the monoid's \code{measure()} applied to
+the leaf entry (so \code{.size} is 1, and any custom \code{sum}-like monoid
+equals the leaf's own contribution). Keys are monoid names such as
+\code{.size}, \code{.named_count}, or any custom name added via \code{\link[=add_monoids]{add_monoids()}}.
+\item \code{element} — for element nodes, the raw leaf entry. Shape depends on the
+structure type (see \code{\link[=measure_monoid]{measure_monoid()}} for the entry contract). \code{NULL}
+for structural nodes.
+}
+
+Measure values are exposed as-is, including list-valued measures (e.g. the
+built-in \code{.pq_min} on \code{priority_queue} is \code{list(has, priority)}).
 }
 \examples{
 x <- flexseq("a", "b", "c")
 plot(x)
+
+\dontrun{
+# Label every node with its subtree size (leaves contribute 1).
+plot(as_flexseq(1:10), node_label = function(node) {
+  paste0(node$type, "\n.size=", node$measures$.size)
+})
+
+# Custom monoid: sum of numeric payloads. Structural nodes show the
+# subtree total; leaves show their own contribution.
+sum_monoid <- measure_monoid(`+`, 0, function(el) el)
+xs <- add_monoids(as_flexseq(c(3, 1, 4, 1, 5, 9, 2, 6)),
+                  list(sum = sum_monoid))
+plot(xs, node_label = function(node) {
+  if(node$type == "Element") sprintf("\%g\nΣ=\%g", node$element, node$measures$sum)
+  else sprintf("\%s\nΣ=\%g", node$type, node$measures$sum)
+})
+
+# List-valued built-in measure: priority_queue's .pq_min tracks the min
+# priority seen in a subtree as list(has, priority). Unpack in the label.
+pq <- priority_queue("task-a", "task-b", "task-c",
+                     priorities = c(5, 1, 3))
+plot(pq, node_label = function(node) {
+  m <- node$measures$.pq_min
+  if(node$type == "Element") {
+    sprintf("\%s\np=\%g", node$element$value, node$element$priority)
+  } else if(isTRUE(m$has)) {
+    sprintf("\%s\nmin=\%g", node$type, m$priority)
+  } else {
+    node$type
+  }
+})
+}
 }

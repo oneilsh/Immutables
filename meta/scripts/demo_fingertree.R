@@ -16,15 +16,15 @@ size_monoids <- list(.size = size_measure_monoid())
 abcs <- as_flexseq(as.list(letters[1:12]), monoids = size_monoids)
 xyzs <- as_flexseq(as.list(letters[16:26]), monoids = size_monoids)
 
-plot_tree(abcs, title = "abcs")
-plot_tree(xyzs, title = "xyzs")
+plot_structure(abcs, title = "abcs")
+plot_structure(xyzs, title = "xyzs")
 
 # This warns by design when same monoid names exist on both sides.
 combined <- suppressWarnings(c(abcs, xyzs))
-plot_tree(combined, vertex.size = 9, title = "combined", node_label = "both")
+plot_structure(combined, vertex.size = 9, title = "combined", node_label = "both")
 
 mix26 <- as_flexseq(letters, values = sample(1:26), monoids = size_monoids)
-plot_tree(mix26, vertex.size = 9, title = "valued letters")
+plot_structure(mix26, vertex.size = 9, title = "valued letters")
 
 # Reduce examples: explicit MeasureMonoid is always required.
 char_concat <- measure_monoid(

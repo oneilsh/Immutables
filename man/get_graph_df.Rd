@@ -10,7 +10,12 @@ get_graph_df(t)
 \item{t}{FingerTree.}
 }
 \value{
-A list with edge and node data frames for igraph plotting.
+A list with three elements: \code{edge_df} (parent/child/label),
+\code{node_df} (node/type/label), and \code{node_data} — a named list keyed by node
+id whose values are lists with fields \code{type}, \code{label}, \code{measures} (cached
+monoid values for structural nodes; \code{NULL} for element leaves), and
+\code{element} (the raw leaf entry for element nodes; \code{NULL} for structural
+nodes).
 }
 \description{
 Build graph data frames for a finger tree
