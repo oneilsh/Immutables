@@ -141,8 +141,8 @@ Query and endpoint helpers are non-throwing on empty indices, and `length()` all
 ```{r}
 empty_ix <- interval_index()
 length(empty_ix)
-peek_point(empty_ix, 1)
-pop_overlaps(empty_ix, 1, 5)
+peek_point(empty_ix, point = 1)
+pop_overlaps(empty_ix, start = 1, end = 5)
 ```
 
 
