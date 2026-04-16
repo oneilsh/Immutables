@@ -144,10 +144,12 @@ testthat::test_that("elements_between supports inclusivity flags", {
   e_open_lo <- elements_between(xs, 2, 3, include_from = FALSE)
   e_miss <- elements_between(xs, 9, 10)
 
-  testthat::expect_equal(e_closed, list("bb", "cc", "ddd"))
-  testthat::expect_equal(e_open_hi, list("bb", "cc"))
-  testthat::expect_equal(e_open_lo, list("ddd"))
-  testthat::expect_equal(e_miss, list())
+  testthat::expect_s3_class(e_closed, "ordered_sequence")
+  testthat::expect_s3_class(e_miss, "ordered_sequence")
+  testthat::expect_equal(as.list(e_closed), list("bb", "cc", "ddd"))
+  testthat::expect_equal(as.list(e_open_hi), list("bb", "cc"))
+  testthat::expect_equal(as.list(e_open_lo), list("ddd"))
+  testthat::expect_identical(length(e_miss), 0L)
 })
 
 testthat::test_that("peek_key/peek_all_key and pop_key are stable within duplicate key blocks", {

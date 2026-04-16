@@ -90,17 +90,22 @@ elements_between(seq, from_key = "b", to_key ="c", include_from = FALSE, include
 a provided query key. `upper_bound()` gives the first with a key *greater than* (`>`)
 than a provided query key. Return values indicate if the key is found, the index
 of the match, and the associated key and value. The difference in indices thus provides
-the count of matched keys, and the indices
+the count of matched keys, and ...
 
 ```{r}
 seq <- as_ordered_sequence(1:4, keys = c("b", "d", "d", "f"))
 
-# for 
+# matches some key 
 lower_bound(seq, key = "d") |> str()
 upper_bound(seq, key = "d") |> str()
 
+# less than all keys
 lower_bound(seq, key = "a") |> str()
 upper_bound(seq, key = "a") |> str()
+
+# greater than all keys
+lower_bound(seq, key = "g") |> str()
+upper_bound(seq, key = "g") |> str()
 ```
 
 

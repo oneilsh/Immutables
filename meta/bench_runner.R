@@ -307,7 +307,7 @@
     x <- as_ordered_sequence(list("a", "b", "c"), keys = c(1, 2, 3))
     n <- count_between(x, 1, 2)
     ys <- elements_between(x, 1, 2)
-    if(!is.integer(n) || !is.list(ys)) {
+    if(!is.integer(n) || !inherits(ys, "ordered_sequence")) {
       stop("Scenario contract failed: range query helpers changed.")
     }
     return(invisible(TRUE))

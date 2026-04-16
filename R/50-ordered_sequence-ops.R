@@ -410,7 +410,7 @@ pop_all_key <- function(x, key) {
   )
 }
 
-# Runtime: O(log n + k), where k is output size.
+# Runtime: O(log n) via tree-surgery splits; no per-element gather.
 #' Return Elements in a Key Range
 #'
 #' @param x An `ordered_sequence`.
@@ -418,16 +418,18 @@ pop_all_key <- function(x, key) {
 #' @param to_key Upper bound key.
 #' @param include_from Include lower bound when `TRUE`.
 #' @param include_to Include upper bound when `TRUE`.
-#' @return Base R list of matched elements, in key order.
+#' @return An `ordered_sequence` of matched elements, in key order. Use
+#'   [as.list()] to convert to a plain list.
 #' @details
 #' Range membership is controlled by `include_from` and `include_to`:
 #' - `include_from = TRUE` uses `key >= from_key`; otherwise `key > from_key`.
 #' - `include_to = TRUE` uses `key <= to_key`; otherwise `key < to_key`.
 #'
-#' If no elements fall in the range, returns `list()`.
+#' If no elements fall in the range, returns an empty `ordered_sequence`.
 #' @examples
 #' x <- ordered_sequence("a", "b", "c", "d", keys = c(1, 2, 2, 3))
 #' elements_between(x, 2, 3)
+#' as.list(elements_between(x, 2, 3))
 #' elements_between(x, 2, 2, include_to = FALSE)
 #' @export
 # Public range extraction API over bound-index helpers.
@@ -440,12 +442,8 @@ elements_between <- function(x, from_key, to_key, include_from = TRUE, include_t
   start <- .oms_range_start_index(x, from_key, include_from)
   end_excl <- .oms_range_end_exclusive_index(x, to_key, include_to)
 
-  if(end_excl <= start || start > length(x)) {
-    return(list())
-  }
-
-  entries <- .ft_get_elems_at(x, seq.int(start, end_excl - 1L))
-  .oms_extract_items(entries)
+  parts <- .oms_slice_key_span(x, start, end_excl)
+  .ord_wrap_like(x, parts$matched)
 }
 
 # Runtime: O(log n).
