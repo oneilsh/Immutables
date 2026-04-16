@@ -29,8 +29,13 @@ ix <- interval_index(
   start = c(20, 30, 10), end = c(25, 37, 24)
 )
 print(ix, max_elements = 4)
-width_sum <- measure_monoid(`+`, 0, function(entry) as.numeric(entry$end - entry$start))
-ix3 <- add_monoids(interval_index(1, 2, start = c(1, 3), end = c(2, 5)), list(width_sum = width_sum))
+width_sum <- measure_monoid(
+  `+`, 0, function(entry) as.numeric(entry$end - entry$start)
+)
+ix3 <- add_monoids(
+  interval_index(1, 2, start = c(1, 3), end = c(2, 5)),
+  list(width_sum = width_sum)
+)
 print(ix3, max_elements = 0, show_custom_monoids = TRUE)
 
 ix2 <- interval_index(1, 2, 3, start = c(2, 4, 6), end = c(3, 5, 8), bounds = "[]")

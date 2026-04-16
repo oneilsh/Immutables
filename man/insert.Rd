@@ -35,7 +35,7 @@ insert(q, "c", priority = 3)
 o <- ordered_sequence("a", "c", keys = c(1, 3))
 insert(o, "b", key = 2)
 
-iv <- interval_index("A", "B", starts = c(1, 5), ends = c(3, 8))
+iv <- interval_index("A", "B", start = c(1, 5), end = c(3, 8))
 insert(iv, "C", start = 2, end = 6)
 }
 \seealso{

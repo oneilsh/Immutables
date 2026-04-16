@@ -20,11 +20,16 @@ LinkingTo:
 Suggests:
     ggplot2,
     igraph,
+    IRanges,
     knitr,
     microbenchmark,
     pkgdown,
+    pkgload,
     rmarkdown,
+    rprojroot,
     rstackdeque,
+    rticles,
+    S4Vectors,
     scales,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

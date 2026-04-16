@@ -281,36 +281,6 @@ void collect_names_impl(SEXP x, CharacterVector& out, int& pos) {
   }
 }
 
-void collect_leaves_impl(SEXP x, std::vector<SEXP>& out) {
-  if(!is_structural_node_cpp(x)) {
-    out.push_back(x);
-    return;
-  }
-
-  if(has_class(x, "Empty")) {
-    return;
-  }
-
-  if(has_class(x, "Single")) {
-    List s(x);
-    collect_leaves_impl(s[0], out);
-    return;
-  }
-
-  if(has_class(x, "Deep")) {
-    List d(x);
-    collect_leaves_impl(d["prefix"], out);
-    collect_leaves_impl(d["middle"], out);
-    collect_leaves_impl(d["suffix"], out);
-    return;
-  }
-
-  List xs(x);
-  for(int i = 0; i < xs.size(); ++i) {
-    collect_leaves_impl(xs[i], out);
-  }
-}
-
 SEXP oms_entry_key(SEXP entry) {
   if(TYPEOF(entry) != VECSXP || XLENGTH(entry) < 2) {
     stop("ordered entries must be list(value, key).");

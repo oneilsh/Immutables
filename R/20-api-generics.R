@@ -86,8 +86,7 @@ fapply <- function(X, FUN, ...) {
 #' x3 <- add_monoids(x2, list(sum = running_count), overwrite = TRUE)
 #' attr(x3, "measures")$sum
 #' @export
-#' @seealso [add_monoids.flexseq()], [add_monoids.priority_queue()],
-#'   [add_monoids.ordered_sequence()], [add_monoids.interval_index()]
+#' @seealso [measure_monoid()], [get_measure()], [get_measures()]
 # Runtime: O(1) dispatch.
 add_monoids <- function(t, monoids, overwrite = FALSE) {
   UseMethod("add_monoids")
@@ -319,7 +318,7 @@ split_at <- function(x, at, pull_index = FALSE) {
 #' o <- ordered_sequence("a", "c", keys = c(1, 3))
 #' insert(o, "b", key = 2)
 #'
-#' iv <- interval_index("A", "B", starts = c(1, 5), ends = c(3, 8))
+#' iv <- interval_index("A", "B", start = c(1, 5), end = c(3, 8))
 #' insert(iv, "C", start = 2, end = 6)
 #' @seealso [priority_queue()], [ordered_sequence()], [interval_index()],
 #'   [insert_at()]

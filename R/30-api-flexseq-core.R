@@ -363,12 +363,13 @@ as.list.flexseq <- function(x, ...) {
 #' Convenience wrapper around [base::unlist()] over [as.list()].
 #'
 #' @method unlist flexseq
-#' @param s A `flexseq`.
-#' @param ... Passed through to [base::unlist()].
+#' @param x A `flexseq`.
+#' @param recursive Passed through to [base::unlist()].
+#' @param use.names Passed through to [base::unlist()].
 #' @return An atomic vector built from [as.list.flexseq()].
 #' @details
 #' For `priority_queue`, this unwraps queue entries to payload items before
-#' unlisting (equivalent to `unlist(as.list(s, drop_meta = TRUE), ...)`).
+#' unlisting (equivalent to `unlist(as.list(x, drop_meta = TRUE), ...)`).
 #'
 #' Inherited by `ordered_sequence` and `interval_index` through the shared
 #' class stack.
@@ -380,9 +381,9 @@ as.list.flexseq <- function(x, ...) {
 #' unlist(q)
 #' @export
 # Runtime: O(n) over number of elements.
-unlist.flexseq <- function(s, ...) {
-  if(inherits(s, "priority_queue")) {
-    return(unlist(as.list(s, drop_meta = TRUE), ...))
+unlist.flexseq <- function(x, recursive = TRUE, use.names = TRUE) {
+  if(inherits(x, "priority_queue")) {
+    return(unlist(as.list(x, drop_meta = TRUE), recursive = recursive, use.names = use.names))
   }
-  unlist(as.list(s), ...)
+  unlist(as.list(x), recursive = recursive, use.names = use.names)
 }

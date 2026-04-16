@@ -10,3 +10,11 @@
 ^\.claude/
 ^doc$
 ^Meta$
+^data-raw$
+^paper$
+^AGENTS\.md$
+^\.agents$
+^\.github$
+^\.review$
+^\.vscode$
+^\.codex$

@@ -1,0 +1,231 @@
+---
+documentclass: jss
+author:
+  - name: Shawn T. O'Neil
+    affiliation: TISLab
+    address: >
+      Translational and Integrative Sciences Lab
+    email: \email{shawn@tislab.org}
+title:
+  formatted: "\\pkg{immutables}: Persistent, Monoid-Annotated Finger Trees for R"
+  plain:     "immutables: Persistent, Monoid-Annotated Finger Trees for R"
+  short:     "\\pkg{immutables} for R"
+abstract: >
+  We present \pkg{immutables}, an R package providing persistent
+  finger-tree-backed collections (catenable sequences, priority queues,
+  ordered sequences, and interval indices) with user-extensible monoid
+  annotations. The same predicate-based locate and split primitives power
+  every built-in operation and remain accessible to users, enabling
+  $O(\log n)$ queries over custom aggregates. We describe the API,
+  provide micro-benchmarks against base R and existing packages, and
+  demonstrate the extension points with a DNA prefix-search example.
+keywords:
+  formatted: ["\\proglang{R}", "finger trees", "persistent data structures", "monoids"]
+  plain:     [R, finger trees, persistent data structures, monoids]
+preamble: >
+  \usepackage{amsmath}
+output:
+  rticles::jss_article:
+    citation_package: natbib
+    includes:
+      in_header: preamble.tex
+bibliography: references.bib
+classoption: nojss
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.pos = "!htb",
+  out.width = "\\linewidth"
+)
+options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
+
+loaded <- tryCatch({
+  pkgload::load_all(quiet = TRUE)
+  TRUE
+}, error = function(e) FALSE)
+if(!loaded) library(immutables)
+
+library(ggplot2)
+
+bench_results <- local({
+  path <- system.file("extdata", "benchmarks.rds", package = "immutables")
+  if(nzchar(path) && file.exists(path)) readRDS(path) else list()
+})
+```
+
+# Introduction
+
+Purely functional collections in \proglang{R} are rare: the stock
+\code{list} and \code{vector} types are semantically immutable but the
+ergonomic and asymptotic penalties for treating them so are severe.
+\pkg{immutables} closes that gap by providing a small suite of
+persistent collection types backed by 2-3 finger trees \citep{hinze2006finger}
+with user-extensible monoid annotations. The package unifies sequence,
+queue, priority-queue, ordered-sequence, and interval-index operations
+under a single tree representation and a single pair of
+predicate-driven primitives.
+
+# The package
+
+\pkg{immutables} exposes four collection types:
+
+- \code{flexseq} --- a general persistent sequence supporting push/pop at
+  both ends, indexing, split, and concatenation.
+- \code{priority\_queue} --- a min- and max-priority queue.
+- \code{ordered\_sequence} --- a key-ordered sequence with successor,
+  predecessor, and range queries.
+- \code{interval\_index} --- an interval tree supporting point and range
+  overlap queries.
+
+Internally each is a finger tree with a specific set of monoid
+annotations attached; the operations above delegate to two primitives
+--- \code{locate\_by\_predicate()} and \code{split\_by\_predicate()} ---
+over those annotations. Users are free to attach their own monoids via
+\code{add\_monoids()} and invoke the same primitives for arbitrary
+$O(\log n)$ queries.
+
+# Benchmarks
+
+Figures in this section are loaded from benchmark results produced by
+the replication script \code{data-raw/generate\_publication\_results.R}
+shipped with the package. The absolute numbers are platform-dependent;
+the shapes of the curves are the pertinent evidence.
+
+```{r seq-plot, echo=FALSE, fig.cap="Sequence operations.", fig.width=9, fig.height=7}
+if(!is.null(bench_results$sequence)) {
+  d <- bench_results$sequence
+  d$time_ms <- d$time_us / 1000
+  sorted_sizes <- sort(unique(d$n))
+  pow_labels <- lapply(sorted_sizes, function(s) bquote(2^.(log2(s)))) |> as.character()
+  d$n_cat <- factor(d$n, levels = sorted_sizes)
+  ggplot(d, aes(x = n_cat, y = time_ms, color = impl)) +
+    geom_point(position = position_jitter(width = 0.15, height = 0)) +
+    facet_wrap(~ op, scales = "free_y") +
+    scale_x_discrete(labels = pow_labels) +
+    labs(x = "Number of elements", y = "Time (ms)", color = "Implementation") +
+    theme_bw() + theme(legend.position = "bottom")
+}
+```
+
+```{r pq-plot, echo=FALSE, fig.cap="Priority queue operations.", fig.width=9, fig.height=7}
+if(!is.null(bench_results$pq)) {
+  d <- bench_results$pq
+  d$time_ms <- d$time_us / 1000
+  m <- aggregate(time_us ~ impl + op + n, data = d, FUN = median)
+  m$time_ms <- m$time_us / 1000
+  ggplot(d, aes(x = n, y = time_ms, color = impl)) +
+    geom_point(alpha = 0.25, size = 1.2, position = position_jitter(width = 0.03)) +
+    geom_line(data = m, linewidth = 0.6) +
+    geom_point(data = m, size = 1.8) +
+    facet_wrap(~ op, scales = "free_y") +
+    scale_x_log10(labels = scales::label_comma()) +
+    scale_y_log10(labels = scales::label_comma()) +
+    labs(x = "Number of elements", y = "Time (ms)", color = "Implementation") +
+    theme_bw() + theme(legend.position = "bottom")
+}
+```
+
+```{r ivx-plot, echo=FALSE, fig.cap="Interval index queries.", fig.width=9, fig.height=6}
+if(!is.null(bench_results$ivx)) {
+  d <- bench_results$ivx
+  d$time_ms <- d$time_us / 1000
+  m <- aggregate(time_us ~ impl + op + n, data = d, FUN = median)
+  m$time_ms <- m$time_us / 1000
+  ggplot(d, aes(x = n, y = time_ms, color = impl)) +
+    geom_point(alpha = 0.25, size = 1.2, position = position_jitter(width = 0.03)) +
+    geom_line(data = m, linewidth = 0.6) +
+    geom_point(data = m, size = 1.8) +
+    facet_wrap(~ op, scales = "free_y") +
+    scale_x_log10(labels = scales::label_comma()) +
+    scale_y_log10(labels = scales::label_comma()) +
+    labs(x = "Number of elements", y = "Time (ms)", color = "Implementation") +
+    theme_bw() + theme(legend.position = "bottom")
+}
+```
+
+# Extension: DNA prefix search
+
+Custom monoids and predicate splits combine naturally for index-style
+queries. We build a persistent suffix-prefix index over a DNA string and
+use it to find all positions where a query pattern occurs as a prefix.
+
+```{r dna-setup}
+sequence <- "ACGCGCTCGCGCATAGTCGCGCCTG"
+query <- "CGCGC"
+```
+
+Each position in the sequence is stored as a value keyed on a length-10
+window starting at that position. Because \code{ordered\_sequence}
+stores entries sorted by key, all matches to a given prefix lie in a
+contiguous run, so extracting them is two splits.
+
+We define a monoid tracking the maximum key (subsequence) seen so far
+and attach it to an empty \code{ordered\_sequence}:
+
+```{r dna-monoid}
+max_seq <- measure_monoid(max, i = -Inf, measure = function(entry) entry$key)
+subseqs <- ordered_sequence()
+subseqs <- add_monoids(subseqs, list(max_seq = max_seq))
+```
+
+Index every position by its length-10 subsequence:
+
+```{r dna-index}
+for(i in seq_len(nchar(sequence))) {
+  subseqs <- insert(subseqs, i, key = substr(sequence, i, i + 10))
+}
+```
+
+Split at the first entry whose key is at least the query:
+
+```{r dna-first-split}
+first_split <- split_by_predicate(subseqs, function(m) query <= m, "max_seq")
+```
+
+If the right side is non-empty and its first key starts with the query,
+split again at the first key that is strictly greater *and* no longer
+starts with the query:
+
+```{r dna-second-split}
+matches <- ordered_sequence()
+if(length(first_split$right) > 0L) {
+  first_measure <- get_measures(first_split$right, "max_seq")[[1]]
+  if(startsWith(first_measure, query)) {
+    second_split <- split_by_predicate(
+      first_split$right,
+      function(m) query < m & !startsWith(m, query),
+      "max_seq"
+    )
+    matches <- second_split$left
+  }
+}
+positions <- fapply(matches, function(value, key) value) |> unlist()
+positions
+```
+
+The two splits run in $O(\log n)$ each; recovering the matching
+positions from a $k$-element result run is $O(k)$. No auxiliary index
+structure is maintained beyond the cached monoid values attached to the
+tree nodes.
+
+# Conclusion
+
+\pkg{immutables} provides the finger-tree vocabulary as a first-class
+extension surface rather than hiding it behind closed collection APIs.
+The cost of user-defined monoid attachments is small; the benefit is a
+uniform path to $O(\log n)$ operations over arbitrary subtree summaries.
+
+# Computational details {-}
+
+The results in this paper were obtained using \proglang{R}~4.3.0
+with the \pkg{immutables} package at its current development version.
+Replication is via the script
+\code{data-raw/generate\_publication\_results.R} shipped with the
+package source.
+
+# Acknowledgments {-}
+
+# References {-}

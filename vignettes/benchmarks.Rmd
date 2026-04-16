@@ -21,8 +21,20 @@ if(!loaded) {
 library(microbenchmark)
 library(ggplot2)
 
-run_benchmarks <- identical(Sys.getenv("IMMUTABLES_RUN_BENCHMARK_VIGNETTE"), "1")
+# Two env-var gates control this vignette:
+#   IMMUTABLES_RUN_SLOW=true       -> re-run all benchmarks and save
+#                                     results to inst/extdata/benchmarks.rds
+#   IMMUTABLES_SAVE_FIGURES=true   -> also write pub-ready figures to
+#                                     paper/figures/*.pdf
+# When neither is set (CRAN, ordinary pkgdown build) the vignette loads
+# cached results and renders plots without re-timing.
+run_benchmarks <- identical(Sys.getenv("IMMUTABLES_RUN_SLOW"), "true")
+save_figures   <- identical(Sys.getenv("IMMUTABLES_SAVE_FIGURES"), "true")
 repeats <- 8L
+
+# Accumulator populated either by the benchmark chunks (when
+# run_benchmarks) or by the loader chunk below (otherwise).
+results_list <- list()
 
 bench_one <- function(rows, impl, op, n, repeats, setup, bench) {
   gc(FALSE)
@@ -36,6 +48,12 @@ bench_one <- function(rows, impl, op, n, repeats, setup, bench) {
 }
 ```
 
+```{r load-cached, eval=!run_benchmarks, include=FALSE}
+.cache_path <- system.file("extdata", "benchmarks.rds", package = "immutables")
+if(nzchar(.cache_path) && file.exists(.cache_path)) {
+  results_list <- readRDS(.cache_path)
+}
+```
 
 ## Method
 
@@ -43,6 +61,10 @@ This article measures individual operation times for each collection type
 provided by `immutables`. Each recorded repetition rebuilds the fixture for
 size *n*, then uses `microbenchmark(..., times = 1)` to time one operation on
 that fresh state.
+
+The numbers shown below are loaded from cached results shipped with the
+package; re-running `data-raw/generate_publication_results.R` regenerates
+them. See the script's header for runtime and options.
 
 Comparisons use base R implementations and select structures from
 `rstackdeque` and `IRanges`:
@@ -119,26 +141,32 @@ for(n in sequence_sizes) {
     ))
 }
 
-seq_results <- do.call(rbind, as.list(rows))
+results_list$sequence <- do.call(rbind, as.list(rows))
 ```
-```{r sequence-plot, eval=run_benchmarks, fig.width=9, fig.height=7}
-seq_results$time_ms <- seq_results$time_us / 1000
-sorted_sizes <- sort(unique(seq_results$n))
-pow_labels <- lapply(sorted_sizes, function(s) bquote(2^.(log2(s)))) |> as.character()
-seq_results$n_cat <- factor(seq_results$n, levels = sorted_sizes)
+```{r sequence-plot, fig.width=9, fig.height=7}
+if(!is.null(results_list$sequence)) {
+  seq_results <- results_list$sequence
+  seq_results$time_ms <- seq_results$time_us / 1000
+  sorted_sizes <- sort(unique(seq_results$n))
+  pow_labels <- lapply(sorted_sizes, function(s) bquote(2^.(log2(s)))) |> as.character()
+  seq_results$n_cat <- factor(seq_results$n, levels = sorted_sizes)
 
-ggplot(seq_results, aes(x = n_cat, y = time_ms, color = impl)) +
-  geom_point(position = position_jitter(width = 0.15, height = 0)) +
-  facet_wrap(~ op, scales = "free_y") +
-  scale_x_discrete(labels = pow_labels) +
-  labs(
-    title = "Sequence Operations",
-    x = "Number of elements",
-    y = "Time (ms)",
-    color = "Implementation"
-  ) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+  p_sequence <- ggplot(seq_results, aes(x = n_cat, y = time_ms, color = impl)) +
+    geom_point(position = position_jitter(width = 0.15, height = 0)) +
+    facet_wrap(~ op, scales = "free_y") +
+    scale_x_discrete(labels = pow_labels) +
+    labs(
+      title = "Sequence Operations",
+      x = "Number of elements",
+      y = "Time (ms)",
+      color = "Implementation"
+    ) +
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+  print(p_sequence)
+} else {
+  knitr::asis_output("*Benchmark results not yet generated. Run `data-raw/generate_publication_results.R` to populate.*")
+}
 ```
 
 
@@ -175,23 +203,29 @@ for(n in queue_sizes) {
     function(st) st$q[-1L])
 }
 
-queue_results <- do.call(rbind, as.list(rows))
+results_list$queue <- do.call(rbind, as.list(rows))
 ```
-```{r queue-plot, eval=run_benchmarks, fig.width=8, fig.height=4.8}
-queue_results$time_ms <- queue_results$time_us / 1000
-queue_results$n_cat <- factor(queue_results$n, levels = sort(unique(queue_results$n)))
+```{r queue-plot, fig.width=8, fig.height=4.8}
+if(!is.null(results_list$queue)) {
+  queue_results <- results_list$queue
+  queue_results$time_ms <- queue_results$time_us / 1000
+  queue_results$n_cat <- factor(queue_results$n, levels = sort(unique(queue_results$n)))
 
-ggplot(queue_results, aes(x = n_cat, y = time_ms, color = impl)) +
-  geom_boxplot() +
-  facet_wrap(~ op, scales = "free_y") +
-  labs(
-    title = "Queue Operations",
-    x = "Number of elements",
-    y = "Time (ms)",
-    color = "Implementation"
-  ) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+  p_queue <- ggplot(queue_results, aes(x = n_cat, y = time_ms, color = impl)) +
+    geom_boxplot() +
+    facet_wrap(~ op, scales = "free_y") +
+    labs(
+      title = "Queue Operations",
+      x = "Number of elements",
+      y = "Time (ms)",
+      color = "Implementation"
+    ) +
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+  print(p_queue)
+} else {
+  knitr::asis_output("*Benchmark results not yet generated.*")
+}
 ```
 
 
@@ -241,28 +275,34 @@ for(n in pq_sizes) {
     function(st) { i <- which.max(st$p); list(values = st$v[-i], priorities = st$p[-i]) })
 }
 
-pq_results <- do.call(rbind, as.list(rows))
+results_list$pq <- do.call(rbind, as.list(rows))
 ```
-```{r pq-plot, eval=run_benchmarks, fig.width=9, fig.height=7}
-pq_results$time_ms <- pq_results$time_us / 1000
-pq_medians <- aggregate(time_us ~ impl + op + n, data = pq_results, FUN = median)
-pq_medians$time_ms <- pq_medians$time_us / 1000
+```{r pq-plot, fig.width=9, fig.height=7}
+if(!is.null(results_list$pq)) {
+  pq_results <- results_list$pq
+  pq_results$time_ms <- pq_results$time_us / 1000
+  pq_medians <- aggregate(time_us ~ impl + op + n, data = pq_results, FUN = median)
+  pq_medians$time_ms <- pq_medians$time_us / 1000
 
-ggplot(pq_results, aes(x = n, y = time_ms, color = impl)) +
-  geom_point(alpha = 0.25, size = 1.2, position = position_jitter(width = 0.03)) +
-  geom_line(data = pq_medians, linewidth = 0.6) +
-  geom_point(data = pq_medians, size = 1.8) +
-  facet_wrap(~ op, scales = "free_y") +
-  scale_x_log10(labels = scales::label_comma()) +
-  scale_y_log10(labels = scales::label_comma()) +
-  labs(
-    title = "Priority Queue Operations",
-    x = "Number of elements",
-    y = "Time (ms)",
-    color = "Implementation"
-  ) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+  p_pq <- ggplot(pq_results, aes(x = n, y = time_ms, color = impl)) +
+    geom_point(alpha = 0.25, size = 1.2, position = position_jitter(width = 0.03)) +
+    geom_line(data = pq_medians, linewidth = 0.6) +
+    geom_point(data = pq_medians, size = 1.8) +
+    facet_wrap(~ op, scales = "free_y") +
+    scale_x_log10(labels = scales::label_comma()) +
+    scale_y_log10(labels = scales::label_comma()) +
+    labs(
+      title = "Priority Queue Operations",
+      x = "Number of elements",
+      y = "Time (ms)",
+      color = "Implementation"
+    ) +
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+  print(p_pq)
+} else {
+  knitr::asis_output("*Benchmark results not yet generated.*")
+}
 ```
 
 
@@ -353,26 +393,47 @@ for(n in ivx_sizes) {
   }
 }
 
-ivx_results <- do.call(rbind, as.list(rows))
+results_list$ivx <- do.call(rbind, as.list(rows))
 ```
-```{r ivx-plot, eval=run_benchmarks, fig.width=9, fig.height=6}
-ivx_results$time_ms <- ivx_results$time_us / 1000
-ivx_medians <- aggregate(time_us ~ impl + op + n, data = ivx_results, FUN = median)
-ivx_medians$time_ms <- ivx_medians$time_us / 1000
+```{r ivx-plot, fig.width=9, fig.height=6}
+if(!is.null(results_list$ivx)) {
+  ivx_results <- results_list$ivx
+  ivx_results$time_ms <- ivx_results$time_us / 1000
+  ivx_medians <- aggregate(time_us ~ impl + op + n, data = ivx_results, FUN = median)
+  ivx_medians$time_ms <- ivx_medians$time_us / 1000
 
-ggplot(ivx_results, aes(x = n, y = time_ms, color = impl)) +
-  geom_point(alpha = 0.25, size = 1.2, position = position_jitter(width = 0.03)) +
-  geom_line(data = ivx_medians, linewidth = 0.6) +
-  geom_point(data = ivx_medians, size = 1.8) +
-  facet_wrap(~ op, scales = "free_y") +
-  scale_x_log10(labels = scales::label_comma()) +
-  scale_y_log10(labels = scales::label_comma()) +
-  labs(
-    title = "Interval Index Queries",
-    x = "Number of elements",
-    y = "Time (ms)",
-    color = "Implementation"
-  ) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+  p_ivx <- ggplot(ivx_results, aes(x = n, y = time_ms, color = impl)) +
+    geom_point(alpha = 0.25, size = 1.2, position = position_jitter(width = 0.03)) +
+    geom_line(data = ivx_medians, linewidth = 0.6) +
+    geom_point(data = ivx_medians, size = 1.8) +
+    facet_wrap(~ op, scales = "free_y") +
+    scale_x_log10(labels = scales::label_comma()) +
+    scale_y_log10(labels = scales::label_comma()) +
+    labs(
+      title = "Interval Index Queries",
+      x = "Number of elements",
+      y = "Time (ms)",
+      color = "Implementation"
+    ) +
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+  print(p_ivx)
+} else {
+  knitr::asis_output("*Benchmark results not yet generated.*")
+}
+```
+
+```{r save-results, eval=run_benchmarks, include=FALSE}
+# Persist this run so subsequent builds (CRAN, pkgdown) render the same
+# figures without re-timing. Path resolves from knit_root_dir, which the
+# generator script sets to the repo root.
+saveRDS(results_list, "inst/extdata/benchmarks.rds")
+```
+
+```{r save-figures, eval=save_figures, include=FALSE}
+dir.create("paper/figures", showWarnings = FALSE, recursive = TRUE)
+if(exists("p_sequence")) ggsave("paper/figures/benchmarks-sequence.pdf", p_sequence, width = 9, height = 7)
+if(exists("p_queue"))    ggsave("paper/figures/benchmarks-queue.pdf",    p_queue,    width = 8, height = 4.8)
+if(exists("p_pq"))       ggsave("paper/figures/benchmarks-pq.pdf",       p_pq,       width = 9, height = 7)
+if(exists("p_ivx"))      ggsave("paper/figures/benchmarks-ivx.pdf",      p_ivx,      width = 9, height = 6)
 ```

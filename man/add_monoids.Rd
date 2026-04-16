@@ -60,6 +60,5 @@ x3 <- add_monoids(x2, list(sum = running_count), overwrite = TRUE)
 attr(x3, "measures")$sum
 }
 \seealso{
-\code{\link[=add_monoids.flexseq]{add_monoids.flexseq()}}, \code{\link[=add_monoids.priority_queue]{add_monoids.priority_queue()}},
-\code{\link[=add_monoids.ordered_sequence]{add_monoids.ordered_sequence()}}, \code{\link[=add_monoids.interval_index]{add_monoids.interval_index()}}
+\code{\link[=measure_monoid]{measure_monoid()}}, \code{\link[=get_measure]{get_measure()}}, \code{\link[=get_measures]{get_measures()}}
 }

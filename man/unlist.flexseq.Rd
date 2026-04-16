@@ -4,7 +4,7 @@
 \alias{unlist.flexseq}
 \title{Coerce a Sequence to an Atomic Vector}
 \usage{
-\method{unlist}{flexseq}(s, ...)
+\method{unlist}{flexseq}(x, recursive = TRUE, use.names = TRUE)
 }
 \arguments{
 \item{s}{A \code{flexseq}.}

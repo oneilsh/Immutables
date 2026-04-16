@@ -1,9 +1,16 @@
 .gc_stress_enabled <- function() {
+  # Never run on CRAN even if the opt-in env var is somehow set on a CRAN
+  # machine: `NOT_CRAN` is conventionally "true" only in interactive / CI
+  # contexts, so treating a missing / non-"true" value as "this is CRAN"
+  # gives belt-and-suspenders protection alongside the skip_on_cran() call
+  # inside `.skip_if_no_gc_stress()`.
+  if(!identical(Sys.getenv("NOT_CRAN"), "true")) return(FALSE)
   gc_stress <- tolower(Sys.getenv("IMMUTABLES_GC_STRESS", unset = "0"))
   gc_stress %in% c("1", "true", "yes", "on")
 }
 
 .skip_if_no_gc_stress <- function() {
+  testthat::skip_on_cran()
   if(!isTRUE(.gc_cpp_run$enabled)) {
     testthat::skip("Set IMMUTABLES_GC_STRESS=1 to run GC torture regression.")
   }
