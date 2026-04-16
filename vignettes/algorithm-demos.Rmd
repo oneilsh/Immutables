@@ -64,15 +64,12 @@ x2 <- x1 + runif(10, min = 2, max = 5)
 items = letters[1:10]
 
 index  <- as_interval_index(items, start = x1, end = x2)
-events <- as_ordered_sequence(                                 # event stream:
-  items = c(paste0(ids, ":start"), paste0(ids, ":end")),       #   2 per interval
-  keys  = c(starts,                ends)                       #   keyed by x
-)
+xvalues <- as_flexseq(sort(unique(c(x1, x2))))
 snapshots <- flexseq()                                         # replay timeline
 
-for (x in sort(unique(c(starts, ends)))) {
-  popped    <- pop_all_key(events, x)      # batch events at this x
-  events    <- popped$remaining            # new sequence, minus popped
+for (x in xvalues) {
+  popped    <- pop_all_key(index, key = x)      # batch events at this x
+  xvals    <- popped$remaining            # new sequence, minus popped
   active    <- peek_all_point(index, x)    # intervals overlapping x
   snapshots <- push_back(snapshots, list(x = x, active = active))
 }
