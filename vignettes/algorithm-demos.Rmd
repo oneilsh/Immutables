@@ -57,6 +57,27 @@ of the active set is appended to a `flexseq` acting as a snapshot timeline.
 Because every snapshot is a persistent value, the animation is just playback
 over that timeline — no re-running, no state to rewind.
 
+```r
+# Ranges with left index between 0 and 10, 2 to 5 units long.
+x1 <- runif(10, min = 0, max = 10)
+x2 <- x1 + runif(10, min = 2, max = 5)
+items = letters[1:10]
+
+index  <- as_interval_index(items, start = x1, end = x2)
+events <- as_ordered_sequence(                                 # event stream:
+  items = c(paste0(ids, ":start"), paste0(ids, ":end")),       #   2 per interval
+  keys  = c(starts,                ends)                       #   keyed by x
+)
+snapshots <- flexseq()                                         # replay timeline
+
+for (x in sort(unique(c(starts, ends)))) {
+  popped    <- pop_all_key(events, x)      # batch events at this x
+  events    <- popped$remaining            # new sequence, minus popped
+  active    <- peek_all_point(index, x)    # intervals overlapping x
+  snapshots <- push_back(snapshots, list(x = x, active = active))
+}
+```
+
 ```{r sweep-line-viz, echo=FALSE, fig.cap="Sweep-line interval activity over persistent snapshots."}
 knitr::include_graphics(algorithm_demo_asset("sweep_line"))
 ```

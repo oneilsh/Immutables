@@ -58,8 +58,8 @@ algorithm_demo_render_presets <- list(
       max_animation_frames = 90L,
       hold_final_frames = algorithm_demo_pause_frames(12),
       loop = TRUE,
-      width_px = 960L,
-      height_px = 500L
+      width_px = 800L,
+      height_px = 420L
     )
   ),
   segment_sweep = list(
@@ -68,6 +68,8 @@ algorithm_demo_render_presets <- list(
     runner = "run_segment_sweep_demo",
     args = list(
       complexity = "standard",
+      n_segments = 17L,
+      seed = 43L,
       visualize = TRUE,
       animate = TRUE,
       fps = 10,
@@ -97,7 +99,7 @@ algorithm_demo_render_presets <- list(
     runner = "run_fortune_frontier_demo",
     args = list(
       complexity = "standard",
-      seed = 412L,
+      seed = 4121L,
       n_frames = 200L,
       visualize = TRUE,
       animate = TRUE,

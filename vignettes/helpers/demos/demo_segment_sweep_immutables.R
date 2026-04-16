@@ -345,6 +345,7 @@ plot_segment_sweep <- function(
 
   seg <- result$segments
   seg_ids <- as.character(seg$id)
+  seg$id <- factor(seg_ids, levels = seg_ids)
   seg_palette <- stats::setNames(grDevices::hcl.colors(length(seg_ids), palette = "Dark 3"), seg_ids)
 
   shots <- as.list(result$snapshots)
@@ -432,7 +433,7 @@ plot_segment_sweep <- function(
         size = 4.65
       ) +
       ggplot2::geom_vline(xintercept = shot$x, color = "#111111", linewidth = 0.8, linetype = "22") +
-      ggplot2::scale_color_manual(values = seg_palette) +
+      ggplot2::scale_color_manual(values = seg_palette, limits = seg_ids) +
       ggplot2::coord_cartesian(xlim = c(0, max(seg$x2) + 4), ylim = c(0, max(c(seg$y1, seg$y2)) + 4), expand = FALSE) +
       ggplot2::labs(
         title = "Persistent Segment Sweep",
@@ -472,8 +473,8 @@ plot_segment_sweep <- function(
       ggplot2::ggsave(
         filename = frame_paths[[i]],
         plot = p,
-        width = 1400 / 96,
-        height = 620 / 96,
+        width = 1160 / 96,
+        height = 520 / 96,
         dpi = 96,
         units = "in"
       )
@@ -486,8 +487,8 @@ plot_segment_sweep <- function(
     gifski::gifski(
       png_files = frame_paths,
       gif_file = outfile,
-      width = 1400,
-      height = 620,
+      width = 1160,
+      height = 520,
       delay = 1 / fps,
       loop = isTRUE(loop),
       progress = FALSE
