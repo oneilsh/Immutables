@@ -18,60 +18,136 @@ if(requireNamespace("immutables", quietly = TRUE)) {
 }
 ```
 
-## What is an ordered sequence?
+## Ordered sequence basics
 
-`ordered_sequence` stores elements sorted by key, with stable FIFO behavior for
-duplicate keys.
+`ordered_sequence` is a persistent structure that associates elements with keys, typically numeric or character (string). They store elements sorted by key, with stable first-in-first-out (FIFO) behavior for duplicate keys, and provide fast key-based lookup, range queries over keys, and insertion.
+
+All operations are persistent, and return modified copies. Peeking by key returns the stored element (which may be any type), popping returns a list with `$value` containing the stored element, `$key` the key, and `$remaining` the rest of the sequence without that element.
 
 ```{r}
 xs <- ordered_sequence("a1", "b1", "b2", "c1", keys = c(1, 2, 2, 3))
 xs
 ```
 
-`as_flexseq(xs)` returns a payload-only `flexseq`; keys and any custom
-monoids are dropped.
-
-## Key-based lookup
+The `as_ordered_sequence()` variant builds a sequence from a vector or list of elements paired with a key vector, useful when keys are already in a separate vector.
 
 ```{r}
-peek_key(xs, 2)
-as.list(peek_all_key(xs, 2))
-count_key(xs, 2)
+xs2 <- as_ordered_sequence(c(3, 1, 2, 1), keys = letters[1:4])
+xs2
 ```
 
-## Key boundaries
+`as_flexseq(xs)` returns a payload-only `flexseq`; keys and any custom monoids are dropped (see `as.list` to convert and 
+preservekey metadata).
 
-`lower_bound()` gives first `>= key`, and `upper_bound()` gives first `> key`.
+
+## Peek, pop, insert, and range query by key
+
+Insertion is by key, and *keys may be duplicated*. 
 
 ```{r}
-lower_bound(xs, 2)
-upper_bound(xs, 2)
+seq <- as_ordered_sequence(1:3, keys = letters[1:3])
+seq2 <- insert(seq, 10, key = "b")
+seq2
 ```
 
-## Key range queries
+`pop_key()` removes and returns the first match for a key as `$value`/`$key`/`$remaining`. Its "all" counterpart `pop_all_key()` removes the entire tie run for that key, returning `$elements` (an ordered sequence of removed matches) and `$remaining`.
 
 ```{r}
-elements_between(xs, 2, 3)
-count_between(xs, 2, 3)
-count_between(xs, 2, 3, include_to = FALSE)
-```
-
-## Pop by key
-
-```{r}
-one <- pop_key(xs, 2)
+one <- pop_key(seq, key = "b")
 one$value
 one$key
 one$remaining
 
-all_two <- pop_all_key(xs, 2)
-as.list(all_two$values)
+all_two <- pop_all_key(seq, "b")
+all_two$elements
 all_two$remaining
 ```
 
-## Insert
+Keys may be counted, and elements accessed; `peek_key()` returns one element, the
+first in insertion order. `peek_all_key()` returns an ordered sequence with all
+matching keys.
 
 ```{r}
-xs2 <- insert(xs, "a2", key = 1)
-xs2
+count_key(seq, key = "b")
+peek_key(seq, key = "b")
+peek_all_key(seq, key = "b")
+```
+
+Counting and accessing elements over query ranges support inclusive/exclusive on both sides (defaulting to `TRUE`).
+
+```{r}
+elements_between(seq, from_key = "b", to_key ="c", include_from = TRUE, include_to = TRUE)
+count_between(seq, from_key = "b", to_key = "c", include_from = TRUE, include_to = TRUE)
+
+# exclude "b" keys
+elements_between(seq, from_key = "b", to_key ="c", include_from = FALSE, include_to = TRUE)
+```
+
+
+## Key boundaries, and extrema
+
+`lower_bound()` gives *first* element (by index) with a key greater than *or equal to* (`>=`)
+a provided query key. `upper_bound()` gives the first with a key *greater than* (`>`)
+than a provided query key. Return values indicate if the key is found, the index
+of the match, and the associated key and value. The difference in indices thus provides
+the count of matched keys, and the indices
+
+```{r}
+seq <- as_ordered_sequence(1:4, keys = c("b", "d", "d", "f"))
+
+# for 
+lower_bound(seq, key = "d") |> str()
+upper_bound(seq, key = "d") |> str()
+
+lower_bound(seq, key = "a") |> str()
+upper_bound(seq, key = "a") |> str()
+```
+
+
+
+
+`min_key()` and `max_key()` return the current minimum and maximum *keys* (not the stored elements), in O(log n) and O(1) respectively via cached monoid state.
+
+```{r}
+min_key(xs)
+max_key(xs)
+min_key(ordered_sequence())  # NULL when empty
+```
+
+## Empty sequences
+
+Key and range helpers are non-throwing on empty sequences, and `length()` allows for empty checking.
+
+```{r}
+empty_os <- ordered_sequence()
+length(empty_os)
+peek_key(empty_os, 1)
+count_between(empty_os, 1, 5)
+```
+
+## Named ordered sequences
+
+Ordered sequences can carry names, set either at construction or through `as_ordered_sequence()` on a named list. Names and integer positions both support read-only indexing via `[`, `[[`, and `$`; all replacement forms (`[<-`, `[[<-`, `$<-`) error — cast to `as_flexseq()` first to mutate. Named and unnamed elements cannot be mixed within one sequence.
+
+```{r}
+xs_named <- as_ordered_sequence(
+  setNames(list("alice", "bob", "carol"), c("a", "b", "c")),
+  keys = c(3, 1, 2)
+)
+xs_named
+
+xs_named[["b"]]
+xs_named[c("a", "c")]
+xs_named[1]            # positional read also works
+
+try(xs_named$a <- "!!")  # replacement blocked
+```
+
+## Transforming
+
+`fapply()` maps a function over elements while preserving keys and order. The function receives `(value, key)`, or `(value, key, name)` if it accepts a third argument — keys and names are passed in read-only, and the return value replaces the stored element.
+
+```{r}
+xs_t <- ordered_sequence("alice", "bob", "carol", keys = c(3, 1, 2))
+fapply(xs_t, function(value, key) toupper(value))
 ```
