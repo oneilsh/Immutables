@@ -7,9 +7,11 @@
 \method{unlist}{flexseq}(x, recursive = TRUE, use.names = TRUE)
 }
 \arguments{
-\item{s}{A \code{flexseq}.}
+\item{x}{A \code{flexseq}.}
 
-\item{...}{Passed through to \code{\link[base:unlist]{base::unlist()}}.}
+\item{recursive}{Passed through to \code{\link[base:unlist]{base::unlist()}}.}
+
+\item{use.names}{Passed through to \code{\link[base:unlist]{base::unlist()}}.}
 }
 \value{
 An atomic vector built from \code{\link[=as.list.flexseq]{as.list.flexseq()}}.
@@ -19,7 +21,7 @@ Convenience wrapper around \code{\link[base:unlist]{base::unlist()}} over \code{
 }
 \details{
 For \code{priority_queue}, this unwraps queue entries to payload items before
-unlisting (equivalent to \code{unlist(as.list(s, drop_meta = TRUE), ...)}).
+unlisting (equivalent to \code{unlist(as.list(x, drop_meta = TRUE), ...)}).
 
 Inherited by \code{ordered_sequence} and \code{interval_index} through the shared
 class stack.

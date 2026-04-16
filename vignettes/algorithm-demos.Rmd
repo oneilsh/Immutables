@@ -12,25 +12,30 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 source(file.path("helpers", "algorithm_demos_helpers.R"), local = TRUE)
 ```
 
-This article presents six algorithm demos in a single walkthrough. Each section
-focuses on the algorithmic idea, the specific immutable data-structure roles,
-and a compact core logic view.
+## About these demos
 
-Runtime-heavy animation generation is intentionally excluded from vignette build.
-The visuals shown here are pre-rendered GIF assets under
-`vignettes/assets/algorithm-demos/`.
+The examples below are not step-by-step
+tutorials: the underlying scripts are several hundred to a thousand lines each,
+but most of that code is event generation, plotting, and animation machinery.
+What matters here is the *shape* of each algorithm — which structure carries
+which role, and what persistence specifically buys when that role is filled by
+an immutable value instead of a mutable one.
+
+Each section gives a picture of the algorithm, names the structures it uses,
+and shows a pre-rendered animation of a run. The animations are not produced
+during vignette build; they are GIFs under
+`vignettes/assets/algorithm-demos/`. Source paths for every demo and the asset
+renderer are collected in a single section at the end.
 
 <details>
 <summary>Maintainer note: re-render one demo asset</summary>
-
-Use:
 
 ```r
 source("vignettes/helpers/render_algorithm_demo_assets.R")
 render_algorithm_demo_assets(demos = "sweep_line")
 ```
 
-CLI alternative:
+Or from the shell:
 
 ```sh
 R -q -f vignettes/helpers/render_algorithm_demo_assets.R --args demo=sweep_line
@@ -38,256 +43,135 @@ R -q -f vignettes/helpers/render_algorithm_demo_assets.R --args demo=sweep_line
 
 </details>
 
-## Sweep Line
+## Sweep line
 
-### What This Illustrates
+A vertical line moves left-to-right across a collection of 1D intervals. At
+each position, the algorithm asks: which intervals are active right now? This
+is the canonical setting for a sweep over ordered events.
 
-A one-dimensional sweep over interval start/end events. At each sweep position,
-we ask: "which intervals are active right now?" This demonstrates immutable
-state progression across ordered event keys.
-
-### Data Structures and Their Roles
-
-- `interval_index`: fast active-interval query at each x-position.
-- `ordered_sequence`: persistent event stream keyed by x.
-- `flexseq`: immutable snapshot history for playback.
-
-### Core Logic (Minimal)
-
-```{r sweep-line-core, eval=FALSE}
-# Minimal wrapper from algorithm_demos_helpers.R
-out <- run_sweep_line_minimal(seed = 42L, track_snapshots = TRUE)
-
-# Persistent step updates:
-# 1) pop events at current x from ordered_sequence
-# 2) query active intervals from interval_index
-# 3) append immutable snapshot to flexseq
-```
-
-### Visualization
+Events (interval start and end points) live in an `ordered_sequence` keyed by
+x-coordinate; `pop_all_key()` pulls every event at the current sweep position
+as a single batch. The intervals themselves live in an `interval_index`, which
+answers "what is active at x?" via `peek_all_point()`. At each step, a record
+of the active set is appended to a `flexseq` acting as a snapshot timeline.
+Because every snapshot is a persistent value, the animation is just playback
+over that timeline — no re-running, no state to rewind.
 
 ```{r sweep-line-viz, echo=FALSE, fig.cap="Sweep-line interval activity over persistent snapshots."}
 knitr::include_graphics(algorithm_demo_asset("sweep_line"))
 ```
 
-### Full Implementation
+## Segment sweep
 
-<details>
-<summary>Show source/helper paths</summary>
+A 2D variant: the sweep line crosses a set of line segments, and the demo
+discovers pairwise intersections among segments that are simultaneously
+active. It's a simplified version of the Bentley–Ottmann setup.
 
-- Demo source: `meta/scripts/demo_sweep_line_immutables.R`
-- Asset renderer: `vignettes/helpers/render_algorithm_demo_assets.R`
-
-</details>
-
-## Segment Sweep
-
-### What This Illustrates
-
-A sweep over segment endpoint events with active-set intersection discovery.
-This highlights immutable event processing and query state over geometric input.
-
-### Data Structures and Their Roles
-
-- `interval_index`: active-segment candidate querying at current sweep x.
-- `ordered_sequence`: endpoint event stream, processed in sorted order.
-- `flexseq`: snapshot timeline of sweep states.
-
-### Core Logic (Minimal)
-
-```{r segment-sweep-core, eval=FALSE}
-# Minimal wrapper from algorithm_demos_helpers.R
-stats <- run_segment_sweep_minimal(complexity = "standard")
-stats
-
-# Core behavior:
-# - events are popped in x-order
-# - active segments are queried via interval index
-# - found intersections are accumulated persistently
-```
-
-### Visualization
+The event stream (segment start/end events, intersection events) is an
+`ordered_sequence` keyed by x. Active segment candidates are queried from an
+`interval_index` built on segment x-ranges. Interestingly, there is a *second*
+`ordered_sequence` that accumulates discovered intersections as the sweep
+progresses — a nice illustration that an ordered sequence is useful not only
+as an event queue but as a growing sorted log. A `flexseq` holds the snapshot
+timeline, so the animation can replay the sweep with the intersection list
+growing step by step.
 
 ```{r segment-sweep-viz, echo=FALSE, fig.cap="Segment sweep with active-set intersection discovery."}
 knitr::include_graphics(algorithm_demo_asset("segment_sweep"))
 ```
 
-### Full Implementation
+## Convex hull
 
-<details>
-<summary>Show source/helper paths</summary>
+Andrew's monotone chain: sort the points by `(x, y)`, sweep once to build the
+lower hull, sweep again for the upper hull, and concatenate. Each sweep is a
+stack algorithm — push the next point, then pop while the last three points
+turn the wrong way.
 
-- Demo source: `meta/scripts/demo_segment_sweep_immutables.R`
-- Asset renderer: `vignettes/helpers/render_algorithm_demo_assets.R`
-
-</details>
-
-## Convex Hull
-
-### What This Illustrates
-
-Monotone-chain convex hull construction with immutable lower/upper hull stacks.
-The demo emphasizes turn tests and persistent stack evolution.
-
-### Data Structures and Their Roles
-
-- `ordered_sequence`: sorted point stream by `(x, y)`.
-- `flexseq`: persistent lower/upper hull stacks and snapshot timeline.
-
-### Core Logic (Minimal)
-
-```{r convex-hull-core, eval=FALSE}
-# Minimal wrapper from algorithm_demos_helpers.R
-stats <- run_convex_hull_minimal(complexity = "standard")
-stats
-
-# Core behavior:
-# - points consumed in sorted order
-# - pop while orientation violates convexity
-# - push next point, preserving prior versions immutably
-```
-
-### Visualization
+This demo is notable because `flexseq` carries most of the work. The sorted
+input lives in an `ordered_sequence`, but the lower and upper hull stacks are
+themselves `flexseq`s, and every push and pop returns a new one rather than
+mutating in place. A third `flexseq` stores the snapshot timeline, so after
+the run you have a complete record of every intermediate hull — which point
+was pushed, which points were popped because they violated convexity, and
+what the partial hull looked like at every step.
 
 ```{r convex-hull-viz, echo=FALSE, fig.cap="Monotone-chain hull construction with persistent snapshots."}
 knitr::include_graphics(algorithm_demo_asset("convex_hull"))
 ```
 
-### Full Implementation
+## Fortune frontier
 
-<details>
-<summary>Show source/helper paths</summary>
+Fortune's sweep-line algorithm for Voronoi diagrams. A vertical sweep moves
+across a set of sites; each new site introduces a parabola to the "beach
+line" frontier, and the breakpoints between adjacent parabolas trace out the
+Voronoi edges as the sweep advances.
 
-- Demo source: `meta/scripts/demo_convex_hull_immutables.R`
-- Asset renderer: `vignettes/helpers/render_algorithm_demo_assets.R`
-
-</details>
-
-## Fortune Frontier
-
-### What This Illustrates
-
-A Fortune-style sweep frontier (beach line) visualization that replays immutable
-state over directrix progression. The focus is event-driven frontier evolution.
-
-### Data Structures and Their Roles
-
-- `priority_queue`: site events consumed by sweep position.
-- `ordered_sequence`: active frontier registry.
-- `flexseq`: snapshots and breakpoint trails for playback.
-
-### Core Logic (Minimal)
-
-```{r fortune-core, eval=FALSE}
-# Minimal wrapper from algorithm_demos_helpers.R
-stats <- run_fortune_frontier_minimal(complexity = "standard")
-stats
-
-# Core behavior:
-# - pop ready site events from priority queue
-# - insert active sites into ordered frontier state
-# - sample beach line and breakpoint trails into persistent snapshots
-```
-
-### Visualization
+Three structures share the work. A `priority_queue` holds site events keyed
+by x; `pop_min()` produces the next event due. The active sites along the
+frontier live in an `ordered_sequence`, keyed by a composite score so they
+stay in frontier order. A `flexseq` accumulates the *breakpoint trail* — every
+Voronoi edge segment traced out so far — and a second `flexseq` holds the
+snapshot timeline. The trail is an especially good fit for persistence: it
+only ever grows, and the accumulated value from any past step is still
+available for comparison or partial rendering with no bookkeeping.
 
 ```{r fortune-viz, echo=FALSE, fig.cap="Fortune-style frontier sweep and revealed Voronoi structure."}
 knitr::include_graphics(algorithm_demo_asset("fortune_frontier"))
 ```
 
-### Full Implementation
+## A* search
 
-<details>
-<summary>Show source/helper paths</summary>
+Standard A* pathfinding on a generated maze, with the frontier ordered by
+`f = g + h`. This is the demo where persistence pays off in a way that goes
+beyond replay.
 
-- Demo source: `meta/scripts/demo_fortune_frontier_immutables.R`
-- Asset renderer: `vignettes/helpers/render_algorithm_demo_assets.R`
-
-</details>
-
-## A* Organic History Large Fast
-
-### What This Illustrates
-
-A large maze A* search with staged final-path reveal plus a pressure-history
-summary. The replay first settles on the solved state, then highlights the solved
-route in orange before revealing the final purple path overlay, and ends on a
-full persistent pressure view.
-
-### Data Structures and Their Roles
-
-- `priority_queue`: open-set frontier ordered by `f = g + h`.
-- `ordered_sequence`: closed/visited keys for deterministic membership updates.
-- `flexseq`: full persistent snapshot timeline used for replay and history metrics.
-
-### Core Logic (Minimal)
-
-```{r astar-core, eval=FALSE}
-# Codified vignette preset (see algorithm_demos_helpers.R)
-algorithm_demo_presets$astar_organic_history_large_fast
-
-# Equivalent driver shape:
-run_astar_from_preset(
-  name = "astar_organic_history_large_fast",
-  outfile = "vignettes/assets/algorithm-demos/05-astar-organic-history-large-fast.gif"
-)
-```
-
-### Visualization
+A `priority_queue` keyed by f-score holds the open set; `pop_min()` picks the
+next node to expand. A `closed` `ordered_sequence` keyed by node index answers
+the "already visited?" check via `peek_key()` in log time. A `flexseq`
+snapshot timeline captures open/closed/current state at every expansion step.
+Because the full search history is preserved as an immutable timeline, a
+post-hoc aggregate like *pressure* — how many times each cell appeared on the
+frontier over the course of the search — can be computed by folding over the
+snapshots after the fact, rather than sprinkling counters through the search
+loop. The large-maze animation exploits this to reveal the final path on top
+of a pressure heatmap once the search settles.
 
 ```{r astar-viz, echo=FALSE, fig.cap="A* replay with staged final-route reveal, then persistent pressure summary."}
 knitr::include_graphics(algorithm_demo_asset("astar_organic_history_large_fast"))
 ```
 
-### Full Implementation
+## Wave clear
 
-<details>
-<summary>Show source/helper paths</summary>
+A two-stage simulation over a weighted grid. Cells light up in Dijkstra-
+distance order from a source, and a lagged "clear-wave" follows behind,
+deactivating cells after a delay. The visible result is a travelling band.
 
-- Demo source: `meta/scripts/demo_astar_immutables.R`
-- Preset registry: `vignettes/helpers/algorithm_demos_helpers.R`
-- Asset renderer: `vignettes/helpers/render_algorithm_demo_assets.R`
-
-</details>
-
-## Wave Clear
-
-### What This Illustrates
-
-A queued "wave + clear-wave" process over a weighted obstacle field. The demo
-shows how immutable timelines make event replay and summary metrics straightforward.
-
-### Data Structures and Their Roles
-
-- `priority_queue`: add/clear events scheduled by time.
-- `ordered_sequence`: active-cell set keyed by cell id.
-- `flexseq`: immutable snapshot timeline for animation and playback.
-
-### Core Logic (Minimal)
-
-```{r wave-clear-core, eval=FALSE}
-# Minimal wrapper from algorithm_demos_helpers.R
-stats <- run_wave_clear_minimal(complexity = "standard")
-stats
-
-# Core behavior:
-# - pop due events from priority queue
-# - apply add/clear to active ordered state
-# - append snapshot to persistent timeline
-```
-
-### Visualization
+Two `priority_queue`s drive the scheduling — one for add-events, one for
+clear-events — both keyed by time; pop-by-priority-band retrieves everything
+due at the current tick. The currently-active cell set lives in an
+`ordered_sequence` keyed by cell index, with `insert()` on activation and
+`pop_key()` on clear. A `flexseq` records the snapshot timeline. Because the
+full temporal record is preserved, aggregate dynamics (peak concurrent active
+count, first-arrival time at a goal cell) can be read off the history without
+re-simulating.
 
 ```{r wave-clear-viz, echo=FALSE, fig.cap="Wave and clear-wave progression over persistent state snapshots."}
 knitr::include_graphics(algorithm_demo_asset("wave_clear"))
 ```
 
-### Full Implementation
+## Source and rendering
 
-<details>
-<summary>Show source/helper paths</summary>
+The full implementations live under `vignettes/helpers/demos/`:
 
-- Demo source: `meta/scripts/demo_wave_clear_immutables.R`
-- Asset renderer: `vignettes/helpers/render_algorithm_demo_assets.R`
+- `demo_sweep_line_immutables.R`
+- `demo_segment_sweep_immutables.R`
+- `demo_convex_hull_immutables.R`
+- `demo_fortune_frontier_immutables.R`
+- `demo_astar_immutables.R`
+- `demo_wave_clear_immutables.R`
 
-</details>
+The vignette-side helpers (asset paths, render presets, the A* preset used by
+the large-maze animation) are in
+`vignettes/helpers/algorithm_demos_helpers.R`, and
+`vignettes/helpers/render_algorithm_demo_assets.R` is the entry point for
+re-rendering any or all of the GIFs.

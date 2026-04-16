@@ -16,12 +16,12 @@ algorithm_demo_asset <- function(name) {
 }
 
 algorithm_demo_sources <- list(
-  sweep_line = "meta/scripts/demo_sweep_line_immutables.R",
-  segment_sweep = "meta/scripts/demo_segment_sweep_immutables.R",
-  convex_hull = "meta/scripts/demo_convex_hull_immutables.R",
-  fortune_frontier = "meta/scripts/demo_fortune_frontier_immutables.R",
-  astar = "meta/scripts/demo_astar_immutables.R",
-  wave_clear = "meta/scripts/demo_wave_clear_immutables.R",
+  sweep_line = "vignettes/helpers/demos/demo_sweep_line_immutables.R",
+  segment_sweep = "vignettes/helpers/demos/demo_segment_sweep_immutables.R",
+  convex_hull = "vignettes/helpers/demos/demo_convex_hull_immutables.R",
+  fortune_frontier = "vignettes/helpers/demos/demo_fortune_frontier_immutables.R",
+  astar = "vignettes/helpers/demos/demo_astar_immutables.R",
+  wave_clear = "vignettes/helpers/demos/demo_wave_clear_immutables.R",
   asset_renderer = "vignettes/helpers/render_algorithm_demo_assets.R"
 )
 
@@ -82,6 +82,7 @@ algorithm_demo_render_presets <- list(
     runner = "run_convex_hull_demo",
     args = list(
       complexity = "standard",
+      n_points = 42L,
       visualize = TRUE,
       animate = TRUE,
       fps = 10,
