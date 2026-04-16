@@ -37,7 +37,7 @@ Measure values typically represent something you would want to aggregate over a
 subset of elements, with different measures and aggregations resulting in unique
 properties.
 
-When operating on `flexseq`s,
+When operating on a `flexseq`,
 you can think of a monoid's `f` as being applied left-to-right (a left fold), 
 accumulating measure values at each element. The calculation for the first 
 element also uses `f`, which is where `i` is used, as the other input. 
@@ -53,9 +53,9 @@ monoid-accumulated measures (infix notation):
   ...
 ```
 
-This left-to-rightness is only well defined for `flexseq`s (using element order 
-defined by the user in construction), `ordered_sequence`s (always ordered by key), 
-and `interval_index`s (always ordered by interval start). Priority queue element
+This left-to-rightness is only well defined for `flexseq` (using element order 
+defined by the user in construction), `ordered_sequence` (always ordered by key), 
+and `interval_index` (always ordered by interval start). Priority queue element
 order is maintained internally with new elements being added on the right, not
 in priority order. There may still be uses for monoids that aggregate priority values. 
 This is because we can compute an aggregate 
@@ -194,7 +194,7 @@ split_at(x, at = 5)
 As described by [Hinze and Paterson](https://www.cs.ox.ac.uk/ralf.hinze/publications/FingerTrees.pdf),
 this monoid + predicate pattern is remarkably flexible. 
 The `priority_queue` and `ordered_sequence` types for example are not actually separate
-data structures, but monoid-annotated `flexseq`s plus thin wrappers that
+data structures, but monoid-annotated `flexseq` structures plus thin wrappers that
 invoke `locate_by_predicate()` and friends with the right predicate. The
 same primitives introduced above power every `peek_*`, `pop_*`, and bound
 query in the package. (Interval indices also follow these patterns, but
@@ -313,22 +313,25 @@ first_split$left
 first_split$right
 ```
 
-And empty `$right` indicates no matches (all measures are less than the query).
+An empty `$right` indicates no matches (all measures are less than the query).
 If it's not empty, but the first measure in `$right` does not start with the
 query, then there again no matches (the key is between the left and right
-but doesn't match).
+but doesn't match). We can use the `get_measures()` function to return a `flexseq` 
+of measure values by name and index with `[[1]]` to get the first measure.
 
 If the first key in `$right` *does* start with the query, then there is at least one 
 match, and all matches would be in `$right`. We can split again to find where
 matching keys end with a different predicate, one that fires on the first measure
-that iis strictly greater than the query *and* no longer starts with it (resulting
+that is strictly *greater* than the query *and* no longer starts with it (resulting
 in the index of the first non-match in the run).
+
 
 ```{r}
 if(length(first_split$right) > 0) {
-  first_key <- min_key(first_split$right)
+  right_measures = get_measures(first_split$right, "max_seq")
+  first_measure = right_measures[[1]]
 
-  if(startsWith(first_key, query)) {
+  if(startsWith(first_measure, query)) {
     second_split <- split_by_predicate(
       first_split$right,
       function(m) query < m & !startsWith(m, query),
@@ -341,25 +344,19 @@ if(length(first_split$right) > 0) {
 matches
 ```
 
-Extract the original string positions from the matching entries:
+Finally we can extract the original string positions from the matching entries:
 
 ```{r}
 positions <- fapply(matches, function(value, key) value) |> unlist()
 positions
-
-# verify: each position is a prefix match
-for(pos in positions) {
-  cat(pos, ":", substr(sequence, pos, pos + nchar(query) - 1), "\n")
-}
 ```
-
 
 ## Validation helpers
 
 `validate_tree()` checks structural invariants (monoid consistency, node
 structure) across the entire tree. `validate_name_state()` verifies that a tree
 is either fully unnamed or fully named with unique, non-empty names. Both are
-O(n) and intended for debugging and tests, not hot paths.
+$O(n)$ and intended for debugging and tests.
 
 ```{r}
 validate_tree(x)

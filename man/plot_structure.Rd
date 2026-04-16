@@ -12,6 +12,9 @@ plot_structure(
   label_edges = FALSE,
   title = NULL,
   node_label = "value",
+  label.cex = NULL,
+  asp = NA,
+  legend = TRUE,
   ...
 )
 }
@@ -58,7 +61,23 @@ entry contract. \code{NULL} for structural nodes.}
 Measure values are exposed as-is, including list-valued measures
 (e.g. the built-in \code{.pq_min} is \code{list(has, priority)}).}
 
-\item{...}{Additional arguments passed to \code{igraph::plot.igraph}.}
+\item{label.cex}{Numeric scalar controlling label text size (passed as
+\code{vertex.label.cex} to igraph). If \code{NULL} (default), scales
+automatically from ~1.0 on small trees down to ~0.55 on dense ones so
+the auto-sized \code{"rounded_rect"} boxes don't collide. Override with a
+fixed value for finer control.}
+
+\item{asp}{Plot aspect ratio (physical y-unit / physical x-unit).
+Default \code{NA} lets the tree fill the device without aspect constraint.
+Set to a numeric (e.g. \code{0.4}) to enforce horizontal stretching,
+or \code{1} for a square plot region.}
+
+\item{legend}{If \code{TRUE} (default), draws a horizontal legend below the
+tree mapping node-type names to their fill colors, restricted to
+types actually present.}
+
+\item{...}{Additional arguments passed to \code{igraph::plot.igraph} (e.g.
+\code{vertex.label.color}, \code{vertex.frame.color}).}
 }
 \value{
 Invoked for its side effect (draws to the active graphics

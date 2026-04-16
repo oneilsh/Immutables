@@ -188,6 +188,8 @@ reference:
     desc: "Lower-level primitives for custom monoids, predicate queries, validation, and structure visualization."
     contents:
       - add_monoids
+      - get_measure
+      - get_measures
       - locate_by_predicate
       - split_around_by_predicate
       - split_by_predicate
