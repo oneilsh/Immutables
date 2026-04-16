@@ -86,32 +86,34 @@ elements_between(seq, from_key = "b", to_key ="c", include_from = FALSE, include
 
 ## Key boundaries, and extrema
 
-`lower_bound()` gives *first* element (by index) with a key greater than *or equal to* (`>=`)
-a provided query key. `upper_bound()` gives the first with a key *greater than* (`>`)
-than a provided query key. Return values indicate if the key is found, the index
-of the match, and the associated key and value. The difference in indices thus provides
-the count of matched keys, and ...
+`lower_bound()` finds the first element with key `>=` a query key; `upper_bound()` finds the first with key strictly `>`. Both return a list with `$found`, `$index`, `$value`, and `$key` (`NULL` fields when no match exists). Together they support successor queries ("find the nearest entry at or above this key") and duplicate counting via index arithmetic.
 
 ```{r}
 seq <- as_ordered_sequence(1:4, keys = c("b", "d", "d", "f"))
 
-# matches some key 
 lower_bound(seq, key = "d") |> str()
 upper_bound(seq, key = "d") |> str()
+```
 
-# less than all keys
+When the query key falls between or outside existing keys, `lower_bound()` returns the next entry at or above, useful for nearest-match lookups. Both return `found = FALSE` when no keys satisfy the condition.
+
+```{r}
+# query key below all keys — both point to the first entry
 lower_bound(seq, key = "a") |> str()
-upper_bound(seq, key = "a") |> str()
 
-# greater than all keys
-lower_bound(seq, key = "g") |> str()
+# query key above all keys — no match
 upper_bound(seq, key = "g") |> str()
 ```
 
+The difference `upper_bound(x, k)$index - lower_bound(x, k)$index` gives the count of entries with key `k` (this is what `count_key()` does internally).
+
+```{r}
+upper_bound(seq, key = "d")$index - lower_bound(seq, key = "d")$index
+count_key(seq, key = "d")
+```
 
 
-
-`min_key()` and `max_key()` return the current minimum and maximum *keys* (not the stored elements), in O(log n) and O(1) respectively via cached monoid state.
+`min_key()` and `max_key()` return the current minimum and maximum *keys* (not the stored elements).
 
 ```{r}
 min_key(xs)
@@ -132,7 +134,8 @@ count_between(empty_os, 1, 5)
 
 ## Named ordered sequences
 
-Ordered sequences can carry names, set either at construction or through `as_ordered_sequence()` on a named list. Names and integer positions both support read-only indexing via `[`, `[[`, and `$`; all replacement forms (`[<-`, `[[<-`, `$<-`) error — cast to `as_flexseq()` first to mutate. Named and unnamed elements cannot be mixed within one sequence.
+Ordered sequences can carry names, set either at construction or through `as_ordered_sequence()` on a named list. Names and integer positions both support read-only indexing via `[`, `[[`, and `$`. All replacement forms (`[<-`, `[[<-`, `$<-`) error, because
+index-based assignment may break the ordering invariant. Ordered sequences may be cast down with `as_flexseq()` or `as.list()`. Named and unnamed elements cannot be mixed within one sequence.
 
 ```{r}
 xs_named <- as_ordered_sequence(
@@ -150,7 +153,7 @@ try(xs_named$a <- "!!")  # replacement blocked
 
 ## Transforming
 
-`fapply()` maps a function over elements while preserving keys and order. The function receives `(value, key)`, or `(value, key, name)` if it accepts a third argument — keys and names are passed in read-only, and the return value replaces the stored element.
+`fapply()` maps a function over elements while preserving keys and order. The function receives `(value, key)`, or `(value, key, name)` if it accepts a third argument. Keys and names are passed in read-only, and the return value replaces the stored element at the associated key (and name if named).
 
 ```{r}
 xs_t <- ordered_sequence("alice", "bob", "carol", keys = c(3, 1, 2))
