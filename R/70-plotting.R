@@ -88,9 +88,7 @@ get_graph_df <- function(t) {
                    measures = attr(t, "measures", exact = TRUE))
 
       if(!is.null(names(t))) {
-        # rev() here and below determines the order of addition to the data and thus (apparently)
-        # the node ordering
-        for(subthing_name in rev(names(t))) {
+        for(subthing_name in names(t)) {
           subthing <- .subset2(t, subthing_name)
           childid <- paste(path, subthing_name, sep = ":")
           add_edge_row(path, childid, subthing_name)
@@ -98,7 +96,7 @@ get_graph_df <- function(t) {
         }
       } else {
         index <- 1
-        for(subthing in rev(t)) {
+        for(subthing in t) {
           childid <- paste(path, index, sep = ":")
           add_edge_row(path, childid, index)
           add_edges(subthing, childid)

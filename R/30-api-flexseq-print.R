@@ -60,6 +60,25 @@
   trimws(paste(txt, collapse = " "))
 }
 
+# Like `.ft_format_scalar` but preserves structure for non-atomic-scalar
+# values. Atomic scalars (e.g. a numeric sum) use `format()`; lists and
+# longer vectors use `deparse()` so they render as `list(has = TRUE, ...)`
+# instead of a space-joined flat string. Output is clipped to a single line.
+# Runtime: O(size of deparsed representation) for structural values.
+.ft_format_measure <- function(x) {
+  if(is.atomic(x) && length(x) == 1L) {
+    return(.ft_format_scalar(x))
+  }
+  txt <- tryCatch(
+    deparse(x, width.cutoff = 60L, nlines = 1L),
+    error = function(e) NULL
+  )
+  if(is.null(txt) || length(txt) == 0L) {
+    return("<unprintable>")
+  }
+  trimws(paste(txt, collapse = " "))
+}
+
 # Runtime: O(m), where m = number of monoids on tree root.
 .ft_custom_monoid_names <- function(x, excluded_names) {
   monoids <- names(resolve_tree_monoids(x, required = TRUE))
@@ -76,13 +95,34 @@
 
   cat("Custom monoids + measures:\n")
   for(name in custom) {
-    cat("  ", name, ": ", .ft_format_scalar(node_measure(x, name)), "\n", sep = "")
+    cat("  ", name, ": ", .ft_format_measure(node_measure(x, name)), " (aggregate)\n", sep = "")
+  }
+  invisible(NULL)
+}
+
+# Apply each custom (non-excluded) monoid's measure() to a single leaf entry
+# and print a "  <name> measure: <value>" line for each. Safe to call when
+# `show_custom_monoids` is FALSE — it short-circuits at that point.
+# Runtime: O(m), where m = number of custom monoids on the tree.
+.ft_print_elem_custom_monoids <- function(x, entry, excluded_names, show_custom_monoids) {
+  if(!isTRUE(show_custom_monoids)) {
+    return(invisible(NULL))
+  }
+  monoids <- resolve_tree_monoids(x, required = TRUE)
+  custom <- setdiff(names(monoids), excluded_names)
+  if(length(custom) == 0L) {
+    return(invisible(NULL))
+  }
+  for(name in custom) {
+    val <- monoids[[name]]$measure(entry)
+    cat("  ", name, " measure: ", .ft_format_measure(val), "\n", sep = "")
   }
   invisible(NULL)
 }
 
 # Runtime: O(log n).
-.ft_print_elem_at <- function(x, i, named, ...) {
+.ft_print_elem_at <- function(x, i, named, show_custom_monoids = FALSE,
+                              excluded_names = character(), ...) {
   el <- .ft_get_elem_at(x, as.integer(i))
   nm <- .ft_get_name(el)
   if(isTRUE(named) && !is.null(nm)) {
@@ -91,6 +131,7 @@
     cat("[[", i, "]]\n", sep = "")
   }
   print(.ft_strip_name(el), ...)
+  .ft_print_elem_custom_monoids(x, el, excluded_names, show_custom_monoids)
   cat("\n")
   invisible(NULL)
 }
@@ -133,14 +174,17 @@ print.FingerTree <- function(x, max_elements = 4L, show_custom_monoids = FALSE, 
 
   cat("\nElements:\n\n")
 
+  excluded_names <- c(".size", ".named_count")
   for(i in preview$head) {
-    .ft_print_elem_at(x, i, named, ...)
+    .ft_print_elem_at(x, i, named, show_custom_monoids = show_custom,
+                      excluded_names = excluded_names, ...)
   }
 
   .ft_print_skipped(preview$skipped)
 
   for(i in preview$tail) {
-    .ft_print_elem_at(x, i, named, ...)
+    .ft_print_elem_at(x, i, named, show_custom_monoids = show_custom,
+                      excluded_names = excluded_names, ...)
   }
   invisible(x)
 }

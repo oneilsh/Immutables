@@ -43,6 +43,7 @@ print.ordered_sequence <- function(x, max_elements = 4L, show_custom_monoids = F
 
   cat("\nElements (by key order):\n\n")
   preview <- .pick_preview_sizes(n, max_elements)
+  excluded_names <- c(".size", ".named_count", ".oms_max_key")
   for(i in preview$head) {
     entry <- .ft_get_elem_at(x, as.integer(i))
     nm <- .ft_get_name(entry)
@@ -52,6 +53,7 @@ print.ordered_sequence <- function(x, max_elements = 4L, show_custom_monoids = F
       cat("[[", i, "]] (key ", .ft_format_scalar(entry$key), ")\n", sep = "")
     }
     print(entry$value, ...)
+    .ft_print_elem_custom_monoids(x, entry, excluded_names, show_custom)
     cat("\n")
   }
 
@@ -66,6 +68,7 @@ print.ordered_sequence <- function(x, max_elements = 4L, show_custom_monoids = F
       cat("[[", i, "]] (key ", .ft_format_scalar(entry$key), ")\n", sep = "")
     }
     print(entry$value, ...)
+    .ft_print_elem_custom_monoids(x, entry, excluded_names, show_custom)
     cat("\n")
   }
   invisible(x)

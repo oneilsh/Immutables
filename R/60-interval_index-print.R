@@ -75,6 +75,7 @@ print.interval_index <- function(x, max_elements = 4L, show_custom_monoids = FAL
 
   cat("\nElements (by interval start order):\n\n")
   preview <- .pick_preview_sizes(n, max_elements)
+  excluded_names <- c(".size", ".named_count", ".ivx_max_start", ".ivx_max_end", ".ivx_min_end", ".oms_max_key")
   for(i in preview$head) {
     entry <- .ft_get_elem_at(x, as.integer(i))
     nm <- .ft_get_name(entry)
@@ -85,6 +86,7 @@ print.interval_index <- function(x, max_elements = 4L, show_custom_monoids = FAL
       cat("[[", i, "]] (interval ", iv, ")\n", sep = "")
     }
     print(entry$value, ...)
+    .ft_print_elem_custom_monoids(x, entry, excluded_names, show_custom)
     cat("\n")
   }
 
@@ -100,6 +102,7 @@ print.interval_index <- function(x, max_elements = 4L, show_custom_monoids = FAL
       cat("[[", i, "]] (interval ", iv, ")\n", sep = "")
     }
     print(entry$value, ...)
+    .ft_print_elem_custom_monoids(x, entry, excluded_names, show_custom)
     cat("\n")
   }
   invisible(x)

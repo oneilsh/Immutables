@@ -92,6 +92,7 @@ print.priority_queue <- function(x, max_elements = 4L, show_custom_monoids = FAL
     tail_entries <- rev(tail_entries)
   }
 
+  excluded_names <- c(".size", ".named_count", ".pq_min", ".pq_max")
   for(entry in head_entries) {
     nm <- .ft_get_name(entry)
     if(named && !is.null(nm)) {
@@ -100,6 +101,7 @@ print.priority_queue <- function(x, max_elements = 4L, show_custom_monoids = FAL
       cat("(priority ", .ft_format_scalar(entry$priority), ")\n", sep = "")
     }
     print(entry$value, ...)
+    .ft_print_elem_custom_monoids(x, entry, excluded_names, show_custom)
     cat("\n")
   }
 
@@ -113,6 +115,7 @@ print.priority_queue <- function(x, max_elements = 4L, show_custom_monoids = FAL
       cat("(priority ", .ft_format_scalar(entry$priority), ")\n", sep = "")
     }
     print(entry$value, ...)
+    .ft_print_elem_custom_monoids(x, entry, excluded_names, show_custom)
     cat("\n")
   }
   invisible(x)

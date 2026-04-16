@@ -89,7 +89,7 @@ print(x, show_custom_monoids = TRUE)
 ```
 
 The `plot_structure()` functions visualizes the internal tree layout. Passing a function to
-`node_label` lets us render both leaf values and cached structural measures:
+`node_label` lets us render both leaf values and cached structural measures produced by monoids:
 
 ```{r fig.height=4, fig.width=10}
 plot(x, node_label = function(node) {
@@ -98,15 +98,8 @@ plot(x, node_label = function(node) {
 })
 ```
 
-Each structural node's label is drawn from its cached `sum` measure — the total
-of the leaves beneath it — while each element shows its own value. The
-`node$measures` list carries every monoid attached to the tree (including the
-built-in `.size` and `.named_count`), so the same pattern generalizes to any
-monoid. See `?plot.flexseq` for more details, including handling list-valued
-measures like a priority queue's `.pq_min`.
-
 The tree now caches cumulative sum annotations at every internal node,
-enabling O(log n) search by accumulated sum. Setting `overwrite = TRUE`
+enabling $O(log n)$ search by accumulated sum. Setting `overwrite = TRUE`
 replaces an existing monoid with the same name.
 
 Each structure type reserves certain monoid names for internal use (e.g. `.size`,
@@ -116,7 +109,7 @@ error.
 
 ## Leaf entry contract
 
-The `measure` function receives a structure-specific *entry* — not just the
+The provided `measure` function receives a structure-specific *entry* — not just the
 stored value. The entry shapes are:
 
 - **`flexseq`**: the stored element directly.
@@ -132,7 +125,8 @@ key_sum <- measure_monoid(`+`, 0L, function(entry) as.integer(entry$key))
 
 os <- as_ordered_sequence(c("alice", "bob", "carol"), keys = c(10, 20, 30))
 os <- add_monoids(os, list(key_sum = key_sum))
-os
+
+print(os, show_custom_monoids = TRUE)
 ```
 
 
@@ -141,28 +135,36 @@ os
 Predicate-based operations scan accumulated monoid values left-to-right and find
 the first point where a predicate transitions from `FALSE` to `TRUE`. The
 predicate must be *monotonic*: once it returns `TRUE`, it must stay `TRUE` for
-all subsequent accumulated values. This is what enables the O(log n) search.
+all subsequent accumulated values. This is what enables the $O(log n)$ search for a
+single split point.
 
-`locate_by_predicate()` finds the first element where the predicate fires,
+`locate_by_predicate()` finds the *first* element where the predicate fires,
 without splitting the tree. With `include_metadata = TRUE` it returns additional
-scan information:
+scan information. The predicate function is applied to accumulated measure
+values for a given monoid name; here we find the first element where the accumulated
+sum exceeds $25$.
 
 ```{r}
-loc <- locate_by_predicate(x, function(v) v >= 15, "sum", include_metadata = TRUE)
-loc$found
-loc$value
-loc$metadata
+loc <- locate_by_predicate(x, function(v) v > 25, "sum", include_metadata = TRUE)
+str(loc)
 ```
 
-The metadata includes `left_measure` (accumulated value before the match),
-`hit_measure` (the matched element's own measure), `right_measure` (accumulated
-value of everything after), and `index` (1-based position).
+The `$found` entry indicates that a node where the predicate fires was found; if
+this is false the predicate is `FALSE` for all elements through the end. The `$value`
+entry gives the measure of the node where the predicate turned `TRUE`.
+
+The optional metadata includes `left_measure` (accumulated value before the match),
+`hit_measure` (the matched element's own accumulated measure), `right_measure` (accumulated
+value of everything after), and `index` (1-based position). In this example index
+4 is where the first time where the accumulated sum is greater than 25, which we can
+verify in the plot above ($9.2 + 9.4 + 3.6 = 22.2$, adding in $8.5$ brings the sum to
+$30.7$).
 
 `split_by_predicate()` splits the structure at the predicate point, returning
 `$left` and `$right`. The matched element is the first element of `$right`:
 
 ```{r}
-s <- split_by_predicate(x, function(v) v >= 15, "sum")
+s <- split_by_predicate(x, function(v) v > 25, "sum")
 s$left
 s$right
 ```
@@ -171,7 +173,7 @@ s$right
 separate `$value` field:
 
 ```{r}
-sa <- split_around_by_predicate(x, function(v) v >= 15, "sum")
+sa <- split_around_by_predicate(x, function(v) v > 25, "sum")
 sa$left
 sa$value
 sa$right
@@ -187,10 +189,11 @@ locate_by_predicate(x, p, "sum")
 
 Both split variants accept an optional `accumulator` argument to start scanning
 from a value other than the monoid identity. `split_at()` is a convenience
-wrapper that splits by position using the built-in `.size` monoid:
+wrapper that splits by position using the built-in `.size` monoid (which counts nodes;
+each leaf node's measure is `1` and it uses the `sum` operator):
 
 ```{r}
-split_at(x, 2)
+split_at(x, at = 5)
 ```
 
 
