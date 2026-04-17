@@ -100,6 +100,27 @@ x <- as_flexseq(1:3)
 fapply(x, function(el) el * 10)
 ```
 
+## Iterating
+
+`loop()` (re-exported from the **coro** package) enables `for`-loop traversal, yielding elements left-to-right lazily without materializing a list.
+
+```{r}
+x <- flexseq("a", "b", "c", "d")
+
+loop(for (el in x) {
+  print(el)
+})
+```
+
+For named flexseqs, `loop()` yields bare values (matching `peek_front()`); use `as.list()` when you need names alongside values.
+
+```{r}
+x <- flexseq(a = 1, b = 2, c = 3)
+loop(for (el in x) print(el))
+```
+
+Plain `for (el in x)` (without `loop()`) does *not* dispatch to the iteration protocol — it walks the underlying finger-tree storage and yields internal nodes rather than sequence elements. Always wrap with `loop()`.
+
 ## Converting to base R
 
 Flexseqs convert back to standard R structures with `as.list()` (preserves names and list semantics) and `unlist()` (atomic vector when possible). `length()` returns the element count in O(1), and `str()` gives a compact diagnostic display.

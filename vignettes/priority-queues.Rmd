@@ -122,6 +122,17 @@ q <- priority_queue("alice", "bob", "carol", priorities = c(3, 1, 2))
 fapply(q, function(value, priority) toupper(value))
 ```
 
+## Iterating
+
+`loop()` (re-exported from the **coro** package) walks the queue in priority-ascending order, yielding bare values. Traversal is driven by repeated `pop_min()`, so full traversal is O(n log n) (O(log n) per step); ties within equal priority follow insertion order.
+
+```{r}
+q <- priority_queue("task_a", "task_b", "task_c", priorities = c(3, 1, 2))
+loop(for (v in q) print(v))
+```
+
+Use `fapply()` if your callback needs the priority alongside the value, or cast with `as_flexseq()` for insertion-order iteration. Plain `for (v in q)` (without `loop()`) yields raw finger-tree internals rather than elements — always wrap with `loop()`.
+
 ## Casting to `flexseq`
 
 For full sequence-style operations, cast with `as_flexseq()`. This returns

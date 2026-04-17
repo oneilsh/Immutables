@@ -57,20 +57,30 @@ of the active set is appended to a `flexseq` acting as a snapshot timeline.
 Because every snapshot is a persistent value, the animation is just playback
 over that timeline — no re-running, no state to rewind.
 
-```r
+```{r}
 # Ranges with left index between 0 and 10, 2 to 5 units long.
 x1 <- runif(10, min = 0, max = 10)
 x2 <- x1 + runif(10, min = 2, max = 5)
 items = letters[1:10]
 
 index  <- as_interval_index(items, start = x1, end = x2)
-xvalues <- as_flexseq(sort(unique(c(x1, x2))))
-snapshots <- flexseq()                                         # replay timeline
+
+# first replace current stored item with the start and end metadata
+xvalues <- fapply(index, function(item, x1, x2) { c(x1, x2) }) |>
+  unlist() |>  # flattens the structure (items only)
+  sort() |>
+  unique()
+
+active <- interval_index()
+snapshots <- flexseq()
 
 for (x in xvalues) {
-  popped    <- pop_all_key(index, key = x)      # batch events at this x
-  xvals    <- popped$remaining            # new sequence, minus popped
-  active    <- peek_all_point(index, x)    # intervals overlapping x
+  overlapping <- pop_all_point(index, x)
+  active <- active |> 
+  
+  popped <- pop_all_key(index, key = x)      # batch events at this x
+  xvals <-  popped$remaining            # new sequence, minus popped
+  active <- peek_all_point(index, x)    # intervals overlapping x
   snapshots <- push_back(snapshots, list(x = x, active = active))
 }
 ```

@@ -86,6 +86,8 @@ reference:
       - pop_at
       - split_at
       - fapply
+      - loop
+      - "as_iterator.flexseq"
       - "c.flexseq"
       - "[.flexseq"
       - "print.flexseq"
@@ -114,6 +116,7 @@ reference:
       - min_priority
       - max_priority
       - fapply
+      - "as_iterator.priority_queue"
       - "[.priority_queue"
       - "[[.priority_queue"
       - "as.list.priority_queue"

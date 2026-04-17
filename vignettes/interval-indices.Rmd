@@ -173,3 +173,13 @@ try(ix_named$a <- "!!")
 ```{r}
 fapply(ix, function(value, start, end) paste0(value, "[", start, ",", end, "]"))
 ```
+
+## Iterating
+
+`loop()` (re-exported from the **coro** package) walks the index in interval start-position order, yielding bare values. Interval endpoints are dropped from each yield; use `fapply()` if your callback needs `(value, start, end)`.
+
+```{r}
+loop(for (v in ix) print(v))
+```
+
+Plain `for (v in ix)` (without `loop()`) does *not* dispatch to the iteration protocol — it walks the underlying finger-tree storage and yields internal nodes rather than elements. Always wrap with `loop()`.

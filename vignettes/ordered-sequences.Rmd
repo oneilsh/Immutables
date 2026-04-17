@@ -159,3 +159,13 @@ try(xs_named$a <- "!!")  # replacement blocked
 xs_t <- ordered_sequence("alice", "bob", "carol", keys = c(3, 1, 2))
 fapply(xs_t, function(value, key) toupper(value))
 ```
+
+## Iterating
+
+`loop()` (re-exported from the **coro** package) walks the sequence in key-ascending order, yielding bare values. Keys are dropped from each yield; use `fapply()` if your callback needs the key alongside the value, or iterate over `as.list()` when you want a list keyed by name.
+
+```{r}
+loop(for (v in xs_t) print(v))
+```
+
+Plain `for (v in xs_t)` (without `loop()`) does *not* dispatch to the iteration protocol — it walks the underlying finger-tree storage and yields internal nodes rather than sequence elements. Always wrap with `loop()`.
