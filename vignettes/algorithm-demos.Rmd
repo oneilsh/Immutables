@@ -9,6 +9,13 @@ vignette: >
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+if(requireNamespace("pkgload", quietly = TRUE)) {
+  pkgload::load_all(".", quiet = TRUE)
+} else if(requireNamespace("immutables", quietly = TRUE)) {
+  library(immutables)
+} else {
+  stop("Need either installed 'immutables' or the 'pkgload' package to render this vignette.")
+}
 source(file.path("helpers", "algorithm_demos_helpers.R"), local = TRUE)
 ```
 
@@ -51,38 +58,27 @@ is the canonical setting for a sweep over ordered events.
 
 Events (interval start and end points) live in an `ordered_sequence` keyed by
 x-coordinate; `pop_all_key()` pulls every event at the current sweep position
-as a single batch. The intervals themselves live in an `interval_index`, which
-answers "what is active at x?" via `peek_all_point()`. At each step, a record
-of the active set is appended to a `flexseq` acting as a snapshot timeline.
-Because every snapshot is a persistent value, the animation is just playback
-over that timeline — no re-running, no state to rewind.
+as a single batch. A second `ordered_sequence` — keyed by interval end — is
+the evolving active set: start events insert, end events remove by key. Each
+updated active set is pushed into a `flexseq` snapshot timeline. Because every
+snapshot is itself a persistent value, the animation is just playback over
+that timeline — no re-running, no state to rewind.
 
 ```{r}
-# Ranges with left index between 0 and 10, 2 to 5 units long.
-x1 <- runif(10, min = 0, max = 10)
-x2 <- x1 + runif(10, min = 2, max = 5)
-items = letters[1:10]
+items  <- letters[1:10]
+starts <- runif(10, min = 0, max = 10)
+ends   <- starts + runif(10, min = 2, max = 5)
 
-index  <- as_interval_index(items, start = x1, end = x2)
-
-# first replace current stored item with the start and end metadata
-xvalues <- fapply(index, function(item, x1, x2) { c(x1, x2) }) |>
-  unlist() |>  # flattens the structure (items only)
-  sort() |>
-  unique()
+xs <- c(starts, ends) |> sort() |> unique()
+index <- interval_index(items, start = starts, end = ends)
 
 active <- interval_index()
-snapshots <- flexseq()
 
-for (x in xvalues) {
-  overlapping <- pop_all_point(index, x)
-  active <- active |> 
+for(x in xs) {
+  new <- pop_all_point(index, x, bounds = "[)")
   
-  popped <- pop_all_key(index, key = x)      # batch events at this x
-  xvals <-  popped$remaining            # new sequence, minus popped
-  active <- peek_all_point(index, x)    # intervals overlapping x
-  snapshots <- push_back(snapshots, list(x = x, active = active))
 }
+
 ```
 
 ```{r sweep-line-viz, echo=FALSE, fig.cap="Sweep-line interval activity over persistent snapshots."}

@@ -125,6 +125,10 @@ get_graph_df <- function(t) {
 
 
 
+#' @importFrom graphics par plot.new polygon strheight strwidth
+#' @keywords internal
+NULL
+
 # Build a closed polygon path for a rounded rectangle centered at (cx, cy)
 # with width w, height h, and corner radius r (clamped to min(w, h) / 2).
 # Returns list(x, y) suitable for graphics::polygon().

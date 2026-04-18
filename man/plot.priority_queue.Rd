@@ -19,5 +19,5 @@ Visualizes the internal finger-tree structure backing the queue.
 }
 \examples{
 q <- priority_queue("a", "b", "c", priorities = c(2, 1, 3))
-plot(q)
+if(requireNamespace("igraph", quietly = TRUE)) plot(q)
 }

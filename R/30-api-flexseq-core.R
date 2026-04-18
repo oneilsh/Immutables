@@ -255,11 +255,11 @@ c.priority_queue <- function(..., recursive = FALSE) {
 #'
 #' @examples
 #' x <- flexseq("a", "b", "c")
-#' plot(x)
+#' if(requireNamespace("igraph", quietly = TRUE)) plot(x)
 #'
 #' \dontrun{
 #' # Label every node with its subtree size (leaves contribute 1).
-#' plot(as_flexseq(1:10), node_label = function(node) {
+#' plot_structure(as_flexseq(1:10), node_label = function(node) {
 #'   paste0(node$type, "\n.size=", node$measures$.size)
 #' })
 #'
@@ -268,7 +268,7 @@ c.priority_queue <- function(..., recursive = FALSE) {
 #' sum_monoid <- measure_monoid(`+`, 0, function(el) el)
 #' xs <- add_monoids(as_flexseq(c(3, 1, 4, 1, 5, 9, 2, 6)),
 #'                   list(sum = sum_monoid))
-#' plot(xs, node_label = function(node) {
+#' plot_structure(xs, node_label = function(node) {
 #'   if(node$type == "Element") sprintf("%g\nΣ=%g", node$element, node$measures$sum)
 #'   else sprintf("%s\nΣ=%g", node$type, node$measures$sum)
 #' })
@@ -277,7 +277,7 @@ c.priority_queue <- function(..., recursive = FALSE) {
 #' # priority seen in a subtree as list(has, priority). Unpack in the label.
 #' pq <- priority_queue("task-a", "task-b", "task-c",
 #'                      priorities = c(5, 1, 3))
-#' plot(pq, node_label = function(node) {
+#' plot_structure(pq, node_label = function(node) {
 #'   m <- node$measures$.pq_min
 #'   if(node$type == "Element") {
 #'     sprintf("%s\np=%g", node$element$value, node$element$priority)

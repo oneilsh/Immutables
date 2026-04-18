@@ -52,7 +52,7 @@ as.list.priority_queue <- function(x, ..., drop_meta = FALSE) {
 #' Visualizes the internal finger-tree structure backing the queue.
 #' @examples
 #' q <- priority_queue("a", "b", "c", priorities = c(2, 1, 3))
-#' plot(q)
+#' if(requireNamespace("igraph", quietly = TRUE)) plot(q)
 #' @export
 # Runtime: O(n) to build plot graph data.
 plot.priority_queue <- function(x, ...) {

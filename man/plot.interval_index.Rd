@@ -19,5 +19,5 @@ Visualizes the internal finger-tree structure used for interval queries.
 }
 \examples{
 ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
-plot(ix)
+if(requireNamespace("igraph", quietly = TRUE)) plot(ix)
 }

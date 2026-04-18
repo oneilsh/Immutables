@@ -19,7 +19,7 @@ as_flexseq.ordered_sequence <- function(x) {
 #' Visualizes the internal finger-tree structure used to store ordered entries.
 #' @examples
 #' x <- ordered_sequence("a", "b", "c", keys = c(2, 1, 3))
-#' plot(x)
+#' if(requireNamespace("igraph", quietly = TRUE)) plot(x)
 #' @export
 # Runtime: O(n) to build plot graph data.
 plot.ordered_sequence <- function(x, ...) {

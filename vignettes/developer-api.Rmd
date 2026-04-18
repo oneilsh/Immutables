@@ -92,7 +92,7 @@ The `plot_structure()` functions visualizes the internal tree layout. Passing a 
 `node_label` lets us render both leaf values and cached structural measures produced by monoids:
 
 ```{r fig.height=4, fig.width=10}
-plot(x, node_label = function(node) {
+plot_structure(x, node_label = function(node) {
   if(node$type == "Element") sprintf("%.1f\nΣ=%.1f", node$element, node$measures$sum)
   else sprintf("Σ=%.1f", node$measures$sum)
 })
