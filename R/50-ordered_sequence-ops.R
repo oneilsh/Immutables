@@ -499,3 +499,87 @@ count_between <- function(x, from_key, to_key, include_from = TRUE, include_to =
   end_excl <- .oms_range_end_exclusive_index(x, to_key, include_to)
   as.integer(max(0L, end_excl - start))
 }
+
+#' Merge Two Ordered Sequences
+#'
+#' Returns a new `ordered_sequence` containing every entry from both inputs,
+#' preserving key order. On duplicate keys, `x`'s entries precede `y`'s
+#' (left-biased FIFO).
+#'
+#' @method merge ordered_sequence
+#' @param x An `ordered_sequence`.
+#' @param y An `ordered_sequence`.
+#' @param ... Unused.
+#' @return A new `ordered_sequence` of size `length(x) + length(y)`.
+#' @details
+#' The merge runs in O(m + n) via a zipper-style traversal, with a fast path
+#' to O(log(min(m, n))) when the key ranges are disjoint (all of `x`'s keys
+#' `<=` all of `y`'s keys, or vice versa with a strict `<` to keep
+#' left-biased FIFO intact on equal boundary keys).
+#'
+#' Both sequences must share the same key type and the same monoid set;
+#' mismatches error rather than being silently harmonized. Merging an
+#' empty sequence with a non-empty sequence returns the non-empty one
+#' unchanged.
+#'
+#' Both inputs are left unmodified.
+#' @examples
+#' a <- ordered_sequence("a1", "a2", "a3", keys = c(1, 3, 5))
+#' b <- ordered_sequence("b1", "b2", "b3", keys = c(2, 3, 6))
+#' m <- merge(a, b)
+#' as.list(m)
+#' # At the tied key 3, "a2" precedes "b2".
+#' @export
+# Runtime: O(m + n); O(log(min(m, n))) on the disjoint fast path.
+merge.ordered_sequence <- function(x, y, ...) {
+  if(inherits(x, "interval_index") || inherits(y, "interval_index")) {
+    stop("Cannot merge `ordered_sequence` with `interval_index`. Merge like-typed structures only.")
+  }
+  if(!inherits(y, "ordered_sequence")) {
+    stop("Both arguments to `merge()` must be ordered_sequences.")
+  }
+
+  if(length(x) == 0L) return(y)
+  if(length(y) == 0L) return(x)
+
+  kx <- attr(x, "oms_key_type", exact = TRUE)
+  ky <- attr(y, "oms_key_type", exact = TRUE)
+  if(!identical(kx, ky)) {
+    stop("Cannot merge ordered_sequences with different key types.")
+  }
+  if(!identical(sort(names(attr(x, "monoids", exact = TRUE))),
+                sort(names(attr(y, "monoids", exact = TRUE))))) {
+    stop("Cannot merge ordered_sequences with different monoid sets.")
+  }
+
+  # Disjoint fast paths.
+  mx <- max_key(x); my_min <- min_key(y)
+  if(.oms_compare_key(mx, my_min, kx) <= 0L) {
+    return(.ord_wrap_like(x, concat_trees(x, y)))
+  }
+  ym <- max_key(y); x_min <- min_key(x)
+  if(.oms_compare_key(ym, x_min, kx) < 0L) {
+    return(.ord_wrap_like(x, concat_trees(y, x)))
+  }
+
+  # General O(m + n) zipper merge on pre-sorted entries.
+  xs <- .ft_to_list(x)
+  ys <- .ft_to_list(y)
+  nxs <- length(xs); nys <- length(ys)
+  merged <- vector("list", nxs + nys)
+  i <- 1L; j <- 1L; k <- 1L
+  while(i <= nxs && j <= nys) {
+    if(.oms_compare_key(xs[[i]]$key, ys[[j]]$key, kx) <= 0L) {
+      merged[[k]] <- xs[[i]]; i <- i + 1L
+    } else {
+      merged[[k]] <- ys[[j]]; j <- j + 1L
+    }
+    k <- k + 1L
+  }
+  while(i <= nxs) { merged[[k]] <- xs[[i]]; i <- i + 1L; k <- k + 1L }
+  while(j <= nys) { merged[[k]] <- ys[[j]]; j <- j + 1L; k <- k + 1L }
+
+  ms <- attr(x, "monoids", exact = TRUE)
+  out <- .oms_tree_from_ordered_entries(merged, ms)
+  .ord_wrap_like(x, out)
+}

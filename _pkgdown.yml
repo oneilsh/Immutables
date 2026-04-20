@@ -89,6 +89,7 @@ reference:
       - loop
       - "as_iterator.flexseq"
       - "c.flexseq"
+      - "merge.flexseq"
       - "[.flexseq"
       - "print.flexseq"
       - "length.flexseq"
@@ -117,6 +118,7 @@ reference:
       - max_priority
       - fapply
       - "as_iterator.priority_queue"
+      - "merge.priority_queue"
       - "[.priority_queue"
       - "[[.priority_queue"
       - "as.list.priority_queue"
@@ -146,6 +148,7 @@ reference:
       - min_key
       - max_key
       - fapply
+      - "merge.ordered_sequence"
       - "[.ordered_sequence"
       - "print.ordered_sequence"
       - "length.ordered_sequence"
@@ -180,6 +183,7 @@ reference:
       - min_endpoint
       - max_endpoint
       - fapply
+      - "merge.interval_index"
       - "[.interval_index"
       - "print.interval_index"
       - "length.interval_index"

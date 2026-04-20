@@ -98,10 +98,8 @@ upper_bound(seq, key = "d") |> str()
 When the query key falls between or outside existing keys, `lower_bound()` returns the next entry at or above, useful for nearest-match lookups. Both return `found = FALSE` when no keys satisfy the condition.
 
 ```{r}
-# query key below all keys — both point to the first entry
 lower_bound(seq, key = "a") |> str()
 
-# query key above all keys — no match
 upper_bound(seq, key = "g") |> str()
 ```
 
@@ -151,7 +149,7 @@ xs_named[1]            # positional read also works
 try(xs_named$a <- "!!")  # replacement blocked
 ```
 
-## Transforming
+## Transforming, aterating, merging
 
 `fapply()` maps a function over elements while preserving keys and order. The function receives `(value, key)`, or `(value, key, name)` if it accepts a third argument. Keys and names are passed in read-only, and the return value replaces the stored element at the associated key (and name if named).
 
@@ -160,12 +158,20 @@ xs_t <- ordered_sequence("alice", "bob", "carol", keys = c(3, 1, 2))
 fapply(xs_t, function(value, key) toupper(value))
 ```
 
-## Iterating
-
 `loop()` (re-exported from the **coro** package) walks the sequence in key-ascending order, yielding bare values. Keys are dropped from each yield; use `fapply()` if your callback needs the key alongside the value, or iterate over `as.list()` when you want a list keyed by name.
 
 ```{r}
 loop(for (v in xs_t) print(v))
 ```
 
-Plain `for (v in xs_t)` (without `loop()`) does *not* dispatch to the iteration protocol — it walks the underlying finger-tree storage and yields internal nodes rather than sequence elements. Always wrap with `loop()`.
+Plain `for (v in xs_t)` (without `loop()`) does *not* dispatch to the iteration protocol, it walks the underlying internal structure and yields those rather than sequence elements. Always wrap with `loop()`.
+
+`merge(x, y)` combines two ordered sequences into a new one in key order, preserving left-biased FIFO on duplicate keys (all of `x`'s entries at a tied key precede `y`'s). The general case runs in O(m + n); when the key ranges are disjoint it collapses to O(log(min(m, n))) via concat.
+
+```{r}
+a <- as_ordered_sequence(c("a1", "a2", "a3"), keys = c(1, 3, 5))
+b <- as_ordered_sequence(c("b1", "b2", "b3"), keys = c(2, 3, 6))
+merge(a, b)
+```
+
+Both sequences must share the same key type and monoid set; mismatches error. Both inputs are left unmodified.

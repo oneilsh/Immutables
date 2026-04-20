@@ -216,6 +216,33 @@ c.priority_queue <- function(..., recursive = FALSE) {
   stop("`c()` is not supported for priority_queue. Cast first with `as_flexseq()`.")
 }
 
+#' Merge Two Sequences
+#'
+#' Returns a new `flexseq` containing all elements of `x` followed by all
+#' elements of `y`. Thin wrapper over [c()] for API uniformity across the
+#' package's merge methods; `c(x, y)` and `merge(x, y)` are equivalent for
+#' `flexseq`.
+#'
+#' @method merge flexseq
+#' @param x A `flexseq`.
+#' @param y A `flexseq`.
+#' @param ... Unused.
+#' @return A new `flexseq`.
+#' @details
+#' For ordered types (`ordered_sequence`, `interval_index`), `merge()` performs
+#' a proper sorted merge respecting keys/intervals — see [merge.ordered_sequence()]
+#' and [merge.interval_index()]. For `priority_queue`, see
+#' [merge.priority_queue()].
+#' @examples
+#' x <- flexseq("a", "b")
+#' y <- flexseq("c", "d")
+#' merge(x, y)
+#' @export
+# Runtime: O(log(min(m, n))) via concat_trees.
+merge.flexseq <- function(x, y, ...) {
+  c(x, y)
+}
+
 #' Plot a Sequence Tree
 #'
 #' @method plot flexseq

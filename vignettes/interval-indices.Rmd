@@ -166,7 +166,7 @@ try(ix_named$a <- "!!")
 ```
 
 
-## Transforming
+## Transforming, iterating, merging
 
 `fapply()` maps a function over elements while preserving intervals and order. The function receives `(value, start, end)`, or `(value, start, end, name)` if it accepts a fourth argument. Endpoints and names are passed in read-only, and the return value replaces the stored element (similar to `lapply()` for named R lists).
 
@@ -174,12 +174,21 @@ try(ix_named$a <- "!!")
 fapply(ix, function(value, start, end) paste0(value, "[", start, ",", end, "]"))
 ```
 
-## Iterating
-
 `loop()` (re-exported from the **coro** package) walks the index in interval start-position order, yielding bare values. Interval endpoints are dropped from each yield; use `fapply()` if your callback needs `(value, start, end)`.
 
 ```{r}
 loop(for (v in ix) print(v))
 ```
 
-Plain `for (v in ix)` (without `loop()`) does *not* dispatch to the iteration protocol — it walks the underlying finger-tree storage and yields internal nodes rather than elements. Always wrap with `loop()`.
+Plain `for (v in ix)` (without `loop()`) does *not* dispatch to the iteration protocol, it walks the underlying structure and yields internal nodes rather than elements. Always wrap with `loop()`.
+
+`merge(x, y)` combines two interval indices into a new one in start-position order, preserving left-biased FIFO on tied starts. The general case runs in O(m + n); disjoint start ranges collapse to O(log(min(m, n))) via concat. The reserved `.ivx_min_end` / `.ivx_max_end` monoids recompute automatically, so interval-relation queries work immediately on the result.
+
+```{r}
+a <- as_interval_index(c("A1", "A2"), start = c(1, 5), end = c(4, 8))
+b <- as_interval_index(c("B1", "B2"), start = c(3, 7), end = c(6, 10))
+m <- merge(a, b)
+peek_all_point(m, 3)
+```
+
+Both indices must share the same endpoint type, the same `bounds` convention, and the same monoid set; mismatches error. Both inputs are left unmodified.
