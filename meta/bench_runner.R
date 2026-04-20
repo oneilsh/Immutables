@@ -368,7 +368,7 @@
     return(invisible(TRUE))
   }
   if(identical(scenario, "interval_index_bounds_override")) {
-    x <- as_interval_index(list("a", "b", "c"), start = c(1, 2, 3), end = c(2, 4, 5), bounds = "[)")
+    x <- as_interval_index(list("a", "b", "c"), start = c(1, 2, 3), end = c(2, 4, 5), default_query_bounds = "[)")
     p <- peek_all_point(x, 2, bounds = "[]")
     o <- peek_all_overlaps(x, 2, 3, bounds = "()")
     r <- pop_overlaps(x, 2, 3, bounds = "(]")
@@ -378,7 +378,7 @@
     return(invisible(TRUE))
   }
   if(identical(scenario, "interval_index_overlaps_all_stress")) {
-    x <- as_interval_index(list("a", "b", "c"), start = c(1, 2, 3), end = c(4, 5, 6), bounds = "[]")
+    x <- as_interval_index(list("a", "b", "c"), start = c(1, 2, 3), end = c(4, 5, 6), default_query_bounds = "[]")
     p <- peek_all_overlaps(x, 1, 5)
     r <- pop_all_overlaps(x, 1, 5)
     if(!inherits(p, "interval_index") || !is.list(r) || !inherits(r$elements, "interval_index") || !inherits(r$remaining, "interval_index")) {
@@ -883,7 +883,7 @@
   widths <- sample.int(width_max + 1L, n, replace = TRUE) - 1L
   ends <- pmin(starts + widths, coord_space)
   payload <- as.list(seq_len(n))
-  as_interval_index(payload, start = as.list(starts), end = as.list(ends), bounds = bounds)
+  as_interval_index(payload, start = as.list(starts), end = as.list(ends), default_query_bounds = bounds)
 }
 
 .bench_scenario_interval_index_insert <- function(n, inserts, coord_space, width_max) {

@@ -188,7 +188,10 @@
 #' @param x Elements to add.
 #' @param start Start endpoints with the same length as `x`.
 #' @param end End endpoints with the same length as `x`.
-#' @param bounds Boundary convention: one of `"[)"`, `"[]"`, `"()"`, `"(]"`.
+#' @param default_query_bounds Boundary convention used as the default for
+#'   query operations on this index: one of `"[)"`, `"[]"`, `"()"`, `"(]"`.
+#'   Per-query `peek_*` / `pop_*` calls may override via their own `bounds`
+#'   argument.
 #' @return An `interval_index`.
 #' @details
 #' Output is ordered by interval `start`.
@@ -207,8 +210,8 @@
 #' )
 #' ix_date
 #' @export
-as_interval_index <- function(x, start, end, bounds = "[)") {
-  .as_interval_index_build(x, start = start, end = end, bounds = bounds, monoids = NULL)
+as_interval_index <- function(x, start, end, default_query_bounds = "[)") {
+  .as_interval_index_build(x, start = start, end = end, bounds = default_query_bounds, monoids = NULL)
 }
 
 # Runtime: O(n log n) from sort + bulk build.
@@ -232,7 +235,10 @@ as_interval_index <- function(x, start, end, bounds = "[)") {
 #' @param ... Elements to add.
 #' @param start Start endpoints matching `...`.
 #' @param end End endpoints matching `...`.
-#' @param bounds Boundary convention: one of `"[)"`, `"[]"`, `"()"`, `"(]"`.
+#' @param default_query_bounds Boundary convention used as the default for
+#'   query operations on this index: one of `"[)"`, `"[]"`, `"()"`, `"(]"`.
+#'   Per-query `peek_*` / `pop_*` calls may override via their own `bounds`
+#'   argument.
 #' @return An `interval_index`.
 #' @details
 #' Empty construction is supported: `interval_index()` returns an empty index.
@@ -244,12 +250,12 @@ as_interval_index <- function(x, start, end, bounds = "[)") {
 #'
 #' interval_index()
 #' @export
-interval_index <- function(..., start, end, bounds = "[)") {
+interval_index <- function(..., start, end, default_query_bounds = "[)") {
   if(missing(start)) {
     start <- NULL
   }
   if(missing(end)) {
     end <- NULL
   }
-  .as_interval_index_build(list(...), start = start, end = end, bounds = bounds, monoids = NULL)
+  .as_interval_index_build(list(...), start = start, end = end, bounds = default_query_bounds, monoids = NULL)
 }

@@ -28,7 +28,7 @@ ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
 peek_point(ix, 2)
 
 # Boundary override at an endpoint
-edge <- interval_index("a", start = 1, end = 3, bounds = "[)")
+edge <- interval_index("a", start = 1, end = 3, default_query_bounds = "[)")
 peek_point(edge, 3)                # default "[)": no match at right endpoint
 peek_point(edge, 3, bounds = "[]") # closed bounds: endpoint matches
 }

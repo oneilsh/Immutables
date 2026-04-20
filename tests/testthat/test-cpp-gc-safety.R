@@ -42,7 +42,7 @@
     x_oms <- as_ordered_sequence(list("aa", "bb", "c", "ddd"), keys = c(2, 2, 1, 3))
     ms_oms <- attr(x_oms, "monoids", exact = TRUE)
     key_type_oms <- attr(x_oms, "oms_key_type", exact = TRUE)
-    x_ivx <- as_interval_index(list("a", "b", "c"), start = c(1, 2, 2), end = c(3, 2, 4), bounds = "[]")
+    x_ivx <- as_interval_index(list("a", "b", "c"), start = c(1, 2, 2), end = c(3, 2, 4), default_query_bounds = "[]")
     q_num <- priority_queue("a", "b", "c", priorities = c(2, 1, 3))
     q_date <- priority_queue(
       "d1", "d2", "d3",

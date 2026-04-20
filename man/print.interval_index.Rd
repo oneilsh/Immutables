@@ -38,7 +38,7 @@ ix3 <- add_monoids(
 )
 print(ix3, max_elements = 0, show_custom_monoids = TRUE)
 
-ix2 <- interval_index(1, 2, 3, start = c(2, 4, 6), end = c(3, 5, 8), bounds = "[]")
+ix2 <- interval_index(1, 2, 3, start = c(2, 4, 6), end = c(3, 5, 8), default_query_bounds = "[]")
 print(ix2, max_elements = 3)
 
 print(interval_index())

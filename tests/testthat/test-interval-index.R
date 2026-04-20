@@ -21,7 +21,7 @@ testthat::test_that("interval_index validates endpoints and bounds", {
   testthat::expect_s3_class(ok, "interval_index")
 
   testthat::expect_error(as_interval_index("x", start = 3, end = 2), "start")
-  testthat::expect_error(as_interval_index("x", start = 1, end = 2, bounds = "bad"), "bounds")
+  testthat::expect_error(as_interval_index("x", start = 1, end = 2, default_query_bounds = "bad"), "bounds")
 })
 
 testthat::test_that("min_endpoint/max_endpoint expose endpoint extrema", {
@@ -53,7 +53,7 @@ testthat::test_that("peek_point honors boundary modes", {
     list("A", "B", "C", "D"),
     start = c(1, 2, 3, 2),
     end = c(2, 3, 4, 2),
-    bounds = "[)"
+    default_query_bounds = "[)"
   )
 
   testthat::expect_equal(peek_point(ix, 2, bounds = "[)"), "B")
@@ -68,7 +68,7 @@ testthat::test_that("peek overlap/contain/within queries are deterministic", {
     list("A", "B", "C", "D"),
     start = c(1, 2, 3, 2),
     end = c(2, 3, 4, 2),
-    bounds = "[)"
+    default_query_bounds = "[)"
   )
 
   testthat::expect_equal(peek_overlaps(ix, 2, 3, bounds = "[)"), "B")
@@ -78,7 +78,7 @@ testthat::test_that("peek overlap/contain/within queries are deterministic", {
     list("outer", "inner", "tail", "point"),
     start = c(1, 2, 2, 3),
     end = c(5, 3, 5, 3),
-    bounds = "[]"
+    default_query_bounds = "[]"
   )
 
   testthat::expect_equal(peek_containing(jy, 2, 3), "outer")
@@ -97,7 +97,7 @@ testthat::test_that("relation query/pop contracts hold across all bounds tokens"
     list("A", "B", "C", "D"),
     start = c(1, 2, 3, 2),
     end = c(2, 3, 4, 2),
-    bounds = "[)"
+    default_query_bounds = "[)"
   )
   vals <- as.list(ix)
   entries <- .ivx_entries(ix)
@@ -195,7 +195,7 @@ testthat::test_that("pop helpers follow first/all contracts and preserve persist
     list("A", "B", "C", "D"),
     start = c(1, 2, 3, 2),
     end = c(2, 3, 4, 2),
-    bounds = "[]"
+    default_query_bounds = "[]"
   )
 
   first <- pop_overlaps(ix, 2, 3)
@@ -309,7 +309,7 @@ testthat::test_that("fapply for interval_index updates payload only and keeps in
     setNames(as.list(c("a", "b", "c")), c("ka", "kb", "kc")),
     start = c(3, 1, 2),
     end = c(4, 2, 3),
-    bounds = "[]"
+    default_query_bounds = "[]"
   )
   b0 <- lapply(.ivx_entries(ix), function(e) list(start = e$start, end = e$end))
 

@@ -342,7 +342,7 @@ for(n in ivx_sizes) {
   ends   <- all_ends[seq_len(n)]
   vals   <- all_vals[seq_len(n)]
 
-  ivx_setup  <- function() list(ix = as_interval_index(as.list(vals), start = starts, end = ends, bounds = "[]"))
+  ivx_setup  <- function() list(ix = as_interval_index(as.list(vals), start = starts, end = ends, default_query_bounds = "[]"))
   df_setup   <- function() list(df = data.frame(start = starts, end = ends, value = vals, stringsAsFactors = FALSE))
 
   rows <- bench_one(rows, "interval_index", "insert", n, repeats, ivx_setup,

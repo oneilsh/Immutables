@@ -20,8 +20,8 @@ testthat::test_that("public constructor wrappers align with as_* constructors", 
   testthat::expect_identical(count_key(os, 1), count_key(os_as, 1))
   testthat::expect_identical(count_key(os, 2), count_key(os_as, 2))
 
-  ix <- interval_index(one = "a", two = "b", start = c(2, 1), end = c(4, 3), bounds = "[]")
-  ix_as <- as_interval_index(list(one = "a", two = "b"), start = c(2, 1), end = c(4, 3), bounds = "[]")
+  ix <- interval_index(one = "a", two = "b", start = c(2, 1), end = c(4, 3), default_query_bounds = "[]")
+  ix_as <- as_interval_index(list(one = "a", two = "b"), start = c(2, 1), end = c(4, 3), default_query_bounds = "[]")
   testthat::expect_s3_class(ix, "interval_index")
   testthat::expect_equal(as.list(ix), as.list(ix_as))
   ix_entries <- lapply(.ivx_entries(ix), function(e) list(start = e$start, end = e$end))

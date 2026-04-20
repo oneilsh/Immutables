@@ -65,20 +65,30 @@ snapshot is itself a persistent value, the animation is just playback over
 that timeline — no re-running, no state to rewind.
 
 ```{r}
-items  <- letters[1:10]
-starts <- runif(10, min = 0, max = 10)
-ends   <- starts + runif(10, min = 2, max = 5)
+items  <- c("a", "b", "c", "d")
+starts <- c(1,    2,   3,   4)
+ends   <- c(3,    4,   5,   6)
 
 xs <- c(starts, ends) |> sort() |> unique()
-index <- interval_index(items, start = starts, end = ends)
+first_x <- xs[1]
+
+index <- as_interval_index(items, start = starts, end = ends)
 
 active <- interval_index()
+playback <- flexseq()
 
 for(x in xs) {
-  new <- pop_all_point(index, x, bounds = "[)")
-  
-}
+  new_popped <- pop_all_point(index, x)
+  active <- merge(active, new_popped$elements)
+  index <- new_popped$remaining
 
+  remove_popped <- pop_all_within(active, start = first_x, end = x, bounds = "()")
+  active <- remove_popped$remaining
+  
+  cat("Currently active 2: ", unlist(active), "\n")
+  
+  playback <- push_back(playback, active)
+}
 ```
 
 ```{r sweep-line-viz, echo=FALSE, fig.cap="Sweep-line interval activity over persistent snapshots."}

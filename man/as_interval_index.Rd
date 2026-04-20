@@ -4,7 +4,7 @@
 \alias{as_interval_index}
 \title{Build an Interval Index from \code{x}, \code{start}, and \code{end}}
 \usage{
-as_interval_index(x, start, end, bounds = "[)")
+as_interval_index(x, start, end, default_query_bounds = "[)")
 }
 \arguments{
 \item{x}{Elements to add.}
@@ -13,7 +13,10 @@ as_interval_index(x, start, end, bounds = "[)")
 
 \item{end}{End endpoints with the same length as \code{x}.}
 
-\item{bounds}{Boundary convention: one of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
+\item{default_query_bounds}{Boundary convention used as the default for
+query operations on this index: one of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.
+Per-query \verb{peek_*} / \verb{pop_*} calls may override via their own \code{bounds}
+argument.}
 }
 \value{
 An \code{interval_index}.

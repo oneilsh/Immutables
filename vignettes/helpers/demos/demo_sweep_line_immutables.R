@@ -218,7 +218,7 @@ sweep_line_core_immutables <- function(intervals, bounds = "[)", track_snapshots
   }
 
   items <- build_interval_items(intervals)
-  index <- as_interval_index(items, start = intervals$start, end = intervals$end, bounds = bounds)
+  index <- as_interval_index(items, start = intervals$start, end = intervals$end, default_query_bounds = bounds)
   events <- build_event_stream(intervals)
 
   sweep_points <- sort(unique(c(intervals$start, intervals$end)))

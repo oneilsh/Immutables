@@ -61,7 +61,7 @@ max_endpoint <- function(x) {
 #' peek_point(ix, 2)
 #'
 #' # Boundary override at an endpoint
-#' edge <- interval_index("a", start = 1, end = 3, bounds = "[)")
+#' edge <- interval_index("a", start = 1, end = 3, default_query_bounds = "[)")
 #' peek_point(edge, 3)                # default "[)": no match at right endpoint
 #' peek_point(edge, 3, bounds = "[]") # closed bounds: endpoint matches
 #' @export
@@ -156,7 +156,7 @@ pop_all_point <- function(x, point, bounds = NULL) {
 #' peek_overlaps(ix, 2, 3)
 #'
 #' # Boundary override at touching endpoints
-#' edge <- interval_index("a", start = 1, end = 3, bounds = "[)")
+#' edge <- interval_index("a", start = 1, end = 3, default_query_bounds = "[)")
 #' peek_overlaps(edge, 3, 4)                # default "[)": no endpoint overlap
 #' peek_overlaps(edge, 3, 4, bounds = "[]") # closed bounds: endpoint overlaps
 #' @export

@@ -35,7 +35,7 @@
 #' )
 #' print(ix3, max_elements = 0, show_custom_monoids = TRUE)
 #'
-#' ix2 <- interval_index(1, 2, 3, start = c(2, 4, 6), end = c(3, 5, 8), bounds = "[]")
+#' ix2 <- interval_index(1, 2, 3, start = c(2, 4, 6), end = c(3, 5, 8), default_query_bounds = "[]")
 #' print(ix2, max_elements = 3)
 #'
 #' print(interval_index())
@@ -62,7 +62,7 @@ print.interval_index <- function(x, max_elements = 4L, show_custom_monoids = FAL
     n,
     " element",
     if(n == 1L) "" else "s",
-    ", default bounds ",
+    ", default query bounds ",
     .ivx_bounds_phrase(bounds),
     ".\n",
     sep = ""
@@ -84,7 +84,7 @@ print.interval_index <- function(x, max_elements = 4L, show_custom_monoids = FAL
   for(i in preview$head) {
     entry <- .ft_get_elem_at(x, as.integer(i))
     nm <- .ft_get_name(entry)
-    iv <- paste0(substr(bounds, 1L, 1L), .ft_format_scalar(entry$start), ", ", .ft_format_scalar(entry$end), substr(bounds, 2L, 2L))
+    iv <- paste0(.ft_format_scalar(entry$start), " - ", .ft_format_scalar(entry$end))
     if(named && !is.null(nm)) {
       cat("$", nm, " (interval ", iv, ")\n", sep = "")
     } else {
@@ -100,7 +100,7 @@ print.interval_index <- function(x, max_elements = 4L, show_custom_monoids = FAL
   for(i in preview$tail) {
     entry <- .ft_get_elem_at(x, as.integer(i))
     nm <- .ft_get_name(entry)
-    iv <- paste0(substr(bounds, 1L, 1L), .ft_format_scalar(entry$start), ", ", .ft_format_scalar(entry$end), substr(bounds, 2L, 2L))
+    iv <- paste0(.ft_format_scalar(entry$start), " - ", .ft_format_scalar(entry$end))
     if(named && !is.null(nm)) {
       cat("$", nm, " (interval ", iv, ")\n", sep = "")
     } else {

@@ -271,7 +271,7 @@ run_segment_sweep_immutables <- function(segments, max_steps = 5000L, track_snap
     segment_items,
     start = as.numeric(segments$x1),
     end = as.numeric(segments$x2),
-    bounds = "[]"
+    default_query_bounds = "[]"
   )
 
   intersections <- compute_intersections(segments)

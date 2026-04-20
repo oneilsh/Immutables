@@ -395,7 +395,7 @@ testthat::test_that("backend parity: interval_index insert and queries", {
       list("a", "b", "c"),
       start = c(1, 2, 2),
       end = c(3, 2, 4),
-      bounds = "[]"
+      default_query_bounds = "[]"
     )
     y <- insert(x, "d", start = 2, end = 5)
 

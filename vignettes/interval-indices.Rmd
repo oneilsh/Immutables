@@ -91,10 +91,10 @@ All relation queries have symmetric `pop_*` and `pop_all_*` variants following t
 
 ## Boundary modes
 
-The `bounds` parameter controls endpoint inclusion: `"[)"` (default, left-closed right-open), `"[]"` (closed), `"()"` (open), or `"(]"` (left-open right-closed). It can be set at construction time as the index default, or overridden per query.
+Endpoint inclusion is controlled by two related parameters. The constructors take `default_query_bounds` — one of `"[)"` (default, left-closed right-open), `"[]"` (closed), `"()"` (open), or `"(]"` (left-open right-closed) — which sets the convention used when queries on this index don't specify their own. Query functions (`peek_*` / `pop_*`) then accept a `bounds` override for the duration of a single call.
 
 ```{r}
-edge <- interval_index("E", start = 1, end = 3, bounds = "[)")
+edge <- interval_index("E", start = 1, end = 3, default_query_bounds = "[)")
 
 # right endpoint excluded by default
 peek_point(edge, 3)
@@ -107,11 +107,11 @@ Note that bounds affect what counts as a valid interval: under `"[)"`, an interv
 
 ```{r}
 # [2, 2) contains nothing under half-open bounds
-pt_open <- interval_index("X", start = 2, end = 2, bounds = "[)")
+pt_open <- interval_index("X", start = 2, end = 2, default_query_bounds = "[)")
 peek_point(pt_open, point = 2)
 
 # [2, 2] contains exactly the point 2
-pt_closed <- interval_index("X", start = 2, end = 2, bounds = "[]")
+pt_closed <- interval_index("X", start = 2, end = 2, default_query_bounds = "[]")
 peek_point(pt_closed, point = 2)
 ```
 

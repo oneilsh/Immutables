@@ -201,8 +201,8 @@ testthat::test_that("merge.interval_index does not mutate sources", {
 })
 
 testthat::test_that("merge.interval_index errors on bounds mismatch", {
-  ah <- interval_index("x", start = 1, end = 2, bounds = "[)")
-  ac <- interval_index("y", start = 1, end = 2, bounds = "[]")
+  ah <- interval_index("x", start = 1, end = 2, default_query_bounds = "[)")
+  ac <- interval_index("y", start = 1, end = 2, default_query_bounds = "[]")
   testthat::expect_error(merge(ah, ac), "bounds")
 })
 
