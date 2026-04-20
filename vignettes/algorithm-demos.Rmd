@@ -21,12 +21,11 @@ source(file.path("helpers", "algorithm_demos_helpers.R"), local = TRUE)
 
 ## About these demos
 
-The examples below are not step-by-step
-tutorials: the underlying scripts are several hundred to a thousand lines each,
-but most of that code is event generation, plotting, and animation machinery.
-What matters here is the *shape* of each algorithm — which structure carries
-which role, and what persistence specifically buys when that role is filled by
-an immutable value instead of a mutable one.
+The demos below illustrate the types of algorithms supported by `immutables`,
+especially `interval_index()` as applied to problems in computational geometry.
+They are not intended as how-to guides; the underlying scripts are complex,
+largely AI generated, and 
+mostly composed of plotting and animation machinery.
 
 Each section gives a picture of the algorithm, names the structures it uses,
 and shows a pre-rendered animation of a run. The animations are not produced
@@ -52,33 +51,38 @@ R -q -f vignettes/helpers/render_algorithm_demo_assets.R --args demo=sweep_line
 
 ## Sweep line
 
-A vertical line moves left-to-right across a collection of 1D intervals. At
-each position, the algorithm asks: which intervals are active right now? This
-is the canonical setting for a sweep over ordered events.
+Many algorithms in computational geometry utilize a sweep line. In this strategy
+points belonging to geometric objects (e.g. line segments) are ordered along
+one dimension, and then iterated over. Each point triggers some action, for 
+example adding or removing the associated object from an "active" set and 
+performing some computation on that active set.
 
-The interval collection lives in an `interval_index`, which supports efficient
-coordinate-equality queries at either endpoint via the `match_at` parameter on
-the `*_point` functions. At each event `x`: `pop_all_point(index, x, match_at = "start")`
-removes and returns intervals newly arriving (those whose start coordinate equals
-`x`); they get merged into the active set. `pop_all_point(active, x, match_at = "end")`
-then retires intervals whose end coordinate equals `x`. Each updated active set is
-pushed into a `flexseq` snapshot timeline — because every snapshot is itself a
-persistent value, the animation is just playback over that timeline, with no
-re-running and no state to rewind.
+In this very basic example, a sweep line loops over all line segments in an 
+`interval_index()`. It collects all segments into an `index`, and loops over 
+distinct endpoint values, using the `match_at` parameter of `pop_all_point()` to
+identify segments to move from the index to an active set (those that start at the
+current sweep line position) and remove from the active set (those end at 
+the current sweepline position). 
+
+It also keeps a record by appending the active set to a `playback` flexseq. 
+Because these structures are immutable, we needn't worry about the active set
+changing as the algorithm proceeds.
 
 ```{r}
 items  <- c("a", "b", "c", "d")
 starts <- c( 1,   2,   3,   4)
 ends   <- c( 3,   5,   5,   6)
 
-xs <- c(starts, ends) |> sort() |> unique()
+# we could also use xs <- sort(unique(c(starts, ends)))
+xs <- as_ordered_sequence(c(starts, ends), keys = c(starts, ends))
 
 index <- as_interval_index(items, start = starts, end = ends)
 
 active <- interval_index()
 playback <- flexseq()
 
-for(x in xs) {
+# loop(for(...) {...}) is needed to loop over an immutables structure
+loop(for(x in xs) {
   arrived <- pop_all_point(index, x, match_at = "start")
   index <- arrived$remaining
   active <- merge(active, arrived$elements)
@@ -89,8 +93,10 @@ for(x in xs) {
   cat("At x =", x, "active:", paste(unlist(active), collapse = ", "), "\n")
 
   playback <- push_back(playback, active)
-}
+})
 ```
+Here's an illustration with more ranges, higlighting the sweep line position
+and active set:
 
 ```{r sweep-line-viz, echo=FALSE, fig.cap="Sweep-line interval activity over persistent snapshots."}
 knitr::include_graphics(algorithm_demo_asset("sweep_line"))
@@ -98,16 +104,14 @@ knitr::include_graphics(algorithm_demo_asset("sweep_line"))
 
 ## Segment sweep
 
-A 2D variant: the sweep line crosses a set of line segments, and the demo
-discovers pairwise intersections among segments that are simultaneously
-active. It's a simplified version of the Bentley–Ottmann setup.
+In this variant we discover pairwise intersections among line segments in the
+2-D plane.
 
-The event stream (segment start/end events, intersection events) is an
+The event stream (segment start/end events) is an
 `ordered_sequence` keyed by x. Active segment candidates are queried from an
-`interval_index` built on segment x-ranges. Interestingly, there is a *second*
-`ordered_sequence` that accumulates discovered intersections as the sweep
-progresses — a nice illustration that an ordered sequence is useful not only
-as an event queue but as a growing sorted log. A `flexseq` holds the snapshot
+`interval_index` built on segment x-ranges. A *second*
+`ordered_sequence` accumulates discovered intersections as the sweep
+progresses. A `flexseq` holds the snapshot
 timeline, so the animation can replay the sweep with the intersection list
 growing step by step.
 
@@ -117,18 +121,20 @@ knitr::include_graphics(algorithm_demo_asset("segment_sweep"))
 
 ## Convex hull
 
-Andrew's monotone chain: sort the points by `(x, y)`, sweep once to build the
-lower hull, sweep again for the upper hull, and concatenate. Each sweep is a
-stack algorithm — push the next point, then pop while the last three points
+Computing convex hull also utilizes a sweep line method, or rather a pair of sweeps,
+at least for [Andrew's monotone chain](https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain) method.
+After sorting the points by $x$ value, we sweep once to build the
+lower hull, and then sweep again for the upper hull. Each sweep uses a stack: 
+push the next point, then pop while the last three points
 turn the wrong way.
 
-This demo is notable because `flexseq` carries most of the work. The sorted
+Here `flexseq` carries most of the work. The sorted
 input lives in an `ordered_sequence`, but the lower and upper hull stacks are
 themselves `flexseq`s, and every push and pop returns a new one rather than
 mutating in place. A third `flexseq` stores the snapshot timeline, so after
-the run you have a complete record of every intermediate hull — which point
-was pushed, which points were popped because they violated convexity, and
-what the partial hull looked like at every step.
+the run we have a complete record of every intermediate hull for visualization, 
+including which point was pushed, which points were popped because they violated
+convexity, and what the partial hull looked like at every step.
 
 ```{r convex-hull-viz, echo=FALSE, fig.cap="Monotone-chain hull construction with persistent snapshots."}
 knitr::include_graphics(algorithm_demo_asset("convex_hull"))
@@ -136,19 +142,26 @@ knitr::include_graphics(algorithm_demo_asset("convex_hull"))
 
 ## Fortune frontier
 
-Fortune's sweep-line algorithm for Voronoi diagrams. A vertical sweep moves
-across a set of sites; each new site introduces a parabola to the "beach
-line" frontier, and the breakpoints between adjacent parabolas trace out the
-Voronoi edges as the sweep advances.
+Fortune's algorithm](https://en.wikipedia.org/wiki/Fortune%27s_algorithm) is
+a sweep-line method for efficiently computing Voronoi diagrams. A vertical
+sweep moves across the set of points; each new site introduces a parabola to
+the "beach line" frontier, and the breakpoints between adjacent parabolas
+trace out the Voronoi edges as the sweep advances.
 
-Three structures share the work. A `priority_queue` holds site events keyed
-by x; `pop_min()` produces the next event due. The active sites along the
-frontier live in an `ordered_sequence`, keyed by a composite score so they
-stay in frontier order. A `flexseq` accumulates the *breakpoint trail* — every
-Voronoi edge segment traced out so far — and a second `flexseq` holds the
-snapshot timeline. The trail is an especially good fit for persistence: it
-only ever grows, and the accumulated value from any past step is still
-available for comparison or partial rendering with no bookkeeping.
+Three structures share the work. A `priority_queue` holds events keyed by x
+and `pop_min()` produces the next event due. Two event types flow through it:
+*site events* (one per input point, known up front) and *circle events*
+(emerging dynamically whenever three adjacent arcs on the beach line begin
+converging on a circumcenter; processing one creates a Voronoi vertex and
+retires the middle arc). The active arcs along the frontier live in an
+`ordered_sequence`, keyed by a composite score so they stay in frontier
+order. A `flexseq` accumulates the *breakpoint trail*--every Voronoi edge
+segment traced out so far--and a second `flexseq` holds the snapshot timeline.
+The trail is an especially good fit for persistence: it only ever grows, and
+the accumulated value from any past step is still available for comparison
+or partial rendering with no bookkeeping. This animation samples intermediate
+sweep positions for smoothness; structurally, the sweep only needs to stop at
+site and circle events.
 
 ```{r fortune-viz, echo=FALSE, fig.cap="Fortune-style frontier sweep and revealed Voronoi structure."}
 knitr::include_graphics(algorithm_demo_asset("fortune_frontier"))
@@ -156,20 +169,29 @@ knitr::include_graphics(algorithm_demo_asset("fortune_frontier"))
 
 ## A* search
 
-Standard A* pathfinding on a generated maze, with the frontier ordered by
-`f = g + h`. This is the demo where persistence pays off in a way that goes
-beyond replay.
+[A* search](https://en.wikipedia.org/wiki/A*_search_algorithm) finds a
+shortest path from a start cell to a goal cell on a weighted graph by
+always expanding the frontier node with the smallest estimated total cost.
+Each node `n` carries two numbers: `g(n)`, the known cost to reach it from
+the start, and `h(n)`, a heuristic estimate of the remaining cost to the
+goal. The algorithm repeatedly pops the node with the smallest `f = g + h`
+from a frontier, marks it visited, and updates its neighbors with any 
+newly-cheaper path estimates. With an admissible heuristic this is guaranteed 
+to find an optimal path while typically exploring far fewer nodes than 
+Dijkstra's algorithm. 
 
-A `priority_queue` keyed by f-score holds the open set; `pop_min()` picks the
-next node to expand. A `closed` `ordered_sequence` keyed by node index answers
-the "already visited?" check via `peek_key()` in log time. A `flexseq`
-snapshot timeline captures open/closed/current state at every expansion step.
-Because the full search history is preserved as an immutable timeline, a
-post-hoc aggregate like *pressure* — how many times each cell appeared on the
-frontier over the course of the search — can be computed by folding over the
-snapshots after the fact, rather than sprinkling counters through the search
-loop. The large-maze animation exploits this to reveal the final path on top
-of a pressure heatmap once the search settles.
+This demo runs A* on a generated maze from a fixed start to a goal.
+Three structures share the work. A `priority_queue` keyed by f-score holds
+the frontier, and `pop_min()` picks the next node to expand. A separate
+`ordered_sequence` keyed by node index records which nodes have already
+been expanded, so the "already visited?" check is a `peek_key()`. 
+A `flexseq` accumulates a snapshot of the frontier, the set of
+expanded nodes, and the current node at every step. Since the full search
+history is preserved as an immutable timeline, a post-hoc aggregate like
+*pressure*, i.e. how many times each cell appeared on the frontier over
+the course of the search, can be computed by folding over the snapshots
+after the run. The animation exploits this to reveal the final path on
+top of a pressure heatmap once the search settles.
 
 ```{r astar-viz, echo=FALSE, fig.cap="A* replay with staged final-route reveal, then persistent pressure summary."}
 knitr::include_graphics(algorithm_demo_asset("astar_organic_history_large_fast"))
