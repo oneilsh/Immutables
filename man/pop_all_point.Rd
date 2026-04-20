@@ -2,22 +2,33 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{pop_all_point}
 \alias{pop_all_point}
-\title{Pop All Intervals Containing a Point}
+\title{Pop All Intervals Matching a Point}
 \usage{
-pop_all_point(x, point, bounds = NULL)
+pop_all_point(
+  x,
+  point,
+  bounds = NULL,
+  match_at = c("interval", "start", "end", "either")
+)
 }
 \arguments{
 \item{x}{An \code{interval_index}.}
 
 \item{point}{Query point.}
 
-\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
+\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.
+Ignored when \code{match_at} is not \code{"interval"}.}
+
+\item{match_at}{How the query point is matched against each entry. One of
+\code{"interval"} (default; containment under \code{bounds}), \code{"start"}, \code{"end"},
+or \code{"either"}. See \code{\link[=peek_point]{peek_point()}} for details. The \code{"end"} mode is the
+standard primitive for retiring active intervals in a sweep-line.}
 }
 \value{
 A list with \code{elements} and \code{remaining}, both \code{interval_index} objects.
 }
 \description{
-Pop All Intervals Containing a Point
+Pop All Intervals Matching a Point
 }
 \details{
 Use \code{\link[=as.list]{as.list()}} to convert \code{elements} to a standard R list.
@@ -26,4 +37,9 @@ Use \code{\link[=as.list]{as.list()}} to convert \code{elements} to a standard R
 ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
 out <- pop_all_point(ix, 2)
 as.list(out$elements)
+
+# Sweep-line retirement: remove everything ending at x = 3
+retired <- pop_all_point(ix, 3, match_at = "end")
+as.list(retired$elements)
+as.list(retired$remaining)
 }

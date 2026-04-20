@@ -2,23 +2,33 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{pop_point}
 \alias{pop_point}
-\title{Pop First Interval Containing a Point}
+\title{Pop First Interval Matching a Point}
 \usage{
-pop_point(x, point, bounds = NULL)
+pop_point(
+  x,
+  point,
+  bounds = NULL,
+  match_at = c("interval", "start", "end", "either")
+)
 }
 \arguments{
 \item{x}{An \code{interval_index}.}
 
 \item{point}{Query point.}
 
-\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
+\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.
+Ignored when \code{match_at} is not \code{"interval"}.}
+
+\item{match_at}{How the query point is matched against each entry. One of
+\code{"interval"} (default; containment under \code{bounds}), \code{"start"}, \code{"end"},
+or \code{"either"}. See \code{\link[=peek_point]{peek_point()}} for details.}
 }
 \value{
 A list with \code{element}, \code{start}, \code{end}, and \code{remaining}.
 On miss: \code{element}, \code{start}, and \code{end} are \code{NULL}.
 }
 \description{
-Pop First Interval Containing a Point
+Pop First Interval Matching a Point
 }
 \details{
 Removes the first match in canonical interval order. On miss, returns a

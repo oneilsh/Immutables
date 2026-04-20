@@ -2,22 +2,32 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{peek_all_point}
 \alias{peek_all_point}
-\title{Peek All Intervals Containing a Point}
+\title{Peek All Intervals Matching a Point}
 \usage{
-peek_all_point(x, point, bounds = NULL)
+peek_all_point(
+  x,
+  point,
+  bounds = NULL,
+  match_at = c("interval", "start", "end", "either")
+)
 }
 \arguments{
 \item{x}{An \code{interval_index}.}
 
 \item{point}{Query point.}
 
-\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
+\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.
+Ignored when \code{match_at} is not \code{"interval"}.}
+
+\item{match_at}{How the query point is matched against each entry. One of
+\code{"interval"} (default; containment under \code{bounds}), \code{"start"}, \code{"end"},
+or \code{"either"}. See \code{\link[=peek_point]{peek_point()}} for details.}
 }
 \value{
 An \code{interval_index} slice of all matches (possibly empty).
 }
 \description{
-Peek All Intervals Containing a Point
+Peek All Intervals Matching a Point
 }
 \details{
 The returned \code{interval_index} can be inspected with \code{\link[=as.list]{as.list()}}.
@@ -25,4 +35,7 @@ The returned \code{interval_index} can be inspected with \code{\link[=as.list]{a
 \examples{
 ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
 as.list(peek_all_point(ix, 2))
+
+# Entries ending at 3
+as.list(peek_all_point(ix, 3, match_at = "end"))
 }

@@ -62,6 +62,19 @@ res$end
 res$remaining
 ```
 
+By default the four `*_point()` functions test interval containment. The `match_at` parameter lets them match instead on coordinate equality at the entry's start, end, or either endpoint. This is useful for sweep-line patterns where you need to identify intervals arriving or retiring at a specific event point. `bounds` is ignored for these modes (coordinate equality is structural).
+
+```{r}
+# Entries whose start coordinate equals 2
+peek_all_point(ix, point = 2, match_at = "start")
+
+# Entries whose end coordinate equals 3 — the sweep-line retirement query
+peek_all_point(ix, point = 3, match_at = "end")
+
+# Either endpoint equals 3
+peek_all_point(ix, point = 3, match_at = "either")
+```
+
 Interval-vs-interval queries select overlaps of different kinds. First we'll build a new index to query:
 
 ```{r}

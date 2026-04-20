@@ -2,22 +2,34 @@
 % Please edit documentation in R/60-interval_index-query-api.R
 \name{peek_point}
 \alias{peek_point}
-\title{Peek First Interval Containing a Point}
+\title{Peek First Interval Matching a Point}
 \usage{
-peek_point(x, point, bounds = NULL)
+peek_point(
+  x,
+  point,
+  bounds = NULL,
+  match_at = c("interval", "start", "end", "either")
+)
 }
 \arguments{
 \item{x}{An \code{interval_index}.}
 
 \item{point}{Query point.}
 
-\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
+\item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.
+Ignored when \code{match_at} is not \code{"interval"}.}
+
+\item{match_at}{How the query point is matched against each entry. One of
+\code{"interval"} (default; entry interval contains \code{point}, under \code{bounds}),
+\code{"start"} (entry's start coordinate equals \code{point}), \code{"end"} (entry's end
+equals \code{point}), or \code{"either"} (start or end equals \code{point}). The three
+coordinate-equality modes are structural and ignore \code{bounds}.}
 }
 \value{
 The payload value from the first match, or \code{NULL} on no match.
 }
 \description{
-Peek First Interval Containing a Point
+Peek First Interval Matching a Point
 }
 \details{
 Returns the first match in canonical interval order. Use \code{\link[=peek_all_point]{peek_all_point()}} to
@@ -31,4 +43,8 @@ peek_point(ix, 2)
 edge <- interval_index("a", start = 1, end = 3, default_query_bounds = "[)")
 peek_point(edge, 3)                # default "[)": no match at right endpoint
 peek_point(edge, 3, bounds = "[]") # closed bounds: endpoint matches
+
+# Coordinate-equality modes (bounds irrelevant)
+peek_point(ix, 2, match_at = "start")  # entry starting at 2
+peek_point(ix, 3, match_at = "end")    # entry ending at 3
 }

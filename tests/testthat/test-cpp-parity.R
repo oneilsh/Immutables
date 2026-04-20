@@ -417,10 +417,22 @@ testthat::test_that("backend parity: interval_index insert and queries", {
       )
     })
 
+    match_at_tokens <- c("start", "end", "either")
+    match_at_matrix <- lapply(match_at_tokens, function(ma) {
+      list(
+        mode = ma,
+        peek = as.list(peek_all_point(y, 2, match_at = ma)),
+        peek_first = peek_point(y, 2, match_at = ma),
+        pop = as.list(pop_all_point(y, 2, match_at = ma)$elements),
+        pop_remaining = as.list(pop_all_point(y, 2, match_at = ma)$remaining)
+      )
+    })
+
     list(
       values = as.list(y),
       intervals = lapply(.ivx_entries(y), function(e) list(start = e$start, end = e$end)),
       bounds_matrix = bounds_matrix,
+      match_at_matrix = match_at_matrix,
       point_first = peek_point(y, 2),
       point = as.list(peek_all_point(y, 2)),
       overlaps_first = peek_overlaps(y, 2, 3),

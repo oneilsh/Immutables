@@ -56,21 +56,22 @@ A vertical line moves left-to-right across a collection of 1D intervals. At
 each position, the algorithm asks: which intervals are active right now? This
 is the canonical setting for a sweep over ordered events.
 
-Events (interval start and end points) live in an `ordered_sequence` keyed by
-x-coordinate; `pop_all_key()` pulls every event at the current sweep position
-as a single batch. A second `ordered_sequence` — keyed by interval end — is
-the evolving active set: start events insert, end events remove by key. Each
-updated active set is pushed into a `flexseq` snapshot timeline. Because every
-snapshot is itself a persistent value, the animation is just playback over
-that timeline — no re-running, no state to rewind.
+The interval collection lives in an `interval_index`, which supports efficient
+coordinate-equality queries at either endpoint via the `match_at` parameter on
+the `*_point` functions. At each event `x`: `pop_all_point(index, x, match_at = "start")`
+removes and returns intervals newly arriving (those whose start coordinate equals
+`x`); they get merged into the active set. `pop_all_point(active, x, match_at = "end")`
+then retires intervals whose end coordinate equals `x`. Each updated active set is
+pushed into a `flexseq` snapshot timeline — because every snapshot is itself a
+persistent value, the animation is just playback over that timeline, with no
+re-running and no state to rewind.
 
 ```{r}
 items  <- c("a", "b", "c", "d")
-starts <- c(1,    2,   3,   4)
-ends   <- c(3,    4,   5,   6)
+starts <- c( 1,   2,   3,   4)
+ends   <- c( 3,   5,   5,   6)
 
 xs <- c(starts, ends) |> sort() |> unique()
-first_x <- xs[1]
 
 index <- as_interval_index(items, start = starts, end = ends)
 
@@ -78,15 +79,15 @@ active <- interval_index()
 playback <- flexseq()
 
 for(x in xs) {
-  new_popped <- pop_all_point(index, x)
-  active <- merge(active, new_popped$elements)
-  index <- new_popped$remaining
+  arrived <- pop_all_point(index, x, match_at = "start")
+  index <- arrived$remaining
+  active <- merge(active, arrived$elements)
 
-  remove_popped <- pop_all_within(active, start = first_x, end = x, bounds = "()")
-  active <- remove_popped$remaining
-  
-  cat("Currently active 2: ", unlist(active), "\n")
-  
+  retired <- pop_all_point(active, x, match_at = "end")
+  active <- retired$remaining
+
+  cat("At x =", x, "active:", paste(unlist(active), collapse = ", "), "\n")
+
   playback <- push_back(playback, active)
 }
 ```

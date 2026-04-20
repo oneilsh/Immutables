@@ -9,11 +9,29 @@
 #   the subtree cannot contain matches and traversal can skip it.
 # - leaf_match(entry): exact entry-level relation test run on remaining candidates.
 
-# Point relation spec (entry interval contains query point).
-# **Inputs:** `qp` normalized point query list; scalar `bounds`; bounds-flag list `flags`.
+# Point relation spec.
+# Dispatches on `match_at`:
+#   "interval" -> entry interval contains query point (under `bounds`).
+#   "start"    -> entry$start == point (coordinate equality; bounds ignored).
+#   "end"      -> entry$end   == point (coordinate equality; bounds ignored).
+#   "either"   -> entry$start == point OR entry$end == point (bounds ignored).
+# **Inputs:** `qp` normalized point query list; scalar `bounds` (or NULL for
+#   non-"interval" modes); bounds-flag list `flags` (or NULL); scalar `match_at`.
 # **Outputs:** query-spec list(lower/lower_strict/upper/upper_strict/no_match_subtree/leaf_match).
-# **Used by:** peek_point(), pop_point().
-.ivx_spec_point <- function(qp, bounds, flags) {
+# **Used by:** peek_point(), peek_all_point(), pop_point(), pop_all_point().
+.ivx_spec_point <- function(qp, bounds, flags, match_at = "interval") {
+  switch(
+    match_at,
+    interval = .ivx_spec_point_interval(qp, bounds, flags),
+    start    = .ivx_spec_point_start(qp),
+    end      = .ivx_spec_point_end(qp),
+    either   = .ivx_spec_point_either(qp),
+    stop("Unknown match_at mode: ", match_at)
+  )
+}
+
+# `match_at = "interval"` — interval-containment query under `bounds`.
+.ivx_spec_point_interval <- function(qp, bounds, flags) {
   include_start <- isTRUE(flags$include_start)
   include_end <- isTRUE(flags$include_end)
 
@@ -43,6 +61,75 @@
       } else {
         cmp <= 0L
       }
+    },
+    leaf_match = leaf_match
+  )
+}
+
+# `match_at = "start"` — entries whose start coordinate equals point.
+# Tree is start-sorted, so windowing alone isolates matches.
+.ivx_spec_point_start <- function(qp) {
+  leaf_match <- function(e) {
+    isTRUE(.ivx_compare_scalar_fast(e$start, qp$value, endpoint_type = qp$endpoint_type) == 0L)
+  }
+  list(
+    lower = qp$value,
+    lower_strict = FALSE,
+    upper = qp$value,
+    upper_strict = FALSE,
+    no_match_subtree = function(node) FALSE,
+    leaf_match = leaf_match
+  )
+}
+
+# `match_at = "end"` — entries whose end coordinate equals point.
+# Tree is not end-sorted; skip start windowing, prune via min/max-end monoids.
+.ivx_spec_point_end <- function(qp) {
+  leaf_match <- function(e) {
+    isTRUE(.ivx_compare_scalar_fast(e$end, qp$value, endpoint_type = qp$endpoint_type) == 0L)
+  }
+  list(
+    lower = NULL,
+    lower_strict = FALSE,
+    upper = NULL,
+    upper_strict = FALSE,
+    no_match_subtree = function(node) {
+      mmax <- node_measure(node, ".ivx_max_end")
+      mmin <- node_measure(node, ".ivx_min_end")
+      if(!isTRUE(mmax$has) || !isTRUE(mmin$has)) {
+        return(TRUE)
+      }
+      if(.ivx_compare_scalar_fast(mmax$end, qp$value, endpoint_type = qp$endpoint_type) < 0L) {
+        return(TRUE)
+      }
+      if(.ivx_compare_scalar_fast(mmin$end, qp$value, endpoint_type = qp$endpoint_type) > 0L) {
+        return(TRUE)
+      }
+      FALSE
+    },
+    leaf_match = leaf_match
+  )
+}
+
+# `match_at = "either"` — entries whose start or end equals point.
+# Start > point rules out both start == point and end == point (since end >= start),
+# so we can upper-window by start. End pruning still uses max_end.
+.ivx_spec_point_either <- function(qp) {
+  leaf_match <- function(e) {
+    isTRUE(.ivx_compare_scalar_fast(e$start, qp$value, endpoint_type = qp$endpoint_type) == 0L) ||
+      isTRUE(.ivx_compare_scalar_fast(e$end, qp$value, endpoint_type = qp$endpoint_type) == 0L)
+  }
+  list(
+    lower = NULL,
+    lower_strict = FALSE,
+    upper = qp$value,
+    upper_strict = FALSE,
+    no_match_subtree = function(node) {
+      mmax <- node_measure(node, ".ivx_max_end")
+      if(!isTRUE(mmax$has)) {
+        return(TRUE)
+      }
+      .ivx_compare_scalar_fast(mmax$end, qp$value, endpoint_type = qp$endpoint_type) < 0L
     },
     leaf_match = leaf_match
   )

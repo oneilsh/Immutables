@@ -190,6 +190,117 @@ testthat::test_that("relation query/pop contracts hold across all bounds tokens"
   }
 })
 
+testthat::test_that("point queries honor match_at modes on a fixed fixture", {
+  ix <- as_interval_index(
+    list("A", "B", "C", "D"),
+    start = c(1, 2, 3, 2),
+    end = c(3, 4, 5, 2),
+    default_query_bounds = "[)"
+  )
+
+  # match_at = "start": entries whose start == point, FIFO on ties.
+  testthat::expect_equal(peek_point(ix, 2, match_at = "start"), "B")
+  testthat::expect_equal(as.list(peek_all_point(ix, 2, match_at = "start")), list("B", "D"))
+  testthat::expect_null(peek_point(ix, 99, match_at = "start"))
+
+  # match_at = "end": entries whose end == point.
+  testthat::expect_equal(peek_point(ix, 3, match_at = "end"), "A")
+  testthat::expect_equal(as.list(peek_all_point(ix, 3, match_at = "end")), list("A"))
+  testthat::expect_equal(as.list(peek_all_point(ix, 2, match_at = "end")), list("D"))
+  testthat::expect_identical(length(peek_all_point(ix, 99, match_at = "end")), 0L)
+
+  # match_at = "either": union of start/end matches, canonical order by start.
+  testthat::expect_equal(as.list(peek_all_point(ix, 2, match_at = "either")), list("B", "D"))
+  testthat::expect_equal(as.list(peek_all_point(ix, 3, match_at = "either")), list("A", "C"))
+
+  # pop_* shapes match peek semantics and preserve persistence.
+  before <- as.list(ix)
+  popped_end <- pop_all_point(ix, 3, match_at = "end")
+  testthat::expect_equal(as.list(popped_end$elements), list("A"))
+  testthat::expect_equal(as.list(popped_end$remaining), list("B", "D", "C"))
+  testthat::expect_equal(as.list(ix), before)
+
+  one_start <- pop_point(ix, 2, match_at = "start")
+  testthat::expect_equal(one_start$value, "B")
+  testthat::expect_equal(one_start$start, 2)
+  testthat::expect_equal(one_start$end, 4)
+  testthat::expect_equal(as.list(one_start$remaining), list("A", "D", "C"))
+  # (sanity: after popping first of B/D at start==2, D is the only remaining start==2 entry)
+})
+
+testthat::test_that("match_at = 'interval' preserves default containment semantics", {
+  ix <- as_interval_index(
+    list("A", "B", "C"),
+    start = c(1, 2, 4),
+    end = c(3, 2, 5),
+    default_query_bounds = "[)"
+  )
+  testthat::expect_equal(peek_point(ix, 2), peek_point(ix, 2, match_at = "interval"))
+  testthat::expect_equal(
+    as.list(peek_all_point(ix, 2)),
+    as.list(peek_all_point(ix, 2, match_at = "interval"))
+  )
+})
+
+testthat::test_that("coordinate-equality match_at modes ignore bounds", {
+  ix <- as_interval_index(
+    list("A", "B", "C"),
+    start = c(1, 2, 3),
+    end = c(3, 4, 5),
+    default_query_bounds = "[)"
+  )
+  # With match_at = "end", endpoint is a structural coordinate — bounds override
+  # has no effect.
+  expected <- as.list(peek_all_point(ix, 3, match_at = "end"))
+  for(bt in c("[)", "[]", "()", "(]")) {
+    testthat::expect_equal(
+      as.list(peek_all_point(ix, 3, match_at = "end", bounds = bt)),
+      expected
+    )
+  }
+})
+
+testthat::test_that("match_at on empty indices is non-throwing and empty", {
+  empty_ix <- interval_index()
+  for(m in c("start", "end", "either")) {
+    testthat::expect_null(peek_point(empty_ix, 1, match_at = m))
+    testthat::expect_identical(length(peek_all_point(empty_ix, 1, match_at = m)), 0L)
+    r <- pop_point(empty_ix, 1, match_at = m)
+    testthat::expect_null(r$value)
+    testthat::expect_null(r$start)
+    testthat::expect_null(r$end)
+    testthat::expect_identical(length(r$remaining), 0L)
+    ra <- pop_all_point(empty_ix, 1, match_at = m)
+    testthat::expect_identical(length(ra$elements), 0L)
+    testthat::expect_identical(length(ra$remaining), 0L)
+  }
+})
+
+testthat::test_that("match_at point queries match a pure-R oracle across bounds tokens", {
+  ix <- as_interval_index(
+    list("A", "B", "C", "D", "E"),
+    start = c(1, 2, 3, 2, 4),
+    end = c(3, 4, 5, 2, 4),
+    default_query_bounds = "[)"
+  )
+  vals <- as.list(ix)
+  entries <- .ivx_entries(ix)
+  starts <- as.numeric(unlist(lapply(entries, function(e) e$start), use.names = FALSE))
+  ends <- as.numeric(unlist(lapply(entries, function(e) e$end), use.names = FALSE))
+
+  for(p in c(1, 2, 3, 4, 5, 99)) {
+    # start mode
+    idx <- which(starts == p)
+    testthat::expect_equal(as.list(peek_all_point(ix, p, match_at = "start")), vals[idx])
+    # end mode
+    idx <- which(ends == p)
+    testthat::expect_equal(as.list(peek_all_point(ix, p, match_at = "end")), vals[idx])
+    # either mode — canonical start order
+    idx <- which(starts == p | ends == p)
+    testthat::expect_equal(as.list(peek_all_point(ix, p, match_at = "either")), vals[idx])
+  }
+})
+
 testthat::test_that("pop helpers follow first/all contracts and preserve persistence", {
   ix <- as_interval_index(
     list("A", "B", "C", "D"),
