@@ -15,24 +15,27 @@ permissions:
 jobs:
   pkgdown:
     runs-on: ubuntu-latest
-    container: rocker/r2u:latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install system dependencies
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends pandoc git
+      - uses: r-lib/actions/setup-pandoc@v2
 
-      - name: Install R dependencies
-        run: |
-          Rscript -e 'install.packages(c("Rcpp","lambda.r","knitr","rmarkdown","pkgdown","microbenchmark","ggplot2","scales","rstackdeque"), repos = "https://cloud.r-project.org")'
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgdown, local::.
+          dependencies: '"all"'
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = TRUE)
-        shell: Rscript {0}
         env:
           IMMUTABLES_RUN_BENCHMARK_VIGNETTE: "1"
+        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        shell: Rscript {0}
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
