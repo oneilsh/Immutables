@@ -1,0 +1,4 @@
+.navbar .dropdown-menu {
+  max-height: none;
+  overflow-y: visible;
+}
