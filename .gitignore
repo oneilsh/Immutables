@@ -14,4 +14,7 @@ docs/
 /Meta/
 ..Rcheck/
 .claude
+.codex
+.agents
+AGENTS.md
 *.tar.gz
