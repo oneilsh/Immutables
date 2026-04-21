@@ -537,3 +537,43 @@ testthat::test_that("interval_index casts down to flexseq explicitly", {
   testthat::expect_false(".ivx_min_end" %in% ms)
   testthat::expect_false(".oms_max_key" %in% ms)
 })
+
+testthat::test_that("interval_index rejects non-empty start when no elements are supplied", {
+  testthat::expect_error(
+    interval_index(start = c(1, 2)),
+    "`start` must be empty when no elements are supplied"
+  )
+  testthat::expect_error(
+    as_interval_index(list(), start = c(1, 2), end = c(2, 3)),
+    "`start` must be empty when no elements are supplied"
+  )
+})
+
+testthat::test_that("interval_index rejects non-empty end when no elements are supplied", {
+  testthat::expect_error(
+    interval_index(end = c(1, 2)),
+    "`end` must be empty when no elements are supplied"
+  )
+})
+
+testthat::test_that("interval_index requires start and end when elements are supplied", {
+  testthat::expect_error(
+    interval_index("a", end = c(2)),
+    "`start` is required when elements are supplied"
+  )
+  testthat::expect_error(
+    interval_index("a", start = c(1)),
+    "`end` is required when elements are supplied"
+  )
+})
+
+testthat::test_that("interval_index enforces start/end length matches elements length", {
+  testthat::expect_error(
+    interval_index("a", "b", start = c(1), end = c(2, 3)),
+    "`start` length must match elements length"
+  )
+  testthat::expect_error(
+    interval_index("a", "b", start = c(1, 2), end = c(3)),
+    "`end` length must match elements length"
+  )
+})

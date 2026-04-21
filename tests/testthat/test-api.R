@@ -227,3 +227,17 @@ testthat::test_that("insert_at enforces global named/unnamed consistency", {
   testthat::expect_identical(out[["k2"]], 8)
   testthat::expect_identical(length(out), 5L)
 })
+
+testthat::test_that("add_monoids() errors on an unsupported class with an informative message", {
+  testthat::expect_error(
+    add_monoids(list(), list()),
+    "No `add_monoids\\(\\)` method for class"
+  )
+})
+
+testthat::test_that("insert() errors on an unsupported class with an informative message", {
+  testthat::expect_error(
+    insert(list()),
+    "No `insert\\(\\)` method for class"
+  )
+})

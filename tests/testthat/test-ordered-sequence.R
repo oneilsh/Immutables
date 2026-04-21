@@ -436,3 +436,36 @@ testthat::test_that("ordered_sequence rejects mixed key domains and missing keys
     "`key` must be non-missing"
   )
 })
+
+testthat::test_that("ordered_sequence rejects non-empty keys when no elements are supplied", {
+  testthat::expect_error(
+    ordered_sequence(keys = c(1, 2)),
+    "`keys` must be empty when no elements are supplied"
+  )
+  testthat::expect_error(
+    as_ordered_sequence(list(), keys = c(1, 2)),
+    "`keys` must be empty when no elements are supplied"
+  )
+})
+
+testthat::test_that("ordered_sequence requires keys when elements are supplied", {
+  testthat::expect_error(
+    ordered_sequence("a", "b"),
+    "`keys` is required when elements are supplied"
+  )
+  testthat::expect_error(
+    as_ordered_sequence(list("a", "b"), keys = NULL),
+    "`keys` is required when elements are supplied"
+  )
+})
+
+testthat::test_that("ordered_sequence enforces keys length matches elements length", {
+  testthat::expect_error(
+    ordered_sequence("a", "b", keys = c(1)),
+    "`keys` length must match elements length"
+  )
+  testthat::expect_error(
+    as_ordered_sequence(list("a", "b"), keys = c(1, 2, 3)),
+    "`keys` length must match elements length"
+  )
+})

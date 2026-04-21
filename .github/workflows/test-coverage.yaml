@@ -38,7 +38,8 @@ jobs:
           cov <- covr::package_coverage(
             quiet = FALSE,
             clean = FALSE,
-            install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
+            install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package"),
+            code = 'Sys.setenv(IMMUTABLES_USE_CPP = "FALSE"); .out <- tempfile("immutables-r-backend"); dir.create(.out, recursive = TRUE); tools::testInstalledPackage("immutables", outDir = .out, types = "tests"); Sys.unsetenv("IMMUTABLES_USE_CPP")'
           )
           covr::to_cobertura(cov)
         shell: Rscript {0}
