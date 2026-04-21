@@ -37,20 +37,20 @@ str(x)
 #>   .. ..$ .size       :List of 3
 #>   .. .. ..$ f      :function (a, b)  
 #>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 18 5 37 18 37 5 5
-#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3555658> 
+#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33c65d0c8> 
 #>   .. .. ..$ i      : num 0
 #>   .. .. ..$ measure:function (el)  
 #>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 43 5 56 43 56 5 5
-#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3555658> 
+#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33c65d0c8> 
 #>   .. .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"
 #>   .. ..$ .named_count:List of 3
 #>   .. .. ..$ f      :function (a, b)  
 #>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 18 8 37 18 37 8 8
-#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3a4b470> 
+#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33cc6cbb8> 
 #>   .. .. ..$ i      : int 0
 #>   .. .. ..$ measure:function (el)  
 #>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 44 12 3 44 3 8 12
-#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3a4b470> 
+#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33cc6cbb8> 
 #>   .. .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"
 #>   ..- attr(*, "measures")=List of 2
 #>   .. ..$ .size       : num 1
@@ -62,20 +62,20 @@ str(x)
 #>   .. ..$ .size       :List of 3
 #>   .. .. ..$ f      :function (a, b)  
 #>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 18 5 37 18 37 5 5
-#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3555658> 
+#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33c65d0c8> 
 #>   .. .. ..$ i      : num 0
 #>   .. .. ..$ measure:function (el)  
 #>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 43 5 56 43 56 5 5
-#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3555658> 
+#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33c65d0c8> 
 #>   .. .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"
 #>   .. ..$ .named_count:List of 3
 #>   .. .. ..$ f      :function (a, b)  
 #>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 18 8 37 18 37 8 8
-#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3a4b470> 
+#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33cc6cbb8> 
 #>   .. .. ..$ i      : int 0
 #>   .. .. ..$ measure:function (el)  
 #>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 44 12 3 44 3 8 12
-#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3a4b470> 
+#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33cc6cbb8> 
 #>   .. .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"
 #>   ..- attr(*, "measures")=List of 2
 #>   .. ..$ .size       : num 0
@@ -89,20 +89,20 @@ str(x)
 #>   .. ..$ .size       :List of 3
 #>   .. .. ..$ f      :function (a, b)  
 #>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 18 5 37 18 37 5 5
-#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3555658> 
+#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33c65d0c8> 
 #>   .. .. ..$ i      : num 0
 #>   .. .. ..$ measure:function (el)  
 #>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 43 5 56 43 56 5 5
-#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3555658> 
+#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33c65d0c8> 
 #>   .. .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"
 #>   .. ..$ .named_count:List of 3
 #>   .. .. ..$ f      :function (a, b)  
 #>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 18 8 37 18 37 8 8
-#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3a4b470> 
+#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33cc6cbb8> 
 #>   .. .. ..$ i      : int 0
 #>   .. .. ..$ measure:function (el)  
 #>   .. .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 44 12 3 44 3 8 12
-#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3a4b470> 
+#>   .. .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33cc6cbb8> 
 #>   .. .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"
 #>   ..- attr(*, "measures")=List of 2
 #>   .. ..$ .size       : num 1
@@ -111,20 +111,20 @@ str(x)
 #>   ..$ .size       :List of 3
 #>   .. ..$ f      :function (a, b)  
 #>   .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 18 5 37 18 37 5 5
-#>   .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3555658> 
+#>   .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33c65d0c8> 
 #>   .. ..$ i      : num 0
 #>   .. ..$ measure:function (el)  
 #>   .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 5 43 5 56 43 56 5 5
-#>   .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3555658> 
+#>   .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33c65d0c8> 
 #>   .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"
 #>   ..$ .named_count:List of 3
 #>   .. ..$ f      :function (a, b)  
 #>   .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 18 8 37 18 37 8 8
-#>   .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3a4b470> 
+#>   .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33cc6cbb8> 
 #>   .. ..$ i      : int 0
 #>   .. ..$ measure:function (el)  
 #>   .. .. ..- attr(*, "srcref")= 'srcref' int [1:8] 8 44 12 3 44 3 8 12
-#>   .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x5650f3a4b470> 
+#>   .. .. .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' <environment: 0x55e33cc6cbb8> 
 #>   .. ..- attr(*, "class")= chr [1:3] "measure_monoid" "MeasureMonoid" "list"
 #>  - attr(*, "measures")=List of 2
 #>   ..$ .size       : num 2
