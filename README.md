@@ -1,10 +1,10 @@
-# immutables <img src="man/figures/logo.png" align="right" height="139" alt="immutables logo" />
+# immutables
 
-[![Lifecycle: experimental](https://lifecycle.r-lib.org/reference/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- Uncomment after CRAN submission:
 [![CRAN status](https://www.r-pkg.org/badges/version/immutables)](https://CRAN.R-project.org/package=immutables)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/immutables)](https://CRAN.R-project.org/package=immutables)
 -->
+[![Lifecycle: experimental](https://lifecycle.r-lib.org/reference/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/oneilsh/immutables/branch/main/graph/badge.svg)](https://app.codecov.io/gh/oneilsh/immutables)
 [![pkgdown](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml)
@@ -13,6 +13,8 @@
 The `immutables` R package implements several immutable, or persistent, data
 structures: operations return modified copies while remaining fast and true
 to R's side-effect-free functional nature.
+
+<img src="man/figures/logo.png" align="right" height="139" alt="immutables logo" />
 
 - `flexseq`s provide list-like operations including indexed and named element
    access, push/pop/peek from either end for double-ended queue behavior, 
