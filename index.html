@@ -72,14 +72,14 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.png" class="logo" alt=""><h1 id="immutables-">immutables <a class="anchor" aria-label="anchor" href="#immutables-"></a>
+<img src="logo.png" class="logo" alt=""><h1 id="immutables-">Immutables <a class="anchor" aria-label="anchor" href="#immutables-"></a>
 </h1>
 </div>
 <!-- Uncomment after CRAN submission:
 [![CRAN status](https://www.r-pkg.org/badges/version/immutables)](https://CRAN.R-project.org/package=immutables)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/immutables)](https://CRAN.R-project.org/package=immutables)
 -->
-<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://lifecycle.r-lib.org/reference/figures/lifecycle-experimental.svg" alt="Lifecycle: experimental"></a> <a href="https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://app.codecov.io/gh/oneilsh/immutables" class="external-link"><img src="https://codecov.io/gh/oneilsh/immutables/branch/main/graph/badge.svg" alt="Codecov test coverage"></a> <a href="https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a> <a href="https://oneilsh.github.io/immutables/"><img src="https://img.shields.io/badge/docs-pkgdown-blue" alt="docs"></a></p>
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://lifecycle.r-lib.org/reference/figures/lifecycle-experimental.svg" alt="Lifecycle: experimental"></a> <a href="https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://app.codecov.io/gh/oneilsh/immutables" class="external-link"><img src="https://codecov.io/gh/oneilsh/immutables/branch/main/graph/badge.svg" alt="Codecov test coverage"></a> <a href="https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a> <a href="https://oneilsh.github.io/immutables/"><img src="https://img.shields.io/badge/docs-pkgdown-blue" alt="docs"></a> <a href="https://doi.org/10.5281/zenodo.19686096" class="external-link"><img src="https://zenodo.org/badge/154557443.svg" alt="DOI"></a></p>
 <p>The <code>immutables</code> R package implements several immutable, or persistent, data structures: operations return modified copies while remaining fast and true to R’s side-effect-free functional nature.</p>
 <ul>
 <li>
@@ -91,7 +91,7 @@
 <li>
 <code>interval_indexes</code> store items associated with interval ranges, supporting point as well as interval overlaps/contains/within queries. Items are kept in start-order enabling ordered sequence operations and sweep-line algorithms.</li>
 </ul>
-<p>Backed by monoid-annotated 2-3 fingertrees as described by <a href="https://doi.org/10.1017/S0956796805005769" class="external-link">Hinze and Paterson</a>, most operations are constant time, amortized constant time, or <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(\log(n))</annotation></semantics></math>. Core functions are implemented in C++ (via Rcpp) for speed, with matching pure-R reference implementations using <code>lambda.r</code> syntax to match the paper.</p>
+<p>Backed by monoid-annotated 2-3 fingertrees as described by <a href="https://doi.org/10.1017/S0956796805005769" class="external-link">Hinze and Paterson</a>, most operations are constant time, amortized constant time, or <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>log</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math>. Core functions are implemented in C++ (via Rcpp) for speed, with matching pure-R reference implementations using <code>lambda.r</code> syntax to match the paper.</p>
 <p>Finally, the developer API supports the addition of custom structures via combinations of monoids and measures; see vignettes for details.</p>
 <ul>
 <li>Hinze, R. and Paterson, R. (2006), <em>Finger trees: a simple general-purpose data structure</em>.</li>
