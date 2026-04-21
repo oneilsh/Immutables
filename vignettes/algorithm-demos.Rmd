@@ -197,23 +197,33 @@ top of a pressure heatmap once the search settles.
 knitr::include_graphics(algorithm_demo_asset("astar_organic_history_large_fast"))
 ```
 
-## Wave clear
+## A* with heuristic trail
 
-A two-stage simulation over a weighted grid. Cells light up in Dijkstra-
-distance order from a source, and a lagged "clear-wave" follows behind,
-deactivating cells after a delay. The visible result is a travelling band.
+A variation on the A* search above, run over a procedurally-generated
+weighted terrain grid and augmented with a lagged retirement "clear wave"
+that fades expanded cells out of the visualization instead of leaving them
+permanently marked. The search itself is standard weighted A*; the clear
+wave is visualization machinery with structural significance.
 
-Two `priority_queue`s drive the scheduling — one for add-events, one for
-clear-events — both keyed by time; pop-by-priority-band retrieves everything
-due at the current tick. The currently-active cell set lives in an
-`ordered_sequence` keyed by cell index, with `insert()` on activation and
-`pop_key()` on clear. A `flexseq` records the snapshot timeline. Because the
-full temporal record is preserved, aggregate dynamics (peak concurrent active
-count, first-arrival time at a goal cell) can be read off the history without
-re-simulating.
+Five roles share the work. The A* frontier is still a `priority_queue`
+keyed by `f = g + h`, and the expanded set is still an `ordered_sequence`
+keyed by cell index. Running alongside them: a second `priority_queue`
+holds scheduled retirement events, and a second `ordered_sequence` tracks
+the currently-visible trail. A `flexseq` accumulates snapshots of all of
+these at every expansion step.
 
-```{r wave-clear-viz, echo=FALSE, fig.cap="Wave and clear-wave progression over persistent state snapshots."}
-knitr::include_graphics(algorithm_demo_asset("wave_clear"))
+What makes the trail interesting is how the retirement lag is computed.
+Each expanded cell `c` is scheduled to clear at
+`step_expand + lag_base + lag_warp * h(c)`: cells far from the goal (high
+`h`) linger in the trail longer, while cells close to the goal clear
+quickly. The tail is therefore thick in high-heuristic regions the
+search recently moved through, and thin near the goal where the search
+is narrowing in. Each iteration of the loop pops matured retirements
+from the clear queue before snapshotting, so the frame drawn at every
+step reflects exactly what should currently be visible.
+
+```{r astar-trail-viz, echo=FALSE, fig.cap="A* expansion with a heuristic-warped clear wave trailing behind."}
+knitr::include_graphics(algorithm_demo_asset("astar_trail"))
 ```
 
 ## Source and rendering
@@ -225,7 +235,7 @@ The full implementations live under `vignettes/helpers/demos/`:
 - `demo_convex_hull_immutables.R`
 - `demo_fortune_frontier_immutables.R`
 - `demo_astar_immutables.R`
-- `demo_wave_clear_immutables.R`
+- `demo_astar_trail_immutables.R`
 
 The vignette-side helpers (asset paths, render presets, the A* preset used by
 the large-maze animation) are in

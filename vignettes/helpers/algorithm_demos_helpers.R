@@ -7,7 +7,7 @@ algorithm_demo_asset_files <- c(
   convex_hull = "03-convex-hull.gif",
   fortune_frontier = "04-fortune-frontier.gif",
   astar_organic_history_large_fast = "05-astar-organic-history-large-fast.gif",
-  wave_clear = "06-wave-clear.gif"
+  astar_trail = "06-astar-trail.gif"
 )
 
 algorithm_demo_asset <- function(name) {
@@ -21,7 +21,7 @@ algorithm_demo_sources <- list(
   convex_hull = "vignettes/helpers/demos/demo_convex_hull_immutables.R",
   fortune_frontier = "vignettes/helpers/demos/demo_fortune_frontier_immutables.R",
   astar = "vignettes/helpers/demos/demo_astar_immutables.R",
-  wave_clear = "vignettes/helpers/demos/demo_wave_clear_immutables.R",
+  astar_trail = "vignettes/helpers/demos/demo_astar_trail_immutables.R",
   asset_renderer = "vignettes/helpers/render_algorithm_demo_assets.R"
 )
 
@@ -122,19 +122,21 @@ algorithm_demo_render_presets <- list(
       )
     )
   ),
-  wave_clear = list(
-    source = "wave_clear",
-    asset_key = "wave_clear",
-    runner = "run_wave_clear_demo",
+  astar_trail = list(
+    source = "astar_trail",
+    asset_key = "astar_trail",
+    runner = "run_astar_trail_demo",
     args = list(
       complexity = "standard",
+      lag_base = 3,
+      lag_warp = 0.4,
       visualize = TRUE,
       animate = TRUE,
-      fps = 10,
-      max_animation_frames = 210L,
-      hold_final_frames = algorithm_demo_pause_frames(10),
-      loop = TRUE,
-      time_compute = FALSE
+      fps = 12,
+      max_animation_frames = 140L,
+      hold_final_frames = algorithm_demo_pause_frames(12),
+      reveal_hold_frames = algorithm_demo_pause_frames(12),
+      loop = TRUE
     )
   )
 )
@@ -154,10 +156,6 @@ run_convex_hull_minimal <- function(complexity = "standard") {
 
 run_fortune_frontier_minimal <- function(complexity = "standard") {
   run_fortune_frontier_paper_core(complexity = complexity)
-}
-
-run_wave_clear_minimal <- function(complexity = "standard") {
-  run_wave_clear_paper_core(complexity = complexity)
 }
 
 run_astar_from_preset <- function(
