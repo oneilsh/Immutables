@@ -21,3 +21,4 @@
 ^vignettes/articles$
 ^Makefile$
 ^codecov\.yml$
+^pkgdown$
