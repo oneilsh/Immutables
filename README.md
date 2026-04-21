@@ -1,4 +1,4 @@
-# immutables <img src="man/figures/logo.png" align="right" height="139" alt="" />
+# Immutables <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
 <!-- Uncomment after CRAN submission:
 [![CRAN status](https://www.r-pkg.org/badges/version/immutables)](https://CRAN.R-project.org/package=immutables)
