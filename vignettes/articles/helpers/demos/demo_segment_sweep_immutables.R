@@ -403,13 +403,13 @@ plot_segment_sweep <- function(
         data = seg_inactive,
         ggplot2::aes(x = x1, y = y1, xend = x2, yend = y2),
         color = "#BEB8AB",
-        linewidth = 0.85,
+        linewidth = 1.3,
         alpha = 0.8
       ) +
       ggplot2::geom_segment(
         data = seg_active,
         ggplot2::aes(x = x1, y = y1, xend = x2, yend = y2, color = id),
-        linewidth = 1.5,
+        linewidth = 2.3,
         alpha = 0.95,
         show.legend = FALSE
       ) +
@@ -417,41 +417,39 @@ plot_segment_sweep <- function(
         data = discovered_df,
         ggplot2::aes(x = x, y = y),
         shape = 21,
-        stroke = 0.28,
+        stroke = 0.42,
         fill = "#D1495B",
         color = "#111111",
-        size = 2.7,
+        size = 4.1,
         alpha = 0.95
       ) +
       ggplot2::geom_point(
         data = new_intersections_df,
         ggplot2::aes(x = x, y = y),
         shape = 21,
-        stroke = 0.9,
+        stroke = 1.37,
         fill = "#FFE066",
         color = "#111111",
-        size = 4.65
+        size = 7.1
       ) +
-      ggplot2::geom_vline(xintercept = shot$x, color = "#111111", linewidth = 0.8, linetype = "22") +
+      ggplot2::geom_vline(xintercept = shot$x, color = "#111111", linewidth = 1.2, linetype = "22") +
       ggplot2::scale_color_manual(values = seg_palette, limits = seg_ids) +
       ggplot2::coord_cartesian(xlim = c(0, max(seg$x2) + 4), ylim = c(0, max(c(seg$y1, seg$y2)) + 4), expand = FALSE) +
       ggplot2::labs(
         title = "Persistent Segment Sweep",
         subtitle = sprintf(
-          "x=%.2f | active=%d | intersections=%d | +%d starts / -%d ends",
+          "x=%.2f | active=%d | intersections=%d",
           shot$x,
           nrow(seg_active),
-          nrow(discovered_df),
-          n_start,
-          n_end
+          nrow(discovered_df)
         ),
         x = "x",
         y = "y"
       ) +
-      ggplot2::theme_minimal(base_size = 14) +
+      ggplot2::theme_minimal(base_size = 21) +
       ggplot2::theme(
         panel.grid.minor = ggplot2::element_blank(),
-        panel.grid.major = ggplot2::element_line(color = "#E7E2D7", linewidth = 0.25)
+        panel.grid.major = ggplot2::element_line(color = "#E7E2D7", linewidth = 0.4)
       )
   }
 
@@ -473,8 +471,8 @@ plot_segment_sweep <- function(
       ggplot2::ggsave(
         filename = frame_paths[[i]],
         plot = p,
-        width = 1160 / 96,
-        height = 520 / 96,
+        width = 1760 / 96,
+        height = 790 / 96,
         dpi = 96,
         units = "in"
       )
@@ -487,8 +485,8 @@ plot_segment_sweep <- function(
     gifski::gifski(
       png_files = frame_paths,
       gif_file = outfile,
-      width = 1160,
-      height = 520,
+      width = 1760,
+      height = 790,
       delay = 1 / fps,
       loop = isTRUE(loop),
       progress = FALSE

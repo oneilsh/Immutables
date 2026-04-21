@@ -1,10 +1,6 @@
 ---
-title: "Algorithm Demos"
+title: "Gallery"
 output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Algorithm Demos}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
@@ -30,21 +26,21 @@ mostly composed of plotting and animation machinery.
 Each section gives a picture of the algorithm, names the structures it uses,
 and shows a pre-rendered animation of a run. The animations are not produced
 during vignette build; they are GIFs under
-`vignettes/assets/algorithm-demos/`. Source paths for every demo and the asset
-renderer are collected in a single section at the end.
+`vignettes/articles/assets/algorithm-demos/`. Source paths for every demo and
+the asset renderer are collected in a single section at the end.
 
 <details>
 <summary>Maintainer note: re-render one demo asset</summary>
 
 ```r
-source("vignettes/helpers/render_algorithm_demo_assets.R")
+source("vignettes/articles/helpers/render_algorithm_demo_assets.R")
 render_algorithm_demo_assets(demos = "sweep_line")
 ```
 
 Or from the shell:
 
 ```sh
-R -q -f vignettes/helpers/render_algorithm_demo_assets.R --args demo=sweep_line
+R -q -f vignettes/articles/helpers/render_algorithm_demo_assets.R --args demo=sweep_line
 ```
 
 </details>
@@ -98,7 +94,7 @@ loop(for(x in xs) {
 Here's an illustration with more ranges, higlighting the sweep line position
 and active set:
 
-```{r sweep-line-viz, echo=FALSE, fig.cap="Sweep-line interval activity over persistent snapshots."}
+```{r sweep-line-viz, echo=FALSE}
 knitr::include_graphics(algorithm_demo_asset("sweep_line"))
 ```
 
@@ -115,7 +111,7 @@ progresses. A `flexseq` holds the snapshot
 timeline, so the animation can replay the sweep with the intersection list
 growing step by step.
 
-```{r segment-sweep-viz, echo=FALSE, fig.cap="Segment sweep with active-set intersection discovery."}
+```{r segment-sweep-viz, echo=FALSE}
 knitr::include_graphics(algorithm_demo_asset("segment_sweep"))
 ```
 
@@ -136,7 +132,7 @@ the run we have a complete record of every intermediate hull for visualization,
 including which point was pushed, which points were popped because they violated
 convexity, and what the partial hull looked like at every step.
 
-```{r convex-hull-viz, echo=FALSE, fig.cap="Monotone-chain hull construction with persistent snapshots."}
+```{r convex-hull-viz, echo=FALSE}
 knitr::include_graphics(algorithm_demo_asset("convex_hull"))
 ```
 
@@ -163,7 +159,7 @@ or partial rendering with no bookkeeping. This animation samples intermediate
 sweep positions for smoothness; structurally, the sweep only needs to stop at
 site and circle events.
 
-```{r fortune-viz, echo=FALSE, fig.cap="Fortune-style frontier sweep and revealed Voronoi structure."}
+```{r fortune-viz, echo=FALSE}
 knitr::include_graphics(algorithm_demo_asset("fortune_frontier"))
 ```
 
@@ -194,7 +190,7 @@ see during playback, made explicit as a persistent overlay. The animation
 reveals the final path on top of this activity map once the search
 settles.
 
-```{r astar-viz, echo=FALSE, fig.cap="A* replay with staged final-route reveal, then persistent cell-activity overlay."}
+```{r astar-viz, echo=FALSE}
 knitr::include_graphics(algorithm_demo_asset("astar_organic_history_large_fast"))
 ```
 
@@ -223,23 +219,25 @@ is narrowing in. Each iteration of the loop pops matured retirements
 from the clear queue before snapshotting, so the frame drawn at every
 step reflects exactly what should currently be visible.
 
-```{r astar-trail-viz, echo=FALSE, fig.cap="A* expansion with a heuristic-warped clear wave trailing behind."}
+```{r astar-trail-viz, echo=FALSE}
 knitr::include_graphics(algorithm_demo_asset("astar_trail"))
 ```
 
 ## Source and rendering
 
-The full implementations live under `vignettes/helpers/demos/`:
+The full implementations live under
+[`vignettes/articles/helpers/demos/`](https://github.com/oneilsh/immutables/tree/main/vignettes/articles/helpers/demos):
 
-- `demo_sweep_line_immutables.R`
-- `demo_segment_sweep_immutables.R`
-- `demo_convex_hull_immutables.R`
-- `demo_fortune_frontier_immutables.R`
-- `demo_astar_immutables.R`
-- `demo_astar_trail_immutables.R`
+- [`demo_sweep_line_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_sweep_line_immutables.R)
+- [`demo_segment_sweep_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_segment_sweep_immutables.R)
+- [`demo_convex_hull_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_convex_hull_immutables.R)
+- [`demo_fortune_frontier_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_fortune_frontier_immutables.R)
+- [`demo_astar_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_astar_immutables.R)
+- [`demo_astar_trail_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_astar_trail_immutables.R)
 
 The vignette-side helpers (asset paths, render presets, the A* preset used by
 the large-maze animation) are in
-`vignettes/helpers/algorithm_demos_helpers.R`, and
-`vignettes/helpers/render_algorithm_demo_assets.R` is the entry point for
-re-rendering any or all of the GIFs.
+[`vignettes/articles/helpers/algorithm_demos_helpers.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/algorithm_demos_helpers.R),
+and
+[`vignettes/articles/helpers/render_algorithm_demo_assets.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/render_algorithm_demo_assets.R)
+is the entry point for re-rendering any or all of the GIFs.

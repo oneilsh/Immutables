@@ -21,48 +21,44 @@ navbar:
     articles:
       text: "Articles"
       menu:
-        - text: "flexseq"
+        - text: "Data structures"
+        - text: "Sequences, Stacks, and Queues"
           href: articles/flexseq.html
-        - text: "Benchmarks"
-          href: articles/benchmarks.html
         - text: "Priority Queues"
           href: articles/priority-queues.html
         - text: "Ordered Sequences"
           href: articles/ordered-sequences.html
         - text: "Interval Indices"
           href: articles/interval-indices.html
-        - text: "Algorithm Demos"
-          href: articles/algorithm-demos.html
+        - text: "---------"
+        - text: "Examples"
+        - text: "Benchmarks"
+          href: articles/benchmarks.html
+        - text: "Gallery"
+          href: articles/gallery.html
+        - text: "---------"
+        - text: "Internals"
         - text: "Developer API"
           href: articles/developer-api.html
 
 articles:
-  - title: "immutables"
-    desc: "Main overview and package entrypoint."
+  - title: "Getting started"
+    desc: "Package overview and entrypoint."
     contents:
       - index
-      - algorithm-demos
-  - title: "Flexible Sequence (flexseq)"
-    desc: "General persistent sequence usage."
+  - title: "Data structures"
+    desc: "Per-structure guides to API, semantics, and usage patterns."
     contents:
       - flexseq
-  - title: "Benchmarks"
-    desc: "Performance comparisons across all collection types."
+      - priority-queues
+      - ordered-sequences
+      - interval-indices
+  - title: "Examples"
+    desc: "Applied use cases and performance comparisons."
     contents:
       - benchmarks
-  - title: "Priority Queue"
-    desc: "Queue-oriented priority operations."
-    contents:
-      - priority-queues
-  - title: "Ordered Sequence"
-    desc: "Key-ordered lookup and range operations."
-    contents:
-      - ordered-sequences
-  - title: "Interval Index"
-    desc: "Interval relation query patterns."
-    contents:
-      - interval-indices
-  - title: "Developer Tools"
+      - articles/gallery
+  - title: "Internals"
     desc: "Monoid/predicate internals and validation utilities."
     contents:
       - developer-api

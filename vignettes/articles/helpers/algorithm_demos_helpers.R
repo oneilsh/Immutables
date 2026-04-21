@@ -16,13 +16,13 @@ algorithm_demo_asset <- function(name) {
 }
 
 algorithm_demo_sources <- list(
-  sweep_line = "vignettes/helpers/demos/demo_sweep_line_immutables.R",
-  segment_sweep = "vignettes/helpers/demos/demo_segment_sweep_immutables.R",
-  convex_hull = "vignettes/helpers/demos/demo_convex_hull_immutables.R",
-  fortune_frontier = "vignettes/helpers/demos/demo_fortune_frontier_immutables.R",
-  astar = "vignettes/helpers/demos/demo_astar_immutables.R",
-  astar_trail = "vignettes/helpers/demos/demo_astar_trail_immutables.R",
-  asset_renderer = "vignettes/helpers/render_algorithm_demo_assets.R"
+  sweep_line = "vignettes/articles/helpers/demos/demo_sweep_line_immutables.R",
+  segment_sweep = "vignettes/articles/helpers/demos/demo_segment_sweep_immutables.R",
+  convex_hull = "vignettes/articles/helpers/demos/demo_convex_hull_immutables.R",
+  fortune_frontier = "vignettes/articles/helpers/demos/demo_fortune_frontier_immutables.R",
+  astar = "vignettes/articles/helpers/demos/demo_astar_immutables.R",
+  astar_trail = "vignettes/articles/helpers/demos/demo_astar_trail_immutables.R",
+  asset_renderer = "vignettes/articles/helpers/render_algorithm_demo_assets.R"
 )
 
 algorithm_demo_presets <- list(
@@ -57,9 +57,7 @@ algorithm_demo_render_presets <- list(
       fps = 12,
       max_animation_frames = 90L,
       hold_final_frames = algorithm_demo_pause_frames(12),
-      loop = TRUE,
-      width_px = 800L,
-      height_px = 420L
+      loop = TRUE
     )
   ),
   segment_sweep = list(
@@ -99,7 +97,7 @@ algorithm_demo_render_presets <- list(
     runner = "run_fortune_frontier_demo",
     args = list(
       complexity = "standard",
-      seed = 4121L,
+      seed = 440L,
       n_frames = 200L,
       visualize = TRUE,
       animate = TRUE,

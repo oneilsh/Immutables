@@ -341,7 +341,7 @@ plot_hull_snapshots <- function(
       ggplot2::geom_point(
         data = pts,
         ggplot2::aes(x = x, y = y, color = processed),
-        size = 1.9,
+        size = 3.4,
         alpha = 0.92
       ) +
       ggplot2::scale_color_manual(values = c(`TRUE` = "#5C8A7C", `FALSE` = "#C5BFB3"), guide = "none") +
@@ -349,7 +349,7 @@ plot_hull_snapshots <- function(
         data = lower_path,
         ggplot2::aes(x = x, y = y),
         color = "#2C7BE5",
-        linewidth = 1.2,
+        linewidth = 2.2,
         lineend = "round",
         linejoin = "round"
       ) +
@@ -357,7 +357,7 @@ plot_hull_snapshots <- function(
         data = upper_path,
         ggplot2::aes(x = x, y = y),
         color = "#2AA876",
-        linewidth = 1.2,
+        linewidth = 2.2,
         lineend = "round",
         linejoin = "round"
       ) +
@@ -372,7 +372,7 @@ plot_hull_snapshots <- function(
         data = hull_path,
         ggplot2::aes(x = x, y = y),
         color = "#3E4A56",
-        linewidth = if(identical(s$phase, "done")) 0.95 else 0.75,
+        linewidth = if(identical(s$phase, "done")) 1.7 else 1.35,
         alpha = if(nrow(hull_path) >= 2L) 0.9 else 0,
         lineend = "round",
         linejoin = "round"
@@ -381,10 +381,10 @@ plot_hull_snapshots <- function(
         data = current_df,
         ggplot2::aes(x = x, y = y),
         shape = 21,
-        stroke = 0.8,
+        stroke = 1.4,
         fill = "#F08A24",
         color = "#111111",
-        size = 3
+        size = 5.4
       ) +
       ggplot2::labs(
         title = "Persistent Monotone Chain Convex Hull",
@@ -398,10 +398,10 @@ plot_hull_snapshots <- function(
         y = "y"
       ) +
       ggplot2::coord_equal() +
-      ggplot2::theme_minimal(base_size = 12) +
+      ggplot2::theme_minimal(base_size = 22) +
       ggplot2::theme(
         panel.grid.minor = ggplot2::element_blank(),
-        panel.grid.major = ggplot2::element_line(color = "#E8E3D8", linewidth = 0.25)
+        panel.grid.major = ggplot2::element_line(color = "#E8E3D8", linewidth = 0.45)
       )
   }
 
@@ -421,8 +421,8 @@ plot_hull_snapshots <- function(
       ggplot2::ggsave(
         filename = frame_paths[[i]],
         plot = p,
-        width = 980 / 96,
-        height = 620 / 96,
+        width = 1760 / 96,
+        height = 1113 / 96,
         dpi = 96,
         units = "in"
       )
@@ -435,8 +435,8 @@ plot_hull_snapshots <- function(
     gifski::gifski(
       png_files = frame_paths,
       gif_file = outfile,
-      width = 980,
-      height = 620,
+      width = 1760,
+      height = 1113,
       delay = 1 / fps,
       loop = isTRUE(loop),
       progress = FALSE

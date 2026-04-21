@@ -617,8 +617,8 @@ plot_astar_trail_snapshots <- function(
   hold_final_frames = 8L,
   reveal_hold_frames = NULL,
   loop = TRUE,
-  width_px = 840L,
-  height_px = 560L
+  width_px = 1680L,
+  height_px = 1120L
 ) {
   if(!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Please install 'ggplot2' to visualize snapshots.")
@@ -657,7 +657,7 @@ plot_astar_trail_snapshots <- function(
         data = heat_df,
         ggplot2::aes(x = x, y = y, fill = weight),
         color = "#151515",
-        linewidth = 0.06
+        linewidth = 0.12
       ) +
       # Wall cells.
       ggplot2::geom_tile(
@@ -665,7 +665,7 @@ plot_astar_trail_snapshots <- function(
         ggplot2::aes(x = x, y = y),
         fill = "#2A2A2A",
         color = "#2A2A2A",
-        linewidth = 0.06
+        linewidth = 0.12
       )
 
     # Trail overlay with alpha ramp.
@@ -688,7 +688,7 @@ plot_astar_trail_snapshots <- function(
           ggplot2::aes(x = x, y = y),
           fill = trail_color,
           color = "#111111",
-          linewidth = 0.25
+          linewidth = 0.5
         )
     }
 
@@ -700,7 +700,7 @@ plot_astar_trail_snapshots <- function(
           ggplot2::aes(x = x, y = y, group = 1L),
           inherit.aes = FALSE,
           color = path_outline_color,
-          linewidth = 1.45,
+          linewidth = 2.9,
           lineend = "round", linejoin = "round"
         ) +
         ggplot2::geom_path(
@@ -708,7 +708,7 @@ plot_astar_trail_snapshots <- function(
           ggplot2::aes(x = x, y = y, group = 1L),
           inherit.aes = FALSE,
           color = path_color,
-          linewidth = 0.85,
+          linewidth = 1.7,
           lineend = "round", linejoin = "round"
         )
     }
@@ -719,7 +719,7 @@ plot_astar_trail_snapshots <- function(
           ggplot2::aes(x = x, y = y),
           inherit.aes = FALSE,
           color = path_color,
-          size = 0.95
+          size = 1.9
         )
     }
 
@@ -728,14 +728,14 @@ plot_astar_trail_snapshots <- function(
       ggplot2::geom_point(
         data = source_df,
         ggplot2::aes(x = x, y = y),
-        shape = 8, color = "#FFFFFF", size = 2.3, stroke = 0.6, inherit.aes = FALSE
+        shape = 8, color = "#FFFFFF", size = 4.6, stroke = 1.2, inherit.aes = FALSE
       ) +
       ggplot2::geom_point(
         data = goal_df,
         ggplot2::aes(x = x, y = y),
         shape = 21,
         fill = if(isTRUE(result$found) && identical(path_layer, "line")) "#2AA876" else "#D1495B",
-        color = "#FFFFFF", stroke = 0.55, size = 2.6, inherit.aes = FALSE
+        color = "#FFFFFF", stroke = 1.1, size = 5.2, inherit.aes = FALSE
       ) +
       ggplot2::scale_fill_gradientn(
         colours = c("#EFF5FF", "#D5E6FF", "#A8CBF4", "#6EA6E4", "#2C7BE5", "#124C9C"),
@@ -751,13 +751,13 @@ plot_astar_trail_snapshots <- function(
         caption = caption,
         x = NULL, y = NULL, fill = NULL
       ) +
-      ggplot2::theme_minimal(base_size = 11) +
+      ggplot2::theme_minimal(base_size = 22) +
       ggplot2::theme(
         panel.grid = ggplot2::element_blank(),
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
         legend.position = "bottom",
-        plot.margin = ggplot2::margin(t = 6, r = 8, b = 6, l = 8)
+        plot.margin = ggplot2::margin(t = 12, r = 16, b = 12, l = 16)
       )
   }
 
@@ -850,8 +850,8 @@ run_astar_trail_demo <- function(
   hold_final_frames = 8L,
   reveal_hold_frames = NULL,
   loop = TRUE,
-  width_px = 840L,
-  height_px = 560L
+  width_px = 1680L,
+  height_px = 1120L
 ) {
   cfg <- resolve_trail_config(
     complexity = match.arg(complexity),

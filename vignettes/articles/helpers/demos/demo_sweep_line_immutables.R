@@ -306,8 +306,8 @@ plot_sweep_line <- function(
   frame_stride = NULL,
   hold_final_frames = 0L,
   loop = TRUE,
-  width_px = 960L,
-  height_px = 500L
+  width_px = 1600L,
+  height_px = 832L
 ) {
   if(!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Please install 'ggplot2' to visualize snapshots.")
@@ -320,27 +320,27 @@ plot_sweep_line <- function(
     ggplot2::ggplot(frame_df) +
       ggplot2::geom_segment(
         ggplot2::aes(x = start, xend = end, y = track, yend = track, color = state),
-        linewidth = 2.4,
+        linewidth = 4.0,
         lineend = "round",
         alpha = 0.95
       ) +
       ggplot2::geom_point(
         ggplot2::aes(x = start, y = track),
-        size = 1.2,
+        size = 2.0,
         shape = 21,
-        stroke = 0.2,
+        stroke = 0.33,
         fill = "white",
         color = "#333333"
       ) +
       ggplot2::geom_point(
         ggplot2::aes(x = end, y = track),
-        size = 1.2,
+        size = 2.0,
         shape = 21,
-        stroke = 0.2,
+        stroke = 0.33,
         fill = "#333333",
         color = "#333333"
       ) +
-      ggplot2::geom_vline(xintercept = meta$sweep_x, linewidth = 0.8, color = "#111111", linetype = "22") +
+      ggplot2::geom_vline(xintercept = meta$sweep_x, linewidth = 1.3, color = "#111111", linetype = "22") +
       ggplot2::scale_color_manual(
         values = c(
           future = "#B8B3A7",
@@ -355,23 +355,17 @@ plot_sweep_line <- function(
       ggplot2::scale_x_continuous(expand = c(0.01, 0.01)) +
       ggplot2::labs(
         title = "Sweep-Line Interval Activity",
-        subtitle = sprintf(
-          "x=%s | active=%s | +%s starts / -%s ends",
-          meta$sweep_x,
-          meta$n_active,
-          meta$start_events,
-          meta$end_events
-        ),
+        subtitle = sprintf("x=%s | active=%s", meta$sweep_x, meta$n_active),
         x = "Position",
         y = "Track",
         color = NULL
       ) +
-      ggplot2::theme_minimal(base_size = 11) +
+      ggplot2::theme_minimal(base_size = 18) +
       ggplot2::theme(
         panel.grid.minor = ggplot2::element_blank(),
-        panel.grid.major.y = ggplot2::element_line(color = "#E8E3D8", linewidth = 0.3),
+        panel.grid.major.y = ggplot2::element_line(color = "#E8E3D8", linewidth = 0.5),
         legend.position = "top",
-        plot.margin = ggplot2::margin(t = 3, r = 7, b = 3, l = 7)
+        plot.margin = ggplot2::margin(t = 5, r = 12, b = 5, l = 12)
       )
   }
 
@@ -455,8 +449,8 @@ run_sweep_line_demo <- function(
   frame_stride = NULL,
   hold_final_frames = 0L,
   loop = TRUE,
-  width_px = 960L,
-  height_px = 500L,
+  width_px = 1600L,
+  height_px = 832L,
   track_snapshots = TRUE
 ) {
   cfg <- resolve_sweep_config(

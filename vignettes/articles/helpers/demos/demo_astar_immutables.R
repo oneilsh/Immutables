@@ -665,7 +665,7 @@ plot_astar_snapshots <- function(
     }
 
     p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = x, y = y, fill = state)) +
-      ggplot2::geom_tile(color = "#111111", linewidth = 0.12)
+      ggplot2::geom_tile(color = "#111111", linewidth = 0.24)
 
     if((identical(path_layer, "highlight") || identical(path_layer, "line")) && nrow(path_df) > 0L) {
       p <- p +
@@ -674,7 +674,7 @@ plot_astar_snapshots <- function(
           ggplot2::aes(x = x, y = y),
           inherit.aes = FALSE,
           color = path_highlight_color,
-          size = 1.15
+          size = 2.3
         )
     }
 
@@ -685,7 +685,7 @@ plot_astar_snapshots <- function(
           ggplot2::aes(x = x, y = y, group = 1L),
           inherit.aes = FALSE,
           color = "#111111",
-          linewidth = 1.35,
+          linewidth = 2.7,
           lineend = "round",
           linejoin = "round"
         ) +
@@ -694,7 +694,7 @@ plot_astar_snapshots <- function(
           ggplot2::aes(x = x, y = y, group = 1L),
           inherit.aes = FALSE,
           color = path_color,
-          linewidth = 0.85,
+          linewidth = 1.7,
           lineend = "round",
           linejoin = "round"
         )
@@ -723,14 +723,14 @@ plot_astar_snapshots <- function(
         y = NULL,
         fill = NULL
       ) +
-      ggplot2::theme_minimal(base_size = 11) +
+      ggplot2::theme_minimal(base_size = 22) +
       ggplot2::theme(
         panel.grid = ggplot2::element_blank(),
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
         legend.position = "none",
         plot.subtitle = .astar_subtitle_element(),
-        plot.margin = ggplot2::margin(t = 6, r = 8, b = 6, l = 8)
+        plot.margin = ggplot2::margin(t = 12, r = 16, b = 12, l = 16)
       )
   }
 
@@ -758,14 +758,14 @@ plot_astar_snapshots <- function(
     }
 
     ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
-      ggplot2::geom_tile(ggplot2::aes(fill = metric_value), color = "#111111", linewidth = 0.08) +
+      ggplot2::geom_tile(ggplot2::aes(fill = metric_value), color = "#111111", linewidth = 0.16) +
       ggplot2::geom_tile(data = d[d$wall, , drop = FALSE], fill = "#2F2F2F", color = "#2F2F2F") +
       ggplot2::geom_path(
         data = path_df,
         ggplot2::aes(x = x, y = y, group = 1L),
         inherit.aes = FALSE,
         color = "#111111",
-        linewidth = 1.5,
+        linewidth = 3.0,
         lineend = "round",
         linejoin = "round"
       ) +
@@ -774,7 +774,7 @@ plot_astar_snapshots <- function(
         ggplot2::aes(x = x, y = y, group = 1L),
         inherit.aes = FALSE,
         color = path_color,
-        linewidth = 0.95,
+        linewidth = 1.9,
         lineend = "round",
         linejoin = "round"
       ) +
@@ -785,8 +785,8 @@ plot_astar_snapshots <- function(
         shape = 22,
         fill = start_goal_color,
         color = "#111111",
-        stroke = 0.28,
-        size = 3.2
+        stroke = 0.56,
+        size = 6.4
       ) +
       ggplot2::geom_point(
         data = d[d$goal, , drop = FALSE],
@@ -795,8 +795,8 @@ plot_astar_snapshots <- function(
         shape = 22,
         fill = start_goal_color,
         color = "#111111",
-        stroke = 0.28,
-        size = 3.2
+        stroke = 0.56,
+        size = 6.4
       ) +
       ggplot2::coord_equal() +
       ggplot2::scale_y_reverse(expand = c(0, 0)) +
@@ -813,14 +813,14 @@ plot_astar_snapshots <- function(
         y = NULL,
         fill = NULL
       ) +
-      ggplot2::theme_minimal(base_size = 11) +
+      ggplot2::theme_minimal(base_size = 22) +
       ggplot2::theme(
         panel.grid = ggplot2::element_blank(),
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
         legend.position = "none",
         plot.subtitle = if(identical(metric_name, "pressure")) .astar_subtitle_element() else ggplot2::element_text(),
-        plot.margin = ggplot2::margin(t = 6, r = 8, b = 6, l = 8)
+        plot.margin = ggplot2::margin(t = 12, r = 16, b = 12, l = 16)
       )
   }
   history_plot <- if(!is.null(history_df)) .make_history_plot(history_df, history_metric) else NULL
@@ -885,8 +885,8 @@ plot_astar_snapshots <- function(
       ggplot2::ggsave(
         filename = frame_paths[[i]],
         plot = frame_plot,
-        width = 840 / 96,
-        height = 560 / 96,
+        width = 1680 / 96,
+        height = 1120 / 96,
         dpi = 96,
         units = "in"
       )
@@ -897,8 +897,8 @@ plot_astar_snapshots <- function(
         ggplot2::ggsave(
           filename = frame_paths[[idx]],
           plot = history_plot,
-          width = 840 / 96,
-          height = 560 / 96,
+          width = 1680 / 96,
+          height = 1120 / 96,
           dpi = 96,
           units = "in"
         )
@@ -912,8 +912,8 @@ plot_astar_snapshots <- function(
     gifski::gifski(
       png_files = frame_paths,
       gif_file = outfile,
-      width = 840,
-      height = 560,
+      width = 1680,
+      height = 1120,
       delay = 1 / fps,
       loop = isTRUE(loop),
       progress = FALSE

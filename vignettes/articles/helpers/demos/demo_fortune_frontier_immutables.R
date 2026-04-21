@@ -37,7 +37,7 @@ fortune_complexity_config <- function(complexity = c("simple", "standard", "comp
       complexity = complexity,
       n_sites = 40L,
       x_max = 400L,
-      y_max = 170L,
+      y_max = 220L,
       seed = 909L,
       n_frames = 620L,
       y_resolution = 560L,
@@ -47,9 +47,9 @@ fortune_complexity_config <- function(complexity = c("simple", "standard", "comp
   }
   list(
     complexity = "standard",
-    n_sites = 26L,
+    n_sites = 16L,
     x_max = 320L,
-    y_max = 130L,
+    y_max = 180L,
     seed = 503L,
     n_frames = 225L,
     y_resolution = 460L,
@@ -577,7 +577,7 @@ plot_fortune_frontier_snapshots <- function(
   hold_final_frames = 10L,
   loop = TRUE,
   width_px = 1760L,
-  height_px = 640L,
+  height_px = 768L,
   max_snapshot_step = 100L
 ) {
   if(is.null(result$snapshots)) {
@@ -664,16 +664,16 @@ plot_fortune_frontier_snapshots <- function(
         shape = 21,
         fill = "#E7E0D6",
         color = "#6A6257",
-        size = 2.4,
-        stroke = 0.45
+        size = 3.8,
+        stroke = 0.7
       ) +
       ggplot2::geom_point(
         data = site_plot[site_plot$active, , drop = FALSE],
         ggplot2::aes(x = x, y = y, fill = id),
         shape = 21,
         color = "#202020",
-        size = 3.0,
-        stroke = 0.55,
+        size = 4.7,
+        stroke = 0.85,
         inherit.aes = FALSE
       ) +
       ggplot2::geom_point(
@@ -682,8 +682,8 @@ plot_fortune_frontier_snapshots <- function(
         shape = 21,
         fill = "#FFFFFF",
         color = "#111111",
-        size = 2.9,
-        stroke = 0.65
+        size = 4.5,
+        stroke = 1.0
       ) +
       ggplot2::scale_fill_manual(values = site_cols, guide = "none") +
       ggplot2::scale_color_manual(values = site_cols, guide = "none", drop = FALSE) +
@@ -701,10 +701,10 @@ plot_fortune_frontier_snapshots <- function(
         x = "x (sweep direction ->)",
         y = "y"
       ) +
-      ggplot2::theme_minimal(base_size = 14) +
+      ggplot2::theme_minimal(base_size = 22) +
       ggplot2::theme(
         panel.grid.minor = ggplot2::element_blank(),
-        panel.grid.major = ggplot2::element_line(color = "#E6E1D6", linewidth = 0.26)
+        panel.grid.major = ggplot2::element_line(color = "#E6E1D6", linewidth = 0.4)
       )
 
     p
@@ -774,7 +774,7 @@ run_fortune_frontier_demo <- function(
   loop = TRUE,
   track_snapshots = TRUE,
   width_px = 1760L,
-  height_px = 640L,
+  height_px = 768L,
   max_snapshot_step = 100L
 ) {
   cfg <- resolve_fortune_config(

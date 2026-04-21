@@ -2,8 +2,8 @@
 
 # Maintainer utility: regenerate vignette demo GIF assets.
 # Run from repository root:
-#   R -q -f vignettes/helpers/render_algorithm_demo_assets.R
-#   R -q -f vignettes/helpers/render_algorithm_demo_assets.R --args demo=sweep_line
+#   R -q -f vignettes/articles/helpers/render_algorithm_demo_assets.R
+#   R -q -f vignettes/articles/helpers/render_algorithm_demo_assets.R --args demo=sweep_line
 
 source_demo_without_runner <- function(path, envir) {
   lines <- readLines(path, warn = FALSE)
@@ -80,7 +80,7 @@ render_algorithm_demo_assets <- function(
   }
 
   helper_env <- new.env(parent = baseenv())
-  sys.source(file.path(repo_root, "vignettes", "helpers", "algorithm_demos_helpers.R"), envir = helper_env)
+  sys.source(file.path(repo_root, "vignettes", "articles", "helpers", "algorithm_demos_helpers.R"), envir = helper_env)
   presets <- helper_env$algorithm_demo_render_presets
 
   selected <- if(is.null(demos)) names(presets) else unique(as.character(demos))
@@ -97,7 +97,7 @@ render_algorithm_demo_assets <- function(
     stop("Unknown demo names: ", paste(unknown, collapse = ", "))
   }
 
-  asset_dir <- file.path(repo_root, "vignettes", "assets", "algorithm-demos")
+  asset_dir <- file.path(repo_root, "vignettes", "articles", "assets", "algorithm-demos")
   dir.create(asset_dir, recursive = TRUE, showWarnings = FALSE)
 
   load_render_dependencies(repo_root)
