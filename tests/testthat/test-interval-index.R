@@ -603,7 +603,7 @@ testthat::test_that(".ivx_parse_entry validates entry records (direct internal c
   # records during subclass restore, but no current caller path exercises it.
   # These tests pin its behavior via `:::` so the validator cannot silently rot
   # if a future restore hook begins relying on it.
-  parse <- immutables:::.ivx_parse_entry
+  parse <- Immutables:::.ivx_parse_entry
 
   # Happy path, with and without explicit `key`.
   out <- parse(list(value = "v", start = 1, end = 2))

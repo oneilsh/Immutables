@@ -4,7 +4,7 @@ template:
   bootstrap: 5
 
 home:
-  title: immutables
+  title: Immutables
   description: Monoid-annotated 2-3 finger trees for R
 
 navbar:

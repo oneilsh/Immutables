@@ -15,7 +15,7 @@ loaded <- tryCatch({
 }, error = function(e) FALSE)
 
 if(!loaded) {
-  library(immutables)
+  library(Immutables)
 }
 
 library(microbenchmark)
@@ -49,7 +49,7 @@ bench_one <- function(rows, impl, op, n, repeats, setup, bench) {
 ```
 
 ```{r load-cached, eval=!run_benchmarks, include=FALSE}
-.cache_path <- system.file("extdata", "benchmarks.rds", package = "immutables")
+.cache_path <- system.file("extdata", "benchmarks.rds", package = "Immutables")
 if(nzchar(.cache_path) && file.exists(.cache_path)) {
   results_list <- readRDS(.cache_path)
 }
