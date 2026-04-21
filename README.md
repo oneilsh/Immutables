@@ -10,7 +10,7 @@
 [![pkgdown](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml)
 [![docs](https://img.shields.io/badge/docs-pkgdown-blue)](https://oneilsh.github.io/immutables/)
 
-<img src="man/figures/logo.png" align="right" height="139" alt="immutables logo" />
+<img src="man/figures/logo.png" align="right" height="175" alt="immutables logo" />
 The `immutables` R package implements several immutable, or persistent, data
 structures: operations return modified copies while remaining fast and true
 to R's side-effect-free functional nature.
