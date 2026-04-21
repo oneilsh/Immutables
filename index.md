@@ -39,3 +39,7 @@ via combinations of monoids and measures; see vignettes for details.
 
 - Hinze, R. and Paterson, R. (2006), *Finger trees: a simple
   general-purpose data structure*.
+
+### Changelog
+
+- 1.0: First 1.0 release
