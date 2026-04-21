@@ -20,3 +20,4 @@
 ^\.codex$
 ^vignettes/articles$
 ^Makefile$
+^codecov\.yml$

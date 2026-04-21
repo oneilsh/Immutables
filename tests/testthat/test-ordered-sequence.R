@@ -469,3 +469,44 @@ testthat::test_that("ordered_sequence enforces keys length matches elements leng
     "`keys` length must match elements length"
   )
 })
+
+testthat::test_that("ordered_sequence falls back to internal merge-sort when `c()` on keys fails", {
+  # The default sort path in .oms_order_entries uses `order(do.call(c, keys), idx)`.
+  # For exotic classes without a `c()` method, `do.call(c, keys)` returns a list
+  # which `order()` cannot handle; .oms_build_from_items then delegates to
+  # .oms_merge_sort_indices for a stable merge sort using the class's < / >.
+  # Class/methods are defined at file top-level (see below) — S3 dispatch for
+  # `Ops` needs them in an env the package can see, not inside test_that.
+
+  # Ensure the prerequisite holds (documents the test's premise).
+  testthat::expect_true(
+    inherits(tryCatch(order(do.call(c, list(mk_comp(1), mk_comp(2))), 1:2),
+                      error = function(e) e),
+             "error")
+  )
+
+  # Large enough to force recursive merge-sort descent.
+  vals <- letters[1:7]
+  keys <- lapply(c(4, 1, 6, 3, 7, 2, 5), mk_comp)
+  xs <- as_ordered_sequence(vals, keys = keys)
+  testthat::expect_identical(length(xs), 7L)
+  # Sorted ascending by key val: 1,2,3,4,5,6,7 -> b,f,d,a,g,c,e
+  testthat::expect_identical(unlist(as.list(xs)), c("b", "f", "d", "a", "g", "c", "e"))
+})
+
+testthat::test_that("ordered_sequence supports ordered-factor keys (exotic-key slow path)", {
+  # Ordered factors aren't in the fast-domain set (numeric/character/logical/Date/POSIXct)
+  # but do support `<`/`>`. This exercises the slow-path key-compare and the
+  # non-fast-domain branch of .ft_normalize_scalar_orderable.
+  lvls <- c("low", "med", "high")
+  f <- factor(lvls, levels = lvls, ordered = TRUE)
+
+  xs <- as_ordered_sequence(c("L", "H", "M"), keys = c(f[1], f[3], f[2]))
+  testthat::expect_identical(length(xs), 3L)
+  # Sorted by factor level order: low, med, high.
+  testthat::expect_identical(unlist(as.list(xs)), c("L", "M", "H"))
+
+  # Key-based range query.
+  mid <- elements_between(xs, f[2], f[3])
+  testthat::expect_identical(unlist(as.list(mid)), c("M", "H"))
+})

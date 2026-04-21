@@ -18,6 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      # Ensure testthat::expect_snapshot() tests run (they auto-skip in
+      # CRAN-like envs, which is what tools::testInstalledPackage emulates).
+      NOT_CRAN: "true"
 
     steps:
       - uses: actions/checkout@v4

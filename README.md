@@ -1,4 +1,4 @@
-# immutables
+# immutables <img src="man/figures/logo.png" align="right" height="139" alt="immutables logo" />
 
 [![Lifecycle: experimental](https://lifecycle.r-lib.org/reference/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- Uncomment after CRAN submission:

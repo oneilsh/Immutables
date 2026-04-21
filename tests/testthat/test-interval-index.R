@@ -577,3 +577,78 @@ testthat::test_that("interval_index enforces start/end length matches elements l
     "`end` length must match elements length"
   )
 })
+
+testthat::test_that("interval_index falls back to internal merge-sort when `c()` on endpoints fails", {
+  # Mirrors the ordered_sequence fallback case: for exotic endpoint classes
+  # without a `c()` method, the default `order(do.call(c, starts), idx)` path
+  # fails and .ivx_build_from_items delegates to .ivx_merge_sort_indices.
+  # `mk_comp` is defined in tests/testthat/helper-mk-comp.R.
+  testthat::expect_true(
+    inherits(tryCatch(order(do.call(c, list(mk_comp(1), mk_comp(2))), 1:2),
+                      error = function(e) e),
+             "error")
+  )
+
+  vals <- letters[1:7]
+  starts <- lapply(c(4, 1, 6, 3, 7, 2, 5), mk_comp)
+  ends <- lapply(c(5, 2, 7, 4, 8, 3, 6), mk_comp)
+  ix <- as_interval_index(vals, start = starts, end = ends)
+  testthat::expect_identical(length(ix), 7L)
+  # Sorted by start val ascending: 1,2,3,4,5,6,7 -> b,f,d,a,g,c,e
+  testthat::expect_identical(unlist(as.list(ix)), c("b", "f", "d", "a", "g", "c", "e"))
+})
+
+testthat::test_that(".ivx_parse_entry validates entry records (direct internal call)", {
+  # .ivx_parse_entry is a documented internal validator for serialized entry
+  # records during subclass restore, but no current caller path exercises it.
+  # These tests pin its behavior via `:::` so the validator cannot silently rot
+  # if a future restore hook begins relying on it.
+  parse <- immutables:::.ivx_parse_entry
+
+  # Happy path, with and without explicit `key`.
+  out <- parse(list(value = "v", start = 1, end = 2))
+  testthat::expect_identical(out$entry$value, "v")
+  testthat::expect_identical(out$entry$start, 1)
+  testthat::expect_identical(out$entry$end, 2)
+  testthat::expect_identical(out$endpoint_type, "numeric")
+
+  out_key <- parse(list(value = "v", start = 1, end = 2, key = 1))
+  testthat::expect_identical(out_key$entry$start, 1)
+
+  # Error branches.
+  testthat::expect_error(parse(1L),                                     "must be named lists")
+  testthat::expect_error(parse(list(1, 2, 3)),                           "must be named lists")
+  testthat::expect_error(parse(setNames(list(1, 2, 3), c("a", NA, "c"))),"must be named lists")
+  testthat::expect_error(parse(list(value = 1, value = 2, start = 1, end = 2)),
+                         "entry fields must be unique")
+  testthat::expect_error(parse(list(value = 1, start = 1, end = 2, bogus = 9)),
+                         "unsupported field")
+  testthat::expect_error(parse(list(value = 1, start = 1)),
+                         "must include")
+  testthat::expect_error(parse(list(value = "v", start = 1, end = 2, key = 7)),
+                         "`key` must equal `start`")
+})
+
+testthat::test_that("interval_index supports ordered-factor endpoints (exotic-endpoint slow path)", {
+  # Ordered factors aren't in the fast-domain set, so queries route through the
+  # pure-R leaf_match predicates .ivx_contains_point / .ivx_overlaps_interval /
+  # .ivx_contains_interval instead of the inline fast-path closures.
+  lvls <- letters[1:5]
+  f <- factor(lvls, levels = lvls, ordered = TRUE)
+
+  # Default bounds are [start, end).
+  ix <- interval_index("x", "y", start = c(f[1], f[3]), end = c(f[3], f[5]))
+  testthat::expect_identical(length(ix), 2L)
+
+  # Point query: `b` falls inside [a,c) only.
+  testthat::expect_identical(peek_point(ix, f[2]), "x")
+
+  # Overlaps query: [c,d) overlaps [c,e) only (not [a,c) because end is exclusive).
+  testthat::expect_identical(peek_overlaps(ix, start = f[3], end = f[4]), "y")
+
+  # Containing query: entries whose interval contains [b,c) — only [a,c).
+  testthat::expect_identical(peek_containing(ix, start = f[2], end = f[3]), "x")
+
+  # Within query: entries whose interval is within [a,e) — only [a,c).
+  testthat::expect_identical(peek_within(ix, start = f[1], end = f[5]), "x")
+})
