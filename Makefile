@@ -30,7 +30,13 @@ coverage:
 	Rscript -e 'print(covr::package_coverage())'
 
 coverage-report:
-	Rscript -e 'covr::report(covr::package_coverage())'
+	@CACHE=$$(Rscript -e 'cat(tools::R_user_dir("immutables", "cache"))') && \
+	 FILE="$$CACHE/coverage.html" && \
+	 mkdir -p "$$CACHE" && \
+	 Rscript -e "covr::report(covr::package_coverage(), file = '$$FILE', browse = FALSE)" && \
+	 echo "Report: $$FILE" && \
+	 (command -v open >/dev/null 2>&1 && open "$$FILE") || \
+	 (command -v xdg-open >/dev/null 2>&1 && xdg-open "$$FILE") || true
 
 site:
 	Rscript -e 'pkgdown::build_site()'
