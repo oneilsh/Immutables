@@ -18,10 +18,10 @@ source_demo_without_runner <- function(path, envir) {
 load_render_dependencies <- function(repo_root) {
   if(requireNamespace("pkgload", quietly = TRUE)) {
     pkgload::load_all(repo_root, quiet = TRUE)
-  } else if(requireNamespace("immutables", quietly = TRUE)) {
-    library(immutables)
+  } else if(requireNamespace("Immutables", quietly = TRUE)) {
+    library(Immutables)
   } else {
-    stop("Need either installed 'immutables' or 'pkgload' to render assets.")
+    stop("Need either installed 'Immutables' or 'pkgload' to render assets.")
   }
   invisible(TRUE)
 }

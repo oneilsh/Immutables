@@ -10,11 +10,11 @@ load_immutables <- function() {
     pkgload::load_all(".", quiet = TRUE)
     return(invisible(TRUE))
   }
-  if(requireNamespace("immutables", quietly = TRUE)) {
-    library(immutables)
+  if(requireNamespace("Immutables", quietly = TRUE)) {
+    library(Immutables)
     return(invisible(TRUE))
   }
-  stop("Need either installed 'immutables' or the 'pkgload' package.")
+  stop("Need either installed 'Immutables' or the 'pkgload' package.")
 }
 
 sweep_complexity_config <- function(complexity = c("simple", "standard", "complex")) {

@@ -27,5 +27,5 @@
 #' @keywords internal
 #' @import lambda.r
 #' @importFrom Rcpp evalCpp
-#' @useDynLib immutables, .registration = TRUE
+#' @useDynLib Immutables, .registration = TRUE
 "_PACKAGE"

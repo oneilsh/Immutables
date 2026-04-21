@@ -34,7 +34,7 @@ expect_backend_identical <- function(expr, transform = identity, env = parent.fr
 }
 
 expect_wrapper_dispatch <- function(wrapper_name, expr, should_dispatch = TRUE, env = parent.frame()) {
-  ns <- asNamespace("immutables")
+  ns <- asNamespace("Immutables")
   flag <- new.env(parent = emptyenv())
   flag$called <- FALSE
   suppressMessages(base::trace(
@@ -53,10 +53,10 @@ expect_wrapper_dispatch <- function(wrapper_name, expr, should_dispatch = TRUE, 
 }
 
 snapshot_tree <- function(t) {
-  els <- immutables:::.ft_to_list(t)
-  vals <- lapply(els, immutables:::.ft_strip_name)
+  els <- Immutables:::.ft_to_list(t)
+  vals <- lapply(els, Immutables:::.ft_strip_name)
   nms <- vapply(els, function(el) {
-    nm <- immutables:::.ft_get_name(el)
+    nm <- Immutables:::.ft_get_name(el)
     if(is.null(nm)) "" else nm
   }, character(1))
   list(
@@ -71,7 +71,7 @@ snapshot_tree <- function(t) {
 snapshot_split <- function(s) {
   list(
     left = snapshot_tree(s$left),
-    value = immutables:::.ft_strip_name(s$value),
+    value = Immutables:::.ft_strip_name(s$value),
     right = snapshot_tree(s$right)
   )
 }
@@ -79,7 +79,7 @@ snapshot_split <- function(s) {
 snapshot_locate <- function(x) {
   list(
     found = x$found,
-    value = if(isTRUE(x$found)) immutables:::.ft_strip_name(x$value) else NULL,
+    value = if(isTRUE(x$found)) Immutables:::.ft_strip_name(x$value) else NULL,
     index = x$index,
     left_measure = x$left_measure,
     hit_measure = x$hit_measure,
@@ -138,7 +138,7 @@ cpp_wrapper_coverage <- list(
 )
 
 testthat::test_that("backend parity: coverage map includes all cpp wrappers", {
-  ns <- asNamespace("immutables")
+  ns <- asNamespace("Immutables")
   wrappers <- ls(ns, all.names = TRUE)
   wrappers <- wrappers[startsWith(wrappers, ".ft_cpp_")]
   wrappers <- setdiff(

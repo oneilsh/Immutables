@@ -1,4 +1,4 @@
-Package: immutables
+Package: Immutables
 Type: Package
 Title: Fast and Functional Data Structures
 URL: https://oneilsh.github.io/immutables, https://github.com/oneilsh/immutables

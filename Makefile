@@ -3,7 +3,7 @@
 # Passed to covr::package_coverage(code = ...) so local coverage runs the full test
 # suite once with the default (C++) backend AND once with the pure-R backend,
 # matching what test-coverage.yaml uploads to Codecov.
-export COVR_DUAL_CODE := Sys.setenv(IMMUTABLES_USE_CPP = 'FALSE'); .out <- tempfile('immutables-r-backend'); dir.create(.out, recursive = TRUE); tools::testInstalledPackage('immutables', outDir = .out, types = 'tests'); Sys.unsetenv('IMMUTABLES_USE_CPP')
+export COVR_DUAL_CODE := Sys.setenv(IMMUTABLES_USE_CPP = 'FALSE'); .out <- tempfile('immutables-r-backend'); dir.create(.out, recursive = TRUE); tools::testInstalledPackage('Immutables', outDir = .out, types = 'tests'); Sys.unsetenv('IMMUTABLES_USE_CPP')
 
 # devtools::test() sets NOT_CRAN automatically, so snapshot tests (expect_snapshot)
 # run locally. covrs subprocess runner (tools::testInstalledPackage) does NOT set
@@ -44,7 +44,7 @@ coverage:
 	Rscript -e 'print(covr::package_coverage(code = Sys.getenv("COVR_DUAL_CODE")))'
 
 coverage-report:
-	@CACHE=$$(Rscript -e 'cat(tools::R_user_dir("immutables", "cache"))') && \
+	@CACHE=$$(Rscript -e 'cat(tools::R_user_dir("Immutables", "cache"))') && \
 	 FILE="$$CACHE/coverage.html" && \
 	 mkdir -p "$$CACHE" && \
 	 Rscript -e "covr::report(covr::package_coverage(code = Sys.getenv('COVR_DUAL_CODE')), file = '$$FILE', browse = FALSE)" && \
@@ -53,7 +53,7 @@ coverage-report:
 	 (command -v xdg-open >/dev/null 2>&1 && xdg-open "$$FILE") || true
 
 coverage-dump:
-	@CACHE=$$(Rscript -e 'cat(tools::R_user_dir("immutables", "cache"))') && \
+	@CACHE=$$(Rscript -e 'cat(tools::R_user_dir("Immutables", "cache"))') && \
 	 mkdir -p "$$CACHE" && \
 	 FILE="$$CACHE/coverage-dump.txt" && \
 	 Rscript -e 'options(width = 500); cov <- covr::package_coverage(code = Sys.getenv("COVR_DUAL_CODE")); con <- file(commandArgs(trailingOnly = TRUE)[1], "w"); sink(con, type = "output"); sink(con, type = "message"); cat("## Overall and per-file coverage\n\n"); print(cov); cat("\n\n## Uncovered lines (per file)\n\n"); zc <- covr::zero_coverage(cov); if (nrow(zc) == 0) { cat("(100% line coverage)\n") } else { wd <- normalizePath(getwd()); cat("Columns in zero_coverage: ", paste(names(zc), collapse = ", "), "\n\n", sep = ""); line_col <- if ("first_line" %in% names(zc)) "first_line" else if ("line" %in% names(zc)) "line" else names(zc)[sapply(zc, is.numeric)][1]; for (f in sort(unique(zc$$filename))) { lines <- sort(unique(zc[[line_col]][zc$$filename == f])); rel <- sub(paste0("^", wd, "/?"), "", f); cat(sprintf("%s: %s\n", rel, paste(lines, collapse = ","))) } }; sink(type = "message"); sink(); close(con)' "$$FILE" && \

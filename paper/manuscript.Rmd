@@ -46,12 +46,12 @@ loaded <- tryCatch({
   pkgload::load_all(quiet = TRUE)
   TRUE
 }, error = function(e) FALSE)
-if(!loaded) library(immutables)
+if(!loaded) library(Immutables)
 
 library(ggplot2)
 
 bench_results <- local({
-  path <- system.file("extdata", "benchmarks.rds", package = "immutables")
+  path <- system.file("extdata", "benchmarks.rds", package = "Immutables")
   if(nzchar(path) && file.exists(path)) readRDS(path) else list()
 })
 ```
