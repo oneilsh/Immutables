@@ -9,6 +9,7 @@
 [![Codecov test coverage](https://codecov.io/gh/oneilsh/immutables/branch/main/graph/badge.svg)](https://app.codecov.io/gh/oneilsh/immutables)
 [![pkgdown](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml)
 [![docs](https://img.shields.io/badge/docs-pkgdown-blue)](https://oneilsh.github.io/immutables/)
+[![DOI](https://zenodo.org/badge/154557443.svg)](https://doi.org/10.5281/zenodo.19686096)
 
 The `immutables` R package implements several immutable, or persistent, data
 structures: operations return modified copies while remaining fast and true
@@ -29,7 +30,7 @@ to R's side-effect-free functional nature.
   algorithms.
 
 Backed by monoid-annotated 2-3 fingertrees as described by
-[Hinze and Paterson](https://doi.org/10.1017/S0956796805005769), most operations are constant time, amortized constant time, or $O(\log(n))$. Core functions are implemented in C++ (via Rcpp) for speed, with matching pure-R reference implementations using `lambda.r` syntax to match the paper.
+[Hinze and Paterson](https://doi.org/10.1017/S0956796805005769), most operations are constant time, amortized constant time, or $O(\log n)$. Core functions are implemented in C++ (via Rcpp) for speed, with matching pure-R reference implementations using `lambda.r` syntax to match the paper.
 
 Finally, the developer API supports the addition of custom structures via combinations of monoids and measures; see vignettes for details.
 
