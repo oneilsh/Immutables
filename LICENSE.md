@@ -1,6 +1,4 @@
-# NA
-
-MIT License
+# MIT License
 
 Copyright (c) 2026 Shawn T. O’Neil
 

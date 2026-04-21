@@ -13,6 +13,7 @@
 <url><loc>https://oneilsh.github.io/immutables/authors.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/index.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/news/index.html</loc></url>
+<url><loc>https://oneilsh.github.io/immutables/reference/Immutables-package.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/add_monoids.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/as.list.flexseq.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/as.list.interval_index.html</loc></url>
@@ -35,7 +36,6 @@
 <url><loc>https://oneilsh.github.io/immutables/reference/get_graph_df.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/get_measure.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/get_measures.html</loc></url>
-<url><loc>https://oneilsh.github.io/immutables/reference/immutables-package.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/index.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/insert.html</loc></url>
 <url><loc>https://oneilsh.github.io/immutables/reference/insert_at.html</loc></url>
