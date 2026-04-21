@@ -187,29 +187,22 @@ this activity map once the search settles.
 
 ## A\* with heuristic trail
 
-A variation on the A\* search above, run over a procedurally-generated
-weighted terrain grid and augmented with a lagged retirement “clear
-wave” that fades expanded cells out of the visualization instead of
-leaving them permanently marked. The search itself is standard weighted
-A\*; the clear wave is visualization machinery with structural
-significance.
+This is a variation on the A\* search above, run over a weighted terrain
+grid rather than a maze and augmented with a lagged retirement “clear
+wave” that fades expanded cells out of the visualization.
 
 Five roles share the work. The A\* frontier is still a `priority_queue`
 keyed by `f = g + h`, and the expanded set is still an
-`ordered_sequence` keyed by cell index. Running alongside them: a second
-`priority_queue` holds scheduled retirement events, and a second
-`ordered_sequence` tracks the currently-visible trail. A `flexseq`
-accumulates snapshots of all of these at every expansion step.
+`ordered_sequence` keyed by cell index. Running alongside them is a
+second `priority_queue` holding scheduled retirement events, and a
+second `ordered_sequence` tracking the currently-visible trail. A
+`flexseq` accumulates snapshots of all of these at every expansion step.
 
-What makes the trail interesting is how the retirement lag is computed.
-Each expanded cell `c` is scheduled to clear at
-`step_expand + lag_base + lag_warp * h(c)`: cells far from the goal
-(high `h`) linger in the trail longer, while cells close to the goal
-clear quickly. The tail is therefore thick in high-heuristic regions the
-search recently moved through, and thin near the goal where the search
-is narrowing in. Each iteration of the loop pops matured retirements
-from the clear queue before snapshotting, so the frame drawn at every
-step reflects exactly what should currently be visible.
+What makes the trail interesting is how the retirement lag is computed:
+cells far from the goal (high `h`) linger in the trail longer, while
+cells close to the goal clear quickly. The tail is therefore thick in
+high-heuristic regions the search recently moved through, and thin near
+the goal where the search is narrowing in.
 
 ![](assets/algorithm-demos/06-astar-trail.gif)
 

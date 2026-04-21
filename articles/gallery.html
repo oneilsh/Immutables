@@ -66,8 +66,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Gallery</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Gallery</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/oneilsh/immutables/blob/main/vignettes/articles/gallery.Rmd" class="external-link"><code>vignettes/articles/gallery.Rmd</code></a></small>
@@ -251,30 +250,22 @@ the final path on top of this activity map once the search settles.</p>
 <div class="section level2">
 <h2 id="a-with-heuristic-trail">A* with heuristic trail<a class="anchor" aria-label="anchor" href="#a-with-heuristic-trail"></a>
 </h2>
-<p>A variation on the A* search above, run over a procedurally-generated
-weighted terrain grid and augmented with a lagged retirement “clear
-wave” that fades expanded cells out of the visualization instead of
-leaving them permanently marked. The search itself is standard weighted
-A*; the clear wave is visualization machinery with structural
-significance.</p>
+<p>This is a variation on the A* search above, run over a weighted
+terrain grid rather than a maze and augmented with a lagged retirement
+“clear wave” that fades expanded cells out of the visualization.</p>
 <p>Five roles share the work. The A* frontier is still a
 <code>priority_queue</code> keyed by <code>f = g + h</code>, and the
 expanded set is still an <code>ordered_sequence</code> keyed by cell
-index. Running alongside them: a second <code>priority_queue</code>
-holds scheduled retirement events, and a second
-<code>ordered_sequence</code> tracks the currently-visible trail. A
+index. Running alongside them is a second <code>priority_queue</code>
+holding scheduled retirement events, and a second
+<code>ordered_sequence</code> tracking the currently-visible trail. A
 <code>flexseq</code> accumulates snapshots of all of these at every
 expansion step.</p>
 <p>What makes the trail interesting is how the retirement lag is
-computed. Each expanded cell <code>c</code> is scheduled to clear at
-<code>step_expand + lag_base + lag_warp * h(c)</code>: cells far from
-the goal (high <code>h</code>) linger in the trail longer, while cells
-close to the goal clear quickly. The tail is therefore thick in
-high-heuristic regions the search recently moved through, and thin near
-the goal where the search is narrowing in. Each iteration of the loop
-pops matured retirements from the clear queue before snapshotting, so
-the frame drawn at every step reflects exactly what should currently be
-visible.</p>
+computed: cells far from the goal (high <code>h</code>) linger in the
+trail longer, while cells close to the goal clear quickly. The tail is
+therefore thick in high-heuristic regions the search recently moved
+through, and thin near the goal where the search is narrowing in.</p>
 <p><img src="assets/algorithm-demos/06-astar-trail.gif"><!-- --></p>
 </div>
 <div class="section level2">
