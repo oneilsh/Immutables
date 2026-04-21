@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Priority Queues • immutables</title>
-<script src="../deps/jquery-3.6.1/jquery-3.6.1.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -34,11 +34,17 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/flexseq.html">flexseq</a></li>
+<li><h6 class="dropdown-header" data-toc-skip>Data structures</h6></li>
+    <li><a class="dropdown-item" href="../articles/flexseq.html">Sequences, Stacks, and Queues</a></li>
     <li><a class="dropdown-item" href="../articles/priority-queues.html">Priority Queues</a></li>
     <li><a class="dropdown-item" href="../articles/ordered-sequences.html">Ordered Sequences</a></li>
     <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
-    <li><a class="dropdown-item" href="../articles/algorithm-demos.html">Algorithm Demos</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
+    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="../articles/gallery.html">Gallery</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Internals</h6></li>
     <li><a class="dropdown-item" href="../articles/developer-api.html">Developer API</a></li>
   </ul>
 </li>
@@ -71,18 +77,17 @@
     
     
 <div class="section level2">
-<h2 id="what-is-a-priority-queue">What is a priority queue?<a class="anchor" aria-label="anchor" href="#what-is-a-priority-queue"></a>
+<h2 id="priority-queue-basics">Priority queue basics<a class="anchor" aria-label="anchor" href="#priority-queue-basics"></a>
 </h2>
-<p><code>priority_queue</code> is a persistent queue ordered by numeric
-or comparable priority values. For full sequence-style operations, cast
-with <code><a href="../reference/as_flexseq.html">as_flexseq()</a></code>. By default this casts to payload items
-only (<code>drop_meta = TRUE</code>); use
-<code>as_flexseq(..., drop_meta = FALSE)</code> to keep entry records
-(<code>value</code> + <code>priority</code>).</p>
-</div>
-<div class="section level2">
-<h2 id="creating-a-queue">Creating a queue<a class="anchor" aria-label="anchor" href="#creating-a-queue"></a>
-</h2>
+<p><code>priority_queue</code> is a persistent structure that associates
+elements with priority values, typically numeric or character (string).
+They provide fast access to elements by min or max priority, and
+insertion of new elements with given priorities.</p>
+<p>All operations are persistent, and return modified copies. Peeking at
+the min/max returns the stored element (which may be any type), popping
+returns a list with <code>$value</code> containing the stored element,
+<code>$priority</code> the priority, and <code>$remaining</code> the
+rest of the priority queue without those elements.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span><span class="st">"task_a"</span>, <span class="st">"task_b"</span>, <span class="st">"task_c"</span>, priorities <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">x</span></span>
@@ -98,75 +103,145 @@ only (<code>drop_meta = TRUE</code>); use
 <span><span class="co">#&gt; [1] "task_c"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; (priority 3)</span></span>
-<span><span class="co">#&gt; [1] "task_a"</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="peeking-min-and-max">Peeking min and max<a class="anchor" aria-label="anchor" href="#peeking-min-and-max"></a>
-</h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/peek_min.html">peek_min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "task_a"</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/peek_min.html">peek_min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "task_b"</span></span>
-<span><span class="fu"><a href="../reference/peek_max.html">peek_max</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "task_a"</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="popping-one-element">Popping one element<a class="anchor" aria-label="anchor" href="#popping-one-element"></a>
-</h2>
-<p><code><a href="../reference/pop_min.html">pop_min()</a></code> and <code><a href="../reference/pop_max.html">pop_max()</a></code> return both the
-element and the updated queue.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_min.html">pop_min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span><span class="va">x2</span><span class="op">$</span><span class="va">value</span></span>
-<span><span class="co">#&gt; [1] "task_b"</span></span>
-<span><span class="va">x2</span><span class="op">$</span><span class="va">priority</span></span>
-<span><span class="co">#&gt; [1] 1</span></span>
-<span><span class="va">x2</span><span class="op">$</span><span class="va">remaining</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_max.html">pop_max</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">value</span></span>
+<span><span class="co">#&gt; [1] "task_a"</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">priority</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">remaining</span></span>
 <span><span class="co">#&gt; Unnamed priority_queue with 2 elements.</span></span>
-<span><span class="co">#&gt; Minimum priority: 2, Maximum priority: 3</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Elements (by priority):</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; (priority 2)</span></span>
-<span><span class="co">#&gt; [1] "task_c"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; (priority 3)</span></span>
-<span><span class="co">#&gt; [1] "task_a"</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="popping-a-full-tie-run">Popping a full tie run<a class="anchor" aria-label="anchor" href="#popping-a-full-tie-run"></a>
-</h2>
-<p>Use bulk helpers to read/remove all elements tied at the current
-minimum or maximum priority.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/peek_all_min.html">peek_all_min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Unnamed priority_queue with 1 element.</span></span>
-<span><span class="co">#&gt; Minimum priority: 1, Maximum priority: 1</span></span>
+<span><span class="co">#&gt; Minimum priority: 1, Maximum priority: 2</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Elements (by priority):</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; (priority 1)</span></span>
 <span><span class="co">#&gt; [1] "task_b"</span></span>
-<span><span class="va">p_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_all_min.html">pop_all_min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">p_all</span><span class="op">$</span><span class="va">values</span><span class="op">)</span></span>
-<span><span class="co">#&gt; list()</span></span>
-<span><span class="va">p_all</span><span class="op">$</span><span class="va">remaining</span></span>
-<span><span class="co">#&gt; Unnamed priority_queue with 2 elements.</span></span>
-<span><span class="co">#&gt; Minimum priority: 2, Maximum priority: 3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority 2)</span></span>
+<span><span class="co">#&gt; [1] "task_c"</span></span></code></pre></div>
+<p>The <code><a href="../reference/as_priority_queue.html">as_priority_queue()</a></code> variant builds a queue from a
+vector or list of elements paired with a priority vector. useful when
+priorities are already in a separate vector.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_priority_queue.html">as_priority_queue</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, priorities <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">q</span></span>
+<span><span class="co">#&gt; Unnamed priority_queue with 4 elements.</span></span>
+<span><span class="co">#&gt; Minimum priority: 1, Maximum priority: 3</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Elements (by priority):</span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority 1)</span></span>
+<span><span class="co">#&gt; [1] "b"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority 1)</span></span>
+<span><span class="co">#&gt; [1] "d"</span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; (priority 2)</span></span>
-<span><span class="co">#&gt; [1] "task_c"</span></span>
+<span><span class="co">#&gt; [1] "c"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; (priority 3)</span></span>
-<span><span class="co">#&gt; [1] "task_a"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "a"</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="priority-ties">Priority ties<a class="anchor" aria-label="anchor" href="#priority-ties"></a>
+</h2>
+<p>In the case of multiple identical priorities, peek/pop for min/max
+return a <em>single element</em>, in their original insertion order.
+Their “all” counterparts (<code>peek_all_min</code>,
+<code>pop_all_max</code>, etc.) return two priorities: in
+<code>$elements</code> the elements peeked/popped and in
+<code>$remaining</code> the other elements. <code>peek_all_max</code>
+and <code>pop_all_max</code> behave symmetrically on the
+maximum-priority tie run.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="st">"Jones"</span>, priority <span class="op">=</span> <span class="st">"B"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="st">"Smith"</span>, priority <span class="op">=</span> <span class="st">"A"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="st">"Adams"</span>, priority <span class="op">=</span> <span class="st">"A"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/peek_min.html">peek_min</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Smith"</span></span>
+<span><span class="fu"><a href="../reference/peek_all_min.html">peek_all_min</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed priority_queue with 2 elements.</span></span>
+<span><span class="co">#&gt; Minimum priority: A, Maximum priority: A</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by priority):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority A)</span></span>
+<span><span class="co">#&gt; [1] "Smith"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority A)</span></span>
+<span><span class="co">#&gt; [1] "Adams"</span></span>
+<span></span>
+<span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_min.html">pop_min</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
+<span><span class="va">res1</span><span class="op">$</span><span class="va">value</span></span>
+<span><span class="co">#&gt; [1] "Smith"</span></span>
+<span><span class="va">res1</span><span class="op">$</span><span class="va">priority</span></span>
+<span><span class="co">#&gt; [1] "A"</span></span>
+<span><span class="va">res1</span><span class="op">$</span><span class="va">remaining</span></span>
+<span><span class="co">#&gt; Unnamed priority_queue with 2 elements.</span></span>
+<span><span class="co">#&gt; Minimum priority: A, Maximum priority: B</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by priority):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority A)</span></span>
+<span><span class="co">#&gt; [1] "Adams"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority B)</span></span>
+<span><span class="co">#&gt; [1] "Jones"</span></span>
+<span></span>
+<span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_all_min.html">pop_all_min</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">res2</span><span class="op">$</span><span class="va">elements</span></span>
+<span><span class="co">#&gt; Unnamed priority_queue with 2 elements.</span></span>
+<span><span class="co">#&gt; Minimum priority: A, Maximum priority: A</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by priority):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority A)</span></span>
+<span><span class="co">#&gt; [1] "Smith"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority A)</span></span>
+<span><span class="co">#&gt; [1] "Adams"</span></span>
+<span><span class="va">res2</span><span class="op">$</span><span class="va">remaining</span></span>
+<span><span class="co">#&gt; Unnamed priority_queue with 1 element.</span></span>
+<span><span class="co">#&gt; Minimum priority: B, Maximum priority: B</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by priority):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority B)</span></span>
+<span><span class="co">#&gt; [1] "Jones"</span></span></code></pre></div>
+<p>Priority queues can be converted to R lists with
+<code><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list()</a></code>. The <code>drop_meta</code> parameter defaulting
+to <code>FALSE</code> controls whether priority values are included.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">res2</span><span class="op">$</span><span class="va">elements</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 2</span></span>
+<span><span class="co">#&gt;  $ :List of 2</span></span>
+<span><span class="co">#&gt;   ..$ value   : chr "Smith"</span></span>
+<span><span class="co">#&gt;   ..$ priority: chr "A"</span></span>
+<span><span class="co">#&gt;  $ :List of 2</span></span>
+<span><span class="co">#&gt;   ..$ value   : chr "Adams"</span></span>
+<span><span class="co">#&gt;   ..$ priority: chr "A"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">res2</span><span class="op">$</span><span class="va">elements</span>, drop_meta <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 2</span></span>
+<span><span class="co">#&gt;  $ : chr "Smith"</span></span>
+<span><span class="co">#&gt;  $ : chr "Adams"</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="empty-queues">Empty queues<a class="anchor" aria-label="anchor" href="#empty-queues"></a>
 </h2>
-<p>Scalar peek/pop helpers are non-throwing on empty queues.</p>
+<p>Peek/pop helpers are non-throwing on empty queues,
+<code><a href="https://rdrr.io/r/base/length.html" class="external-link">length()</a></code> allows for empty checking.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">empty_q</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">empty_q</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="fu"><a href="../reference/peek_min.html">peek_min</a></span><span class="op">(</span><span class="va">empty_q</span><span class="op">)</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="fu"><a href="../reference/pop_min.html">pop_min</a></span><span class="op">(</span><span class="va">empty_q</span><span class="op">)</span></span>
@@ -180,39 +255,166 @@ minimum or maximum priority.</p>
 <span><span class="co">#&gt; Unnamed priority_queue with 0 elements.</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="inserting">Inserting<a class="anchor" aria-label="anchor" href="#inserting"></a>
+<h2 id="priority-values">Priority values<a class="anchor" aria-label="anchor" href="#priority-values"></a>
 </h2>
+<p><code><a href="../reference/min_priority.html">min_priority()</a></code> and <code><a href="../reference/max_priority.html">max_priority()</a></code> return
+the current extrema <em>priority</em> (not the stored element), in O(1)
+via cached monoid state.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"task_d"</span>, priority <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
-<span><span class="va">x3</span></span>
-<span><span class="co">#&gt; Unnamed priority_queue with 4 elements.</span></span>
-<span><span class="co">#&gt; Minimum priority: 0, Maximum priority: 3</span></span>
+<code class="sourceCode R"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span>, priorities <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/min_priority.html">min_priority</a></span><span class="op">(</span><span class="va">q</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="fu"><a href="../reference/max_priority.html">max_priority</a></span><span class="op">(</span><span class="va">q</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span><span class="fu"><a href="../reference/min_priority.html">min_priority</a></span><span class="op">(</span><span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>  <span class="co"># NULL when empty</span></span>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="named-priorities">Named priorities<a class="anchor" aria-label="anchor" href="#named-priorities"></a>
+</h2>
+<p>Priority queues can carry names, set either at construction or on
+<code><a href="../reference/insert.html">insert()</a></code>. Names support read-only indexing via
+<code>[</code>, <code>[[</code>, and <code>$</code>. This is the
+<em>only</em> indexing form <code>priority_queue</code> supports.
+Positional indexing and all replacement forms (<code>[&lt;-</code>,
+<code>[[&lt;-</code>, <code>$&lt;-</code>) error; cast to
+<code><a href="../reference/as_flexseq.html">as_flexseq()</a></code> first to mutate.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span>a <span class="op">=</span> <span class="st">"task-a"</span>, b <span class="op">=</span> <span class="st">"task-b"</span>, priorities <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="st">"task-c"</span>, priority <span class="op">=</span> <span class="fl">3</span>, name <span class="op">=</span> <span class="st">"c"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">q</span><span class="op">[[</span><span class="st">"b"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; [1] "task-b"</span></span>
+<span><span class="va">q</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; Named priority_queue with 2 elements.</span></span>
+<span><span class="co">#&gt; Minimum priority: 2, Maximum priority: 3</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Elements (by priority):</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; (priority 0)</span></span>
-<span><span class="co">#&gt; [1] "task_d"</span></span>
+<span><span class="co">#&gt; $a (priority 2)</span></span>
+<span><span class="co">#&gt; [1] "task-a"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; (priority 1)</span></span>
-<span><span class="co">#&gt; [1] "task_b"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; (priority 2)</span></span>
-<span><span class="co">#&gt; [1] "task_c"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; (priority 3)</span></span>
-<span><span class="co">#&gt; [1] "task_a"</span></span>
-<span><span class="fu"><a href="../reference/peek_min.html">peek_min</a></span><span class="op">(</span><span class="va">x3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "task_d"</span></span></code></pre></div>
+<span><span class="co">#&gt; $c (priority 3)</span></span>
+<span><span class="co">#&gt; [1] "task-c"</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="va">q</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>         <span class="co"># positional indexing blocked</span></span>
+<span><span class="co">#&gt; Error in `[.priority_queue`(q, 1) : </span></span>
+<span><span class="co">#&gt;   `[.priority_queue` supports character name indexing only. Cast first with `as_flexseq()`.</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="va">q</span><span class="op">$</span><span class="va">a</span> <span class="op">&lt;-</span> <span class="st">"!!"</span><span class="op">)</span>  <span class="co"># replacement blocked</span></span>
+<span><span class="co">#&gt; Error in `$&lt;-.priority_queue`(`*tmp*`, a, value = "!!") : </span></span>
+<span><span class="co">#&gt;   `$&lt;-` is not supported for priority_queue. Cast first with `as_flexseq()`.</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="persistence-recap">Persistence recap<a class="anchor" aria-label="anchor" href="#persistence-recap"></a>
+<h2 id="transforming-iterating-merging">Transforming, iterating, merging<a class="anchor" aria-label="anchor" href="#transforming-iterating-merging"></a>
 </h2>
-<p>The original queue is unchanged.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/peek_min.html">peek_min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<p><code><a href="../reference/fapply.html">fapply()</a></code> maps a function over queue elements while
+preserving priorities. The function receives
+<code>(value, priority)</code>, or <code>(value, priority, name)</code>
+if it accepts a third argument — priorities and names are passed in
+read-only, and the return value replaces the stored element.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span><span class="st">"alice"</span>, <span class="st">"bob"</span>, <span class="st">"carol"</span>, priorities <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/fapply.html">fapply</a></span><span class="op">(</span><span class="va">q</span>, <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">priority</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">toupper</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed priority_queue with 3 elements.</span></span>
+<span><span class="co">#&gt; Minimum priority: 1, Maximum priority: 3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by priority):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority 1)</span></span>
+<span><span class="co">#&gt; [1] "BOB"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority 2)</span></span>
+<span><span class="co">#&gt; [1] "CAROL"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (priority 3)</span></span>
+<span><span class="co">#&gt; [1] "ALICE"</span></span></code></pre></div>
+<p><code><a href="../reference/loop.html">loop()</a></code> (re-exported from the <strong>coro</strong>
+package) walks the queue in priority-ascending order, yielding bare
+values. Traversal is driven by repeated <code><a href="../reference/pop_min.html">pop_min()</a></code>, so full
+traversal is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>log</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n \log n)</annotation></semantics></math>
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>log</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math>
+per step); ties within equal priority follow insertion order.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">q</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span><span class="st">"task_a"</span>, <span class="st">"task_b"</span>, <span class="st">"task_c"</span>, priorities <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/loop.html">loop</a></span><span class="op">(</span><span class="kw">for</span> <span class="op">(</span><span class="va">v</span> <span class="kw">in</span> <span class="va">q</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "task_b"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 3</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "task_c"</span></span>
+<span><span class="co">#&gt; [1] "task_a"</span></span></code></pre></div>
+<p>Use <code><a href="../reference/fapply.html">fapply()</a></code> if your callback needs the priority
+alongside the value, or cast with <code><a href="../reference/as_flexseq.html">as_flexseq()</a></code> for
+insertion-order iteration. Plain <code>for (v in q)</code> (without
+<code><a href="../reference/loop.html">loop()</a></code>) yields raw finger-tree internals rather than
+elements — always wrap with <code><a href="../reference/loop.html">loop()</a></code>.</p>
+<p><code>merge(x, y)</code> combines two priority queues into a new one
+containing every entry from both, in O(log(min(m, n))). The
+<code>.pq_min</code> / <code>.pq_max</code> monoids recompute
+automatically on the merged tree, so extremum queries work immediately
+on the result.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span>, priorities <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span><span class="st">"z"</span>, priorities <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span><span class="fu"><a href="../reference/peek_min.html">peek_min</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "y"</span></span>
+<span><span class="fu"><a href="../reference/peek_max.html">peek_max</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "x"</span></span></code></pre></div>
+<p>Both queues must share the same priority type and monoid set;
+mismatches error (rather than being silently harmonized). Both inputs
+are left unmodified.</p>
+<p>For full sequence-style operations, cast with
+<code><a href="../reference/as_flexseq.html">as_flexseq()</a></code>. This returns payload items only; priority
+metadata and any custom monoids are dropped. To instead obtain a
+<code>flexseq</code> of entry records (<code>value</code> +
+<code>priority</code>), compose with <code><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list()</a></code>.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="st">"Jones"</span>, priority <span class="op">=</span> <span class="st">"B"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="st">"Smith"</span>, priority <span class="op">=</span> <span class="st">"A"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="st">"Adams"</span>, priority <span class="op">=</span> <span class="st">"A"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/as_flexseq.html">as_flexseq</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed flexseq with 3 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] "Jones"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] "Smith"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]]</span></span>
+<span><span class="co">#&gt; [1] "Adams"</span></span>
+<span><span class="fu"><a href="../reference/as_flexseq.html">as_flexseq</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed flexseq with 3 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; $value</span></span>
+<span><span class="co">#&gt; [1] "Jones"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $priority</span></span>
+<span><span class="co">#&gt; [1] "B"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; $value</span></span>
+<span><span class="co">#&gt; [1] "Smith"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $priority</span></span>
+<span><span class="co">#&gt; [1] "A"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]]</span></span>
+<span><span class="co">#&gt; $value</span></span>
+<span><span class="co">#&gt; [1] "Adams"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $priority</span></span>
+<span><span class="co">#&gt; [1] "A"</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

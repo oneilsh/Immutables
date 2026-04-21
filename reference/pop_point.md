@@ -1,11 +1,16 @@
-# Pop First Interval Containing a Point
+# Pop First Interval Matching a Point
 
-Pop First Interval Containing a Point
+Pop First Interval Matching a Point
 
 ## Usage
 
 ``` r
-pop_point(x, point, bounds = NULL)
+pop_point(
+  x,
+  point,
+  bounds = NULL,
+  match_at = c("interval", "start", "end", "either")
+)
 ```
 
 ## Arguments
@@ -21,6 +26,15 @@ pop_point(x, point, bounds = NULL)
 - bounds:
 
   Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
+  Ignored when `match_at` is not `"interval"`.
+
+- match_at:
+
+  How the query point is matched against each entry. One of `"interval"`
+  (default; containment under `bounds`), `"start"`, `"end"`, or
+  `"either"`. See
+  [`peek_point()`](https://oneilsh.github.io/immutables/reference/peek_point.md)
+  for details.
 
 ## Value
 
@@ -49,14 +63,14 @@ pop_point(ix, 2)
 #> [1] 3
 #> 
 #> $remaining
-#> Unnamed interval_index with 2 elements, default bounds [start, end).
+#> Unnamed interval_index with 2 elements, default query bounds [start, end).
 #> 
 #> Elements (by interval start order):
 #> 
-#> [[1]] (interval [2, 2))
+#> [[1]] (interval 2 - 2)
 #> [1] "b"
 #> 
-#> [[2]] (interval [4, 5))
+#> [[2]] (interval 4 - 5)
 #> [1] "c"
 #> 
 #> 

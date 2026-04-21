@@ -1,6 +1,14 @@
 # immutables
 
+[![Lifecycle:
+experimental](https://lifecycle.r-lib.org/reference/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/immutables)](https://CRAN.R-project.org/package=immutables)
+[![CRAN
+downloads](https://cranlogs.r-pkg.org/badges/immutables)](https://CRAN.R-project.org/package=immutables)
 [![R-CMD-check](https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/oneilsh/immutables/graph/badge.svg)](https://app.codecov.io/gh/oneilsh/immutables)
 [![pkgdown](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml)
 [![docs](https://img.shields.io/badge/docs-pkgdown-blue)](https://oneilsh.github.io/immutables/)
 
@@ -83,8 +91,19 @@ ends, O(log n) indexing and replacement, and efficient split/concat.
 - [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
   : Fapply with S3 dispatch
 
+- [`loop()`](https://oneilsh.github.io/immutables/reference/loop.md) :
+  Iterate over an iterator (re-exported from coro)
+
+- [`as_iterator(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/as_iterator.flexseq.md)
+  :
+
+  Iterate over a `flexseq` (coro iterator)
+
 - [`c(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/c.flexseq.md)
   : Concatenate Sequences
+
+- [`merge(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/merge.flexseq.md)
+  : Merge Two Sequences
 
 - [`` `$`( ``*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.flexseq.md)
   [`` `$<-`( ``*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.flexseq.md)
@@ -159,6 +178,14 @@ for full sequence operations.
 
 - [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
   : Fapply with S3 dispatch
+
+- [`as_iterator(`*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/as_iterator.priority_queue.md)
+  :
+
+  Iterate over a `priority_queue` (coro iterator)
+
+- [`merge(`*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/merge.priority_queue.md)
+  : Merge Two Priority Queues
 
 - [`` `[`( ``*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.priority_queue.md)
   [`` `[[`( ``*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.priority_queue.md)
@@ -240,6 +267,9 @@ is not supported.
 - [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
   : Fapply with S3 dispatch
 
+- [`merge(`*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/merge.ordered_sequence.md)
+  : Merge Two Ordered Sequences
+
 - [`` `[`( ``*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.ordered_sequence.md)
   [`` `[[`( ``*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.ordered_sequence.md)
   [`` `[<-`( ``*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.ordered_sequence.md)
@@ -280,16 +310,16 @@ query/pop helpers over ordered interval endpoints.
   : Insert an Element
 
 - [`peek_point()`](https://oneilsh.github.io/immutables/reference/peek_point.md)
-  : Peek First Interval Containing a Point
+  : Peek First Interval Matching a Point
 
 - [`peek_all_point()`](https://oneilsh.github.io/immutables/reference/peek_all_point.md)
-  : Peek All Intervals Containing a Point
+  : Peek All Intervals Matching a Point
 
 - [`pop_point()`](https://oneilsh.github.io/immutables/reference/pop_point.md)
-  : Pop First Interval Containing a Point
+  : Pop First Interval Matching a Point
 
 - [`pop_all_point()`](https://oneilsh.github.io/immutables/reference/pop_all_point.md)
-  : Pop All Intervals Containing a Point
+  : Pop All Intervals Matching a Point
 
 - [`peek_overlaps()`](https://oneilsh.github.io/immutables/reference/peek_overlaps.md)
   : Peek First Interval Overlapping a Query Interval
@@ -336,6 +366,9 @@ query/pop helpers over ordered interval endpoints.
 - [`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
   : Fapply with S3 dispatch
 
+- [`merge(`*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/merge.interval_index.md)
+  : Merge Two Interval Indices
+
 - [`` `[`( ``*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.interval_index.md)
   [`` `[[`( ``*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.interval_index.md)
   [`` `[<-`( ``*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/sub-.interval_index.md)
@@ -361,11 +394,15 @@ query/pop helpers over ordered interval endpoints.
 
 ## Developer Tools
 
-Lower-level primitives for custom monoids, predicate queries, and
-validation.
+Lower-level primitives for custom monoids, predicate queries,
+validation, and structure visualization.
 
 - [`add_monoids()`](https://oneilsh.github.io/immutables/reference/add_monoids.md)
   : Add or Merge Measure Monoids
+- [`get_measure()`](https://oneilsh.github.io/immutables/reference/get_measure.md)
+  : Read a Cached Subtree Measure
+- [`get_measures()`](https://oneilsh.github.io/immutables/reference/get_measures.md)
+  : Read Per-Element Monoid Measures
 - [`locate_by_predicate()`](https://oneilsh.github.io/immutables/reference/locate_by_predicate.md)
   : Locate First Predicate Match
 - [`split_around_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_around_by_predicate.md)
@@ -374,12 +411,12 @@ validation.
   : Split into Left and Right Parts
 - [`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md)
   : Construct a Measure Monoid Specification
-- [`predicate()`](https://oneilsh.github.io/immutables/reference/Predicate.md)
-  : Construct a Predicate Function
 - [`validate_tree()`](https://oneilsh.github.io/immutables/reference/validate_tree.md)
   : Validate full tree invariants (debug/test utility)
 - [`validate_name_state()`](https://oneilsh.github.io/immutables/reference/validate_name_state.md)
   : Validate name-state invariants only (debug/test utility)
+- [`plot_structure()`](https://oneilsh.github.io/immutables/reference/plot_structure.md)
+  : Plot the Internal Finger-Tree Structure
 
 # immutables
 
@@ -490,6 +527,8 @@ in
 ## Next Articles
 
 - [flexseq](https://oneilsh.github.io/immutables/articles/flexseq.md)
+- [flexseq
+  Benchmarks](https://oneilsh.github.io/immutables/articles/flexseq-benchmarks.md)
 - [Priority
   Queues](https://oneilsh.github.io/immutables/articles/priority-queues.md)
 - [Ordered

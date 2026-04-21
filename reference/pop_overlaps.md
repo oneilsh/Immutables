@@ -53,17 +53,17 @@ pop_overlaps(ix, 2, 3)
 #> NULL
 #> 
 #> $remaining
-#> Unnamed interval_index with 3 elements, default bounds [start, end).
+#> Unnamed interval_index with 3 elements, default query bounds [start, end).
 #> 
 #> Elements (by interval start order):
 #> 
-#> [[1]] (interval [1, 2))
+#> [[1]] (interval 1 - 2)
 #> [1] "a"
 #> 
-#> [[2]] (interval [3, 4))
+#> [[2]] (interval 3 - 4)
 #> [1] "b"
 #> 
-#> [[3]] (interval [5, 6))
+#> [[3]] (interval 5 - 6)
 #> [1] "c"
 #> 
 #> 

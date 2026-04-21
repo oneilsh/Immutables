@@ -53,14 +53,14 @@ pop_containing(ix, 2, 4)
 #> [1] 6
 #> 
 #> $remaining
-#> Unnamed interval_index with 2 elements, default bounds [start, end).
+#> Unnamed interval_index with 2 elements, default query bounds [start, end).
 #> 
 #> Elements (by interval start order):
 #> 
-#> [[1]] (interval [2, 3))
+#> [[1]] (interval 2 - 3)
 #> [1] "b"
 #> 
-#> [[2]] (interval [4, 7))
+#> [[2]] (interval 4 - 7)
 #> [1] "c"
 #> 
 #> 

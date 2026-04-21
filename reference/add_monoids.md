@@ -68,8 +68,9 @@ driven by domain-specific accumulated values.
 
 ## See also
 
-`add_monoids.flexseq()`, `add_monoids.priority_queue()`,
-`add_monoids.ordered_sequence()`, `add_monoids.interval_index()`
+[`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md),
+[`get_measure()`](https://oneilsh.github.io/immutables/reference/get_measure.md),
+[`get_measures()`](https://oneilsh.github.io/immutables/reference/get_measures.md)
 
 ## Examples
 

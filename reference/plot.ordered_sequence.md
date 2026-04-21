@@ -28,6 +28,5 @@ entries.
 
 ``` r
 x <- ordered_sequence("a", "b", "c", keys = c(2, 1, 3))
-plot(x)
-#> Error in plot_tree(x, ...): Package 'igraph' is required for plot_tree(). Install it with install.packages('igraph').
+if(requireNamespace("igraph", quietly = TRUE)) plot(x)
 ```

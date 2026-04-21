@@ -6,7 +6,7 @@ sequence-style operations.
 ## Usage
 
 ``` r
-as_flexseq(x, drop_meta = TRUE)
+as_flexseq(x)
 ```
 
 ## Arguments
@@ -14,17 +14,6 @@ as_flexseq(x, drop_meta = TRUE)
 - x:
 
   Input object.
-
-- drop_meta:
-
-  Logical scalar controlling advanced-structure cast style. For
-  `priority_queue`, `ordered_sequence`, and `interval_index`:
-
-  - `TRUE` (default): return payload-only elements and drop custom
-    monoids.
-
-  - `FALSE`: return full stored entry records (for example `value` +
-    metadata) and preserve cast-down custom monoids.
 
 ## Value
 
@@ -41,20 +30,21 @@ semantics and returns a plain `flexseq`.
 
 This is an S3 generic. Notable method behavior:
 
-- `as_flexseq.flexseq(x, drop_meta=...)` returns `x` unchanged.
+- `as_flexseq.flexseq(x)` returns `x` unchanged.
 
-- `as_flexseq.priority_queue(x, drop_meta=TRUE)` returns payload items;
-  `drop_meta=FALSE` returns `list(value, priority)` entries.
+- `as_flexseq.priority_queue(x)` returns payload items.
 
-- `as_flexseq.ordered_sequence(x, drop_meta=TRUE)` returns payload
-  items; `drop_meta=FALSE` returns `list(value, key)` entries.
+- `as_flexseq.ordered_sequence(x)` returns payload items.
 
-- `as_flexseq.interval_index(x, drop_meta=TRUE)` returns payload items;
-  `drop_meta=FALSE` returns interval entry records.
+- `as_flexseq.interval_index(x)` returns payload items.
 
-For advanced types with `drop_meta = TRUE`, custom monoids are dropped
-and the rebuilt `flexseq` keeps only structural monoids (`.size`,
-`.named_count`).
+For advanced types, custom monoids are dropped and the rebuilt `flexseq`
+keeps only structural monoids (`.size`, `.named_count`). For
+`priority_queue`, a flexseq of full entry records can be obtained by
+composing with [`as.list()`](https://rdrr.io/r/base/list.html):
+`as_flexseq(as.list(x))`. For `ordered_sequence` and `interval_index`,
+[`as.list()`](https://rdrr.io/r/base/list.html) also returns
+payload-only lists, so no direct record-preserving cast is provided.
 
 ## See also
 
@@ -94,27 +84,6 @@ as_flexseq(q)
 #> [[2]]
 #> [1] "b"
 #> 
-as_flexseq(q, drop_meta = FALSE)
-#> Unnamed flexseq with 2 elements.
-#> 
-#> Elements:
-#> 
-#> [[1]]
-#> $value
-#> [1] "a"
-#> 
-#> $priority
-#> [1] 2
-#> 
-#> 
-#> [[2]]
-#> $value
-#> [1] "b"
-#> 
-#> $priority
-#> [1] 1
-#> 
-#> 
 
 o <- ordered_sequence("a", "b", keys = c(2, 1))
 as_flexseq(o)
@@ -127,26 +96,5 @@ as_flexseq(o)
 #> 
 #> [[2]]
 #> [1] "a"
-#> 
-as_flexseq(o, drop_meta = FALSE)
-#> Unnamed flexseq with 2 elements.
-#> 
-#> Elements:
-#> 
-#> [[1]]
-#> $value
-#> [1] "b"
-#> 
-#> $key
-#> [1] 1
-#> 
-#> 
-#> [[2]]
-#> $value
-#> [1] "a"
-#> 
-#> $key
-#> [1] 2
-#> 
 #> 
 ```

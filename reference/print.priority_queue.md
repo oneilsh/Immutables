@@ -58,7 +58,7 @@ print(q3, max_elements = 0, show_custom_monoids = TRUE)
 #> Unnamed priority_queue with 2 elements.
 #> Minimum priority: 1, Maximum priority: 2
 #> Custom monoids + measures:
-#>   sum_item: 3
+#>   sum_item: 3 (aggregate)
 
 q2 <- priority_queue(1, 2, 3, priorities = c(2, 1, 3))
 print(q2, max_elements = 3)

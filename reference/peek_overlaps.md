@@ -44,7 +44,7 @@ peek_overlaps(ix, 2, 3)
 #> NULL
 
 # Boundary override at touching endpoints
-edge <- interval_index("a", start = 1, end = 3, bounds = "[)")
+edge <- interval_index("a", start = 1, end = 3, default_query_bounds = "[)")
 peek_overlaps(edge, 3, 4)                # default "[)": no endpoint overlap
 #> NULL
 peek_overlaps(edge, 3, 4, bounds = "[]") # closed bounds: endpoint overlaps

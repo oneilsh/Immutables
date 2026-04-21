@@ -8,16 +8,21 @@ Convenience wrapper around
 
 ``` r
 # S3 method for class 'flexseq'
-unlist(s, ...)
+unlist(x, recursive = TRUE, use.names = TRUE)
 ```
 
 ## Arguments
 
-- s:
+- x:
 
   A `flexseq`.
 
-- ...:
+- recursive:
+
+  Passed through to
+  [`base::unlist()`](https://rdrr.io/r/base/unlist.html).
+
+- use.names:
 
   Passed through to
   [`base::unlist()`](https://rdrr.io/r/base/unlist.html).
@@ -30,7 +35,7 @@ An atomic vector built from
 ## Details
 
 For `priority_queue`, this unwraps queue entries to payload items before
-unlisting (equivalent to `unlist(as.list(s, drop_meta = TRUE), ...)`).
+unlisting (equivalent to `unlist(as.list(x, drop_meta = TRUE), ...)`).
 
 Inherited by `ordered_sequence` and `interval_index` through the shared
 class stack.

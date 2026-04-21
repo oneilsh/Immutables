@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Developer API • immutables</title>
-<script src="../deps/jquery-3.6.1/jquery-3.6.1.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -34,11 +34,17 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/flexseq.html">flexseq</a></li>
+<li><h6 class="dropdown-header" data-toc-skip>Data structures</h6></li>
+    <li><a class="dropdown-item" href="../articles/flexseq.html">Sequences, Stacks, and Queues</a></li>
     <li><a class="dropdown-item" href="../articles/priority-queues.html">Priority Queues</a></li>
     <li><a class="dropdown-item" href="../articles/ordered-sequences.html">Ordered Sequences</a></li>
     <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
-    <li><a class="dropdown-item" href="../articles/algorithm-demos.html">Algorithm Demos</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
+    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="../articles/gallery.html">Gallery</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Internals</h6></li>
     <li><a class="dropdown-item" href="../articles/developer-api.html">Developer API</a></li>
   </ul>
 </li>
@@ -70,149 +76,554 @@
 
     
     
+<p>Every immutables structure is built on finger trees annotated with
+<em>monoids</em> — cached summaries that support O(log n) search and
+split. This vignette covers the developer API for defining custom
+monoids, using predicate-based locate and split operations, and
+validating tree invariants. These operations work uniformly across
+<code>flexseq</code>, <code>ordered_sequence</code>,
+<code>priority_queue</code>, and <code>interval_index</code>.</p>
 <div class="section level2">
-<h2 id="scope">Scope<a class="anchor" aria-label="anchor" href="#scope"></a>
+<h2 id="measures-and-monoids">Measures and monoids<a class="anchor" aria-label="anchor" href="#measures-and-monoids"></a>
 </h2>
-<p>This vignette sketches low-level APIs used to extend/query immutable
-structures:</p>
-<ul>
-<li><code><a href="../reference/measure_monoid.html">measure_monoid()</a></code></li>
-<li><code><a href="../reference/add_monoids.html">add_monoids()</a></code></li>
-<li><code><a href="../reference/Predicate.html">predicate()</a></code></li>
-<li><code><a href="../reference/locate_by_predicate.html">locate_by_predicate()</a></code></li>
-<li>
-<code><a href="../reference/split_around_by_predicate.html">split_around_by_predicate()</a></code> /
-<code><a href="../reference/split_by_predicate.html">split_by_predicate()</a></code>
-</li>
-<li>
-<code><a href="../reference/validate_tree.html">validate_tree()</a></code> /
-<code><a href="../reference/validate_name_state.html">validate_name_state()</a></code>
-</li>
-</ul>
-</div>
-<div class="section level2">
-<h2 id="define-and-attach-a-monoid">Define and attach a monoid<a class="anchor" aria-label="anchor" href="#define-and-attach-a-monoid"></a>
-</h2>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/flexseq.html">flexseq</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"bb"</span>, <span class="st">"ccc"</span>, <span class="st">"dddd"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">width_monoid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_monoid.html">measure_monoid</a></span><span class="op">(</span></span>
+<p>A monoid is defined by three pieces: a binary combining function
+<code>f</code>, an identity value <code>i</code>, and a
+<code>measure</code> function that maps a single leaf entry to its
+measure value. The combining function <em>must</em> be associative
+(<code>f(a, b) == f(b, a)</code>), and the identity must satisfy
+<code>f(i, x) == x</code> and <code>f(x, i) == x</code>.</p>
+<p>Measure values typically represent something you would want to
+aggregate over a subset of elements, with different measures and
+aggregations resulting in unique properties.</p>
+<p>When operating on a <code>flexseq</code>, you can think of a monoid’s
+<code>f</code> as being applied left-to-right (a left fold),
+accumulating measure values at each element. The calculation for the
+first element also uses <code>f</code>, which is where <code>i</code> is
+used, as the other input.</p>
+<pre><code>elements:  x1,  x2,  x3
+measures:  m1,  m2,  m3,  ...
+monoid-accumulated measures (infix notation):
+  v1 = i %f% m1
+  v2 = (i %f% m1) %f% m2            = v1 %f% m2
+  v3 = ((i %f% m1) %f% m2) %f% m3   = v2 %f% m3
+  ...</code></pre>
+<p>This left-to-rightness is only well defined for <code>flexseq</code>
+(using element order defined by the user in construction),
+<code>ordered_sequence</code> (always ordered by key), and
+<code>interval_index</code> (always ordered by interval start). Priority
+queue element order is maintained internally with new elements being
+added on the right, not in priority order. There may still be uses for
+monoids that aggregate priority values. This is because we can compute
+an aggregate over any <em>subsequence</em>, not just prefixes.
+Internally elements are stored as leaf nodes in a tree structure, and
+aggregating measures upward can be done purely recursively, and cached
+for fast access at any level.</p>
+<p>This monoid keeps track of the sum of values:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sum_monoid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_monoid.html">measure_monoid</a></span><span class="op">(</span></span>
 <span>  f <span class="op">=</span> <span class="va">`+`</span>,</span>
-<span>  i <span class="op">=</span> <span class="fl">0L</span>,</span>
-<span>  measure <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">el</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">el</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+<span>  i <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  measure <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">el</span><span class="op">)</span> <span class="va">el</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Next we attach it to a structure with <code><a href="../reference/add_monoids.html">add_monoids()</a></code>,
+which accepts a named list of monoids. We can pass
+<code>show_custom_monoids = TRUE</code> to <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> to see
+this new information:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">task_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">20</span>, min <span class="op">=</span> <span class="fl">1</span>, max <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span>digits <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/as_flexseq.html">as_flexseq</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_monoids.html">add_monoids</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>width <span class="op">=</span> <span class="va">width_monoid</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">x2</span>, <span class="st">"measures"</span><span class="op">)</span><span class="op">$</span><span class="va">width</span></span>
-<span><span class="co">#&gt; [1] 10</span></span></code></pre></div>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_monoids.html">add_monoids</a></span><span class="op">(</span><span class="va">task_times</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sum <span class="op">=</span> <span class="va">sum_monoid</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, show_custom_monoids <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed flexseq with 20 elements.</span></span>
+<span><span class="co">#&gt; Custom monoids + measures:</span></span>
+<span><span class="co">#&gt;   sum: 130.4 (aggregate)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] 9.2</span></span>
+<span><span class="co">#&gt;   sum measure: 9.2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] 9.4</span></span>
+<span><span class="co">#&gt;   sum measure: 9.4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ... (skipping 16 elements)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[19]]</span></span>
+<span><span class="co">#&gt; [1] 5.3</span></span>
+<span><span class="co">#&gt;   sum measure: 5.3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[20]]</span></span>
+<span><span class="co">#&gt; [1] 6</span></span>
+<span><span class="co">#&gt;   sum measure: 6</span></span></code></pre></div>
+<p>The <code><a href="../reference/plot_structure.html">plot_structure()</a></code> functions visualizes the internal
+tree layout. Passing a function to <code>node_label</code> lets us
+render both leaf values and cached structural measures produced by
+monoids:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_structure.html">plot_structure</a></span><span class="op">(</span><span class="va">x</span>, node_label <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">node</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">if</span><span class="op">(</span><span class="va">node</span><span class="op">$</span><span class="va">type</span> <span class="op">==</span> <span class="st">"Element"</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.1f\nΣ=%.1f"</span>, <span class="va">node</span><span class="op">$</span><span class="va">element</span>, <span class="va">node</span><span class="op">$</span><span class="va">measures</span><span class="op">$</span><span class="va">sum</span><span class="op">)</span></span>
+<span>  <span class="kw">else</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Σ=%.1f"</span>, <span class="va">node</span><span class="op">$</span><span class="va">measures</span><span class="op">$</span><span class="va">sum</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p><img src="developer-api_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="960"></p>
+<p>The tree now caches cumulative sum annotations at every internal
+node, enabling
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(log n)</annotation></semantics></math>
+search by accumulated sum. Setting <code>overwrite = TRUE</code>
+replaces an existing monoid with the same name.</p>
+<p>Each structure type reserves certain monoid names for internal use
+(e.g. <code>.size</code>, <code>.named_count</code>,
+<code>.pq_min</code>). Attempting to add a monoid with a reserved name
+will error.</p>
 </div>
 <div class="section level2">
 <h2 id="leaf-entry-contract">Leaf entry contract<a class="anchor" aria-label="anchor" href="#leaf-entry-contract"></a>
 </h2>
-<p>Developer APIs are entry-oriented. <code><a href="../reference/measure_monoid.html">measure_monoid()</a></code>
-measure functions should always be <code>function(entry)</code>.</p>
+<p>The provided <code>measure</code> function receives a
+structure-specific <em>entry</em>, not just the stored value. The entry
+shapes are:</p>
 <ul>
 <li>
-<code>flexseq</code>: entry is the stored user element.</li>
+<strong><code>flexseq</code></strong>: the stored element
+directly.</li>
 <li>
-<code>ordered_sequence</code>: entry is
+<strong><code>ordered_sequence</code></strong>:
 <code>list(value, key)</code>.</li>
 <li>
-<code>priority_queue</code>: entry is
+<strong><code>priority_queue</code></strong>:
 <code>list(value, priority)</code>.</li>
 <li>
-<code>interval_index</code>: entry is
+<strong><code>interval_index</code></strong>:
 <code>list(value, start, end)</code>.</li>
 </ul>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">os</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"yy"</span><span class="op">)</span>, keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">by_key</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_monoid.html">measure_monoid</a></span><span class="op">(</span><span class="va">`+`</span>, <span class="fl">0L</span>, <span class="kw">function</span><span class="op">(</span><span class="va">entry</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">entry</span><span class="op">$</span><span class="va">key</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">os2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_monoids.html">add_monoids</a></span><span class="op">(</span><span class="va">os</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>by_key <span class="op">=</span> <span class="va">by_key</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">loc_key</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/locate_by_predicate.html">locate_by_predicate</a></span><span class="op">(</span><span class="va">os2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;=</span> <span class="fl">3L</span>, <span class="st">"by_key"</span>, include_metadata <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">loc_key</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">hit_measure</span></span>
-<span><span class="co">#&gt; [1] 3</span></span></code></pre></div>
-<p><code><a href="../reference/split_around_by_predicate.html">split_around_by_predicate()</a></code> and
-<code><a href="../reference/locate_by_predicate.html">locate_by_predicate()</a></code> return leaf entries in that same
-structure-specific form.</p>
-</div>
-<div class="section level2">
-<h2 id="locate-with-predicate-scans">Locate with predicate scans<a class="anchor" aria-label="anchor" href="#locate-with-predicate-scans"></a>
-</h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/Predicate.html">predicate</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;=</span> <span class="fl">5L</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">loc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/locate_by_predicate.html">locate_by_predicate</a></span><span class="op">(</span><span class="va">x2</span>, <span class="va">p</span>, <span class="st">"width"</span>, include_metadata <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">loc</span><span class="op">$</span><span class="va">found</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span>
-<span><span class="va">loc</span><span class="op">$</span><span class="va">value</span></span>
-<span><span class="co">#&gt; [1] "ccc"</span></span>
-<span><span class="va">loc</span><span class="op">$</span><span class="va">metadata</span></span>
-<span><span class="co">#&gt; $left_measure</span></span>
-<span><span class="co">#&gt; [1] 3</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $hit_measure</span></span>
-<span><span class="co">#&gt; [1] 6</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $right_measure</span></span>
-<span><span class="co">#&gt; [1] 4</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $index</span></span>
-<span><span class="co">#&gt; [1] 3</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="split-with-predicate-scans">Split with predicate scans<a class="anchor" aria-label="anchor" href="#split-with-predicate-scans"></a>
-</h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">s1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/split_around_by_predicate.html">split_around_by_predicate</a></span><span class="op">(</span><span class="va">x2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;=</span> <span class="fl">5L</span>, <span class="st">"width"</span><span class="op">)</span></span>
-<span><span class="va">s1</span><span class="op">$</span><span class="va">left</span></span>
-<span><span class="co">#&gt; Unnamed flexseq with 2 elements.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Elements:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[1]]</span></span>
-<span><span class="co">#&gt; [1] "a"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]]</span></span>
-<span><span class="co">#&gt; [1] "bb"</span></span>
-<span><span class="va">s1</span><span class="op">$</span><span class="va">value</span></span>
-<span><span class="co">#&gt; [1] "ccc"</span></span>
-<span><span class="va">s1</span><span class="op">$</span><span class="va">right</span></span>
-<span><span class="co">#&gt; Unnamed flexseq with 1 element.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Elements:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[1]]</span></span>
-<span><span class="co">#&gt; [1] "dddd"</span></span>
-<span></span>
-<span><span class="va">s2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/split_by_predicate.html">split_by_predicate</a></span><span class="op">(</span><span class="va">x2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;=</span> <span class="fl">5L</span>, <span class="st">"width"</span><span class="op">)</span></span>
-<span><span class="va">s2</span><span class="op">$</span><span class="va">left</span></span>
-<span><span class="co">#&gt; Unnamed flexseq with 2 elements.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Elements:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[1]]</span></span>
-<span><span class="co">#&gt; [1] "a"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]]</span></span>
-<span><span class="co">#&gt; [1] "bb"</span></span>
-<span><span class="va">s2</span><span class="op">$</span><span class="va">right</span></span>
-<span><span class="co">#&gt; Unnamed flexseq with 2 elements.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Elements:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[1]]</span></span>
-<span><span class="co">#&gt; [1] "ccc"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]]</span></span>
-<span><span class="co">#&gt; [1] "dddd"</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="invariant-checks">Invariant checks<a class="anchor" aria-label="anchor" href="#invariant-checks"></a>
-</h2>
-<p>These are intended for debugging and tests.</p>
+<p>This means a monoid that works on one structure type may not work on
+another. Here is a monoid that sums keys on an
+<code>ordered_sequence</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/validate_tree.html">validate_tree</a></span><span class="op">(</span><span class="va">x2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/validate_name_state.html">validate_name_state</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_flexseq.html">as_flexseq</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span>, b <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">key_sum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_monoid.html">measure_monoid</a></span><span class="op">(</span><span class="va">`+`</span>, <span class="fl">0L</span>, <span class="kw">function</span><span class="op">(</span><span class="va">entry</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">entry</span><span class="op">$</span><span class="va">key</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">os</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"alice"</span>, <span class="st">"bob"</span>, <span class="st">"carol"</span><span class="op">)</span>, keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">os</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_monoids.html">add_monoids</a></span><span class="op">(</span><span class="va">os</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>key_sum <span class="op">=</span> <span class="va">key_sum</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">os</span>, show_custom_monoids <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 3 elements.</span></span>
+<span><span class="co">#&gt; Custom monoids + measures:</span></span>
+<span><span class="co">#&gt;   key_sum: 60 (aggregate)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key 10)</span></span>
+<span><span class="co">#&gt; [1] "alice"</span></span>
+<span><span class="co">#&gt;   key_sum measure: 10</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (key 20)</span></span>
+<span><span class="co">#&gt; [1] "bob"</span></span>
+<span><span class="co">#&gt;   key_sum measure: 20</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]] (key 30)</span></span>
+<span><span class="co">#&gt; [1] "carol"</span></span>
+<span><span class="co">#&gt;   key_sum measure: 30</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="locating-and-splitting-by-predicate">Locating and splitting by predicate<a class="anchor" aria-label="anchor" href="#locating-and-splitting-by-predicate"></a>
+</h2>
+<p>Predicate-based operations scan accumulated monoid values
+left-to-right and find the first point where a predicate transitions
+from <code>FALSE</code> to <code>TRUE</code>. The predicate must be
+<em>monotonic</em>: once it returns <code>TRUE</code>, it must stay
+<code>TRUE</code> for all subsequent accumulated values. This is what
+enables the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(log n)</annotation></semantics></math>
+search for a single split point.</p>
+<p><code><a href="../reference/locate_by_predicate.html">locate_by_predicate()</a></code> finds the <em>first</em> element
+where the predicate fires, without splitting the tree. With
+<code>include_metadata = TRUE</code> it returns additional scan
+information. The predicate function is applied to accumulated measure
+values for a given monoid name; here we find the first element where the
+accumulated sum exceeds
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>25</mn><annotation encoding="application/x-tex">25</annotation></semantics></math>.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">loc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/locate_by_predicate.html">locate_by_predicate</a></span><span class="op">(</span><span class="va">x</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;</span> <span class="fl">25</span>, <span class="st">"sum"</span>, include_metadata <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">loc</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 3</span></span>
+<span><span class="co">#&gt;  $ found   : logi TRUE</span></span>
+<span><span class="co">#&gt;  $ value   : num 8.5</span></span>
+<span><span class="co">#&gt;  $ metadata:List of 4</span></span>
+<span><span class="co">#&gt;   ..$ left_measure : num 22.2</span></span>
+<span><span class="co">#&gt;   ..$ hit_measure  : num 30.7</span></span>
+<span><span class="co">#&gt;   ..$ right_measure: num 84.2</span></span>
+<span><span class="co">#&gt;   ..$ index        : int 4</span></span></code></pre></div>
+<p>The <code>$found</code> entry indicates that a node where the
+predicate fires was found; if this is false the predicate is
+<code>FALSE</code> for all elements through the end. The
+<code>$value</code> entry gives the measure of the node where the
+predicate turned <code>TRUE</code>.</p>
+<p>The optional metadata includes <code>left_measure</code> (accumulated
+value before the match), <code>hit_measure</code> (the matched element’s
+own accumulated measure), <code>right_measure</code> (accumulated value
+of everything after), and <code>index</code> (1-based position). In this
+example index 4 is where the first time where the accumulated sum is
+greater than 25, which we can verify in the plot above
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>9.2</mn><mo>+</mo><mn>9.4</mn><mo>+</mo><mn>3.6</mn><mo>=</mo><mn>22.2</mn></mrow><annotation encoding="application/x-tex">9.2 + 9.4 + 3.6 = 22.2</annotation></semantics></math>,
+adding in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>8.5</mn><annotation encoding="application/x-tex">8.5</annotation></semantics></math>
+brings the sum to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>30.7</mn><annotation encoding="application/x-tex">30.7</annotation></semantics></math>).</p>
+<p><code><a href="../reference/split_by_predicate.html">split_by_predicate()</a></code> splits the structure at the
+predicate point, returning <code>$left</code> and <code>$right</code>.
+The matched element is the first element of <code>$right</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">s</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/split_by_predicate.html">split_by_predicate</a></span><span class="op">(</span><span class="va">x</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;</span> <span class="fl">25</span>, <span class="st">"sum"</span><span class="op">)</span></span>
+<span><span class="va">s</span><span class="op">$</span><span class="va">left</span></span>
+<span><span class="co">#&gt; Unnamed flexseq with 3 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] 9.2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] 9.4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]]</span></span>
+<span><span class="co">#&gt; [1] 3.6</span></span>
+<span><span class="va">s</span><span class="op">$</span><span class="va">right</span></span>
+<span><span class="co">#&gt; Unnamed flexseq with 17 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] 8.5</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] 6.8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ... (skipping 13 elements)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[16]]</span></span>
+<span><span class="co">#&gt; [1] 5.3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[17]]</span></span>
+<span><span class="co">#&gt; [1] 6</span></span></code></pre></div>
+<p><code><a href="../reference/split_around_by_predicate.html">split_around_by_predicate()</a></code> is similar but extracts the
+matched element into a separate <code>$value</code> field:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sa</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/split_around_by_predicate.html">split_around_by_predicate</a></span><span class="op">(</span><span class="va">x</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="va">v</span> <span class="op">&gt;</span> <span class="fl">25</span>, <span class="st">"sum"</span><span class="op">)</span></span>
+<span><span class="va">sa</span><span class="op">$</span><span class="va">left</span></span>
+<span><span class="co">#&gt; Unnamed flexseq with 3 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] 9.2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] 9.4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]]</span></span>
+<span><span class="co">#&gt; [1] 3.6</span></span>
+<span><span class="va">sa</span><span class="op">$</span><span class="va">value</span></span>
+<span><span class="co">#&gt; [1] 8.5</span></span>
+<span><span class="va">sa</span><span class="op">$</span><span class="va">right</span></span>
+<span><span class="co">#&gt; Unnamed flexseq with 16 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] 6.8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] 5.7</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ... (skipping 12 elements)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[15]]</span></span>
+<span><span class="co">#&gt; [1] 5.3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[16]]</span></span>
+<span><span class="co">#&gt; [1] 6</span></span></code></pre></div>
+<p>Both split variants accept an optional <code>accumulator</code>
+argument to start scanning from a value other than the monoid identity.
+<code><a href="../reference/split_at.html">split_at()</a></code> is a convenience wrapper that splits by position
+using the built-in <code>.size</code> monoid (which counts nodes; each
+leaf node’s measure is <code>1</code> and it uses the <code>sum</code>
+operator):</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/split_at.html">split_at</a></span><span class="op">(</span><span class="va">x</span>, at <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $left</span></span>
+<span><span class="co">#&gt; Unnamed flexseq with 4 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] 9.2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] 9.4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]]</span></span>
+<span><span class="co">#&gt; [1] 3.6</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[4]]</span></span>
+<span><span class="co">#&gt; [1] 8.5</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $value</span></span>
+<span><span class="co">#&gt; [1] 6.8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $right</span></span>
+<span><span class="co">#&gt; Unnamed flexseq with 15 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] 5.7</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] 7.6</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ... (skipping 11 elements)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[14]]</span></span>
+<span><span class="co">#&gt; [1] 5.3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[15]]</span></span>
+<span><span class="co">#&gt; [1] 6</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="built-in-monoids-in-action">Built-in monoids in action<a class="anchor" aria-label="anchor" href="#built-in-monoids-in-action"></a>
+</h2>
+<p>As described by <a href="https://www.cs.ox.ac.uk/ralf.hinze/publications/FingerTrees.pdf" class="external-link">Hinze
+and Paterson</a>, this monoid + predicate pattern is remarkably
+flexible. The <code>priority_queue</code> and
+<code>ordered_sequence</code> types for example are not actually
+separate data structures, but monoid-annotated <code>flexseq</code>
+structures plus thin wrappers that invoke
+<code><a href="../reference/locate_by_predicate.html">locate_by_predicate()</a></code> and friends with the right predicate.
+The same primitives introduced above power every <code>peek_*</code>,
+<code>pop_*</code>, and bound query in the package. (Interval indices
+also follow these patterns, but are more complex than would be useful to
+review here.)</p>
+<div class="section level3">
+<h3 id="priority-queue--pq_min-and--pq_max">Priority queue: <code>.pq_min</code> and <code>.pq_max</code><a class="anchor" aria-label="anchor" href="#priority-queue--pq_min-and--pq_max"></a>
+</h3>
+<p>Priority queues store elements in insertion order, not priority
+order, so a linear scan would be the only way to find the min-priority
+element without some extra bookkeeping. That bookkeeping is
+<code>.pq_min</code> (and its twin <code>.pq_max</code>): a monoid whose
+cached value at every internal node is the smallest priority anywhere in
+that subtree, combined by picking the side with the smaller priority
+(left-most on ties, which preserves first-in first-out for equal
+priorities).</p>
+<p><code>pop_min(q)</code> then works in three lines of logic: read the
+root aggregate as the <em>target</em> priority, form the predicate “has
+the accumulated subtree absorbed a slot with this priority yet?”, and
+hand it to <code><a href="../reference/split_around_by_predicate.html">split_around_by_predicate()</a></code> over
+<code>.pq_min</code>. The descent uses cached subtree aggregates to
+prune branches whose min is a different value, so the whole thing runs
+in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>log</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math>
+even though the leaves themselves are not in priority order.</p>
+</div>
+<div class="section level3">
+<h3 id="ordered-sequence--oms_max_key">Ordered sequence: <code>.oms_max_key</code><a class="anchor" aria-label="anchor" href="#ordered-sequence--oms_max_key"></a>
+</h3>
+<p>An ordered sequence is a <code>flexseq</code> whose elements are kept
+sorted by key. Its built-in <code>.oms_max_key</code> monoid caches the
+largest key in each subtree, combined by picking the larger of its two
+inputs.</p>
+<p>Because the sequence is already key-ordered, the accumulated max-key
+is monotonically non-decreasing left-to-right, so a predicate like “is
+the running max at least my query?” transitions from <code>FALSE</code>
+to <code>TRUE</code> exactly once at the correct location. The
+<code><a href="../reference/lower_bound.html">lower_bound()</a></code> function wires that predicate into
+<code><a href="../reference/locate_by_predicate.html">locate_by_predicate()</a></code> on <code>.oms_max_key</code> and
+returns the first element with key at or above the target;
+<code><a href="../reference/peek_key.html">peek_key()</a></code>, <code><a href="../reference/pop_key.html">pop_key()</a></code>,
+<code><a href="../reference/count_between.html">count_between()</a></code>, and the rest all follow the same template
+with different predicate shapes and splitting/concatenating.</p>
+<p>In practice, <code>.pq_min</code>, <code>.oms_max_key</code> and
+other measures are stored as lists, containing the measure of interest
+(min priority value, max key value) as well as other helper information
+such as the key type to ensure consistent comparisons. The identity
+<code>i</code> and associative combining function <code>f</code> operate
+on list-based measures of the right shape.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="example-dna-prefix-search">Example: DNA prefix search<a class="anchor" aria-label="anchor" href="#example-dna-prefix-search"></a>
+</h2>
+<p>Custom monoids and predicate splits combine naturally for index-style
+queries. Here we build a persistent subsequence index over a DNA string
+and use it to find all positions where a query pattern occurs as a
+prefix.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sequence</span> <span class="op">&lt;-</span> <span class="st">"ACGCGCTCGCGCATAGTCGCGCCTG"</span></span>
+<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="st">"CGCGC"</span> <span class="co"># goal: find indices where query occurs</span></span></code></pre></div>
+<p>The idea is to store each position in the string as a value, keyed on
+a subsequence long enough to contain the query (we’ll keep 10-letter
+subsequences):</p>
+<pre><code>key: ACGCGC..., value = 1
+key: CGCGCT..., value = 2
+key: GCGCTC..., value = 3
+...</code></pre>
+<p>However, ordered sequences actually store their values in
+key-order:</p>
+<pre><code>key: ACGCGC..., value = 1
+key: AGTCGC..., value = 15
+key: ATAGTC..., value = 13
+...</code></pre>
+<p>Since they are in key-order, matches will be found in a run: all
+subsequences starting with the query will be next to each other. To
+extract them we just need to find the first one (a splitting operation
+over a monoid), and the last (another splitting operation over a
+monoid).</p>
+<p>First we define a monoid that tracks the maximum key (subsequence
+string) seen so far. The built-in <code>.oms_max_key</code> monoid
+already tracks this, but we define our own to illustrate the pattern.
+Recall from above that the measuring function takes a list with shape
+<code>list(value = ..., key = ...)</code> when used with an
+<code>ordered_sequence</code>; in this case we just need it to return
+the key as the measure.</p>
+<p>We can add the monoid to an empty tree, and values for new entries
+will be automatically computed on addition/removal etc.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">max_seq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_monoid.html">measure_monoid</a></span><span class="op">(</span><span class="va">max</span>, i <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, measure <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">entry</span><span class="op">)</span> <span class="va">entry</span><span class="op">$</span><span class="va">key</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">subseqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ordered_sequence.html">ordered_sequence</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">subseqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_monoids.html">add_monoids</a></span><span class="op">(</span><span class="va">subseqs</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>max_seq <span class="op">=</span> <span class="va">max_seq</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Next we index every position in the DNA string by its length-10
+subsequence, inserting them into the structure:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">sequence</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">subseq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="va">sequence</span>, <span class="va">i</span>, <span class="va">i</span> <span class="op">+</span> <span class="fl">10</span><span class="op">)</span></span>
+<span>  <span class="va">subseqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="va">subseqs</span>, <span class="va">i</span>, key <span class="op">=</span> <span class="va">subseq</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">subseqs</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 25 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key ACGCGCTCGCG)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (key AGTCGCGCCTG)</span></span>
+<span><span class="co">#&gt; [1] 15</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ... (skipping 21 elements)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[24]] (key TCGCGCCTG)</span></span>
+<span><span class="co">#&gt; [1] 17</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[25]] (key TG)</span></span>
+<span><span class="co">#&gt; [1] 24</span></span></code></pre></div>
+<p>Now we can search for all subsequences starting with the query.
+First, split to find the first entry where the measure is
+<code>&gt;=</code> the query:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">first_split</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/split_by_predicate.html">split_by_predicate</a></span><span class="op">(</span><span class="va">subseqs</span>, <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="va">query</span> <span class="op">&lt;=</span> <span class="va">m</span>, <span class="st">"max_seq"</span><span class="op">)</span></span>
+<span><span class="va">first_split</span><span class="op">$</span><span class="va">left</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 7 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key ACGCGCTCGCG)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (key AGTCGCGCCTG)</span></span>
+<span><span class="co">#&gt; [1] 15</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ... (skipping 3 elements)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[6]] (key CGCATAGTCGC)</span></span>
+<span><span class="co">#&gt; [1] 10</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[7]] (key CGCCTG)</span></span>
+<span><span class="co">#&gt; [1] 20</span></span>
+<span><span class="va">first_split</span><span class="op">$</span><span class="va">right</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 18 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key CGCGCATAGTC)</span></span>
+<span><span class="co">#&gt; [1] 8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (key CGCGCCTG)</span></span>
+<span><span class="co">#&gt; [1] 18</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ... (skipping 14 elements)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[17]] (key TCGCGCCTG)</span></span>
+<span><span class="co">#&gt; [1] 17</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[18]] (key TG)</span></span>
+<span><span class="co">#&gt; [1] 24</span></span></code></pre></div>
+<p>An empty <code>$right</code> indicates no matches (all measures are
+less than the query). If it’s not empty, but the first measure in
+<code>$right</code> does not start with the query, then there again no
+matches (the key is between the left and right but doesn’t match). We
+can use the <code><a href="../reference/get_measures.html">get_measures()</a></code> function to return a
+<code>flexseq</code> of measure values by name and index with
+<code>[[1]]</code> to get the first measure.</p>
+<p>If the first key in <code>$right</code> <em>does</em> start with the
+query, then there is at least one match, and all matches would be in
+<code>$right</code>. We can split again to find where matching keys end
+with a different predicate, one that fires on the first measure that is
+strictly <em>greater</em> than the query <em>and</em> no longer starts
+with it (resulting in the index of the first non-match in the run).</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">first_split</span><span class="op">$</span><span class="va">right</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">right_measures</span> <span class="op">=</span> <span class="fu"><a href="../reference/get_measures.html">get_measures</a></span><span class="op">(</span><span class="va">first_split</span><span class="op">$</span><span class="va">right</span>, <span class="st">"max_seq"</span><span class="op">)</span></span>
+<span>  <span class="va">first_measure</span> <span class="op">=</span> <span class="va">right_measures</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span></span>
+<span>  <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/startsWith.html" class="external-link">startsWith</a></span><span class="op">(</span><span class="va">first_measure</span>, <span class="va">query</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">second_split</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/split_by_predicate.html">split_by_predicate</a></span><span class="op">(</span></span>
+<span>      <span class="va">first_split</span><span class="op">$</span><span class="va">right</span>,</span>
+<span>      <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="va">query</span> <span class="op">&lt;</span> <span class="va">m</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/startsWith.html" class="external-link">startsWith</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">query</span><span class="op">)</span>,</span>
+<span>      <span class="st">"max_seq"</span></span>
+<span>    <span class="op">)</span></span>
+<span>    <span class="va">matches</span> <span class="op">&lt;-</span> <span class="va">second_split</span><span class="op">$</span><span class="va">left</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">matches</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 3 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key CGCGCATAGTC)</span></span>
+<span><span class="co">#&gt; [1] 8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (key CGCGCCTG)</span></span>
+<span><span class="co">#&gt; [1] 18</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]] (key CGCGCTCGCGC)</span></span>
+<span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
+<p>Finally we can extract the original string positions from the
+matching entries:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">positions</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fapply.html">fapply</a></span><span class="op">(</span><span class="va">matches</span>, <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">key</span><span class="op">)</span> <span class="va">value</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">positions</span></span>
+<span><span class="co">#&gt; [1]  8 18  2</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="validation-helpers">Validation helpers<a class="anchor" aria-label="anchor" href="#validation-helpers"></a>
+</h2>
+<p><code><a href="../reference/validate_tree.html">validate_tree()</a></code> checks structural invariants (monoid
+consistency, node structure) across the entire tree.
+<code><a href="../reference/validate_name_state.html">validate_name_state()</a></code> verifies that a tree is either fully
+unnamed or fully named with unique, non-empty names. Both are
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math>
+and intended for debugging and tests.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/validate_tree.html">validate_tree</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/validate_name_state.html">validate_name_state</a></span><span class="op">(</span><span class="fu"><a href="../reference/flexseq.html">flexseq</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span>, b <span class="op">=</span> <span class="fl">2</span>, c <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

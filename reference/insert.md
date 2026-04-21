@@ -78,8 +78,19 @@ insert(o, "b", key = 2)
 #> [1] "c"
 #> 
 
-iv <- interval_index("A", "B", starts = c(1, 5), ends = c(3, 8))
-#> Error in .ivx_build_from_items(as.list(x), start = start, end = end, bounds = bounds,     monoids = monoids): `start` is required when elements are supplied.
+iv <- interval_index("A", "B", start = c(1, 5), end = c(3, 8))
 insert(iv, "C", start = 2, end = 6)
-#> Error: object 'iv' not found
+#> Unnamed interval_index with 3 elements, default query bounds [start, end).
+#> 
+#> Elements (by interval start order):
+#> 
+#> [[1]] (interval 1 - 3)
+#> [1] "A"
+#> 
+#> [[2]] (interval 2 - 6)
+#> [1] "C"
+#> 
+#> [[3]] (interval 5 - 8)
+#> [1] "B"
+#> 
 ```

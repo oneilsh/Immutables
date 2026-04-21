@@ -80,37 +80,37 @@ ix <- interval_index(a = "A", b = "B", c = "C", start = c(1, 3, 5), end = c(2, 4
 
 ix[c(3, 1)]         # warning; result returned in interval order
 #> Warning: Ordered subsetting canonicalizes selector order; pre-sort and unique selectors to silence this warning.
-#> Named interval_index with 2 elements, default bounds [start, end).
+#> Named interval_index with 2 elements, default query bounds [start, end).
 #> 
 #> Elements (by interval start order):
 #> 
-#> $a (interval [1, 2))
+#> $a (interval 1 - 2)
 #> [1] "A"
 #> 
-#> $c (interval [5, 6))
+#> $c (interval 5 - 6)
 #> [1] "C"
 #> 
 ix[c("c", "a")]     # warning; result returned in interval order
 #> Warning: Ordered subsetting canonicalizes selector order; pre-sort and unique selectors to silence this warning.
-#> Named interval_index with 2 elements, default bounds [start, end).
+#> Named interval_index with 2 elements, default query bounds [start, end).
 #> 
 #> Elements (by interval start order):
 #> 
-#> $a (interval [1, 2))
+#> $a (interval 1 - 2)
 #> [1] "A"
 #> 
-#> $c (interval [5, 6))
+#> $c (interval 5 - 6)
 #> [1] "C"
 #> 
 ix[c(TRUE, FALSE, TRUE)]
-#> Named interval_index with 2 elements, default bounds [start, end).
+#> Named interval_index with 2 elements, default query bounds [start, end).
 #> 
 #> Elements (by interval start order):
 #> 
-#> $a (interval [1, 2))
+#> $a (interval 1 - 2)
 #> [1] "A"
 #> 
-#> $c (interval [5, 6))
+#> $c (interval 5 - 6)
 #> [1] "C"
 #> 
 ix[["b"]]

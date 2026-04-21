@@ -53,14 +53,14 @@ pop_within(ix, 1, 4)
 #> [1] 3
 #> 
 #> $remaining
-#> Unnamed interval_index with 2 elements, default bounds [start, end).
+#> Unnamed interval_index with 2 elements, default query bounds [start, end).
 #> 
 #> Elements (by interval start order):
 #> 
-#> [[1]] (interval [1, 6))
+#> [[1]] (interval 1 - 6)
 #> [1] "a"
 #> 
-#> [[2]] (interval [4, 5))
+#> [[2]] (interval 4 - 5)
 #> [1] "c"
 #> 
 #> 

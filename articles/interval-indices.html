@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Interval Indices • immutables</title>
-<script src="../deps/jquery-3.6.1/jquery-3.6.1.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -34,11 +34,17 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/flexseq.html">flexseq</a></li>
+<li><h6 class="dropdown-header" data-toc-skip>Data structures</h6></li>
+    <li><a class="dropdown-item" href="../articles/flexseq.html">Sequences, Stacks, and Queues</a></li>
     <li><a class="dropdown-item" href="../articles/priority-queues.html">Priority Queues</a></li>
     <li><a class="dropdown-item" href="../articles/ordered-sequences.html">Ordered Sequences</a></li>
     <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
-    <li><a class="dropdown-item" href="../articles/algorithm-demos.html">Algorithm Demos</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
+    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="../articles/gallery.html">Gallery</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Internals</h6></li>
     <li><a class="dropdown-item" href="../articles/developer-api.html">Developer API</a></li>
   </ul>
 </li>
@@ -71,128 +77,423 @@
     
     
 <div class="section level2">
-<h2 id="what-is-an-interval-index">What is an interval index?<a class="anchor" aria-label="anchor" href="#what-is-an-interval-index"></a>
+<h2 id="interval-index-basics">Interval index basics<a class="anchor" aria-label="anchor" href="#interval-index-basics"></a>
 </h2>
-<p><code>interval_index</code> stores elements with interval endpoints
-and supports immutable relation queries.</p>
+<p><code>interval_index</code> is a persistent structure that associates
+elements with interval endpoints and supports fast interval-relation
+queries. Intervals are stored sorted by start endpoint, with stable
+first-in-first-out (FIFO) ordering for ties.</p>
+<p>All operations are persistent, and return modified copies. Peeking
+returns the stored element (which may be any type), popping returns a
+list with <code>$value</code> containing the stored element,
+<code>$start</code> and <code>$end</code> the interval endpoints, and
+<code>$remaining</code> the rest of the index without that element.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/interval_index.html">interval_index</a></span><span class="op">(</span></span>
 <span>  <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>,</span>
 <span>  start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>,</span>
-<span>  end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span>  end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">ix</span></span>
-<span><span class="co">#&gt; Unnamed interval_index with 3 elements, default bounds [start, end).</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 3 elements, default query bounds [start, end).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Elements (by interval start order):</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[1]] (interval [1, 3))</span></span>
+<span><span class="co">#&gt; [[1]] (interval 1 - 3)</span></span>
 <span><span class="co">#&gt; [1] "A"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]] (interval [2, 2))</span></span>
+<span><span class="co">#&gt; [[2]] (interval 2 - 4)</span></span>
 <span><span class="co">#&gt; [1] "B"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[3]] (interval [4, 5))</span></span>
+<span><span class="co">#&gt; [[3]] (interval 4 - 5)</span></span>
 <span><span class="co">#&gt; [1] "C"</span></span></code></pre></div>
-<p><code>as_flexseq(ix)</code> returns payload-only values by default.
-Use <code>as_flexseq(ix, drop_meta = FALSE)</code> to keep interval
-entry records.</p>
-</div>
-<div class="section level2">
-<h2 id="point-query">Point query<a class="anchor" aria-label="anchor" href="#point-query"></a>
-</h2>
+<p>The <code><a href="../reference/as_interval_index.html">as_interval_index()</a></code> variant builds an index from a
+vector or list of elements paired with start/end vectors, useful when
+endpoints are already in separate vectors.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/peek_point.html">peek_point</a></span><span class="op">(</span><span class="va">ix</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "A"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="fu"><a href="../reference/peek_all_point.html">peek_all_point</a></span><span class="op">(</span><span class="va">ix</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [[1]]</span></span>
-<span><span class="co">#&gt; [1] "A"</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">ix2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_interval_index.html">as_interval_index</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"phase1"</span>, <span class="st">"phase2"</span>, <span class="st">"phase3"</span><span class="op">)</span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>, end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ix2</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 3 elements, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (interval 1 - 4)</span></span>
+<span><span class="co">#&gt; [1] "phase1"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (interval 2 - 6)</span></span>
+<span><span class="co">#&gt; [1] "phase3"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]] (interval 3 - 5)</span></span>
+<span><span class="co">#&gt; [1] "phase2"</span></span></code></pre></div>
+<p><code>as_flexseq(ix)</code> returns a payload-only
+<code>flexseq</code>; interval bounds and any custom monoids are dropped
+(see <code>as.list</code> to convert and preserve interval
+metadata).</p>
 </div>
 <div class="section level2">
-<h2 id="interval-relations">Interval relations<a class="anchor" aria-label="anchor" href="#interval-relations"></a>
+<h2 id="point-and-interval-queries">Point and interval queries<a class="anchor" aria-label="anchor" href="#point-and-interval-queries"></a>
 </h2>
+<p><code><a href="../reference/peek_point.html">peek_point()</a></code> returns the <em>first</em> (in FIFO order)
+element whose interval contains a query point;
+<code><a href="../reference/peek_all_point.html">peek_all_point()</a></code> returns all matches as an
+<code>interval_index</code> slice.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/peek_overlaps.html">peek_overlaps</a></span><span class="op">(</span><span class="va">ix</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/peek_point.html">peek_point</a></span><span class="op">(</span><span class="va">ix</span>, point <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "A"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="fu"><a href="../reference/peek_all_overlaps.html">peek_all_overlaps</a></span><span class="op">(</span><span class="va">ix</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="fu"><a href="../reference/peek_all_point.html">peek_all_point</a></span><span class="op">(</span><span class="va">ix</span>, point <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 2 elements, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (interval 1 - 3)</span></span>
 <span><span class="co">#&gt; [1] "A"</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/peek_containing.html">peek_containing</a></span><span class="op">(</span><span class="va">ix</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "A"</span></span>
-<span><span class="fu"><a href="../reference/peek_within.html">peek_within</a></span><span class="op">(</span><span class="va">ix</span>, <span class="fl">1</span>, <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "A"</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="pop-queries">Pop queries<a class="anchor" aria-label="anchor" href="#pop-queries"></a>
-</h2>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (interval 2 - 4)</span></span>
+<span><span class="co">#&gt; [1] "B"</span></span></code></pre></div>
+<p><code><a href="../reference/pop_point.html">pop_point()</a></code> removes and returns the first match as
+<code>$value</code>/<code>$start</code>/<code>$end</code>/<code>$remaining</code>.
+Its “all” counterpart <code><a href="../reference/pop_all_point.html">pop_all_point()</a></code> returns
+<code>$elements</code> (an interval_index of removed matches) and
+<code>$remaining</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_point.html">pop_point</a></span><span class="op">(</span><span class="va">ix</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">p1</span><span class="op">$</span><span class="va">value</span></span>
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_point.html">pop_point</a></span><span class="op">(</span><span class="va">ix</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">value</span></span>
 <span><span class="co">#&gt; [1] "A"</span></span>
-<span><span class="va">p1</span><span class="op">$</span><span class="va">start</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">start</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
-<span><span class="va">p1</span><span class="op">$</span><span class="va">end</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">end</span></span>
 <span><span class="co">#&gt; [1] 3</span></span>
-<span><span class="va">p1</span><span class="op">$</span><span class="va">remaining</span></span>
-<span><span class="co">#&gt; Unnamed interval_index with 2 elements, default bounds [start, end).</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">remaining</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 2 elements, default query bounds [start, end).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Elements (by interval start order):</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[1]] (interval [2, 2))</span></span>
+<span><span class="co">#&gt; [[1]] (interval 2 - 4)</span></span>
 <span><span class="co">#&gt; [1] "B"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]] (interval [4, 5))</span></span>
-<span><span class="co">#&gt; [1] "C"</span></span>
-<span></span>
-<span><span class="va">p_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_all_overlaps.html">pop_all_overlaps</a></span><span class="op">(</span><span class="va">ix</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">p_all</span><span class="op">$</span><span class="va">values</span><span class="op">)</span></span>
-<span><span class="co">#&gt; list()</span></span>
-<span><span class="va">p_all</span><span class="op">$</span><span class="va">remaining</span></span>
-<span><span class="co">#&gt; Unnamed interval_index with 2 elements, default bounds [start, end).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Elements (by interval start order):</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[1]] (interval [2, 2))</span></span>
-<span><span class="co">#&gt; [1] "B"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]] (interval [4, 5))</span></span>
+<span><span class="co">#&gt; [[2]] (interval 4 - 5)</span></span>
 <span><span class="co">#&gt; [1] "C"</span></span></code></pre></div>
+<p>By default the four <code>*_point()</code> functions test interval
+containment. The <code>match_at</code> parameter lets them match instead
+on coordinate equality at the entry’s start, end, or either endpoint.
+This is useful for sweep-line patterns where you need to identify
+intervals arriving or retiring at a specific event point.
+<code>bounds</code> is ignored for these modes (coordinate equality is
+structural).</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Entries whose start coordinate equals 2</span></span>
+<span><span class="fu"><a href="../reference/peek_all_point.html">peek_all_point</a></span><span class="op">(</span><span class="va">ix</span>, point <span class="op">=</span> <span class="fl">2</span>, match_at <span class="op">=</span> <span class="st">"start"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 1 element, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (interval 2 - 4)</span></span>
+<span><span class="co">#&gt; [1] "B"</span></span>
+<span></span>
+<span><span class="co"># Entries whose end coordinate equals 3 — the sweep-line retirement query</span></span>
+<span><span class="fu"><a href="../reference/peek_all_point.html">peek_all_point</a></span><span class="op">(</span><span class="va">ix</span>, point <span class="op">=</span> <span class="fl">3</span>, match_at <span class="op">=</span> <span class="st">"end"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 1 element, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (interval 1 - 3)</span></span>
+<span><span class="co">#&gt; [1] "A"</span></span>
+<span></span>
+<span><span class="co"># Either endpoint equals 3</span></span>
+<span><span class="fu"><a href="../reference/peek_all_point.html">peek_all_point</a></span><span class="op">(</span><span class="va">ix</span>, point <span class="op">=</span> <span class="fl">3</span>, match_at <span class="op">=</span> <span class="st">"either"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 1 element, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (interval 1 - 3)</span></span>
+<span><span class="co">#&gt; [1] "A"</span></span></code></pre></div>
+<p>Interval-vs-interval queries select overlaps of different kinds.
+First we’ll build a new index to query:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ix3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/interval_index.html">interval_index</a></span><span class="op">(</span></span>
+<span>  <span class="st">"narrow"</span>, <span class="st">"wide"</span>, <span class="st">"right"</span>, <span class="st">"inner"</span>,</span>
+<span>  start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  end   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">6</span>, <span class="fl">5</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">ix3</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 4 elements, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (interval 1 - 6)</span></span>
+<span><span class="co">#&gt; [1] "wide"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (interval 2 - 3)</span></span>
+<span><span class="co">#&gt; [1] "narrow"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]] (interval 3 - 4)</span></span>
+<span><span class="co">#&gt; [1] "inner"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[4]] (interval 4 - 5)</span></span>
+<span><span class="co">#&gt; [1] "right"</span></span></code></pre></div>
+<p><code><a href="../reference/peek_overlaps.html">peek_overlaps()</a></code> returns any interval that shares at
+least one point with the query range. <code><a href="../reference/peek_containing.html">peek_containing()</a></code>
+returns intervals that fully contain the query range.
+<code><a href="../reference/peek_within.html">peek_within()</a></code> returns intervals fully contained by the
+query range.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># overlaps [2, 5]: any shared point</span></span>
+<span><span class="fu"><a href="../reference/peek_all_overlaps.html">peek_all_overlaps</a></span><span class="op">(</span><span class="va">ix3</span>, start <span class="op">=</span> <span class="fl">2</span>, end <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 4 elements, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (interval 1 - 6)</span></span>
+<span><span class="co">#&gt; [1] "wide"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (interval 2 - 3)</span></span>
+<span><span class="co">#&gt; [1] "narrow"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]] (interval 3 - 4)</span></span>
+<span><span class="co">#&gt; [1] "inner"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[4]] (interval 4 - 5)</span></span>
+<span><span class="co">#&gt; [1] "right"</span></span>
+<span></span>
+<span><span class="co"># containing [3, 4]: index interval must enclose query</span></span>
+<span><span class="fu"><a href="../reference/peek_all_containing.html">peek_all_containing</a></span><span class="op">(</span><span class="va">ix3</span>, start <span class="op">=</span> <span class="fl">3</span>, end <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 2 elements, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (interval 1 - 6)</span></span>
+<span><span class="co">#&gt; [1] "wide"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (interval 3 - 4)</span></span>
+<span><span class="co">#&gt; [1] "inner"</span></span>
+<span></span>
+<span><span class="co"># within [1, 5]: index interval must fit inside query</span></span>
+<span><span class="fu"><a href="../reference/peek_all_within.html">peek_all_within</a></span><span class="op">(</span><span class="va">ix3</span>, start <span class="op">=</span> <span class="fl">1</span>, end <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 3 elements, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (interval 2 - 3)</span></span>
+<span><span class="co">#&gt; [1] "narrow"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (interval 3 - 4)</span></span>
+<span><span class="co">#&gt; [1] "inner"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]] (interval 4 - 5)</span></span>
+<span><span class="co">#&gt; [1] "right"</span></span></code></pre></div>
+<p>All relation queries have symmetric <code>pop_*</code> and
+<code>pop_all_*</code> variants following the same return contract as
+<code><a href="../reference/pop_point.html">pop_point()</a></code> and <code><a href="../reference/pop_all_point.html">pop_all_point()</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="boundary-modes">Boundary modes<a class="anchor" aria-label="anchor" href="#boundary-modes"></a>
 </h2>
-<p>Use <code>bounds</code> to control endpoint inclusion
-(<code>"[)"</code>, <code>"[]"</code>, <code>"()"</code>,
-<code>"(]"</code>).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">edge</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/interval_index.html">interval_index</a></span><span class="op">(</span><span class="st">"E"</span>, start <span class="op">=</span> <span class="fl">1</span>, end <span class="op">=</span> <span class="fl">3</span>, bounds <span class="op">=</span> <span class="st">"[)"</span><span class="op">)</span></span>
+<p>Endpoint inclusion is controlled by two related parameters. The
+constructors take <code>default_query_bounds</code> — one of
+<code>"[)"</code> (default, left-closed right-open), <code>"[]"</code>
+(closed), <code>"()"</code> (open), or <code>"(]"</code> (left-open
+right-closed) — which sets the convention used when queries on this
+index don’t specify their own. Query functions (<code>peek_*</code> /
+<code>pop_*</code>) then accept a <code>bounds</code> override for the
+duration of a single call.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">edge</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/interval_index.html">interval_index</a></span><span class="op">(</span><span class="st">"E"</span>, start <span class="op">=</span> <span class="fl">1</span>, end <span class="op">=</span> <span class="fl">3</span>, default_query_bounds <span class="op">=</span> <span class="st">"[)"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># right endpoint excluded by default</span></span>
 <span><span class="fu"><a href="../reference/peek_point.html">peek_point</a></span><span class="op">(</span><span class="va">edge</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; NULL</span></span>
+<span></span>
+<span><span class="co"># override to closed bounds for this query</span></span>
 <span><span class="fu"><a href="../reference/peek_point.html">peek_point</a></span><span class="op">(</span><span class="va">edge</span>, <span class="fl">3</span>, bounds <span class="op">=</span> <span class="st">"[]"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "E"</span></span></code></pre></div>
+<p>Note that bounds affect what counts as a valid interval: under
+<code>"[)"</code>, an interval with <code>start == end</code> like [2,
+2) is empty and will never match any query. Use <code>"[]"</code> if you
+need point intervals where <code>start == end</code>.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># [2, 2) contains nothing under half-open bounds</span></span>
+<span><span class="va">pt_open</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/interval_index.html">interval_index</a></span><span class="op">(</span><span class="st">"X"</span>, start <span class="op">=</span> <span class="fl">2</span>, end <span class="op">=</span> <span class="fl">2</span>, default_query_bounds <span class="op">=</span> <span class="st">"[)"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/peek_point.html">peek_point</a></span><span class="op">(</span><span class="va">pt_open</span>, point <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span></span>
+<span><span class="co"># [2, 2] contains exactly the point 2</span></span>
+<span><span class="va">pt_closed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/interval_index.html">interval_index</a></span><span class="op">(</span><span class="st">"X"</span>, start <span class="op">=</span> <span class="fl">2</span>, end <span class="op">=</span> <span class="fl">2</span>, default_query_bounds <span class="op">=</span> <span class="st">"[]"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/peek_point.html">peek_point</a></span><span class="op">(</span><span class="va">pt_closed</span>, point <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "X"</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="insert">Insert<a class="anchor" aria-label="anchor" href="#insert"></a>
+<h2 id="insertion-and-endpoint-extrema">Insertion and endpoint extrema<a class="anchor" aria-label="anchor" href="#insertion-and-endpoint-extrema"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ix2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="va">ix</span>, <span class="st">"D"</span>, start <span class="op">=</span> <span class="fl">2</span>, end <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
-<span><span class="va">ix2</span></span>
-<span><span class="co">#&gt; Unnamed interval_index with 4 elements, default bounds [start, end).</span></span>
+<p><code><a href="../reference/insert.html">insert()</a></code> adds an element preserving interval start
+order.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ix4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="va">ix</span>, <span class="st">"D"</span>, start <span class="op">=</span> <span class="fl">2</span>, end <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="va">ix4</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 4 elements, default query bounds [start, end).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Elements (by interval start order):</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[1]] (interval [1, 3))</span></span>
+<span><span class="co">#&gt; [[1]] (interval 1 - 3)</span></span>
 <span><span class="co">#&gt; [1] "A"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]] (interval [2, 2))</span></span>
+<span><span class="co">#&gt; [[2]] (interval 2 - 4)</span></span>
 <span><span class="co">#&gt; [1] "B"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[3]] (interval [2, 6))</span></span>
+<span><span class="co">#&gt; [[3]] (interval 2 - 6)</span></span>
 <span><span class="co">#&gt; [1] "D"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[4]] (interval [4, 5))</span></span>
+<span><span class="co">#&gt; [[4]] (interval 4 - 5)</span></span>
 <span><span class="co">#&gt; [1] "C"</span></span></code></pre></div>
+<p><code><a href="../reference/min_endpoint.html">min_endpoint()</a></code> and <code><a href="../reference/max_endpoint.html">max_endpoint()</a></code> return
+the current smallest start and largest end endpoints (not the stored
+elements).</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/min_endpoint.html">min_endpoint</a></span><span class="op">(</span><span class="va">ix</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="fu"><a href="../reference/max_endpoint.html">max_endpoint</a></span><span class="op">(</span><span class="va">ix</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 5</span></span>
+<span><span class="fu"><a href="../reference/min_endpoint.html">min_endpoint</a></span><span class="op">(</span><span class="fu"><a href="../reference/interval_index.html">interval_index</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="empty-indices">Empty indices<a class="anchor" aria-label="anchor" href="#empty-indices"></a>
+</h2>
+<p>Query and endpoint helpers are non-throwing on empty indices, and
+<code><a href="https://rdrr.io/r/base/length.html" class="external-link">length()</a></code> allows for empty checking.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">empty_ix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/interval_index.html">interval_index</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">empty_ix</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0</span></span>
+<span><span class="fu"><a href="../reference/peek_point.html">peek_point</a></span><span class="op">(</span><span class="va">empty_ix</span>, point <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="fu"><a href="../reference/pop_overlaps.html">pop_overlaps</a></span><span class="op">(</span><span class="va">empty_ix</span>, start <span class="op">=</span> <span class="fl">1</span>, end <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $value</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $start</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $end</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $remaining</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 0 elements, default query bounds [start, end).</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="named-interval-indices">Named interval indices<a class="anchor" aria-label="anchor" href="#named-interval-indices"></a>
+</h2>
+<p>Interval indices can carry names, set either at construction or
+through <code><a href="../reference/as_interval_index.html">as_interval_index()</a></code> on a named list. Names support
+read-only indexing via <code>[</code>, <code>[[</code>, and
+<code>$</code>; all replacement forms (<code>[&lt;-</code>,
+<code>[[&lt;-</code>, <code>$&lt;-</code>) error, because index-based
+assignment may break the ordering invariant. Named and unnamed elements
+cannot be mixed within one index.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ix_named</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_interval_index.html">as_interval_index</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"alice"</span>, <span class="st">"bob"</span>, <span class="st">"carol"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">ix_named</span></span>
+<span><span class="co">#&gt; Named interval_index with 3 elements, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $a (interval 1 - 4)</span></span>
+<span><span class="co">#&gt; [1] "alice"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $c (interval 2 - 6)</span></span>
+<span><span class="co">#&gt; [1] "carol"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $b (interval 3 - 5)</span></span>
+<span><span class="co">#&gt; [1] "bob"</span></span>
+<span></span>
+<span><span class="va">ix_named</span><span class="op">[[</span><span class="st">"b"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; [1] "bob"</span></span>
+<span><span class="va">ix_named</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; Named interval_index with 2 elements, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $a (interval 1 - 4)</span></span>
+<span><span class="co">#&gt; [1] "alice"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $c (interval 2 - 6)</span></span>
+<span><span class="co">#&gt; [1] "carol"</span></span>
+<span><span class="va">ix_named</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="co">#&gt; Named interval_index with 1 element, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $a (interval 1 - 4)</span></span>
+<span><span class="co">#&gt; [1] "alice"</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="va">ix_named</span><span class="op">$</span><span class="va">a</span> <span class="op">&lt;-</span> <span class="st">"!!"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in `$&lt;-.interval_index`(`*tmp*`, a, value = "!!") : </span></span>
+<span><span class="co">#&gt;   `$&lt;-` is not supported for interval_index.</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="transforming-iterating-merging">Transforming, iterating, merging<a class="anchor" aria-label="anchor" href="#transforming-iterating-merging"></a>
+</h2>
+<p><code><a href="../reference/fapply.html">fapply()</a></code> maps a function over elements while preserving
+intervals and order. The function receives
+<code>(value, start, end)</code>, or
+<code>(value, start, end, name)</code> if it accepts a fourth argument.
+Endpoints and names are passed in read-only, and the return value
+replaces the stored element (similar to <code><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply()</a></code> for named
+R lists).</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/fapply.html">fapply</a></span><span class="op">(</span><span class="va">ix</span>, <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">start</span>, <span class="va">end</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">value</span>, <span class="st">"["</span>, <span class="va">start</span>, <span class="st">","</span>, <span class="va">end</span>, <span class="st">"]"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 3 elements, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (interval 1 - 3)</span></span>
+<span><span class="co">#&gt; [1] "A[1,3]"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (interval 2 - 4)</span></span>
+<span><span class="co">#&gt; [1] "B[2,4]"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]] (interval 4 - 5)</span></span>
+<span><span class="co">#&gt; [1] "C[4,5]"</span></span></code></pre></div>
+<p><code><a href="../reference/loop.html">loop()</a></code> (re-exported from the <strong>coro</strong>
+package) walks the index in interval start-position order, yielding bare
+values. Interval endpoints are dropped from each yield; use
+<code><a href="../reference/fapply.html">fapply()</a></code> if your callback needs
+<code>(value, start, end)</code>.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/loop.html">loop</a></span><span class="op">(</span><span class="kw">for</span> <span class="op">(</span><span class="va">v</span> <span class="kw">in</span> <span class="va">ix</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "A"</span></span>
+<span><span class="co">#&gt; [1] "B"</span></span>
+<span><span class="co">#&gt; [1] "C"</span></span></code></pre></div>
+<p>Plain <code>for (v in ix)</code> (without <code><a href="../reference/loop.html">loop()</a></code>) does
+<em>not</em> dispatch to the iteration protocol, it walks the underlying
+structure and yields internal nodes rather than elements. Always wrap
+with <code><a href="../reference/loop.html">loop()</a></code>.</p>
+<p><code>merge(x, y)</code> combines two interval indices into a new one
+in start-position order, preserving left-biased FIFO on tied starts. The
+general case runs in O(m + n); disjoint start ranges collapse to
+O(log(min(m, n))) via concat. The reserved <code>.ivx_min_end</code> /
+<code>.ivx_max_end</code> monoids recompute automatically, so
+interval-relation queries work immediately on the result.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_interval_index.html">as_interval_index</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A1"</span>, <span class="st">"A2"</span><span class="op">)</span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_interval_index.html">as_interval_index</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B1"</span>, <span class="st">"B2"</span><span class="op">)</span>, start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">7</span><span class="op">)</span>, end <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/peek_all_point.html">peek_all_point</a></span><span class="op">(</span><span class="va">m</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed interval_index with 2 elements, default query bounds [start, end).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by interval start order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (interval 1 - 4)</span></span>
+<span><span class="co">#&gt; [1] "A1"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (interval 3 - 6)</span></span>
+<span><span class="co">#&gt; [1] "B1"</span></span></code></pre></div>
+<p>Both indices must share the same endpoint type, the same
+<code>bounds</code> convention, and the same monoid set; mismatches
+error. Both inputs are left unmodified.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

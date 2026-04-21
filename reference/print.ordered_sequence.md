@@ -56,7 +56,7 @@ ys2 <- add_monoids(ordered_sequence("a", "b", keys = c(2, 1)), list(sum_key = su
 print(ys2, max_elements = 0, show_custom_monoids = TRUE)
 #> Unnamed ordered_sequence with 2 elements.
 #> Custom monoids + measures:
-#>   sum_key: 3
+#>   sum_key: 3 (aggregate)
 
 ys <- ordered_sequence("x", "y", "z", keys = c(2, 1, 3))
 print(ys, max_elements = 3)

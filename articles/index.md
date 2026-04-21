@@ -107,6 +107,8 @@ in
 ## Next Articles
 
 - [flexseq](https://oneilsh.github.io/immutables/articles/flexseq.md)
+- [flexseq
+  Benchmarks](https://oneilsh.github.io/immutables/articles/flexseq-benchmarks.md)
 - [Priority
   Queues](https://oneilsh.github.io/immutables/articles/priority-queues.md)
 - [Ordered

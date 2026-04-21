@@ -104,14 +104,14 @@ fapply(o, function(value, key, name) paste0(value, "_", key))
 
 ix <- interval_index(one = "a", two = "b", start = c(1, 3), end = c(2, 4))
 fapply(ix, function(value, start, end, name) paste0(value, "[", start, ",", end, "]"))
-#> Named interval_index with 2 elements, default bounds [start, end).
+#> Named interval_index with 2 elements, default query bounds [start, end).
 #> 
 #> Elements (by interval start order):
 #> 
-#> $one (interval [1, 2))
+#> $one (interval 1 - 2)
 #> [1] "a[1,2]"
 #> 
-#> $two (interval [3, 4))
+#> $two (interval 3 - 4)
 #> [1] "b[3,4]"
 #> 
 ```

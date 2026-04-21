@@ -6,7 +6,7 @@ corresponding `start` and `end` endpoints.
 ## Usage
 
 ``` r
-as_interval_index(x, start, end, bounds = "[)")
+as_interval_index(x, start, end, default_query_bounds = "[)")
 ```
 
 ## Arguments
@@ -23,9 +23,11 @@ as_interval_index(x, start, end, bounds = "[)")
 
   End endpoints with the same length as `x`.
 
-- bounds:
+- default_query_bounds:
 
-  Boundary convention: one of `"[)"`, `"[]"`, `"()"`, `"(]"`.
+  Boundary convention used as the default for query operations on this
+  index: one of `"[)"`, `"[]"`, `"()"`, `"(]"`. Per-query `peek_*` /
+  `pop_*` calls may override via their own `bounds` argument.
 
 ## Value
 
@@ -42,17 +44,17 @@ Names on `x` are preserved as element names.
 ``` r
 ix <- as_interval_index(c("a", "b", "c"), start = c(1, 2, 2), end = c(3, 2, 4))
 ix
-#> Unnamed interval_index with 3 elements, default bounds [start, end).
+#> Unnamed interval_index with 3 elements, default query bounds [start, end).
 #> 
 #> Elements (by interval start order):
 #> 
-#> [[1]] (interval [1, 3))
+#> [[1]] (interval 1 - 3)
 #> [1] "a"
 #> 
-#> [[2]] (interval [2, 2))
+#> [[2]] (interval 2 - 2)
 #> [1] "b"
 #> 
-#> [[3]] (interval [2, 4))
+#> [[3]] (interval 2 - 4)
 #> [1] "c"
 #> 
 as.list(peek_all_point(ix, 2))
@@ -70,14 +72,14 @@ ix_date <- as_interval_index(
   end = as.Date(c("2024-01-05", "2024-01-15"))
 )
 ix_date
-#> Unnamed interval_index with 2 elements, default bounds [start, end).
+#> Unnamed interval_index with 2 elements, default query bounds [start, end).
 #> 
 #> Elements (by interval start order):
 #> 
-#> [[1]] (interval [2024-01-01, 2024-01-05))
+#> [[1]] (interval 2024-01-01 - 2024-01-05)
 #> [1] "phase1"
 #> 
-#> [[2]] (interval [2024-01-10, 2024-01-15))
+#> [[2]] (interval 2024-01-10 - 2024-01-15)
 #> [1] "phase2"
 #> 
 ```

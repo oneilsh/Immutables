@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Ordered Sequences • immutables</title>
-<script src="../deps/jquery-3.6.1/jquery-3.6.1.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -34,11 +34,17 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/flexseq.html">flexseq</a></li>
+<li><h6 class="dropdown-header" data-toc-skip>Data structures</h6></li>
+    <li><a class="dropdown-item" href="../articles/flexseq.html">Sequences, Stacks, and Queues</a></li>
     <li><a class="dropdown-item" href="../articles/priority-queues.html">Priority Queues</a></li>
     <li><a class="dropdown-item" href="../articles/ordered-sequences.html">Ordered Sequences</a></li>
     <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
-    <li><a class="dropdown-item" href="../articles/algorithm-demos.html">Algorithm Demos</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
+    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="../articles/gallery.html">Gallery</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Internals</h6></li>
     <li><a class="dropdown-item" href="../articles/developer-api.html">Developer API</a></li>
   </ul>
 </li>
@@ -71,10 +77,18 @@
     
     
 <div class="section level2">
-<h2 id="what-is-an-ordered-sequence">What is an ordered sequence?<a class="anchor" aria-label="anchor" href="#what-is-an-ordered-sequence"></a>
+<h2 id="ordered-sequence-basics">Ordered sequence basics<a class="anchor" aria-label="anchor" href="#ordered-sequence-basics"></a>
 </h2>
-<p><code>ordered_sequence</code> stores elements sorted by key, with
-stable FIFO behavior for duplicate keys.</p>
+<p><code>ordered_sequence</code> is a persistent structure that
+associates elements with keys, typically numeric or character (string).
+They store elements sorted by key, with stable first-in-first-out (FIFO)
+behavior for duplicate keys, and provide fast key-based lookup, range
+queries over keys, and insertion.</p>
+<p>All operations are persistent, and return modified copies. Peeking by
+key returns the stored element (which may be any type), popping returns
+a list with <code>$value</code> containing the stored element,
+<code>$key</code> the key, and <code>$remaining</code> the rest of the
+sequence without that element.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">xs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ordered_sequence.html">ordered_sequence</a></span><span class="op">(</span><span class="st">"a1"</span>, <span class="st">"b1"</span>, <span class="st">"b2"</span>, <span class="st">"c1"</span>, keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">xs</span></span>
@@ -93,86 +107,315 @@ stable FIFO behavior for duplicate keys.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; [[4]] (key 3)</span></span>
 <span><span class="co">#&gt; [1] "c1"</span></span></code></pre></div>
-<p><code>as_flexseq(xs)</code> returns a payload-only
-<code>flexseq</code> by default. Use
-<code>as_flexseq(xs, drop_meta = FALSE)</code> to keep entry records
-(<code>value</code>, <code>key</code>).</p>
-</div>
-<div class="section level2">
-<h2 id="key-based-lookup">Key-based lookup<a class="anchor" aria-label="anchor" href="#key-based-lookup"></a>
-</h2>
+<p>The <code><a href="../reference/as_ordered_sequence.html">as_ordered_sequence()</a></code> variant builds a sequence from
+a vector or list of elements paired with a key vector, useful when keys
+are already in a separate vector.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/peek_key.html">peek_key</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "b1"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="fu"><a href="../reference/peek_all_key.html">peek_all_key</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [[1]]</span></span>
-<span><span class="co">#&gt; [1] "b1"</span></span>
+<code class="sourceCode R"><span><span class="va">xs2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>, keys <span class="op">=</span> <span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">xs2</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 4 elements.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]]</span></span>
-<span><span class="co">#&gt; [1] "b2"</span></span>
-<span><span class="fu"><a href="../reference/count_key.html">count_key</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key a)</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (key b)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]] (key c)</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[4]] (key d)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span></code></pre></div>
+<p><code>as_flexseq(xs)</code> returns a payload-only
+<code>flexseq</code>; keys and any custom monoids are dropped (see
+<code>as.list</code> to convert and preservekey metadata).</p>
 </div>
 <div class="section level2">
-<h2 id="key-boundaries">Key boundaries<a class="anchor" aria-label="anchor" href="#key-boundaries"></a>
+<h2 id="peek-pop-insert-and-range-query-by-key">Peek, pop, insert, and range query by key<a class="anchor" aria-label="anchor" href="#peek-pop-insert-and-range-query-by-key"></a>
 </h2>
-<p><code><a href="../reference/lower_bound.html">lower_bound()</a></code> gives first <code>&gt;= key</code>, and
-<code><a href="../reference/upper_bound.html">upper_bound()</a></code> gives first <code>&gt; key</code>.</p>
+<p>Insertion is by key, and <em>keys may be duplicated</em>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/lower_bound.html">lower_bound</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; $found</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span>
+<code class="sourceCode R"><span><span class="va">seq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, keys <span class="op">=</span> <span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">seq2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="va">seq</span>, <span class="fl">10</span>, key <span class="op">=</span> <span class="st">"b"</span><span class="op">)</span></span>
+<span><span class="va">seq2</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 4 elements.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $index</span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key a)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (key b)</span></span>
 <span><span class="co">#&gt; [1] 2</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $value</span></span>
-<span><span class="co">#&gt; [1] "b1"</span></span>
+<span><span class="co">#&gt; [[3]] (key b)</span></span>
+<span><span class="co">#&gt; [1] 10</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $key</span></span>
+<span><span class="co">#&gt; [[4]] (key c)</span></span>
+<span><span class="co">#&gt; [1] 3</span></span></code></pre></div>
+<p><code><a href="../reference/pop_key.html">pop_key()</a></code> removes and returns the first match for a key
+as <code>$value</code>/<code>$key</code>/<code>$remaining</code>. Its
+“all” counterpart <code><a href="../reference/pop_all_key.html">pop_all_key()</a></code> removes the entire tie run
+for that key, returning <code>$elements</code> (an ordered sequence of
+removed matches) and <code>$remaining</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">one</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_key.html">pop_key</a></span><span class="op">(</span><span class="va">seq</span>, key <span class="op">=</span> <span class="st">"b"</span><span class="op">)</span></span>
+<span><span class="va">one</span><span class="op">$</span><span class="va">value</span></span>
 <span><span class="co">#&gt; [1] 2</span></span>
-<span><span class="fu"><a href="../reference/upper_bound.html">upper_bound</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; $found</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="va">one</span><span class="op">$</span><span class="va">key</span></span>
+<span><span class="co">#&gt; [1] "b"</span></span>
+<span><span class="va">one</span><span class="op">$</span><span class="va">remaining</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 2 elements.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $index</span></span>
-<span><span class="co">#&gt; [1] 4</span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $value</span></span>
-<span><span class="co">#&gt; [1] "c1"</span></span>
+<span><span class="co">#&gt; [[1]] (key a)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $key</span></span>
+<span><span class="co">#&gt; [[2]] (key c)</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span></span>
+<span><span class="va">all_two</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_all_key.html">pop_all_key</a></span><span class="op">(</span><span class="va">seq</span>, <span class="st">"b"</span><span class="op">)</span></span>
+<span><span class="va">all_two</span><span class="op">$</span><span class="va">elements</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 1 element.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key b)</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="va">all_two</span><span class="op">$</span><span class="va">remaining</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 2 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key a)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (key c)</span></span>
+<span><span class="co">#&gt; [1] 3</span></span></code></pre></div>
+<p>Keys may be counted, and elements accessed; <code><a href="../reference/peek_key.html">peek_key()</a></code>
+returns one element, the first in insertion order.
+<code><a href="../reference/peek_all_key.html">peek_all_key()</a></code> returns an ordered sequence with all
+matching keys.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/count_key.html">count_key</a></span><span class="op">(</span><span class="va">seq</span>, key <span class="op">=</span> <span class="st">"b"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="fu"><a href="../reference/peek_key.html">peek_key</a></span><span class="op">(</span><span class="va">seq</span>, key <span class="op">=</span> <span class="st">"b"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="fu"><a href="../reference/peek_all_key.html">peek_all_key</a></span><span class="op">(</span><span class="va">seq</span>, key <span class="op">=</span> <span class="st">"b"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 1 element.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key b)</span></span>
+<span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
+<p>Counting and accessing elements over query ranges support
+inclusive/exclusive on both sides (defaulting to <code>TRUE</code>).</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/elements_between.html">elements_between</a></span><span class="op">(</span><span class="va">seq</span>, from_key <span class="op">=</span> <span class="st">"b"</span>, to_key <span class="op">=</span><span class="st">"c"</span>, include_from <span class="op">=</span> <span class="cn">TRUE</span>, include_to <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 2 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key b)</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (key c)</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span><span class="fu"><a href="../reference/count_between.html">count_between</a></span><span class="op">(</span><span class="va">seq</span>, from_key <span class="op">=</span> <span class="st">"b"</span>, to_key <span class="op">=</span> <span class="st">"c"</span>, include_from <span class="op">=</span> <span class="cn">TRUE</span>, include_to <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span></span>
+<span><span class="co"># exclude "b" keys</span></span>
+<span><span class="fu"><a href="../reference/elements_between.html">elements_between</a></span><span class="op">(</span><span class="va">seq</span>, from_key <span class="op">=</span> <span class="st">"b"</span>, to_key <span class="op">=</span><span class="st">"c"</span>, include_from <span class="op">=</span> <span class="cn">FALSE</span>, include_to <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 1 element.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key c)</span></span>
 <span><span class="co">#&gt; [1] 3</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="key-range-queries">Key range queries<a class="anchor" aria-label="anchor" href="#key-range-queries"></a>
+<h2 id="key-boundaries-and-extrema">Key boundaries, and extrema<a class="anchor" aria-label="anchor" href="#key-boundaries-and-extrema"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/elements_between.html">elements_between</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [[1]]</span></span>
-<span><span class="co">#&gt; [1] "b1"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]]</span></span>
-<span><span class="co">#&gt; [1] "b2"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[3]]</span></span>
-<span><span class="co">#&gt; [1] "c1"</span></span>
-<span><span class="fu"><a href="../reference/count_between.html">count_between</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 3</span></span>
-<span><span class="fu"><a href="../reference/count_between.html">count_between</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2</span>, <span class="fl">3</span>, include_to <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<p><code><a href="../reference/lower_bound.html">lower_bound()</a></code> finds the first element with key
+<code>&gt;=</code> a query key; <code><a href="../reference/upper_bound.html">upper_bound()</a></code> finds the
+first with key strictly <code>&gt;</code>. Both return a list with
+<code>$found</code>, <code>$index</code>, <code>$value</code>, and
+<code>$key</code> (<code>NULL</code> fields when no match exists).
+Together they support successor queries (“find the nearest entry at or
+above this key”) and duplicate counting via index arithmetic.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">seq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b"</span>, <span class="st">"d"</span>, <span class="st">"d"</span>, <span class="st">"f"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/lower_bound.html">lower_bound</a></span><span class="op">(</span><span class="va">seq</span>, key <span class="op">=</span> <span class="st">"d"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 4</span></span>
+<span><span class="co">#&gt;  $ found: logi TRUE</span></span>
+<span><span class="co">#&gt;  $ index: int 2</span></span>
+<span><span class="co">#&gt;  $ value: int 2</span></span>
+<span><span class="co">#&gt;  $ key  : chr "d"</span></span>
+<span><span class="fu"><a href="../reference/upper_bound.html">upper_bound</a></span><span class="op">(</span><span class="va">seq</span>, key <span class="op">=</span> <span class="st">"d"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 4</span></span>
+<span><span class="co">#&gt;  $ found: logi TRUE</span></span>
+<span><span class="co">#&gt;  $ index: int 4</span></span>
+<span><span class="co">#&gt;  $ value: int 4</span></span>
+<span><span class="co">#&gt;  $ key  : chr "f"</span></span></code></pre></div>
+<p>When the query key falls between or outside existing keys,
+<code><a href="../reference/lower_bound.html">lower_bound()</a></code> returns the next entry at or above, useful
+for nearest-match lookups. Both return <code>found = FALSE</code> when
+no keys satisfy the condition.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/lower_bound.html">lower_bound</a></span><span class="op">(</span><span class="va">seq</span>, key <span class="op">=</span> <span class="st">"a"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 4</span></span>
+<span><span class="co">#&gt;  $ found: logi TRUE</span></span>
+<span><span class="co">#&gt;  $ index: int 1</span></span>
+<span><span class="co">#&gt;  $ value: int 1</span></span>
+<span><span class="co">#&gt;  $ key  : chr "b"</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/upper_bound.html">upper_bound</a></span><span class="op">(</span><span class="va">seq</span>, key <span class="op">=</span> <span class="st">"g"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 4</span></span>
+<span><span class="co">#&gt;  $ found: logi FALSE</span></span>
+<span><span class="co">#&gt;  $ index: NULL</span></span>
+<span><span class="co">#&gt;  $ value: NULL</span></span>
+<span><span class="co">#&gt;  $ key  : NULL</span></span></code></pre></div>
+<p>The difference
+<code>upper_bound(x, k)$index - lower_bound(x, k)$index</code> gives the
+count of entries with key <code>k</code> (this is what
+<code><a href="../reference/count_key.html">count_key()</a></code> does internally).</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/upper_bound.html">upper_bound</a></span><span class="op">(</span><span class="va">seq</span>, key <span class="op">=</span> <span class="st">"d"</span><span class="op">)</span><span class="op">$</span><span class="va">index</span> <span class="op">-</span> <span class="fu"><a href="../reference/lower_bound.html">lower_bound</a></span><span class="op">(</span><span class="va">seq</span>, key <span class="op">=</span> <span class="st">"d"</span><span class="op">)</span><span class="op">$</span><span class="va">index</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="fu"><a href="../reference/count_key.html">count_key</a></span><span class="op">(</span><span class="va">seq</span>, key <span class="op">=</span> <span class="st">"d"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
+<p><code><a href="../reference/min_key.html">min_key()</a></code> and <code><a href="../reference/max_key.html">max_key()</a></code> return the current
+minimum and maximum <em>keys</em> (not the stored elements).</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/min_key.html">min_key</a></span><span class="op">(</span><span class="va">xs</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="fu"><a href="../reference/max_key.html">max_key</a></span><span class="op">(</span><span class="va">xs</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span><span class="fu"><a href="../reference/min_key.html">min_key</a></span><span class="op">(</span><span class="fu"><a href="../reference/ordered_sequence.html">ordered_sequence</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>  <span class="co"># NULL when empty</span></span>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="pop-by-key">Pop by key<a class="anchor" aria-label="anchor" href="#pop-by-key"></a>
+<h2 id="empty-sequences">Empty sequences<a class="anchor" aria-label="anchor" href="#empty-sequences"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">one</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_key.html">pop_key</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">one</span><span class="op">$</span><span class="va">value</span></span>
-<span><span class="co">#&gt; [1] "b1"</span></span>
-<span><span class="va">one</span><span class="op">$</span><span class="va">key</span></span>
-<span><span class="co">#&gt; [1] 2</span></span>
-<span><span class="va">one</span><span class="op">$</span><span class="va">remaining</span></span>
+<p>Key and range helpers are non-throwing on empty sequences, and
+<code><a href="https://rdrr.io/r/base/length.html" class="external-link">length()</a></code> allows for empty checking.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">empty_os</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ordered_sequence.html">ordered_sequence</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">empty_os</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0</span></span>
+<span><span class="fu"><a href="../reference/peek_key.html">peek_key</a></span><span class="op">(</span><span class="va">empty_os</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="fu"><a href="../reference/count_between.html">count_between</a></span><span class="op">(</span><span class="va">empty_os</span>, <span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="named-ordered-sequences">Named ordered sequences<a class="anchor" aria-label="anchor" href="#named-ordered-sequences"></a>
+</h2>
+<p>Ordered sequences can carry names, set either at construction or
+through <code><a href="../reference/as_ordered_sequence.html">as_ordered_sequence()</a></code> on a named list. Names and
+integer positions both support read-only indexing via <code>[</code>,
+<code>[[</code>, and <code>$</code>. All replacement forms
+(<code>[&lt;-</code>, <code>[[&lt;-</code>, <code>$&lt;-</code>) error,
+because index-based assignment may break the ordering invariant. Ordered
+sequences may be cast down with <code><a href="../reference/as_flexseq.html">as_flexseq()</a></code> or
+<code><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list()</a></code>. Named and unnamed elements cannot be mixed
+within one sequence.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">xs_named</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"alice"</span>, <span class="st">"bob"</span>, <span class="st">"carol"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">xs_named</span></span>
+<span><span class="co">#&gt; Named ordered_sequence with 3 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $b (key 1)</span></span>
+<span><span class="co">#&gt; [1] "bob"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $c (key 2)</span></span>
+<span><span class="co">#&gt; [1] "carol"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $a (key 3)</span></span>
+<span><span class="co">#&gt; [1] "alice"</span></span>
+<span></span>
+<span><span class="va">xs_named</span><span class="op">[[</span><span class="st">"b"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; [1] "bob"</span></span>
+<span><span class="va">xs_named</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; Warning: Ordered subsetting canonicalizes selector order; pre-sort and unique</span></span>
+<span><span class="co">#&gt; selectors to silence this warning.</span></span>
+<span><span class="co">#&gt; Named ordered_sequence with 2 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $c (key 2)</span></span>
+<span><span class="co">#&gt; [1] "carol"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $a (key 3)</span></span>
+<span><span class="co">#&gt; [1] "alice"</span></span>
+<span><span class="va">xs_named</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>            <span class="co"># positional read also works</span></span>
+<span><span class="co">#&gt; Named ordered_sequence with 1 element.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $b (key 1)</span></span>
+<span><span class="co">#&gt; [1] "bob"</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="va">xs_named</span><span class="op">$</span><span class="va">a</span> <span class="op">&lt;-</span> <span class="st">"!!"</span><span class="op">)</span>  <span class="co"># replacement blocked</span></span>
+<span><span class="co">#&gt; Error in .ft_stop_ordered_like(x, "$&lt;-", "Replacement indexing is not supported. Consider converting with as_flexseq().") : </span></span>
+<span><span class="co">#&gt;   `$&lt;-()` is not supported for ordered_sequence. Replacement indexing is not supported. Consider converting with as_flexseq().</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="transforming-aterating-merging">Transforming, aterating, merging<a class="anchor" aria-label="anchor" href="#transforming-aterating-merging"></a>
+</h2>
+<p><code><a href="../reference/fapply.html">fapply()</a></code> maps a function over elements while preserving
+keys and order. The function receives <code>(value, key)</code>, or
+<code>(value, key, name)</code> if it accepts a third argument. Keys and
+names are passed in read-only, and the return value replaces the stored
+element at the associated key (and name if named).</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">xs_t</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ordered_sequence.html">ordered_sequence</a></span><span class="op">(</span><span class="st">"alice"</span>, <span class="st">"bob"</span>, <span class="st">"carol"</span>, keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/fapply.html">fapply</a></span><span class="op">(</span><span class="va">xs_t</span>, <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">key</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">toupper</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Unnamed ordered_sequence with 3 elements.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]] (key 1)</span></span>
+<span><span class="co">#&gt; [1] "BOB"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]] (key 2)</span></span>
+<span><span class="co">#&gt; [1] "CAROL"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]] (key 3)</span></span>
+<span><span class="co">#&gt; [1] "ALICE"</span></span></code></pre></div>
+<p><code><a href="../reference/loop.html">loop()</a></code> (re-exported from the <strong>coro</strong>
+package) walks the sequence in key-ascending order, yielding bare
+values. Keys are dropped from each yield; use <code><a href="../reference/fapply.html">fapply()</a></code> if
+your callback needs the key alongside the value, or iterate over
+<code><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list()</a></code> when you want a list keyed by name.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/loop.html">loop</a></span><span class="op">(</span><span class="kw">for</span> <span class="op">(</span><span class="va">v</span> <span class="kw">in</span> <span class="va">xs_t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "bob"</span></span>
+<span><span class="co">#&gt; [1] "carol"</span></span>
+<span><span class="co">#&gt; [1] "alice"</span></span></code></pre></div>
+<p>Plain <code>for (v in xs_t)</code> (without <code><a href="../reference/loop.html">loop()</a></code>) does
+<em>not</em> dispatch to the iteration protocol, it walks the underlying
+internal structure and yields those rather than sequence elements.
+Always wrap with <code><a href="../reference/loop.html">loop()</a></code>.</p>
+<p><code>merge(x, y)</code> combines two ordered sequences into a new
+one in key order, preserving left-biased FIFO on duplicate keys (all of
+<code>x</code>’s entries at a tied key precede <code>y</code>’s). The
+general case runs in O(m + n); when the key ranges are disjoint it
+collapses to O(log(min(m, n))) via concat.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a1"</span>, <span class="st">"a2"</span>, <span class="st">"a3"</span><span class="op">)</span>, keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b1"</span>, <span class="st">"b2"</span>, <span class="st">"b3"</span><span class="op">)</span>, keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Unnamed ordered_sequence with 6 elements.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Elements (by key order):</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -180,48 +423,17 @@ stable FIFO behavior for duplicate keys.</p>
 <span><span class="co">#&gt; [1] "a1"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; [[2]] (key 2)</span></span>
-<span><span class="co">#&gt; [1] "b2"</span></span>
+<span><span class="co">#&gt; [1] "b1"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[3]] (key 3)</span></span>
-<span><span class="co">#&gt; [1] "c1"</span></span>
-<span></span>
-<span><span class="va">all_two</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_all_key.html">pop_all_key</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">all_two</span><span class="op">$</span><span class="va">values</span><span class="op">)</span></span>
-<span><span class="co">#&gt; list()</span></span>
-<span><span class="va">all_two</span><span class="op">$</span><span class="va">remaining</span></span>
-<span><span class="co">#&gt; Unnamed ordered_sequence with 2 elements.</span></span>
+<span><span class="co">#&gt; ... (skipping 2 elements)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Elements (by key order):</span></span>
+<span><span class="co">#&gt; [[5]] (key 5)</span></span>
+<span><span class="co">#&gt; [1] "a3"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[1]] (key 1)</span></span>
-<span><span class="co">#&gt; [1] "a1"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]] (key 3)</span></span>
-<span><span class="co">#&gt; [1] "c1"</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="insert">Insert<a class="anchor" aria-label="anchor" href="#insert"></a>
-</h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">xs2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="va">xs</span>, <span class="st">"a2"</span>, key <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">xs2</span></span>
-<span><span class="co">#&gt; Unnamed ordered_sequence with 5 elements.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Elements (by key order):</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[1]] (key 1)</span></span>
-<span><span class="co">#&gt; [1] "a1"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]] (key 1)</span></span>
-<span><span class="co">#&gt; [1] "a2"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ... (skipping 1 element)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[4]] (key 2)</span></span>
-<span><span class="co">#&gt; [1] "b2"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[5]] (key 3)</span></span>
-<span><span class="co">#&gt; [1] "c1"</span></span></code></pre></div>
+<span><span class="co">#&gt; [[6]] (key 6)</span></span>
+<span><span class="co">#&gt; [1] "b3"</span></span></code></pre></div>
+<p>Both sequences must share the same key type and monoid set;
+mismatches error. Both inputs are left unmodified.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

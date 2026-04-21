@@ -70,7 +70,7 @@ sum_m <- measure_monoid(`+`, 0, function(el) as.numeric(el))
 print(add_monoids(as_flexseq(1:3), list(sum = sum_m)), max_elements = 0, show_custom_monoids = TRUE)
 #> Unnamed flexseq with 3 elements.
 #> Custom monoids + measures:
-#>   sum: 6
+#>   sum: 6 (aggregate)
 
 y <- as_flexseq(as.list(1:6))
 print(y, max_elements = 3)

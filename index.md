@@ -1,6 +1,14 @@
 # immutables
 
+[![Lifecycle:
+experimental](https://lifecycle.r-lib.org/reference/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/immutables)](https://CRAN.R-project.org/package=immutables)
+[![CRAN
+downloads](https://cranlogs.r-pkg.org/badges/immutables)](https://CRAN.R-project.org/package=immutables)
 [![R-CMD-check](https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/oneilsh/immutables/graph/badge.svg)](https://app.codecov.io/gh/oneilsh/immutables)
 [![pkgdown](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml)
 [![docs](https://img.shields.io/badge/docs-pkgdown-blue)](https://oneilsh.github.io/immutables/)
 
