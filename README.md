@@ -1,4 +1,4 @@
-# immutables
+# immutables <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
 <!-- Uncomment after CRAN submission:
 [![CRAN status](https://www.r-pkg.org/badges/version/immutables)](https://CRAN.R-project.org/package=immutables)
@@ -10,7 +10,6 @@
 [![pkgdown](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml)
 [![docs](https://img.shields.io/badge/docs-pkgdown-blue)](https://oneilsh.github.io/immutables/)
 
-<img src="man/figures/logo.png" align="right" height="175" alt="immutables logo" />
 The `immutables` R package implements several immutable, or persistent, data
 structures: operations return modified copies while remaining fast and true
 to R's side-effect-free functional nature.
@@ -35,7 +34,3 @@ Backed by monoid-annotated 2-3 fingertrees as described by
 Finally, the developer API supports the addition of custom structures via combinations of monoids and measures; see vignettes for details.
 
 - Hinze, R. and Paterson, R. (2006), *Finger trees: a simple general-purpose data structure*.
-
-### Changelog
-
-- 1.0: First 1.0 release
