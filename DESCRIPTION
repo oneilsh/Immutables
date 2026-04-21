@@ -20,6 +20,7 @@ LinkingTo:
     Rcpp
 Suggests:
     ggplot2,
+    ggtext,
     igraph,
     IRanges,
     knitr,

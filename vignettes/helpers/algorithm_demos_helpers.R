@@ -31,7 +31,7 @@ algorithm_demo_presets <- list(
     maze_seed = 53L,
     playback = "forward",
     history_metric = "pressure",
-    history_hold_frames = 6L,
+    history_hold_frames = 30L,
     max_animation_frames = 140L,
     fps = 12,
     animate = TRUE,

@@ -595,6 +595,37 @@ persistent_rewind_steps <- function(snapshots) {
   out
 }
 
+.astar_has_ggtext <- function() requireNamespace("ggtext", quietly = TRUE)
+
+.astar_color_key_subtitle <- function() {
+  if(.astar_has_ggtext()) {
+    paste0(
+      "<span style='color:#4E9A8A'>frontier</span> &middot; ",
+      "<span style='color:#F08A24'>current</span> &middot; ",
+      "<span style='color:#C9C3B6'>expanded</span> &middot; ",
+      "<span style='color:#D1495B'>start / goal</span>"
+    )
+  } else {
+    "frontier (green) \u00b7 current (orange) \u00b7 expanded (tan) \u00b7 start/goal (red)"
+  }
+}
+
+.astar_activity_key_subtitle <- function() {
+  if(.astar_has_ggtext()) {
+    paste0(
+      "cell activity: ",
+      "<span style='color:#C9C3B6'>low</span> &rarr; ",
+      "<span style='color:#F08A24'>high</span>"
+    )
+  } else {
+    "cell activity: low \u2192 high"
+  }
+}
+
+.astar_subtitle_element <- function() {
+  if(.astar_has_ggtext()) ggtext::element_markdown() else ggplot2::element_text()
+}
+
 plot_astar_snapshots <- function(
   result,
   animate = TRUE,
@@ -685,8 +716,8 @@ plot_astar_snapshots <- function(
         )
       ) +
       ggplot2::labs(
-        title = "A* with Immutable Structures",
-        subtitle = if(result$found) "Path found" else "No path found",
+        title = if(result$found) "A* with Immutable Structures" else "A* with Immutable Structures (no path)",
+        subtitle = .astar_color_key_subtitle(),
         caption = caption,
         x = NULL,
         y = NULL,
@@ -698,6 +729,7 @@ plot_astar_snapshots <- function(
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
         legend.position = "none",
+        plot.subtitle = .astar_subtitle_element(),
         plot.margin = ggplot2::margin(t = 6, r = 8, b = 6, l = 8)
       )
   }
@@ -715,7 +747,7 @@ plot_astar_snapshots <- function(
     title_txt <- "A* with Immutable Structures"
     if(identical(metric_name, "pressure")) {
       d$metric_value <- d$pressure
-      subtitle_txt <- "History pressure across the full immutable timeline"
+      subtitle_txt <- .astar_activity_key_subtitle()
     } else if(identical(metric_name, "expansions")) {
       d$metric_value <- as.numeric(d$current_hits)
       subtitle_txt <- "Expansion count across the full immutable timeline"
@@ -770,7 +802,7 @@ plot_astar_snapshots <- function(
       ggplot2::scale_y_reverse(expand = c(0, 0)) +
       ggplot2::scale_x_continuous(expand = c(0, 0)) +
       ggplot2::scale_fill_gradientn(
-        colours = c("#F7F4EA", "#C9C3B6", "#F08A24", "#D1495B"),
+        colours = c("#F7F4EA", "#C9C3B6", "#F08A24"),
         na.value = "#F7F4EA"
       ) +
       ggplot2::labs(
@@ -787,6 +819,7 @@ plot_astar_snapshots <- function(
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
         legend.position = "none",
+        plot.subtitle = if(identical(metric_name, "pressure")) .astar_subtitle_element() else ggplot2::element_text(),
         plot.margin = ggplot2::margin(t = 6, r = 8, b = 6, l = 8)
       )
   }

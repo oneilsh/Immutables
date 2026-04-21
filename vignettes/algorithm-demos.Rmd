@@ -183,17 +183,18 @@ Dijkstra's algorithm.
 This demo runs A* on a generated maze from a fixed start to a goal.
 Three structures share the work. A `priority_queue` keyed by f-score holds
 the frontier, and `pop_min()` picks the next node to expand. A separate
-`ordered_sequence` keyed by node index records which nodes have already
-been expanded, so the "already visited?" check is a `peek_key()`. 
+`ordered_sequence` records which nodes have already
+been expanded with fast additions and membership checks (keyed on index).
 A `flexseq` accumulates a snapshot of the frontier, the set of
 expanded nodes, and the current node at every step. Since the full search
-history is preserved as an immutable timeline, a post-hoc aggregate like
-*pressure*, i.e. how many times each cell appeared on the frontier over
-the course of the search, can be computed by folding over the snapshots
-after the run. The animation exploits this to reveal the final path on
-top of a pressure heatmap once the search settles.
+history is preserved as an immutable timeline, after the run we can fold
+the snapshots into a *cell activity* field that weights each cell by how
+long it spent as frontier, current, and expanded — the orange trail you
+see during playback, made explicit as a persistent overlay. The animation
+reveals the final path on top of this activity map once the search
+settles.
 
-```{r astar-viz, echo=FALSE, fig.cap="A* replay with staged final-route reveal, then persistent pressure summary."}
+```{r astar-viz, echo=FALSE, fig.cap="A* replay with staged final-route reveal, then persistent cell-activity overlay."}
 knitr::include_graphics(algorithm_demo_asset("astar_organic_history_large_fast"))
 ```
 
