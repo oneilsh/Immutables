@@ -1,8 +1,6 @@
 name: cpp-backend-reference
 
 on:
-  push:
-    branches: [main, master]
   pull_request:
     branches: [main, master]
   workflow_dispatch:
