@@ -22,34 +22,50 @@ if(requireNamespace("pkgload", quietly = TRUE)) {
 
 `immutables` provides four fast data structures:
 
-`flexseq()` - Provides list-like operations including indexed and named element
-   access, push/pop/peek from either end for double-ended queue behavior, 
+[`flexseq()`](flexseq.html) - Provides list-like operations including indexed and named element
+   access, push/pop/peek from either end for double-ended queue behavior,
    insertion, splitting, and concatenation.
 
-`priority_queue()` - Associates items with priority values and provides
+[`priority_queue()`](priority-queues.html) - Associates items with priority values and provides
   min and max peek/pop by priority and fast insertion.
 
-`ordered_sequence()` - Associates items with key values and keeps the elements in
+[`ordered_sequence()`](ordered-sequences.html) - Associates items with key values and keeps the elements in
   sorted order by key. These may be similarly be inserted/popped/peeked by key
-  value as well as position. Keys may be duplicated, with first-in-first-out 
+  value as well as position. Keys may be duplicated, with first-in-first-out
   order within key groups.
 
-`interval_index()` - Stores items associated with interval ranges, supporting
+[`interval_index()`](interval-indices.html) - Stores items associated with interval ranges, supporting
   point and interval overlap/containment/subsumption queries. Items are kept
   in interval-start-order.
+
+A [developer API](developer-api.html) exposes the underlying monoid-annotated
+finger tree primitives (custom monoids, predicate-based locate/split,
+validation helpers) for building new structures and indexes.
 
 
 ## Quick Tour
 
 ### flexseq
 
+Construct, then push or pop at either end:
+
 ```{r}
 s <- flexseq("a", "b", "c", "d")
 s |> push_front("z") |> push_back("e")
+pop_front(s)$remaining
+```
+
+Random-access and positional edits:
+
+```{r}
 s[[3]]
 peek_back(s)
-pop_front(s)$remaining
 insert_at(s, 3, c("x", "y"))
+```
+
+Map, concatenate, and iterate:
+
+```{r}
 fapply(s, toupper)
 c(s, as_flexseq(letters[10:12]))
 loop(for (el in s) print(el))
@@ -57,38 +73,93 @@ loop(for (el in s) print(el))
 
 ### priority_queue
 
+Construct with priorities, optionally with names, and insert more entries:
+
 ```{r}
-q <- priority_queue("task_a", "task_b", "task_c", priorities = c(3, 1, 2)) |>
+q <- priority_queue(a = "task_a", b = "task_b", c = "task_c", priorities = c(3, 1, 2)) |>
   insert("task_d", priority = 1, name = "d")
+```
+
+Peek/pop by min or max priority; the `*_all_*` variants handle ties:
+
+```{r}
 peek_min(q)
 pop_max(q)$value
-peek_all_min(q)$elements
+pop_all_min(q)$elements
+```
+
+Read extrema and merge two queues into one:
+
+```{r}
 min_priority(q); max_priority(q)
 merge(q, priority_queue("task_e", priorities = 0))
 ```
 
 ### ordered_sequence
 
+Construct sorted by key (duplicates allowed, ties FIFO):
+
 ```{r}
 xs <- ordered_sequence("a1", "b1", "b2", "c1", keys = c(1, 2, 2, 3))
 peek_key(xs, 2)
 peek_all_key(xs, 2)
+```
+
+Range queries and successor lookup:
+
+```{r}
 count_between(xs, 1, 2)
 elements_between(xs, 2, 3, include_to = FALSE)
 lower_bound(xs, 2)$index
+```
+
+Extrema and merge:
+
+```{r}
 min_key(xs); max_key(xs)
 merge(xs, ordered_sequence("d1", keys = 4))
 ```
 
 ### interval_index
 
+Construct with start/end coordinates; entries stay in start order:
+
 ```{r}
 ix <- interval_index("A", "B", "C", start = c(1, 2, 4), end = c(3, 4, 5))
 peek_point(ix, 2)
+```
+
+Interval-relation queries (overlap, containment), plus sweep-line endpoint matches via `match_at`:
+
+```{r}
 peek_all_overlaps(ix, start = 2, end = 5)
 peek_all_containing(ix, start = 2, end = 3)
 peek_all_point(ix, point = 3, match_at = "end")
+```
+
+Endpoint extrema and merge:
+
+```{r}
 min_endpoint(ix); max_endpoint(ix)
 merge(ix, interval_index("D", start = 6, end = 8))
+```
+
+### developer API
+
+Define a custom monoid (here, a running sum) and attach it to any structure:
+
+```{r}
+sum_monoid <- measure_monoid(f = `+`, i = 0, measure = function(el) el)
+x <- as_flexseq(c(3, 1, 4, 1, 5, 9, 2, 6)) |>
+  add_monoids(list(sum = sum_monoid))
+get_measure(x, "sum")
+```
+
+Use a monotonic predicate over the cached measure for $O(\log n)$ locate and split:
+
+```{r}
+locate_by_predicate(x, function(v) v > 10, "sum")
+split_around_by_predicate(x, function(v) v > 10, "sum")$value
+validate_tree(x)
 ```
 
