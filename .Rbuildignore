@@ -1,3 +1,4 @@
+^.*\.Rcheck/$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^_pkgdown\.yml$
@@ -22,3 +23,4 @@
 ^Makefile$
 ^codecov\.yml$
 ^pkgdown$
+^cran-comments\.md$

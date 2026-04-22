@@ -284,7 +284,8 @@ merge.flexseq <- function(x, y, ...) {
 #' x <- flexseq("a", "b", "c")
 #' if(requireNamespace("igraph", quietly = TRUE)) plot(x)
 #'
-#' \dontrun{
+#' if (requireNamespace("igraph", quietly = TRUE)) {
+#' \donttest{
 #' # Label every node with its subtree size (leaves contribute 1).
 #' plot_structure(as_flexseq(1:10), node_label = function(node) {
 #'   paste0(node$type, "\n.size=", node$measures$.size)
@@ -296,8 +297,8 @@ merge.flexseq <- function(x, y, ...) {
 #' xs <- add_monoids(as_flexseq(c(3, 1, 4, 1, 5, 9, 2, 6)),
 #'                   list(sum = sum_monoid))
 #' plot_structure(xs, node_label = function(node) {
-#'   if(node$type == "Element") sprintf("%g\nΣ=%g", node$element, node$measures$sum)
-#'   else sprintf("%s\nΣ=%g", node$type, node$measures$sum)
+#'   if(node$type == "Element") sprintf("%g\nsum=%g", node$element, node$measures$sum)
+#'   else sprintf("%s\nsum=%g", node$type, node$measures$sum)
 #' })
 #'
 #' # List-valued built-in measure: priority_queue's .pq_min tracks the min
@@ -314,6 +315,7 @@ merge.flexseq <- function(x, y, ...) {
 #'     node$type
 #'   }
 #' })
+#' }
 #' }
 #' @export
 # Runtime: O(n) to build plot graph data.

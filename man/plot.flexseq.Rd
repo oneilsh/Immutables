@@ -54,7 +54,8 @@ built-in \code{.pq_min} on \code{priority_queue} is \code{list(has, priority)}).
 x <- flexseq("a", "b", "c")
 if(requireNamespace("igraph", quietly = TRUE)) plot(x)
 
-\dontrun{
+if (requireNamespace("igraph", quietly = TRUE)) {
+\donttest{
 # Label every node with its subtree size (leaves contribute 1).
 plot_structure(as_flexseq(1:10), node_label = function(node) {
   paste0(node$type, "\n.size=", node$measures$.size)
@@ -66,8 +67,8 @@ sum_monoid <- measure_monoid(`+`, 0, function(el) el)
 xs <- add_monoids(as_flexseq(c(3, 1, 4, 1, 5, 9, 2, 6)),
                   list(sum = sum_monoid))
 plot_structure(xs, node_label = function(node) {
-  if(node$type == "Element") sprintf("\%g\nΣ=\%g", node$element, node$measures$sum)
-  else sprintf("\%s\nΣ=\%g", node$type, node$measures$sum)
+  if(node$type == "Element") sprintf("\%g\nsum=\%g", node$element, node$measures$sum)
+  else sprintf("\%s\nsum=\%g", node$type, node$measures$sum)
 })
 
 # List-valued built-in measure: priority_queue's .pq_min tracks the min
@@ -84,5 +85,6 @@ plot_structure(pq, node_label = function(node) {
     node$type
   }
 })
+}
 }
 }

@@ -267,7 +267,8 @@ NULL
 #' @return Invoked for its side effect (draws to the active graphics
 #'   device). Returns `NULL` invisibly.
 #' @examples
-#' \dontrun{
+#' if (requireNamespace("igraph", quietly = TRUE)) {
+#' \donttest{
 #' t <- as_flexseq(letters[1:8])
 #' plot_structure(t, title = "Finger tree")
 #'
@@ -277,9 +278,10 @@ NULL
 #' xs <- add_monoids(as_flexseq(c(3, 1, 4, 1, 5, 9, 2, 6)),
 #'                   list(sum = sum_monoid))
 #' plot_structure(xs, node_label = function(node) {
-#'   if(node$type == "Element") sprintf("%g\nΣ=%g", node$element, node$measures$sum)
-#'   else sprintf("%s\nΣ=%g", node$type, node$measures$sum)
+#'   if(node$type == "Element") sprintf("%g\nsum=%g", node$element, node$measures$sum)
+#'   else sprintf("%s\nsum=%g", node$type, node$measures$sum)
 #' })
+#' }
 #' }
 #' @seealso [plot.flexseq()], [measure_monoid()], [add_monoids()]
 #' @export
