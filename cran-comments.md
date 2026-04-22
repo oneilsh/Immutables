@@ -4,10 +4,9 @@
 
 The NOTE has two components:
 
-* "New submission" - expected
-* "catenable" is flagged as a possibly misspelled word, but is standard
-terminology in functional data structures literature meaning "supporting
-fast concatenation" which this package provides for the flexseq datatype.
+* "New submission" is expected
+* "catenable" is flagged as a possibly misspelled word but is standard
+terminology in functional data structures literature
 
 ## Test environments
 
