@@ -76,26 +76,33 @@
 </h1>
 </div>
 <!-- Uncomment after CRAN submission:
-[![CRAN status](https://www.r-pkg.org/badges/version/immutables)](https://CRAN.R-project.org/package=immutables)
-[![CRAN downloads](https://cranlogs.r-pkg.org/badges/immutables)](https://CRAN.R-project.org/package=immutables)
+[![CRAN status](https://www.r-pkg.org/badges/version/Immutables)](https://CRAN.R-project.org/package=Immutables)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/Immutables)](https://CRAN.R-project.org/package=Immutables)
 -->
 <p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://lifecycle.r-lib.org/reference/figures/lifecycle-experimental.svg" alt="Lifecycle: experimental"></a> <a href="https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://app.codecov.io/gh/oneilsh/immutables" class="external-link"><img src="https://codecov.io/gh/oneilsh/immutables/branch/main/graph/badge.svg" alt="Codecov test coverage"></a> <a href="https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a> <a href="https://oneilsh.github.io/immutables/"><img src="https://img.shields.io/badge/docs-pkgdown-blue" alt="docs"></a> <a href="https://doi.org/10.5281/zenodo.19686096" class="external-link"><img src="https://zenodo.org/badge/154557443.svg" alt="DOI"></a></p>
-<p>The <code>immutables</code> R package implements several immutable, or persistent, data structures: operations return modified copies while remaining fast and true to R’s side-effect-free functional nature.</p>
+<p><code>Immutables</code> implements several immutable, or persistent, data structures for R: operations return modified copies while remaining fast and true to R’s side-effect-free functional nature with <code>list</code>-like semantics.</p>
 <ul>
 <li>
-<code>flexseq</code>s provide list-like operations including indexed and named element access, push/pop/peek from either end for double-ended queue behavior, insertion, splitting, and concatenation.</li>
-<li>
-<code>priority_queues</code> associate items with priority values and provide min and max peek/pop by priority and fast insertion.</li>
-<li>
-<code>ordered_sequences</code> associate items with key values and keep the elements in sorted order by key. These may be similarly be inserted/popped/peeked by key value as well as position. Keys may be duplicated, with first-in-first-out order within key groups.</li>
-<li>
-<code>interval_indexes</code> store items associated with interval ranges, supporting point as well as interval overlaps/contains/within queries. Items are kept in start-order enabling ordered sequence operations and sweep-line algorithms.</li>
-</ul>
-<p>Backed by monoid-annotated 2-3 fingertrees as described by <a href="https://doi.org/10.1017/S0956796805005769" class="external-link">Hinze and Paterson</a>, most operations are constant time, amortized constant time, or <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>log</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math>. Core functions are implemented in C++ (via Rcpp) for speed, with matching pure-R reference implementations using <code>lambda.r</code> syntax to match the paper.</p>
-<p>Finally, the developer API supports the addition of custom structures via combinations of monoids and measures; see vignettes for details.</p>
+<a href="https://oneilsh.github.io/immutables/articles/flexseq.html"><code>flexseq</code></a>s provide list-like operations:
 <ul>
-<li>Hinze, R. and Paterson, R. (2006), <em>Finger trees: a simple general-purpose data structure</em>.</li>
+<li>indexed and named element access</li>
+<li>push/pop/peek from either end for double-ended queue behavior</li>
+<li>efficient insertion, splitting, and concatenation</li>
 </ul>
+</li>
+<li>
+<a href="https://oneilsh.github.io/immutables/articles/priority-queues.html"><code>priority_queue</code></a>s associate items with priority values and provide min and max peek/pop by priority and fast insertion.</li>
+<li>
+<a href="https://oneilsh.github.io/immutables/articles/ordered-sequences.html"><code>ordered_sequence</code></a>s associate items with key values and keep the elements in sorted order by key. These may be similarly be inserted/popped/peeked by key value as well as position. Keys may be duplicated, with first-in-first-out order within key groups.</li>
+<li>
+<a href="https://oneilsh.github.io/immutables/articles/interval-indices.html"><code>interval_index</code></a>es store items associated with interval ranges, supporting point as well as interval overlaps/contains/within queries. Items are kept in start-order enabling ordered sequence operations and sweep-line algorithms.</li>
+</ul>
+<div class="section level2">
+<h2 id="speed-and-flexibility">Speed and Flexibility<a class="anchor" aria-label="anchor" href="#speed-and-flexibility"></a>
+</h2>
+<p>Backed by monoid-annotated finger trees as described by <a href="https://doi.org/10.1017/S0956796805005769" class="external-link">Hinze and Paterson</a>, most operations are constant time, amortized constant time, or <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(\log(n))</annotation></semantics></math>. Core functions are implemented in C++ (via Rcpp) for speed, with matching pure-R reference implementations using <code>lambda.r</code> syntax similar to the paper’s Haskell.</p>
+<p>The <a href="https://oneilsh.github.io/immutables/articles/developer-api.html">developer API</a> supports the addition of custom structures via combinations of monoids and measures. See the <a href="https://oneilsh.github.io/immutables/">full documentation</a> for vignettes and reference, including a <a href="https://oneilsh.github.io/immutables/articles/gallery.html">gallery of worked examples</a> and <a href="https://oneilsh.github.io/immutables/articles/benchmarks.html">benchmarks</a>.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>

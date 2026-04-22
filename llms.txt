@@ -9,36 +9,48 @@ coverage](https://codecov.io/gh/oneilsh/immutables/branch/main/graph/badge.svg)]
 [![docs](https://img.shields.io/badge/docs-pkgdown-blue)](https://oneilsh.github.io/immutables/)
 [![DOI](https://zenodo.org/badge/154557443.svg)](https://doi.org/10.5281/zenodo.19686096)
 
-The `immutables` R package implements several immutable, or persistent,
-data structures: operations return modified copies while remaining fast
-and true to R’s side-effect-free functional nature.
+`Immutables` implements several immutable, or persistent, data
+structures for R: operations return modified copies while remaining fast
+and true to R’s side-effect-free functional nature with `list`-like
+semantics.
 
-- `flexseq`s provide list-like operations including indexed and named
-  element access, push/pop/peek from either end for double-ended queue
-  behavior, insertion, splitting, and concatenation.
-- `priority_queues` associate items with priority values and provide min
-  and max peek/pop by priority and fast insertion.
-- `ordered_sequences` associate items with key values and keep the
-  elements in sorted order by key. These may be similarly be
-  inserted/popped/peeked by key value as well as position. Keys may be
-  duplicated, with first-in-first-out order within key groups.
-- `interval_indexes` store items associated with interval ranges,
-  supporting point as well as interval overlaps/contains/within queries.
-  Items are kept in start-order enabling ordered sequence operations and
-  sweep-line algorithms.
+- [`flexseq`](https://oneilsh.github.io/immutables/articles/flexseq.html)s
+  provide list-like operations:
+  - indexed and named element access
+  - push/pop/peek from either end for double-ended queue behavior
+  - efficient insertion, splitting, and concatenation
+- [`priority_queue`](https://oneilsh.github.io/immutables/articles/priority-queues.html)s
+  associate items with priority values and provide min and max peek/pop
+  by priority and fast insertion.
+- [`ordered_sequence`](https://oneilsh.github.io/immutables/articles/ordered-sequences.html)s
+  associate items with key values and keep the elements in sorted order
+  by key. These may be similarly be inserted/popped/peeked by key value
+  as well as position. Keys may be duplicated, with first-in-first-out
+  order within key groups.
+- [`interval_index`](https://oneilsh.github.io/immutables/articles/interval-indices.html)es
+  store items associated with interval ranges, supporting point as well
+  as interval overlaps/contains/within queries. Items are kept in
+  start-order enabling ordered sequence operations and sweep-line
+  algorithms.
 
-Backed by monoid-annotated 2-3 fingertrees as described by [Hinze and
+## Speed and Flexibility
+
+Backed by monoid-annotated finger trees as described by [Hinze and
 Paterson](https://doi.org/10.1017/S0956796805005769), most operations
-are constant time, amortized constant time, or $O\left( \log n \right)$.
-Core functions are implemented in C++ (via Rcpp) for speed, with
-matching pure-R reference implementations using `lambda.r` syntax to
-match the paper.
+are constant time, amortized constant time, or
+$O\left( \log(n) \right)$. Core functions are implemented in C++ (via
+Rcpp) for speed, with matching pure-R reference implementations using
+`lambda.r` syntax similar to the paper’s Haskell.
 
-Finally, the developer API supports the addition of custom structures
-via combinations of monoids and measures; see vignettes for details.
-
-- Hinze, R. and Paterson, R. (2006), *Finger trees: a simple
-  general-purpose data structure*.
+The [developer
+API](https://oneilsh.github.io/immutables/articles/developer-api.html)
+supports the addition of custom structures via combinations of monoids
+and measures. See the [full
+documentation](https://oneilsh.github.io/immutables/) for vignettes and
+reference, including a [gallery of worked
+examples](https://oneilsh.github.io/immutables/articles/gallery.html)
+and
+[benchmarks](https://oneilsh.github.io/immutables/articles/benchmarks.html).
 
 # Package index
 
@@ -421,118 +433,360 @@ validation, and structure visualization.
 
 `immutables` provides four fast data structures:
 
-[`flexseq()`](https://oneilsh.github.io/immutables/reference/flexseq.md) -
+[`flexseq()`](https://oneilsh.github.io/immutables/articles/flexseq.md) -
 Provides list-like operations including indexed and named element
 access, push/pop/peek from either end for double-ended queue behavior,
 insertion, splitting, and concatenation.
 
-[`priority_queue()`](https://oneilsh.github.io/immutables/reference/priority_queue.md) -
+[`priority_queue()`](https://oneilsh.github.io/immutables/articles/priority-queues.md) -
 Associates items with priority values and provides min and max peek/pop
 by priority and fast insertion.
 
-[`ordered_sequence()`](https://oneilsh.github.io/immutables/reference/ordered_sequence.md) -
+[`ordered_sequence()`](https://oneilsh.github.io/immutables/articles/ordered-sequences.md) -
 Associates items with key values and keeps the elements in sorted order
 by key. These may be similarly be inserted/popped/peeked by key value as
 well as position. Keys may be duplicated, with first-in-first-out order
 within key groups.
 
-[`interval_index()`](https://oneilsh.github.io/immutables/reference/interval_index.md) -
+[`interval_index()`](https://oneilsh.github.io/immutables/articles/interval-indices.md) -
 Stores items associated with interval ranges, supporting point and
 interval overlap/containment/subsumption queries. Items are kept in
 interval-start-order.
 
-Built on monoid-annotated finger trees described by [Hinze and Paterson
-(2006)](https://www.cs.ox.ac.uk/ralf.hinze/publications/FingerTrees.pdf),
-they are immutable: operations return modified copies, and are thus
-‘side-effect free’. Their fascinating internal structure ensures most
-operations are fast, either constant amortized time or
-$O\left( \log(n) \right)$, memory proportional to $n\log(n)$, and
-`immutables` implements core operations in `C++` via `Rcpp` for
-numeric/character/logical key and priority types, while enabling R
-fallback for more complex types such as dates.
+A [developer
+API](https://oneilsh.github.io/immutables/articles/developer-api.md)
+exposes the underlying monoid-annotated finger tree primitives (custom
+monoids, predicate-based locate/split, validation helpers) for building
+new structures and indexes.
 
 ## Quick Tour
 
 ### flexseq
 
+Construct, then push or pop at either end:
+
 ``` r
-s <- flexseq("a", "b", "c")
-s2 <- push_back(s, "d")
+s <- flexseq("a", "b", "c", "d")
+s |> push_front("z") |> push_back("e")
+#> Unnamed flexseq with 6 elements.
+#> 
+#> Elements:
+#> 
+#> [[1]]
+#> [1] "z"
+#> 
+#> [[2]]
+#> [1] "a"
+#> 
+#> ... (skipping 2 elements)
+#> 
+#> [[5]]
+#> [1] "d"
+#> 
+#> [[6]]
+#> [1] "e"
+pop_front(s)$remaining
+#> Unnamed flexseq with 3 elements.
+#> 
+#> Elements:
+#> 
+#> [[1]]
+#> [1] "b"
+#> 
+#> [[2]]
+#> [1] "c"
+#> 
+#> [[3]]
+#> [1] "d"
+```
+
+Random-access and positional edits:
+
+``` r
+s[[3]]
+#> [1] "c"
+peek_back(s)
+#> [1] "d"
+insert_at(s, 3, c("x", "y"))
+#> Unnamed flexseq with 6 elements.
+#> 
+#> Elements:
+#> 
+#> [[1]]
+#> [1] "a"
+#> 
+#> [[2]]
+#> [1] "b"
+#> 
+#> ... (skipping 2 elements)
+#> 
+#> [[5]]
+#> [1] "c"
+#> 
+#> [[6]]
+#> [1] "d"
+```
+
+Map, concatenate, and iterate:
+
+``` r
+fapply(s, toupper)
+#> Unnamed flexseq with 4 elements.
+#> 
+#> Elements:
+#> 
+#> [[1]]
+#> [1] "A"
+#> 
+#> [[2]]
+#> [1] "B"
+#> 
+#> [[3]]
+#> [1] "C"
+#> 
+#> [[4]]
+#> [1] "D"
+c(s, as_flexseq(letters[10:12]))
+#> Unnamed flexseq with 7 elements.
+#> 
+#> Elements:
+#> 
+#> [[1]]
+#> [1] "a"
+#> 
+#> [[2]]
+#> [1] "b"
+#> 
+#> ... (skipping 3 elements)
+#> 
+#> [[6]]
+#> [1] "k"
+#> 
+#> [[7]]
+#> [1] "l"
+loop(for (el in s) print(el))
+#> [1] "a"
+#> [1] "b"
+#> [1] "c"
+#> [1] "d"
 ```
 
 ### priority_queue
 
+Construct with priorities, optionally with names, and insert more
+entries:
+
 ``` r
-q <- priority_queue("low", "high", priorities = c(10, 1))
+q <- priority_queue(a = "task_a", b = "task_b", c = "task_c", priorities = c(3, 1, 2)) |>
+  insert("task_d", priority = 1, name = "d")
+```
+
+Peek/pop by min or max priority; the `*_all_*` variants handle ties:
+
+``` r
 peek_min(q)
-#> [1] "high"
-pop_min(q)$remaining
-#> Unnamed priority_queue with 1 element.
-#> Minimum priority: 10, Maximum priority: 10
+#> [1] "task_b"
+pop_max(q)$value
+#> [1] "task_a"
+pop_all_min(q)$elements
+#> Named priority_queue with 2 elements.
+#> Minimum priority: 1, Maximum priority: 1
 #> 
 #> Elements (by priority):
 #> 
-#> (priority 10)
-#> [1] "low"
+#> $b (priority 1)
+#> [1] "task_b"
+#> 
+#> $d (priority 1)
+#> [1] "task_d"
+```
+
+Read extrema and merge two queues into one:
+
+``` r
+min_priority(q); max_priority(q)
+#> [1] 1
+#> [1] 3
+merge(q, priority_queue("task_e", priorities = 0))
+#> Named priority_queue with 5 elements.
+#> Minimum priority: 0, Maximum priority: 3
+#> 
+#> Elements (by priority):
+#> 
+#> (priority 0)
+#> [1] "task_e"
+#> 
+#> $b (priority 1)
+#> [1] "task_b"
+#> 
+#> ... (skipping 1 element)
+#> 
+#> $c (priority 2)
+#> [1] "task_c"
+#> 
+#> $a (priority 3)
+#> [1] "task_a"
 ```
 
 ### ordered_sequence
 
+Construct sorted by key (duplicates allowed, ties FIFO):
+
 ``` r
-os <- ordered_sequence("one", "two", "two-b", keys = c(1, 2, 2))
-peek_key(os, 2)
-#> [1] "two"
-as.list(peek_all_key(os, 2))
-#> [[1]]
-#> [1] "two"
+xs <- ordered_sequence("a1", "b1", "b2", "c1", keys = c(1, 2, 2, 3))
+peek_key(xs, 2)
+#> [1] "b1"
+peek_all_key(xs, 2)
+#> Unnamed ordered_sequence with 2 elements.
 #> 
-#> [[2]]
-#> [1] "two-b"
+#> Elements (by key order):
+#> 
+#> [[1]] (key 2)
+#> [1] "b1"
+#> 
+#> [[2]] (key 2)
+#> [1] "b2"
+```
+
+Range queries and successor lookup:
+
+``` r
+count_between(xs, 1, 2)
+#> [1] 3
+elements_between(xs, 2, 3, include_to = FALSE)
+#> Unnamed ordered_sequence with 2 elements.
+#> 
+#> Elements (by key order):
+#> 
+#> [[1]] (key 2)
+#> [1] "b1"
+#> 
+#> [[2]] (key 2)
+#> [1] "b2"
+lower_bound(xs, 2)$index
+#> [1] 2
+```
+
+Extrema and merge:
+
+``` r
+min_key(xs); max_key(xs)
+#> [1] 1
+#> [1] 3
+merge(xs, ordered_sequence("d1", keys = 4))
+#> Unnamed ordered_sequence with 5 elements.
+#> 
+#> Elements (by key order):
+#> 
+#> [[1]] (key 1)
+#> [1] "a1"
+#> 
+#> [[2]] (key 2)
+#> [1] "b1"
+#> 
+#> ... (skipping 1 element)
+#> 
+#> [[4]] (key 3)
+#> [1] "c1"
+#> 
+#> [[5]] (key 4)
+#> [1] "d1"
 ```
 
 ### interval_index
 
+Construct with start/end coordinates; entries stay in start order:
+
 ``` r
-ix <- interval_index("A", "B", start = c(1, 3), end = c(4, 5))
-peek_point(ix, 3)
-#> [1] "A"
-as.list(peek_all_overlaps(ix, 2, 3))
-#> [[1]]
+ix <- interval_index("A", "B", "C", start = c(1, 2, 4), end = c(3, 4, 5))
+peek_point(ix, 2)
 #> [1] "A"
 ```
 
-## Choosing a Structure
+Interval-relation queries (overlap, containment), plus sweep-line
+endpoint matches via `match_at`:
 
-- Use `flexseq` for general sequence updates and slicing.
-- Use `priority_queue` when min/max priority operations are primary.
-- Use `ordered_sequence` when key lookup/range queries are primary.
-- Use `interval_index` for point/overlap/containment interval relations.
+``` r
+peek_all_overlaps(ix, start = 2, end = 5)
+#> Unnamed interval_index with 3 elements, default query bounds [start, end).
+#> 
+#> Elements (by interval start order):
+#> 
+#> [[1]] (interval 1 - 3)
+#> [1] "A"
+#> 
+#> [[2]] (interval 2 - 4)
+#> [1] "B"
+#> 
+#> [[3]] (interval 4 - 5)
+#> [1] "C"
+peek_all_containing(ix, start = 2, end = 3)
+#> Unnamed interval_index with 2 elements, default query bounds [start, end).
+#> 
+#> Elements (by interval start order):
+#> 
+#> [[1]] (interval 1 - 3)
+#> [1] "A"
+#> 
+#> [[2]] (interval 2 - 4)
+#> [1] "B"
+peek_all_point(ix, point = 3, match_at = "end")
+#> Unnamed interval_index with 1 element, default query bounds [start, end).
+#> 
+#> Elements (by interval start order):
+#> 
+#> [[1]] (interval 1 - 3)
+#> [1] "A"
+```
 
-All structures support names using standard R accessors
-(`seq[c("name1", "name2")]`, `seq[["name"]]`, `seq$name`), but access by
-name is slower than other operations in some cases. In the case of
-ordered sequences and interval indices, return sequences are kept in
-order, and a warning is displayed if this is different than the
-requested order. It is generally possible to cast down with `as_flexseq`
-with
+Endpoint extrema and merge:
 
-If names are used, all elements must be non-NULL and unique. Every
-write-like operation returns a new value and leaves the original
-unchanged, though assignment with `[<-`, `[[<-`, and `$<-` is possible
-in
+``` r
+min_endpoint(ix); max_endpoint(ix)
+#> [1] 1
+#> [1] 5
+merge(ix, interval_index("D", start = 6, end = 8))
+#> Unnamed interval_index with 4 elements, default query bounds [start, end).
+#> 
+#> Elements (by interval start order):
+#> 
+#> [[1]] (interval 1 - 3)
+#> [1] "A"
+#> 
+#> [[2]] (interval 2 - 4)
+#> [1] "B"
+#> 
+#> [[3]] (interval 4 - 5)
+#> [1] "C"
+#> 
+#> [[4]] (interval 6 - 8)
+#> [1] "D"
+```
 
-## Next Articles
+### developer API
 
-- [flexseq](https://oneilsh.github.io/immutables/articles/flexseq.md)
-- [flexseq
-  Benchmarks](https://oneilsh.github.io/immutables/articles/flexseq-benchmarks.md)
-- [Priority
-  Queues](https://oneilsh.github.io/immutables/articles/priority-queues.md)
-- [Ordered
-  Sequences](https://oneilsh.github.io/immutables/articles/ordered-sequences.md)
-- [Interval
-  Indices](https://oneilsh.github.io/immutables/articles/interval-indices.md)
-- [Algorithm
-  Demos](https://oneilsh.github.io/immutables/articles/algorithm-demos.md)
-- [Developer
-  API](https://oneilsh.github.io/immutables/articles/developer-api.md)
+Define a custom monoid (here, a running sum) and attach it to any
+structure:
+
+``` r
+sum_monoid <- measure_monoid(f = `+`, i = 0, measure = function(el) el)
+x <- as_flexseq(c(3, 1, 4, 1, 5, 9, 2, 6)) |>
+  add_monoids(list(sum = sum_monoid))
+get_measure(x, "sum")
+#> [1] 31
+```
+
+Use a monotonic predicate over the cached measure for
+$O\left( \log n \right)$ locate and split:
+
+``` r
+locate_by_predicate(x, function(v) v > 10, "sum")
+#> $found
+#> [1] TRUE
+#> 
+#> $value
+#> [1] 5
+split_around_by_predicate(x, function(v) v > 10, "sum")$value
+#> [1] 5
+validate_tree(x)
+```
