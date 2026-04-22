@@ -37,16 +37,6 @@ if(requireNamespace("pkgload", quietly = TRUE)) {
 `interval_index()` - Stores items associated with interval ranges, supporting
   point and interval overlap/containment/subsumption queries. Items are kept
   in interval-start-order.
-  
-Built on monoid-annotated finger trees described by 
-[Hinze and Paterson (2006)](https://www.cs.ox.ac.uk/ralf.hinze/publications/FingerTrees.pdf),
-they are immutable: operations return modified copies, and are thus 'side-effect free'. 
-Their fascinating internal structure ensures most operations are fast, either
-constant amortized time or $O(\log(n))$, memory proportional to $n \log(n)$, 
-and `immutables` implements core operations in `C++` via `Rcpp` for 
-numeric/character/logical key and priority types, while enabling R fallback 
-for more complex types such as dates.
-
 
 
 ## Quick Tour
@@ -54,54 +44,51 @@ for more complex types such as dates.
 ### flexseq
 
 ```{r}
-s <- flexseq("a", "b", "c")
-s2 <- push_back(s, "d")
+s <- flexseq("a", "b", "c", "d")
+s |> push_front("z") |> push_back("e")
+s[[3]]
+peek_back(s)
+pop_front(s)$remaining
+insert_at(s, 3, c("x", "y"))
+fapply(s, toupper)
+c(s, as_flexseq(letters[10:12]))
+loop(for (el in s) print(el))
 ```
 
 ### priority_queue
 
 ```{r}
-q <- priority_queue("low", "high", priorities = c(10, 1))
+q <- priority_queue("task_a", "task_b", "task_c", priorities = c(3, 1, 2)) |>
+  insert("task_d", priority = 1, name = "d")
 peek_min(q)
-pop_min(q)$remaining
+pop_max(q)$value
+peek_all_min(q)$elements
+min_priority(q); max_priority(q)
+merge(q, priority_queue("task_e", priorities = 0))
 ```
 
 ### ordered_sequence
 
 ```{r}
-os <- ordered_sequence("one", "two", "two-b", keys = c(1, 2, 2))
-peek_key(os, 2)
-as.list(peek_all_key(os, 2))
+xs <- ordered_sequence("a1", "b1", "b2", "c1", keys = c(1, 2, 2, 3))
+peek_key(xs, 2)
+peek_all_key(xs, 2)
+count_between(xs, 1, 2)
+elements_between(xs, 2, 3, include_to = FALSE)
+lower_bound(xs, 2)$index
+min_key(xs); max_key(xs)
+merge(xs, ordered_sequence("d1", keys = 4))
 ```
 
 ### interval_index
 
 ```{r}
-ix <- interval_index("A", "B", start = c(1, 3), end = c(4, 5))
-peek_point(ix, 3)
-as.list(peek_all_overlaps(ix, 2, 3))
+ix <- interval_index("A", "B", "C", start = c(1, 2, 4), end = c(3, 4, 5))
+peek_point(ix, 2)
+peek_all_overlaps(ix, start = 2, end = 5)
+peek_all_containing(ix, start = 2, end = 3)
+peek_all_point(ix, point = 3, match_at = "end")
+min_endpoint(ix); max_endpoint(ix)
+merge(ix, interval_index("D", start = 6, end = 8))
 ```
 
-## Choosing a Structure
-
-- Use `flexseq` for general sequence updates and slicing.
-- Use `priority_queue` when min/max priority operations are primary.
-- Use `ordered_sequence` when key lookup/range queries are primary.
-- Use `interval_index` for point/overlap/containment interval relations.
-
-All structures support names using standard R accessors (`seq[c("name1", "name2")]`, `seq[["name"]]`, `seq$name`), but access by name is slower than other operations in some cases. In the case of
-ordered sequences and interval indices, return sequences are kept in order, and a warning is displayed if this is different than the requested order. It is generally possible to cast down with `as_flexseq` with
-
-If names are used,
-all elements must be non-NULL and unique. Every write-like operation returns a new value and leaves the original unchanged, though assignment with `[<-`, `[[<-`, and `$<-` is possible in  
-
-
-## Next Articles
-
-- [flexseq](flexseq.html)
-- [flexseq Benchmarks](flexseq-benchmarks.html)
-- [Priority Queues](priority-queues.html)
-- [Ordered Sequences](ordered-sequences.html)
-- [Interval Indices](interval-indices.html)
-- [Algorithm Demos](algorithm-demos.html)
-- [Developer API](developer-api.html)
