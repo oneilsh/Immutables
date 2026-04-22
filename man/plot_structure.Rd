@@ -92,7 +92,8 @@ access to the full \code{node_label} API for custom label formatting. Requires
 the \code{igraph} package (listed in \code{Suggests}).
 }
 \examples{
-\dontrun{
+if (requireNamespace("igraph", quietly = TRUE)) {
+\donttest{
 t <- as_flexseq(letters[1:8])
 plot_structure(t, title = "Finger tree")
 
@@ -102,9 +103,10 @@ sum_monoid <- measure_monoid(`+`, 0, function(el) el)
 xs <- add_monoids(as_flexseq(c(3, 1, 4, 1, 5, 9, 2, 6)),
                   list(sum = sum_monoid))
 plot_structure(xs, node_label = function(node) {
-  if(node$type == "Element") sprintf("\%g\nΣ=\%g", node$element, node$measures$sum)
-  else sprintf("\%s\nΣ=\%g", node$type, node$measures$sum)
+  if(node$type == "Element") sprintf("\%g\nsum=\%g", node$element, node$measures$sum)
+  else sprintf("\%s\nsum=\%g", node$type, node$measures$sum)
 })
+}
 }
 }
 \seealso{
