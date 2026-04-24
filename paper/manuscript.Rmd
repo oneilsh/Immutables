@@ -58,173 +58,220 @@ bench_results <- local({
 
 # Introduction
 
-Purely functional collections in \proglang{R} are rare: the stock
-\code{list} and \code{vector} types are semantically immutable but the
-ergonomic and asymptotic penalties for treating them so are severe.
-\pkg{immutables} closes that gap by providing a small suite of
-persistent collection types backed by 2-3 finger trees \citep{hinze2006finger}
-with user-extensible monoid annotations. The package unifies sequence,
-queue, priority-queue, ordered-sequence, and interval-index operations
-under a single tree representation and a single pair of
-predicate-driven primitives.
+The \proglang{R} programming language is a natural first choice for
+statistical analyses, but its ever-growing popularity has diversified
+its application to domains as broad as web services
+\citep{TODO-web-services}, user interfaces
+\citep{TODO-user-interfaces}, machine learning
+\citep{TODO-machine-learning}, simulation \citep{TODO-simulation},
+mobile computing \citep{TODO-rpigpio}, computational geometry
+\citep{TODO-comp-geometry}, graph algorithms \citep{TODO-graph-algos},
+and much more \citep{TODO-misc-applications}. Data structures, or
+collections, are foundational building blocks for almost all computing,
+providing the features necessary for efficient in-memory data storage
+and retrieval.
 
-# The package
+Ordinal-indexed arrays, matrices, and lists are ubiquitous in
+statistical applications; double-ended queues support fast insertion
+and removal from ends and are widely used in state-search and
+scheduling applications \citep{TODO-deque-uses}; key-ordered sequences
+provide fast search, access, and range queries
+\citep{TODO-ordered-sequence-uses}; priority queues associate elements
+with priority values for efficient access by minimum or maximum
+priority, often used in graph algorithms and simulation
+\citep{TODO-pq-uses}. Amongst more exotic structures, pretty trees
+find application in bioinformatics \citep{TODO-pretty-trees-bioinf},
+and interval trees are widely used in computational geometry
+\citep{TODO-interval-tree-geom}.
 
-\pkg{immutables} exposes four collection types:
+Data structure implementations generally fall in one of two classes:
+mutable or immutable (also known as persistent). Operations on mutable
+structures allow the internal structure or contents to change.
+Operations on immutable structures, by contrast, return changed copies,
+preserving the original for further use. Purely functional languages
+like Haskell and ML endorse persistence, and while mutating data
+structures are generally easier to implement and faster, the functional
+programming community has invested significant effort in designing fast
+immutable implementations for a wide variety of applications
+\citep{TODO-okasaki}. This immutability is familiar to \proglang{R}
+developers, who expect pass-by-value semantics and side-effect-free
+functions \citep{TODO-r-semantics}. Most \proglang{R} structures
+follow this paradigm, with the exception of index-assignment (e.g.
+\code{x[2] <- 4.2}). Even in these cases, \proglang{R}'s
+assign-by-value and copy-on-modify semantics ensure safety
+(\code{x <- y; x[2] <- 4.2} modifies \code{x} while preserving the
+original data in \code{y}).
 
-- \code{flexseq} --- a general persistent sequence supporting push/pop at
-  both ends, indexing, split, and concatenation.
-- \code{priority\_queue} --- a min- and max-priority queue.
-- \code{ordered\_sequence} --- a key-ordered sequence with successor,
-  predecessor, and range queries.
-- \code{interval\_index} --- an interval tree supporting point and range
-  overlap queries.
+Unfortunately, native \proglang{R} types do not emphasize
+performance -- many operations require a full scan or copy of the
+data, making them prohibitively expensive for use in highly dynamic or
+large-data applications \citep{TODO-r-perf}. Attempts have been made
+to fill these gaps; we previously published an implementation of
+efficient, persistent stack and queue structures based on lazy
+evaluation techniques (noted as the only use of lazy structures in a
+2019 review of the \proglang{R} ecosystem \citep{TODO-2019-review}).
+In 2018 T. Barry surveyed the state of collection packages,
+identifying 11 packages providing set, map, stack, queue, and/or
+sequence structures \citep{TODO-barry-2018}. Of these, only three
+implemented side-effect-free structures: \pkg{rstackdeque}
+\citep{TODO-rstackdeque}, \pkg{sets} \citep{TODO-sets}, and
+\pkg{S4Vectors} \citep{TODO-s4vectors}. The latter two are optimized
+for bulk operations as compared to base-\proglang{R} types but, like
+\proglang{R} lists and vectors, do not support fast incremental
+insert/remove operations. Notably, \pkg{S4Vectors} is designed for
+extensibility and is widely used in the Bioconductor ecosystem,
+including support for interval ranges via \pkg{IRanges}
+\citep{TODO-iranges}. Barry notes a need for fast, flexible, and
+side-effect-free data structures to support advanced use cases in the
+\proglang{R} ecosystem \citep{TODO-barry-2018}.
 
-Internally each is a finger tree with a specific set of monoid
-annotations attached; the operations above delegate to two primitives
---- \code{locate\_by\_predicate()} and \code{split\_by\_predicate()} ---
-over those annotations. Users are free to attach their own monoids via
-\code{add\_monoids()} and invoke the same primitives for arbitrary
-$O(\log n)$ queries.
+Here we describe \pkg{immutables}, which implements a remarkable data
+structure known as monoid-annotated 2-3 finger trees. First described
+by Hinze and Paterson 20 years ago \citep{hinze2006finger}, these
+provide persistent, amortized constant-time access to ends,
+$O(\log n)$ search/insertion/removal, and via monoid annotation can
+be purposed as other specialized structures
+\citep{TODO-finger-tree-applications}. We implement four such
+specialized structures: \code{flexseq}s, serving as indexable,
+splittable, and concatenable lists with end insertion/removal for
+stack and queue operations; priority queues, associating data elements
+with priority values for min/max access; ordered sequences, keeping
+items in order by provided keys; and interval indices, storing items
+with orderable ranges for overlap-like queries. Core operations are
+implemented in \proglang{C++} via \pkg{Rcpp} \citep{TODO-rcpp} for
+speed, and a developer API is provided to extend functionality via
+monoid annotation.
+
+# Overview
+
+## Flexible sequences
+
+At the core of \pkg{immutables} is the \code{flexseq} structure,
+which operates similarly to \proglang{R} lists: they can store
+elements of any or mixed types, be named, and be indexed with the
+familiar \code{[}, \code{[[}, and \code{$} operators, including
+replacement. Elements can be inserted, accessed, or removed from
+either end via peek/pop/push operations in amortized constant time
+for efficient double-ended queue behavior. Additionally,
+\code{flexseq}s allow concatenation, splitting by position, and
+insertions and removals by position in $O(\log n)$ time.
+
+```r
+x <- as_flexseq(letters[1:10])
+x2 <- push_back(x, "z")
+length(x)                 # 10
+length(x2)                # 11
+x3 <- insert_at(x2, list("p", "q"))
+length(x3)                # 13
+x4 <- x[1:5]              # flexseq of length 5
+result <- pop_back(x3)
+result$element            # "z"
+result$remaining          # flexseq of length 12
+```
+
+Other implemented methods include \code{c()}, \code{as.list()},
+\code{unlist()}, \code{fapply()} (analogous to \code{lapply()} for
+lists), and \code{print()}, mimicking \code{print.list()} but
+displaying only the first and last few elements.
+
+While \code{flexseq}s support names, these are somewhat limited
+compared to named \proglang{R} lists: if names are used, every
+element must have a unique non-\code{NULL} name. Further, the usage
+of names degrades worst-case performance for some operations to a
+full $O(n)$ scan (for example, when concatenating), though front/back
+access remains $O(1)$ amortized in named contexts. Otherwise, all
+operations are $O(\log n)$ worst case, or $O(k \log n)$ when
+deleting $k$ elements. For performance-sensitive applications
+requiring named access, ordered sequences (discussed below) can be
+associated with character-based names as ordering keys for fast
+access.
+
+## Priority queues
+
+The priority-queue type stores arbitrary or mixed types, much like
+\code{flexseq}, but each element is associated with a priority value.
+Rather than efficient front/back access, priority queues provide
+efficient ($O(\log n)$) insertion and pop/peek by minimum and maximum
+priority value. Priorities may be any orderable type (such as dates),
+but full \proglang{C++} optimization is available for primitive
+numeric, character, and logical priorities. Because multiple elements
+may share the same priority, "first" versus "all" access methods are
+available: \code{pop\_all\_min(q)} returns an object with two
+priority queues, \code{\$elements} containing all elements with
+minimum priority and \code{\$remaining} with the rest
+(\code{\$elements} may be easily converted to base \proglang{R} via
+\code{as.list()}). Conversely, \code{pop\_min(q)} returns an object
+with \code{\$element}, the first (by insertion order) minimum-priority
+element, and \code{\$remaining}, the rest of the priority queue.
+
+```r
+q <- as_priority_queue(letters[1:6], priorities = c(2, 1, 3, 1, 9, 7))
+peek_min(q)               # "b"
+peek_all_min(q)           # priority queue w/ "b" "d"
+q2 <- insert(q, "z", priority = 10)
+res <- pop_max(q2)
+res$element               # "z"
+res$remaining             # priority queue w/ 6 entries
+```
+
+Internally, elements are stored in insertion order, though this
+should not be relied on. Accordingly, priority queues only support
+indexing with \code{[}, \code{[[}, and \code{$} by name, and the
+same caveats apply as for named \code{flexseq}s. Priority queues and
+other advanced types (below) may be cast down with
+\code{as\_flexseq()} and \code{as.list()}, optionally preserving
+priority-value metadata.
+
+## Ordered sequences
+
+The ordered-sequence type associates each element with a key value
+and keeps elements in key-value order. Keys may be any orderable
+type, with optimizations for primitive types, and duplicate keys are
+kept in insertion order. Ordered sequences support efficient insert,
+peek, and pop by key, with "all" versions of peek and pop for
+edge-case duplicate-key use cases. Ordered sequences also support
+key counts and key-range queries.
+
+```r
+o <- as_ordered_sequence(letters[1:6], keys = c(20, 10, 30, 10, 90, 70))
+peek_key(o, 10)             # "b"
+peek_all_key(o, 10)         # ordered sequence w/ "b" "d"
+count_key(o, 10)            # 2
+elements_between(o, 15, 85) # ordered seq w/ "a" "c" "f"
+o2 <- insert(o, "z", key = 100)
+res <- pop_key(o2, 100)
+res$element                 # "z"
+res$remaining               # ordered seq w/ "a" - "f"
+```
+
+As with other structures, ordered sequences may be named (the same
+name caveats apply) and indexed with \code{[}, \code{[[}, and
+\code{$}. Integer indices may be used with \code{[} and \code{[[},
+in which case they refer to elements in key-sorted order. When
+\code{[} is used to subset an ordered sequence, the return is
+another ordered sequence and elements are kept in their original
+key-order. A warning is produced if this is not the requested order
+(e.g. \code{o[c(2,1)]}).
+
+## Interval indices
+
+TODO --- to be drafted by hand.
 
 # Benchmarks
 
-Figures in this section are loaded from benchmark results produced by
-the replication script \code{data-raw/generate\_publication\_results.R}
-shipped with the package. The absolute numbers are platform-dependent;
-the shapes of the curves are the pertinent evidence.
+TODO --- to be drafted by hand.
 
-```{r seq-plot, echo=FALSE, fig.cap="Sequence operations.", fig.width=9, fig.height=7}
-if(!is.null(bench_results$sequence)) {
-  d <- bench_results$sequence
-  d$time_ms <- d$time_us / 1000
-  sorted_sizes <- sort(unique(d$n))
-  pow_labels <- lapply(sorted_sizes, function(s) bquote(2^.(log2(s)))) |> as.character()
-  d$n_cat <- factor(d$n, levels = sorted_sizes)
-  ggplot(d, aes(x = n_cat, y = time_ms, color = impl)) +
-    geom_point(position = position_jitter(width = 0.15, height = 0)) +
-    facet_wrap(~ op, scales = "free_y") +
-    scale_x_discrete(labels = pow_labels) +
-    labs(x = "Number of elements", y = "Time (ms)", color = "Implementation") +
-    theme_bw() + theme(legend.position = "bottom")
-}
-```
+# Extension example
 
-```{r pq-plot, echo=FALSE, fig.cap="Priority queue operations.", fig.width=9, fig.height=7}
-if(!is.null(bench_results$pq)) {
-  d <- bench_results$pq
-  d$time_ms <- d$time_us / 1000
-  m <- aggregate(time_us ~ impl + op + n, data = d, FUN = median)
-  m$time_ms <- m$time_us / 1000
-  ggplot(d, aes(x = n, y = time_ms, color = impl)) +
-    geom_point(alpha = 0.25, size = 1.2, position = position_jitter(width = 0.03)) +
-    geom_line(data = m, linewidth = 0.6) +
-    geom_point(data = m, size = 1.8) +
-    facet_wrap(~ op, scales = "free_y") +
-    scale_x_log10(labels = scales::label_comma()) +
-    scale_y_log10(labels = scales::label_comma()) +
-    labs(x = "Number of elements", y = "Time (ms)", color = "Implementation") +
-    theme_bw() + theme(legend.position = "bottom")
-}
-```
-
-```{r ivx-plot, echo=FALSE, fig.cap="Interval index queries.", fig.width=9, fig.height=6}
-if(!is.null(bench_results$ivx)) {
-  d <- bench_results$ivx
-  d$time_ms <- d$time_us / 1000
-  m <- aggregate(time_us ~ impl + op + n, data = d, FUN = median)
-  m$time_ms <- m$time_us / 1000
-  ggplot(d, aes(x = n, y = time_ms, color = impl)) +
-    geom_point(alpha = 0.25, size = 1.2, position = position_jitter(width = 0.03)) +
-    geom_line(data = m, linewidth = 0.6) +
-    geom_point(data = m, size = 1.8) +
-    facet_wrap(~ op, scales = "free_y") +
-    scale_x_log10(labels = scales::label_comma()) +
-    scale_y_log10(labels = scales::label_comma()) +
-    labs(x = "Number of elements", y = "Time (ms)", color = "Implementation") +
-    theme_bw() + theme(legend.position = "bottom")
-}
-```
-
-# Extension: DNA prefix search
-
-Custom monoids and predicate splits combine naturally for index-style
-queries. We build a persistent suffix-prefix index over a DNA string and
-use it to find all positions where a query pattern occurs as a prefix.
-
-```{r dna-setup}
-sequence <- "ACGCGCTCGCGCATAGTCGCGCCTG"
-query <- "CGCGC"
-```
-
-Each position in the sequence is stored as a value keyed on a length-10
-window starting at that position. Because \code{ordered\_sequence}
-stores entries sorted by key, all matches to a given prefix lie in a
-contiguous run, so extracting them is two splits.
-
-We define a monoid tracking the maximum key (subsequence) seen so far
-and attach it to an empty \code{ordered\_sequence}:
-
-```{r dna-monoid}
-max_seq <- measure_monoid(max, i = -Inf, measure = function(entry) entry$key)
-subseqs <- ordered_sequence()
-subseqs <- add_monoids(subseqs, list(max_seq = max_seq))
-```
-
-Index every position by its length-10 subsequence:
-
-```{r dna-index}
-for(i in seq_len(nchar(sequence))) {
-  subseqs <- insert(subseqs, i, key = substr(sequence, i, i + 10))
-}
-```
-
-Split at the first entry whose key is at least the query:
-
-```{r dna-first-split}
-first_split <- split_by_predicate(subseqs, function(m) query <= m, "max_seq")
-```
-
-If the right side is non-empty and its first key starts with the query,
-split again at the first key that is strictly greater *and* no longer
-starts with the query:
-
-```{r dna-second-split}
-matches <- ordered_sequence()
-if(length(first_split$right) > 0L) {
-  first_measure <- get_measures(first_split$right, "max_seq")[[1]]
-  if(startsWith(first_measure, query)) {
-    second_split <- split_by_predicate(
-      first_split$right,
-      function(m) query < m & !startsWith(m, query),
-      "max_seq"
-    )
-    matches <- second_split$left
-  }
-}
-positions <- fapply(matches, function(value, key) value) |> unlist()
-positions
-```
-
-The two splits run in $O(\log n)$ each; recovering the matching
-positions from a $k$-element result run is $O(k)$. No auxiliary index
-structure is maintained beyond the cached monoid values attached to the
-tree nodes.
+TODO --- to be drafted by hand.
 
 # Conclusion
 
-\pkg{immutables} provides the finger-tree vocabulary as a first-class
-extension surface rather than hiding it behind closed collection APIs.
-The cost of user-defined monoid attachments is small; the benefit is a
-uniform path to $O(\log n)$ operations over arbitrary subtree summaries.
+TODO --- to be drafted by hand.
 
 # Computational details {-}
 
-The results in this paper were obtained using \proglang{R}~4.3.0
-with the \pkg{immutables} package at its current development version.
-Replication is via the script
-\code{data-raw/generate\_publication\_results.R} shipped with the
-package source.
+TODO --- to be drafted by hand.
 
 # Acknowledgments {-}
 
