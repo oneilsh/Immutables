@@ -179,6 +179,7 @@ if(!is.null(results_list$sequence)) {
       color = "Implementation"
     ) +
     theme_bw() +
+    scale_y_continuous() +
     theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
   print(p_sequence)
 } else {
