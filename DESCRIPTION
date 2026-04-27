@@ -3,13 +3,15 @@ Type: Package
 Title: Fast and Functional Data Structures
 URL: https://oneilsh.github.io/immutables/, https://github.com/oneilsh/immutables
 BugReports: https://github.com/oneilsh/immutables/issues
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(
     person(given = "Shawn T.", family = "O'Neil", email = "shawn@tislab.org", role = c("aut", "cre"))
   )
 Description: Provides fast, side-effect free data structures, including
     catenable named lists, priority queues, double-ended queues, ordered
-    sequences, and interval indices.
+    sequences, and interval indices. Implementation is based on the
+    finger-tree data structure of Hinze and Paterson (2006)
+    <doi:10.1017/S0956796805005769>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends:

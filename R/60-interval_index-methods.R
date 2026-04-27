@@ -59,28 +59,6 @@ length.interval_index <- function(x) {
   as.integer(node_measure(x, ".size"))
 }
 
-# Plot method delegates to shared flexseq tree plotting.
-# **Inputs:** `x` interval_index; `...`.
-# **Outputs:** plot side-effect (invisible device result).
-# **Used by:** users.
-#' Plot an Interval Index Tree
-#'
-#' Plots the underlying tree structure used by an `interval_index`.
-#'
-#' @method plot interval_index
-#' @param x An `interval_index`.
-#' @param ... Passed to the internal tree plotting routine.
-#' @details
-#' Visualizes the internal finger-tree structure used for interval queries.
-#' @examples
-#' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
-#' if(requireNamespace("igraph", quietly = TRUE)) plot(ix)
-#' @export
-# Runtime: O(n) to build plot graph data.
-plot.interval_index <- function(x, ...) {
-  plot.flexseq(x, ...)
-}
-
 #' Merge Two Interval Indices
 #'
 #' Returns a new `interval_index` containing every entry from both inputs,

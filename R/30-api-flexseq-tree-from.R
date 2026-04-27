@@ -7,11 +7,6 @@
 #' @return A finger tree with cached measures for all monoids.
 #'   If `x` has names, they are used for name-based indexing and must be
 #'   complete (no missing/empty names) and unique.
-#' @examples
-#' \dontrun{
-#' t <- tree_from(letters[1:4])
-#' t[[2]]
-#' }
 #' @keywords internal
 # Runtime: O(n) for validation + linear bulk build.
 tree_from <- function(x, monoids = NULL) {

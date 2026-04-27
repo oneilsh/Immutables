@@ -8,13 +8,6 @@
 #' @param x A `flexseq` (left side).
 #' @param y A `flexseq` (right side).
 #' @return Concatenated tree.
-#' @examples
-#' \dontrun{
-#' left <- as_flexseq(letters[1:3])
-#' right <- as_flexseq(letters[4:6])
-#' t <- concat_trees(left, right)
-#' as.list(t)
-#' }
 #' @keywords internal
 # Runtime: O(nx + ny) when monoid harmonization requires add_monoids passes;
 # otherwise concat spine work is near-logarithmic in boundary distance for the

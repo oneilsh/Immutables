@@ -1,0 +1,11 @@
+citHeader("To cite Immutables in publications use:")
+
+bibentry(
+  bibtype = "Manual",
+  title   = "Immutables: Fast and Functional Data Structures",
+  author  = person("Shawn T.", "O'Neil"),
+  year    = format(Sys.Date(), "%Y"),
+  note    = sprintf("R package version %s", meta$Version),
+  doi     = "10.5281/zenodo.19686096",
+  url     = "https://oneilsh.github.io/immutables/"
+)

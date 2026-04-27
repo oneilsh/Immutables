@@ -19,10 +19,4 @@ complete (no missing/empty names) and unique.
 \description{
 Build a Structural Tree from a Vector or List
 }
-\examples{
-\dontrun{
-t <- tree_from(letters[1:4])
-t[[2]]
-}
-}
 \keyword{internal}

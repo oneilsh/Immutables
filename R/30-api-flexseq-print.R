@@ -198,6 +198,8 @@ print.FingerTree <- function(x, max_elements = 4L, show_custom_monoids = FALSE, 
 #' @param show_custom_monoids Logical; show attached non-default monoids and
 #'   their root cached measures.
 #' @param ... Passed through to per-element `print()`.
+#' @return The input `x`, returned invisibly. Called for its side effect
+#'   of printing a formatted preview of the sequence to the console.
 #' @examples
 #' x <- as_flexseq(setNames(as.list(1:6), letters[1:6]))
 #' print(x, max_elements = 4)
