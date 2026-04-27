@@ -20,11 +20,4 @@ nodes).
 \description{
 Build graph data frames for a finger tree
 }
-\examples{
-\dontrun{
-t <- as_flexseq(letters[1:4])
-gdf <- get_graph_df(t)
-names(gdf)
-}
-}
 \keyword{internal}

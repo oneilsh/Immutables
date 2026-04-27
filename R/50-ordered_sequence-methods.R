@@ -8,24 +8,6 @@ as_flexseq.ordered_sequence <- function(x) {
   .as_flexseq_build.default(entries, monoids = NULL)
 }
 
-#' Plot an Ordered Sequence Tree
-#'
-#' Plots the underlying tree structure used by an `ordered_sequence`.
-#'
-#' @method plot ordered_sequence
-#' @param x An `ordered_sequence`.
-#' @param ... Passed to the internal tree plotting routine.
-#' @details
-#' Visualizes the internal finger-tree structure used to store ordered entries.
-#' @examples
-#' x <- ordered_sequence("a", "b", "c", keys = c(2, 1, 3))
-#' if(requireNamespace("igraph", quietly = TRUE)) plot(x)
-#' @export
-# Runtime: O(n) to build plot graph data.
-plot.ordered_sequence <- function(x, ...) {
-  plot.flexseq(x, ...)
-}
-
 #' Coerce Ordered Sequence to List
 #'
 #' @method as.list ordered_sequence

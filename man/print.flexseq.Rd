@@ -16,6 +16,10 @@ their root cached measures.}
 
 \item{...}{Passed through to per-element \code{print()}.}
 }
+\value{
+The input \code{x}, returned invisibly. Called for its side effect
+of printing a formatted preview of the sequence to the console.
+}
 \description{
 Print a flexseq
 }

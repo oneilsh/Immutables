@@ -15,14 +15,4 @@ An empty finger tree with structural \code{monoids} and \code{measures} attrs.
 \description{
 Create an Empty Structural Tree
 }
-\examples{
-\dontrun{
-t <- empty_tree()
-t
-
-count_m <- measure_monoid(`+`, 0, function(el) 1)
-t2 <- empty_tree(monoids = list(count = count_m))
-attr(t2, "measures")
-}
-}
 \keyword{internal}

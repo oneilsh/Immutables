@@ -97,8 +97,13 @@ if (requireNamespace("igraph", quietly = TRUE)) {
 t <- as_flexseq(letters[1:8])
 plot_structure(t, title = "Finger tree")
 
-# Custom label: show subtree sum at every node (leaves show their own
-# value, structural nodes show the accumulated total).
+# Label every node with its subtree size (leaves contribute 1).
+plot_structure(as_flexseq(1:10), node_label = function(node) {
+  paste0(node$type, "\n.size=", node$measures$.size)
+})
+
+# Custom monoid: subtree sum of numeric payloads. Structural nodes show
+# the accumulated total; leaves show their own contribution.
 sum_monoid <- measure_monoid(`+`, 0, function(el) el)
 xs <- add_monoids(as_flexseq(c(3, 1, 4, 1, 5, 9, 2, 6)),
                   list(sum = sum_monoid))
@@ -106,9 +111,24 @@ plot_structure(xs, node_label = function(node) {
   if(node$type == "Element") sprintf("\%g\nsum=\%g", node$element, node$measures$sum)
   else sprintf("\%s\nsum=\%g", node$type, node$measures$sum)
 })
+
+# List-valued built-in measure: priority_queue's .pq_min tracks the min
+# priority seen in a subtree as list(has, priority). Unpack in the label.
+pq <- priority_queue("task-a", "task-b", "task-c",
+                     priorities = c(5, 1, 3))
+plot_structure(pq, node_label = function(node) {
+  m <- node$measures$.pq_min
+  if(node$type == "Element") {
+    sprintf("\%s\np=\%g", node$element$value, node$element$priority)
+  } else if(isTRUE(m$has)) {
+    sprintf("\%s\nmin=\%g", node$type, m$priority)
+  } else {
+    node$type
+  }
+})
 }
 }
 }
 \seealso{
-\code{\link[=plot.flexseq]{plot.flexseq()}}, \code{\link[=measure_monoid]{measure_monoid()}}, \code{\link[=add_monoids]{add_monoids()}}
+\code{\link[=measure_monoid]{measure_monoid()}}, \code{\link[=add_monoids]{add_monoids()}}
 }

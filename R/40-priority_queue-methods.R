@@ -43,22 +43,6 @@ as.list.priority_queue <- function(x, ..., drop_meta = FALSE) {
   values
 }
 
-#' Plot a Priority Queue Tree
-#'
-#' @method plot priority_queue
-#' @param x A `priority_queue`.
-#' @param ... Passed to the internal tree plotting routine.
-#' @details
-#' Visualizes the internal finger-tree structure backing the queue.
-#' @examples
-#' q <- priority_queue("a", "b", "c", priorities = c(2, 1, 3))
-#' if(requireNamespace("igraph", quietly = TRUE)) plot(q)
-#' @export
-# Runtime: O(n) to build plot graph data.
-plot.priority_queue <- function(x, ...) {
-  plot.flexseq(x, ...)
-}
-
 #' Priority Queue Length
 #'
 #' @method length priority_queue

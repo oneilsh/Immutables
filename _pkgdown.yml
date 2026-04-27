@@ -91,7 +91,6 @@ reference:
       - "length.flexseq"
       - "as.list.flexseq"
       - "unlist.flexseq"
-      - "plot.flexseq"
 
   - title: "Priority Queue"
     desc: |
@@ -121,7 +120,6 @@ reference:
       - "unlist.flexseq"
       - "print.priority_queue"
       - "length.priority_queue"
-      - "plot.priority_queue"
 
   - title: "Ordered Sequence"
     desc: |
@@ -150,7 +148,6 @@ reference:
       - "length.ordered_sequence"
       - "as.list.ordered_sequence"
       - "unlist.flexseq"
-      - "plot.ordered_sequence"
 
   - title: "Interval Index"
     desc: |
@@ -185,7 +182,6 @@ reference:
       - "length.interval_index"
       - "as.list.interval_index"
       - "unlist.flexseq"
-      - "plot.interval_index"
 
   - title: "Developer Tools"
     desc: "Lower-level primitives for custom monoids, predicate queries, validation, and structure visualization."

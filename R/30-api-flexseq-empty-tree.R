@@ -4,15 +4,6 @@
 #'
 #' @param monoids Optional named list of `measure_monoid` objects.
 #' @return An empty finger tree with structural `monoids` and `measures` attrs.
-#' @examples
-#' \dontrun{
-#' t <- empty_tree()
-#' t
-#'
-#' count_m <- measure_monoid(`+`, 0, function(el) 1)
-#' t2 <- empty_tree(monoids = list(count = count_m))
-#' attr(t2, "measures")
-#' }
 #' @keywords internal
 # Runtime: O(1).
 empty_tree <- function(monoids = NULL) {
