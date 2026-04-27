@@ -5,6 +5,10 @@ on:
     branches: [main, master]
     paths:
       - "src/**"
+  push:
+    branches: [main, master]
+    paths:
+      - "src/**"
   workflow_dispatch:
 
 concurrency:

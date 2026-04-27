@@ -3,6 +3,8 @@ name: r-backend-reference
 on:
   pull_request:
     branches: [main, master]
+  push:
+    branches: [main, master]
   workflow_dispatch:
 
 concurrency:
