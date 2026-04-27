@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Immutables</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +47,16 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.1" id="immutables-101">Immutables 1.0.1<a class="anchor" aria-label="anchor" href="#immutables-101"></a></h2>
+<ul><li>CRAN resubmission. Addresses reviewer feedback:
+<ul><li>Added a reference to Hinze and Paterson (2006) <a href="doi:10.1017/S0956796805005769" class="uri">doi:10.1017/S0956796805005769</a> in DESCRIPTION.</li>
+<li>Added missing <code>\value</code> tag for <code><a href="../reference/print.flexseq.html">print.flexseq()</a></code>.</li>
+<li>Removed <code>\dontrun{}</code> example wrappers from internal helpers.</li>
+</ul></li>
+<li>Removed the <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> in favor of <code><a href="../reference/plot_structure.html">plot_structure()</a></code> as part of the developer API.</li>
+<li>Added <code>inst/CITATION</code> with a Zenodo DOI for the package.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.0" id="immutables-100">Immutables 1.0.0<a class="anchor" aria-label="anchor" href="#immutables-100"></a></h2>
 <ul><li>First CRAN submission.</li>
 <li>
@@ -56,7 +66,8 @@
 <li>Developer API for building custom structures via monoid/measure combinations.</li>
 <li>Core operations implemented in C++ via Rcpp, with matching pure-R reference implementations using <code>lambda.r</code>.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

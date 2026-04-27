@@ -29,6 +29,11 @@ print(x, max_elements = 4L, show_custom_monoids = FALSE, ...)
   Passed through to per-element
   [`print()`](https://rdrr.io/r/base/print.html).
 
+## Value
+
+The input `x`, returned invisibly. Called for its side effect of
+printing a formatted preview of the sequence to the console.
+
 ## Examples
 
 ``` r

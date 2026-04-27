@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Immutables</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,18 +69,6 @@
     <p>An empty finger tree with structural <code>monoids</code> and <code>measures</code> attrs.</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu">empty_tree</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">t</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">count_m</span> <span class="op">&lt;-</span> <span class="fu"><a href="measure_monoid.html">measure_monoid</a></span><span class="op">(</span><span class="va">`+`</span>, <span class="fl">0</span>, <span class="kw">function</span><span class="op">(</span><span class="va">el</span><span class="op">)</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">t2</span> <span class="op">&lt;-</span> <span class="fu">empty_tree</span><span class="op">(</span>monoids <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>count <span class="op">=</span> <span class="va">count_m</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">t2</span>, <span class="st">"measures"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

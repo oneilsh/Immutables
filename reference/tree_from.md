@@ -23,12 +23,3 @@ tree_from(x, monoids = NULL)
 A finger tree with cached measures for all monoids. If `x` has names,
 they are used for name-based indexing and must be complete (no
 missing/empty names) and unique.
-
-## Examples
-
-``` r
-if (FALSE) { # \dontrun{
-t <- tree_from(letters[1:4])
-t[[2]]
-} # }
-```

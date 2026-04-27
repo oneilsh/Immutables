@@ -21,13 +21,3 @@ A list with three elements: `edge_df` (parent/child/label), `node_df`
 values are lists with fields `type`, `label`, `measures` (cached monoid
 values for structural nodes; `NULL` for element leaves), and `element`
 (the raw leaf entry for element nodes; `NULL` for structural nodes).
-
-## Examples
-
-``` r
-if (FALSE) { # \dontrun{
-t <- as_flexseq(letters[1:4])
-gdf <- get_graph_df(t)
-names(gdf)
-} # }
-```

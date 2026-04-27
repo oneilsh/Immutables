@@ -80,9 +80,6 @@ ends, O(log n) indexing and replacement, and efficient split/concat.
 - [`unlist(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/unlist.flexseq.md)
   : Coerce a Sequence to an Atomic Vector
 
-- [`plot(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/plot.flexseq.md)
-  : Plot a Sequence Tree
-
 ## Priority Queue
 
 Persistent priority queue with O(log n) insert and min/max peek/pop.
@@ -161,9 +158,6 @@ for full sequence operations.
 
 - [`length(`*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/length.priority_queue.md)
   : Priority Queue Length
-
-- [`plot(`*`<priority_queue>`*`)`](https://oneilsh.github.io/immutables/reference/plot.priority_queue.md)
-  : Plot a Priority Queue Tree
 
 ## Ordered Sequence
 
@@ -244,9 +238,6 @@ is not supported.
 
 - [`unlist(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/unlist.flexseq.md)
   : Coerce a Sequence to an Atomic Vector
-
-- [`plot(`*`<ordered_sequence>`*`)`](https://oneilsh.github.io/immutables/reference/plot.ordered_sequence.md)
-  : Plot an Ordered Sequence Tree
 
 ## Interval Index
 
@@ -343,9 +334,6 @@ query/pop helpers over ordered interval endpoints.
 
 - [`unlist(`*`<flexseq>`*`)`](https://oneilsh.github.io/immutables/reference/unlist.flexseq.md)
   : Coerce a Sequence to an Atomic Vector
-
-- [`plot(`*`<interval_index>`*`)`](https://oneilsh.github.io/immutables/reference/plot.interval_index.md)
-  : Plot an Interval Index Tree
 
 ## Developer Tools
 

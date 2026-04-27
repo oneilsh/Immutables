@@ -1,5 +1,19 @@
 # Changelog
 
+## Immutables 1.0.1
+
+- CRAN resubmission. Addresses reviewer feedback:
+  - Added a reference to Hinze and Paterson (2006)
+    <doi:10.1017/S0956796805005769> in DESCRIPTION.
+  - Added missing `\value` tag for
+    [`print.flexseq()`](https://oneilsh.github.io/immutables/reference/print.flexseq.md).
+  - Removed `\dontrun{}` example wrappers from internal helpers.
+- Removed the [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+  in favor of
+  [`plot_structure()`](https://oneilsh.github.io/immutables/reference/plot_structure.md)
+  as part of the developer API.
+- Added `inst/CITATION` with a Zenodo DOI for the package.
+
 ## Immutables 1.0.0
 
 - First CRAN submission.

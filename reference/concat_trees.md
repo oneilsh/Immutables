@@ -22,14 +22,3 @@ concat_trees(x, y)
 ## Value
 
 Concatenated tree.
-
-## Examples
-
-``` r
-if (FALSE) { # \dontrun{
-left <- as_flexseq(letters[1:3])
-right <- as_flexseq(letters[4:6])
-t <- concat_trees(left, right)
-as.list(t)
-} # }
-```
