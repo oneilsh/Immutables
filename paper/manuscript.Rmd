@@ -278,6 +278,8 @@ TODO --- to be drafted by hand.
 
 # Benchmarks
 
+"Operations dispatched through S3 methods incur first-call costs (method resolution, byte-compilation) that dominate timing at small n; we warm each operation with three untimed calls before measurement."
+
 TODO --- to be drafted by hand.
 
 # Extension example
