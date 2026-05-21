@@ -19,7 +19,9 @@ if(!loaded) {
 }
 
 library(microbenchmark)
+library(bench)
 library(ggplot2)
+library(dplyr)
 
 # Two env-var gates control this vignette:
 #   IMMUTABLES_RUN_SLOW=true       -> re-run all benchmarks and save
@@ -30,21 +32,33 @@ library(ggplot2)
 # cached results and renders plots without re-timing.
 run_benchmarks <- identical(Sys.getenv("IMMUTABLES_RUN_SLOW"), "true")
 save_figures   <- identical(Sys.getenv("IMMUTABLES_SAVE_FIGURES"), "true")
-repeats <- 8L
+repeats <- 10L
+
+pow2_labels <- function(x) parse(text = paste0("2^", log2(as.numeric(x))))
 
 # Accumulator populated either by the benchmark chunks (when
 # run_benchmarks) or by the loader chunk below (otherwise).
 results_list <- list()
 
 bench_one <- function(rows, impl, op, n, repeats, setup, bench) {
-  gc(FALSE)
-  time_us <- numeric(repeats)
-  for(i in seq_len(repeats)) {
-    state <- setup()
-    gc(FALSE)
-    time_us[[i]] <- microbenchmark(bench(state), times = 1L)$time[[1L]] / 1000
-  }
-  push_back(rows, data.frame(impl = impl, op = op, n = n, time_us = time_us))
+  state <- setup()
+  gc(full = TRUE)
+  
+  # warmup
+  for(i in 1:3) bench(state)
+  
+  res <- bench::mark(bench(state), 
+                     min_iterations = repeats, 
+                     max_iterations = repeats + 0)
+  
+  gcs <- res$gc[[1]] # tibble w/ 3 colums; level0, level1, level2
+  gcs$times <- unlist(res$time[[1]])
+  non_gc_times <- gcs |> 
+    filter(level0 == 0 & level1 == 0 & level2 == 0) |>
+    pull(times)
+  non_gc_times <- gcs |> pull(times)
+    
+  push_back(rows, data.frame(impl = impl, op = op, n = n, time_s = non_gc_times))
 }
 ```
 
@@ -52,6 +66,17 @@ bench_one <- function(rows, impl, op, n, repeats, setup, bench) {
 .cache_path <- system.file("extdata", "benchmarks.rds", package = "Immutables")
 if(nzchar(.cache_path) && file.exists(.cache_path)) {
   results_list <- readRDS(.cache_path)
+  # Older caches stored microsecond timings as `time_us`; the current plot
+  # chunks expect `time_s`. Normalize so cached and freshly-run results plot
+  # uniformly.
+  for(.nm in names(results_list)) {
+    .df <- results_list[[.nm]]
+    if(!is.null(.df) && !is.null(.df$time_us) && is.null(.df$time_s)) {
+      .df$time_s <- .df$time_us / 1e6
+      results_list[[.nm]] <- .df
+    }
+  }
+  rm(.nm, .df)
 }
 ```
 
@@ -92,9 +117,7 @@ concatenate, and split exploit the finger tree's O(log n) structural sharing;
 get, replace, and remove at the middle exercise index-based splitting.
 
 ```{r sequence-bench, eval=run_benchmarks, cache=FALSE}
-repeats <- 6L
-
-sequence_sizes <- 2^(10 + 0:6)
+sequence_sizes <- 2^(12 + 0:6) # 2^12 up to +6
 rows <- flexseq()
 
 for(n in sequence_sizes) {
@@ -106,12 +129,10 @@ for(n in sequence_sizes) {
   pair_flex  <- function() list(a = as_flexseq(vals()), b = as_flexseq(vals()))
   pair_list  <- function() list(a = vals(), b = vals())
 
-  rows <- bench_one(rows, "flexseq", "append",  n, repeats, flex_setup,
-    function(st) push_back(st$s, "z"))
-  rows <- bench_one(rows, "flexseq", "prepend", n, repeats, flex_setup,
-    function(st) push_front(st$s, "z"))
-  rows <- bench_one(rows, "flexseq", "get middle", n, repeats, flex_setup,
-    function(st) st$s[[st$mid]])
+  rows <- bench_one(rows, "flexseq", "enqueue", n, repeats, flex_setup,
+    function(st) push_back(st$s, "d"))
+  rows <- bench_one(rows, "flexseq", "dequeue", n, repeats, flex_setup,
+    function(st) pop_front(st$s)$remaining)
   rows <- bench_one(rows, "flexseq", "replace middle", n, repeats, flex_setup,
     function(st) { s <- st$s; s[[st$mid]] <- "y"; s })
   rows <- bench_one(rows, "flexseq", "remove middle", n, repeats, flex_setup,
@@ -121,12 +142,10 @@ for(n in sequence_sizes) {
   rows <- bench_one(rows, "flexseq", "split at middle", n, repeats, flex_setup,
     function(st) split_at(st$s, st$mid))
 
-  rows <- bench_one(rows, "base R list", "append",  n, repeats, list_setup,
-    function(st) c(st$s, list("z")))
-  rows <- bench_one(rows, "base R list", "prepend", n, repeats, list_setup,
-    function(st) c(list("z"), st$s))
-  rows <- bench_one(rows, "base R list", "get middle", n, repeats, list_setup,
-    function(st) st$s[[st$mid]])
+  rows <- bench_one(rows, "base R list", "enqueue", n, repeats, list_setup,
+    function(st) c(st$s, list("d")))
+  rows <- bench_one(rows, "base R list", "dequeue", n, repeats, list_setup,
+    function(st) st$s[-1L])
   rows <- bench_one(rows, "base R list", "replace middle", n, repeats, list_setup,
     function(st) { s <- st$s; s[[st$mid]] <- "y"; s })
   rows <- bench_one(rows, "base R list", "remove middle", n, repeats, list_setup,
@@ -146,19 +165,17 @@ results_list$sequence <- do.call(rbind, as.list(rows))
 ```{r sequence-plot, fig.width=9, fig.height=7}
 if(!is.null(results_list$sequence)) {
   seq_results <- results_list$sequence
-  seq_results$time_ms <- seq_results$time_us / 1000
   sorted_sizes <- sort(unique(seq_results$n))
-  pow_labels <- lapply(sorted_sizes, function(s) bquote(2^.(log2(s)))) |> as.character()
   seq_results$n_cat <- factor(seq_results$n, levels = sorted_sizes)
 
-  p_sequence <- ggplot(seq_results, aes(x = n_cat, y = time_ms, color = impl)) +
-    geom_point(position = position_jitter(width = 0.15, height = 0)) +
+  p_sequence <- ggplot(seq_results, aes(x = n_cat, y = time_s, color = impl)) +
+    geom_boxplot() +
     facet_wrap(~ op, scales = "free_y") +
-    scale_x_discrete(labels = pow_labels) +
+    scale_x_discrete(labels = pow2_labels) +
     labs(
       title = "Sequence Operations",
       x = "Number of elements",
-      y = "Time (ms)",
+      y = "Time (s)",
       color = "Implementation"
     ) +
     theme_bw() +
@@ -171,64 +188,6 @@ if(!is.null(results_list$sequence)) {
 
 
 
-
-## Queue operations
-
-FIFO enqueue (push to back) and dequeue (pop from front) compared across
-`flexseq`, `rstackdeque`, and base R lists. Both `flexseq` and
-`rstackdeque` provide O(log n) or amortized O(1) queue operations; base R's
-`c()` and `[-1]` are O(n).
-
-```{r queue-bench, eval=run_benchmarks, cache=FALSE}
-queue_sizes <- 2^(10 + 0:7)
-rows <- flexseq()
-
-for(n in queue_sizes) {
-  items <- function() as.list(rep("queue_item", n))
-  flex_setup <- function() list(q = as_flexseq(items()))
-  rsd_setup  <- function() list(q = rstackdeque::as.rpqueue(items()))
-  list_setup <- function() list(q = items())
-
-  rows <- bench_one(rows, "flexseq",     "enqueue", n, repeats, flex_setup,
-    function(st) push_back(st$q, "d"))
-  rows <- bench_one(rows, "flexseq",     "dequeue", n, repeats, flex_setup,
-    function(st) pop_front(st$q)$remaining)
-  rows <- bench_one(rows, "rstackdeque", "enqueue", n, repeats, rsd_setup,
-    function(st) rstackdeque::insert_back(st$q, "d"))
-  rows <- bench_one(rows, "rstackdeque", "dequeue", n, repeats, rsd_setup,
-    function(st) rstackdeque::without_front(st$q))
-  rows <- bench_one(rows, "base R list", "enqueue", n, repeats, list_setup,
-    function(st) c(st$q, list("d")))
-  rows <- bench_one(rows, "base R list", "dequeue", n, repeats, list_setup,
-    function(st) st$q[-1L])
-}
-
-results_list$queue <- do.call(rbind, as.list(rows))
-```
-```{r queue-plot, fig.width=8, fig.height=4.8}
-if(!is.null(results_list$queue)) {
-  queue_results <- results_list$queue
-  queue_results$time_ms <- queue_results$time_us / 1000
-  queue_results$n_cat <- factor(queue_results$n, levels = sort(unique(queue_results$n)))
-
-  p_queue <- ggplot(queue_results, aes(x = n_cat, y = time_ms, color = impl)) +
-    geom_boxplot() +
-    facet_wrap(~ op, scales = "free_y") +
-    labs(
-      title = "Queue Operations",
-      x = "Number of elements",
-      y = "Time (ms)",
-      color = "Implementation"
-    ) +
-    theme_bw() +
-    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
-  print(p_queue)
-} else {
-  knitr::asis_output("*Benchmark results not yet generated.*")
-}
-```
-
-
 ## Priority queue operations
 
 Insert, peek, and pop operations for min and max priority. The base R
@@ -238,7 +197,7 @@ baseline stores values and priorities as parallel vectors and uses
 giving O(log n) insert and pop.
 
 ```{r pq-bench, eval=run_benchmarks, cache=FALSE}
-pq_sizes <- c(100, 500, 1000, 5000, 10000, 50000)
+pq_sizes <- 2^(12 + 0:7) # 2^12 up to 2^19
 rows <- flexseq()
 
 set.seed(42)
@@ -247,6 +206,7 @@ all_pq_vals <- sprintf("val_%06d", seq_len(max_pq))
 all_pq_pri  <- runif(max_pq)
 
 for(n in pq_sizes) {
+  cat("Priority queue ops, size ", n, "\n")
   pv <- as.list(all_pq_vals[seq_len(n)])
   pw <- all_pq_pri[seq_len(n)]
   pq_setup   <- function() list(pq = as_priority_queue(pv, priorities = pw))
@@ -254,10 +214,6 @@ for(n in pq_sizes) {
 
   rows <- bench_one(rows, "priority_queue", "insert",   n, repeats, pq_setup,
     function(st) insert(st$pq, "val_new", 0.5))
-  rows <- bench_one(rows, "priority_queue", "peek min", n, repeats, pq_setup,
-    function(st) peek_min(st$pq))
-  rows <- bench_one(rows, "priority_queue", "pop min",  n, repeats, pq_setup,
-    function(st) pop_min(st$pq)$remaining)
   rows <- bench_one(rows, "priority_queue", "peek max", n, repeats, pq_setup,
     function(st) peek_max(st$pq))
   rows <- bench_one(rows, "priority_queue", "pop max",  n, repeats, pq_setup,
@@ -265,10 +221,6 @@ for(n in pq_sizes) {
 
   rows <- bench_one(rows, "base R", "insert",   n, repeats, base_setup,
     function(st) list(values = c(st$v, "val_new"), priorities = c(st$p, 0.5)))
-  rows <- bench_one(rows, "base R", "peek min", n, repeats, base_setup,
-    function(st) st$v[which.min(st$p)])
-  rows <- bench_one(rows, "base R", "pop min",  n, repeats, base_setup,
-    function(st) { i <- which.min(st$p); list(values = st$v[-i], priorities = st$p[-i]) })
   rows <- bench_one(rows, "base R", "peek max", n, repeats, base_setup,
     function(st) st$v[which.max(st$p)])
   rows <- bench_one(rows, "base R", "pop max",  n, repeats, base_setup,
@@ -277,24 +229,22 @@ for(n in pq_sizes) {
 
 results_list$pq <- do.call(rbind, as.list(rows))
 ```
+
+
 ```{r pq-plot, fig.width=9, fig.height=7}
 if(!is.null(results_list$pq)) {
   pq_results <- results_list$pq
-  pq_results$time_ms <- pq_results$time_us / 1000
-  pq_medians <- aggregate(time_us ~ impl + op + n, data = pq_results, FUN = median)
-  pq_medians$time_ms <- pq_medians$time_us / 1000
+  sorted_sizes <- sort(unique(pq_results$n))
+  pq_results$n_cat <- factor(pq_results$n, levels = sorted_sizes)
 
-  p_pq <- ggplot(pq_results, aes(x = n, y = time_ms, color = impl)) +
-    geom_point(alpha = 0.25, size = 1.2, position = position_jitter(width = 0.03)) +
-    geom_line(data = pq_medians, linewidth = 0.6) +
-    geom_point(data = pq_medians, size = 1.8) +
+  p_pq <- ggplot(pq_results, aes(x = n_cat, y = time_s, color = impl)) +
+    geom_boxplot() +
     facet_wrap(~ op, scales = "free_y") +
-    scale_x_log10(labels = scales::label_comma()) +
-    scale_y_log10(labels = scales::label_comma()) +
+    scale_x_discrete(labels = pow2_labels) +
     labs(
       title = "Priority Queue Operations",
       x = "Number of elements",
-      y = "Time (ms)",
+      y = "Time (s)",
       color = "Implementation"
     ) +
     theme_bw() +
@@ -318,7 +268,7 @@ comparisons, which is simple and fast for small *n* but O(n) per query.
 *k* is the number of matches.
 
 ```{r ivx-bench, eval=run_benchmarks, cache=FALSE}
-ivx_sizes <- c(100, 500, 1000, 5000, 10000, 50000)
+ivx_sizes <- 2^(12 + 0:6) # 2^12 (4096) up to 2^18 (262144)
 rows <- flexseq()
 
 set.seed(123)
@@ -338,6 +288,7 @@ has_iranges <- requireNamespace("IRanges", quietly = TRUE) &&
   requireNamespace("S4Vectors", quietly = TRUE)
 
 for(n in ivx_sizes) {
+  cat("Interval ops, size ", n, "\n")
   starts <- all_starts[seq_len(n)]
   ends   <- all_ends[seq_len(n)]
   vals   <- all_vals[seq_len(n)]
@@ -350,9 +301,9 @@ for(n in ivx_sizes) {
   rows <- bench_one(rows, "interval_index", "point query", n, repeats, ivx_setup,
     function(st) peek_point(st$ix, qpt, bounds = "[]"))
   rows <- bench_one(rows, "interval_index", "all point matches", n, repeats, ivx_setup,
-    function(st) peek_all_point(st$ix, qpt, bounds = "[]"))
+    function(st) peek_all_point(st$ix, qpt, bounds = "[]", as_list = TRUE))
   rows <- bench_one(rows, "interval_index", "overlap query", n, repeats, ivx_setup,
-    function(st) peek_all_overlaps(st$ix, qlo, qhi, bounds = "[]"))
+    function(st) peek_all_overlaps(st$ix, qlo, qhi, bounds = "[]", as_list = TRUE))
 
   rows <- bench_one(rows, "base R", "insert", n, repeats, df_setup,
     function(st) rbind(st$df, data.frame(start = ins_s, end = ins_e, value = "interval_new", stringsAsFactors = FALSE)))
@@ -398,26 +349,249 @@ results_list$ivx <- do.call(rbind, as.list(rows))
 ```{r ivx-plot, fig.width=9, fig.height=6}
 if(!is.null(results_list$ivx)) {
   ivx_results <- results_list$ivx
-  ivx_results$time_ms <- ivx_results$time_us / 1000
-  ivx_medians <- aggregate(time_us ~ impl + op + n, data = ivx_results, FUN = median)
-  ivx_medians$time_ms <- ivx_medians$time_us / 1000
+  sorted_sizes <- sort(unique(ivx_results$n))
+  ivx_results$n_cat <- factor(ivx_results$n, levels = sorted_sizes)
 
-  p_ivx <- ggplot(ivx_results, aes(x = n, y = time_ms, color = impl)) +
-    geom_point(alpha = 0.25, size = 1.2, position = position_jitter(width = 0.03)) +
-    geom_line(data = ivx_medians, linewidth = 0.6) +
-    geom_point(data = ivx_medians, size = 1.8) +
+  p_ivx <- ggplot(ivx_results, aes(x = n_cat, y = time_s, color = impl)) +
+    geom_boxplot() +
     facet_wrap(~ op, scales = "free_y") +
-    scale_x_log10(labels = scales::label_comma()) +
-    scale_y_log10(labels = scales::label_comma()) +
+    scale_x_discrete(labels = pow2_labels) +
     labs(
       title = "Interval Index Queries",
       x = "Number of elements",
-      y = "Time (ms)",
+      y = "Time (s)",
+      color = "Implementation"
+    ) +
+    theme_bw() +
+    scale_y_continuous() +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+  print(p_ivx)
+} else {
+  knitr::asis_output("*Benchmark results not yet generated.*")
+}
+```
+
+## Cumulative interval insertion
+
+The single-shot read benchmarks above are a hostile framing for an immutable
+data structure: they pay the index-build cost up front and only amortize it
+across one query. Real workloads more often build state incrementally. This
+section measures the cost of building a collection of *n* intervals one at a
+time, with no batched constructor — the natural pattern for streaming or
+online algorithms.
+
+`data.frame` and `IRanges` rebuild a new vector each call (`rbind` and `c()`
+respectively). `interval_index` shares structure across versions, so each
+`insert` is O(log n).
+
+```{r ivx-cumul-bench, eval=run_benchmarks, cache=FALSE}
+cum_sizes <- 2^(9 + 0:5) # 512 up to 16384
+rows <- flexseq()
+
+set.seed(456)
+max_cum <- max(cum_sizes)
+all_starts_c <- sort(sample.int(max_cum * 10L, max_cum))
+all_widths_c <- sample.int(100L, max_cum, replace = TRUE)
+all_ends_c   <- all_starts_c + all_widths_c
+all_vals_c   <- sprintf("interval_%06d", seq_len(max_cum))
+
+has_iranges_c <- requireNamespace("IRanges", quietly = TRUE) &&
+  requireNamespace("S4Vectors", quietly = TRUE)
+
+for(n in cum_sizes) {
+  cat("Cumulative insert, size ", n, "\n")
+  starts <- all_starts_c[seq_len(n)]
+  ends   <- all_ends_c[seq_len(n)]
+  vals   <- all_vals_c[seq_len(n)]
+
+  cum_setup <- function() list(s = starts, e = ends, v = vals, n = n)
+
+  rows <- bench_one(rows, "interval_index", "cumulative insert", n, repeats, cum_setup,
+    function(st) {
+      ix <- interval_index()
+      for(i in seq_len(st$n)) ix <- insert(ix, st$v[i], st$s[i], st$e[i])
+      ix
+    })
+
+  rows <- bench_one(rows, "data.frame", "cumulative insert", n, repeats, cum_setup,
+    function(st) {
+      df <- data.frame(start = integer(), end = integer(), value = character(),
+                       stringsAsFactors = FALSE)
+      for(i in seq_len(st$n)) {
+        df <- rbind(df, data.frame(start = st$s[i], end = st$e[i], value = st$v[i],
+                                   stringsAsFactors = FALSE))
+      }
+      df
+    })
+
+  if(has_iranges_c) {
+    rows <- bench_one(rows, "IRanges", "cumulative insert", n, repeats, cum_setup,
+      function(st) {
+        ir <- IRanges::IRanges()
+        v  <- character(0)
+        for(i in seq_len(st$n)) {
+          ir <- c(ir, IRanges::IRanges(start = st$s[i], end = st$e[i]))
+          v  <- c(v, st$v[i])
+        }
+        list(ir = ir, v = v)
+      })
+  }
+}
+
+results_list$cumul <- do.call(rbind, as.list(rows))
+```
+
+```{r ivx-cumul-plot, fig.width=8, fig.height=5}
+if(!is.null(results_list$cumul)) {
+  cumul_results <- results_list$cumul
+  sorted_sizes <- sort(unique(cumul_results$n))
+  cumul_results$n_cat <- factor(cumul_results$n, levels = sorted_sizes)
+
+  p_cumul <- ggplot(cumul_results, aes(x = n_cat, y = time_s, color = impl)) +
+    geom_boxplot() +
+    scale_x_discrete(labels = pow2_labels) +
+    labs(
+      title = "Cumulative Interval Insertion",
+      x = "Number of elements inserted",
+      y = "Total time (s)",
       color = "Implementation"
     ) +
     theme_bw() +
     theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
-  print(p_ivx)
+  print(p_cumul)
+} else {
+  knitr::asis_output("*Benchmark results not yet generated.*")
+}
+```
+
+## Sweep-line over interval endpoints
+
+A small sweep-line algorithm: intervals start in *to-be-processed*, move
+to *in-process* when admitted at their start endpoint, and finish in
+*post-processed* when retired at their end endpoint. At each sorted
+unique endpoint *t*, the sweep admits intervals with `start == t` and
+retires those with `end == t`. `interval_index` uses
+`pop_all_point(.., match_at = "start" / "end")` to extract the relevant
+slice in O(log n + k) per event; `data.frame` and `IRanges` filter and
+re-bind in O(n_remaining) per event.
+
+```{r ivx-sweep-bench, eval=run_benchmarks, cache=FALSE}
+sweep_sizes <- 2^(9 + 0:4)
+rows <- flexseq()
+
+set.seed(789)
+max_sw <- max(sweep_sizes)
+all_starts_sw <- sample.int(max_sw * 5L, max_sw, replace = TRUE)
+all_widths_sw <- sample.int(50L, max_sw, replace = TRUE)
+all_ends_sw   <- all_starts_sw + all_widths_sw
+all_vals_sw   <- sprintf("interval_%06d", seq_len(max_sw))
+
+has_iranges_sw <- requireNamespace("IRanges", quietly = TRUE) &&
+  requireNamespace("S4Vectors", quietly = TRUE) &&
+  requireNamespace("BiocGenerics", quietly = TRUE)
+
+for(n in sweep_sizes) {
+  cat("Sweep-line, size ", n, "\n")
+  starts <- all_starts_sw[seq_len(n)]
+  ends   <- all_ends_sw[seq_len(n)]
+  vals   <- all_vals_sw[seq_len(n)]
+  events <- sort(unique(c(starts, ends)))
+
+  ivx_setup <- function() list(
+    ix = as_interval_index(as.list(vals), start = starts, end = ends, default_query_bounds = "[]"),
+    events = events
+  )
+
+  rows <- bench_one(rows, "interval_index", "sweep-line", n, repeats, ivx_setup,
+    function(st) {
+      to_proc <- st$ix
+      active  <- interval_index()
+      retired <- interval_index()
+      for(t in st$events) {
+        admit <- pop_all_point(to_proc, t, match_at = "start")
+        to_proc <- admit$remaining
+        for(e in Immutables:::.ivx_entries(admit$elements)) {
+          active <- insert(active, e$value, e$start, e$end)
+        }
+        retire <- pop_all_point(active, t, match_at = "end")
+        active <- retire$remaining
+        for(e in Immutables:::.ivx_entries(retire$elements)) {
+          retired <- insert(retired, e$value, e$start, e$end)
+        }
+      }
+      retired
+    })
+
+  df_setup <- function() list(
+    df = data.frame(start = starts, end = ends, value = vals, stringsAsFactors = FALSE),
+    events = events
+  )
+
+  rows <- bench_one(rows, "base R", "sweep-line", n, repeats, df_setup,
+    function(st) {
+      to_proc <- st$df
+      active  <- to_proc[0, , drop = FALSE]
+      retired <- to_proc[0, , drop = FALSE]
+      for(t in st$events) {
+        am <- to_proc$start == t
+        active  <- rbind(active, to_proc[am, , drop = FALSE])
+        to_proc <- to_proc[!am, , drop = FALSE]
+        rm <- active$end == t
+        retired <- rbind(retired, active[rm, , drop = FALSE])
+        active  <- active[!rm, , drop = FALSE]
+      }
+      retired
+    })
+
+  if(has_iranges_sw) {
+    ir_setup <- function() list(
+      ir = IRanges::IRanges(start = starts, end = ends),
+      v  = vals,
+      events = events
+    )
+    rows <- bench_one(rows, "IRanges", "sweep-line", n, repeats, ir_setup,
+      function(st) {
+        to_ir <- st$ir; to_v <- st$v
+        act_ir <- IRanges::IRanges(); act_v <- character(0)
+        ret_ir <- IRanges::IRanges(); ret_v <- character(0)
+        for(t in st$events) {
+          ai <- which(BiocGenerics::start(to_ir) == t)
+          if(length(ai)) {
+            act_ir <- c(act_ir, to_ir[ai]); act_v <- c(act_v, to_v[ai])
+            to_ir <- to_ir[-ai]; to_v <- to_v[-ai]
+          }
+          ri <- which(BiocGenerics::end(act_ir) == t)
+          if(length(ri)) {
+            ret_ir <- c(ret_ir, act_ir[ri]); ret_v <- c(ret_v, act_v[ri])
+            act_ir <- act_ir[-ri]; act_v <- act_v[-ri]
+          }
+        }
+        list(ir = ret_ir, v = ret_v)
+      })
+  }
+}
+
+results_list$sweep <- do.call(rbind, as.list(rows))
+```
+
+```{r ivx-sweep-plot, fig.width=8, fig.height=5}
+if(!is.null(results_list$sweep)) {
+  sweep_results <- results_list$sweep
+  sorted_sizes <- sort(unique(sweep_results$n))
+  sweep_results$n_cat <- factor(sweep_results$n, levels = sorted_sizes)
+
+  p_sweep <- ggplot(sweep_results, aes(x = n_cat, y = time_s, color = impl)) +
+    geom_boxplot() +
+    scale_x_discrete(labels = pow2_labels) +
+    labs(
+      title = "Sweep-line over interval endpoints",
+      x = "Number of intervals",
+      y = "Total time (s)",
+      color = "Implementation"
+    ) +
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+  print(p_sweep)
 } else {
   knitr::asis_output("*Benchmark results not yet generated.*")
 }
@@ -433,7 +607,8 @@ saveRDS(results_list, "inst/extdata/benchmarks.rds")
 ```{r save-figures, eval=save_figures, include=FALSE}
 dir.create("paper/figures", showWarnings = FALSE, recursive = TRUE)
 if(exists("p_sequence")) ggsave("paper/figures/benchmarks-sequence.pdf", p_sequence, width = 9, height = 7)
-if(exists("p_queue"))    ggsave("paper/figures/benchmarks-queue.pdf",    p_queue,    width = 8, height = 4.8)
 if(exists("p_pq"))       ggsave("paper/figures/benchmarks-pq.pdf",       p_pq,       width = 9, height = 7)
 if(exists("p_ivx"))      ggsave("paper/figures/benchmarks-ivx.pdf",      p_ivx,      width = 9, height = 6)
+if(exists("p_cumul"))    ggsave("paper/figures/benchmarks-cumul.pdf",    p_cumul,    width = 8, height = 5)
+if(exists("p_sweep"))    ggsave("paper/figures/benchmarks-sweep.pdf",    p_sweep,    width = 8, height = 5)
 ```
