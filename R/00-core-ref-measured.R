@@ -124,10 +124,10 @@ if(FALSE) .ft_set_name <- function(el, name) NULL
 }
 
 # validate and normalize monoid set; `.size` and `.named_count` are always present.
+# Reference (Haskell-style, lambda.r):
+#   ensure_size_monoids(monoids) :: list -> list
 # Runtime: O(1) under fixed monoid set.
-if(FALSE) ensure_size_monoids <- function(monoids) NULL
-ensure_size_monoids(monoids) %::% list : list
-ensure_size_monoids(monoids) %as% {
+ensure_size_monoids <- function(monoids) {
   out <- monoids
   if(!is_measure_monoid_list(out)) {
     stop("`monoids` must be a non-empty named list of MeasureMonoid objects.")
@@ -211,12 +211,12 @@ measure_child_named_impl(x, ms, name, rr) %as% {
 }
 
 # compute all cached measures for a structural node across all monoids
+# Reference (Haskell-style, lambda.r):
+#   measure_children(x, monoids) :: . -> list -> list
 # Runtime: typical O(m * k), where m = number of monoids and k = immediate child
 # count of `x` (bounded for in-tree nodes); worst-case O(m * n_subtree) when
 # recursive fallback is required.
-if(FALSE) measure_children <- function(x, monoids) NULL
-measure_children(x, monoids) %::% . : list : list
-measure_children(x, monoids) %as% {
+measure_children <- function(x, monoids) {
   ms <- monoids
   nms <- names(ms)
   out <- vector("list", length(ms))
@@ -228,10 +228,10 @@ measure_children(x, monoids) %as% {
 }
 
 # read a structural-node measure by monoid name
+# Reference (Haskell-style, lambda.r):
+#   node_measure(x, monoid_name) :: . -> character -> .
 # Runtime: O(1).
-if(FALSE) node_measure <- function(x, monoid_name) NULL
-node_measure(x, monoid_name) %::% . : character : .
-node_measure(x, monoid_name) %as% {
+node_measure <- function(x, monoid_name) {
   if(!is_structural_node(x)) {
     stop("node_measure expects a structural node.")
   }
@@ -243,17 +243,16 @@ node_measure(x, monoid_name) %as% {
 }
 
 # attach canonical monoids + cached measures to a structural node
+# Reference (Haskell-style, lambda.r):
+#   set_measure(x, monoids) :: . -> list -> .
 # Runtime: same as `measure_children()`; typical O(m * k), worst-case
 # O(m * n_subtree) under recursive fallback.
-if(FALSE) set_measure <- function(x, monoids) NULL
-set_measure(x, monoids) %::% . : list : .
-set_measure(x, monoids) %as% {
+set_measure <- function(x, monoids) {
   if(!is_structural_node(x)) {
     return(x)
   }
-  ms <- monoids
-  attr(x, "monoids") <- ms
-  attr(x, "measures") <- measure_children(x, ms)
+  attr(x, "monoids") <- monoids
+  attr(x, "measures") <- measure_children(x, monoids)
   x
 }
 
@@ -399,21 +398,19 @@ assert_structural_attrs(node) %as% {
 }
 
 # construct an Empty with cached measures
+# Reference (Haskell-style, lambda.r):
+#   measured_empty(monoids) :: list -> Empty
 # Runtime: O(1).
-if(FALSE) measured_empty <- function(monoids) NULL
-measured_empty(monoids) %::% list : Empty
-measured_empty(monoids) %as% {
-  e <- Empty()
-  set_measure(e, monoids)
+measured_empty <- function(monoids) {
+  set_measure(Empty(), monoids)
 }
 
 # construct a Single with cached measures
+# Reference:
+#   measured_single(el, monoids) :: . -> list -> Single
 # Runtime: O(1).
-if(FALSE) measured_single <- function(el, monoids) NULL
-measured_single(el, monoids) %::% . : list : Single
-measured_single(el, monoids) %as% {
-  s <- Single(el)
-  set_measure(s, monoids)
+measured_single <- function(el, monoids) {
+  set_measure(Single(el), monoids)
 }
 
 # construct a Digit with cached measures (size 1..4)
