@@ -267,8 +267,18 @@ comparisons, which is simple and fast for small *n* but O(n) per query.
 `interval_index` uses an augmented finger tree for O(log n + k) queries, where
 *k* is the number of matches.
 
+The single-shot query benchmarks pay the index-build cost up front and only
+amortize it across one query. A separate `cumulative insert` operation
+measures the cost of building a collection of *n* intervals one at a time
+with no batched constructor — the natural pattern for streaming or online
+algorithms. `data.frame` and `IRanges` rebuild a new vector each call
+(`rbind` and `c()` respectively); `interval_index` shares structure across
+versions, so each `insert` is O(log n). This is run at smaller sizes because
+the O(n²) build cost on the mutable baselines becomes prohibitive otherwise.
+
 ```{r ivx-bench, eval=run_benchmarks, cache=FALSE}
-ivx_sizes <- 2^(12 + 0:6) # 2^12 (4096) up to 2^18 (262144)
+ivx_sizes       <- 2^(12 + 0:6) # 2^12 (4096) up to 2^18 (262144)
+ivx_cumul_sizes <- 2^(9 + 0:5)  # 2^9 (512)  up to 2^14 (16384)
 rows <- flexseq()
 
 set.seed(123)
@@ -344,6 +354,55 @@ for(n in ivx_sizes) {
   }
 }
 
+# Cumulative incremental insertion, run at smaller sizes where the O(n^2)
+# mutable baselines are still feasible. Uses an independent fixture seed so
+# the start/width distribution is decorrelated from the query benchmarks.
+set.seed(456)
+max_cum <- max(ivx_cumul_sizes)
+all_starts_c <- sort(sample.int(max_cum * 10L, max_cum))
+all_widths_c <- sample.int(100L, max_cum, replace = TRUE)
+all_ends_c   <- all_starts_c + all_widths_c
+all_vals_c   <- sprintf("interval_%06d", seq_len(max_cum))
+
+for(n in ivx_cumul_sizes) {
+  cat("Cumulative insert, size ", n, "\n")
+  starts_c <- all_starts_c[seq_len(n)]
+  ends_c   <- all_ends_c[seq_len(n)]
+  vals_c   <- all_vals_c[seq_len(n)]
+  cum_setup <- function() list(s = starts_c, e = ends_c, v = vals_c, n = n)
+
+  rows <- bench_one(rows, "interval_index", "cumulative insert", n, repeats, cum_setup,
+    function(st) {
+      ix <- interval_index()
+      for(i in seq_len(st$n)) ix <- insert(ix, st$v[i], st$s[i], st$e[i])
+      ix
+    })
+
+  rows <- bench_one(rows, "base R", "cumulative insert", n, repeats, cum_setup,
+    function(st) {
+      df <- data.frame(start = integer(), end = integer(), value = character(),
+                       stringsAsFactors = FALSE)
+      for(i in seq_len(st$n)) {
+        df <- rbind(df, data.frame(start = st$s[i], end = st$e[i], value = st$v[i],
+                                   stringsAsFactors = FALSE))
+      }
+      df
+    })
+
+  if(has_iranges) {
+    rows <- bench_one(rows, "IRanges", "cumulative insert", n, repeats, cum_setup,
+      function(st) {
+        ir <- IRanges::IRanges()
+        v  <- character(0)
+        for(i in seq_len(st$n)) {
+          ir <- c(ir, IRanges::IRanges(start = st$s[i], end = st$e[i]))
+          v  <- c(v, st$v[i])
+        }
+        list(ir = ir, v = v)
+      })
+  }
+}
+
 results_list$ivx <- do.call(rbind, as.list(rows))
 ```
 ```{r ivx-plot, fig.width=9, fig.height=6}
@@ -371,233 +430,6 @@ if(!is.null(results_list$ivx)) {
 }
 ```
 
-## Cumulative interval insertion
-
-The single-shot read benchmarks above are a hostile framing for an immutable
-data structure: they pay the index-build cost up front and only amortize it
-across one query. Real workloads more often build state incrementally. This
-section measures the cost of building a collection of *n* intervals one at a
-time, with no batched constructor — the natural pattern for streaming or
-online algorithms.
-
-`data.frame` and `IRanges` rebuild a new vector each call (`rbind` and `c()`
-respectively). `interval_index` shares structure across versions, so each
-`insert` is O(log n).
-
-```{r ivx-cumul-bench, eval=run_benchmarks, cache=FALSE}
-cum_sizes <- 2^(9 + 0:5) # 512 up to 16384
-rows <- flexseq()
-
-set.seed(456)
-max_cum <- max(cum_sizes)
-all_starts_c <- sort(sample.int(max_cum * 10L, max_cum))
-all_widths_c <- sample.int(100L, max_cum, replace = TRUE)
-all_ends_c   <- all_starts_c + all_widths_c
-all_vals_c   <- sprintf("interval_%06d", seq_len(max_cum))
-
-has_iranges_c <- requireNamespace("IRanges", quietly = TRUE) &&
-  requireNamespace("S4Vectors", quietly = TRUE)
-
-for(n in cum_sizes) {
-  cat("Cumulative insert, size ", n, "\n")
-  starts <- all_starts_c[seq_len(n)]
-  ends   <- all_ends_c[seq_len(n)]
-  vals   <- all_vals_c[seq_len(n)]
-
-  cum_setup <- function() list(s = starts, e = ends, v = vals, n = n)
-
-  rows <- bench_one(rows, "interval_index", "cumulative insert", n, repeats, cum_setup,
-    function(st) {
-      ix <- interval_index()
-      for(i in seq_len(st$n)) ix <- insert(ix, st$v[i], st$s[i], st$e[i])
-      ix
-    })
-
-  rows <- bench_one(rows, "data.frame", "cumulative insert", n, repeats, cum_setup,
-    function(st) {
-      df <- data.frame(start = integer(), end = integer(), value = character(),
-                       stringsAsFactors = FALSE)
-      for(i in seq_len(st$n)) {
-        df <- rbind(df, data.frame(start = st$s[i], end = st$e[i], value = st$v[i],
-                                   stringsAsFactors = FALSE))
-      }
-      df
-    })
-
-  if(has_iranges_c) {
-    rows <- bench_one(rows, "IRanges", "cumulative insert", n, repeats, cum_setup,
-      function(st) {
-        ir <- IRanges::IRanges()
-        v  <- character(0)
-        for(i in seq_len(st$n)) {
-          ir <- c(ir, IRanges::IRanges(start = st$s[i], end = st$e[i]))
-          v  <- c(v, st$v[i])
-        }
-        list(ir = ir, v = v)
-      })
-  }
-}
-
-results_list$cumul <- do.call(rbind, as.list(rows))
-```
-
-```{r ivx-cumul-plot, fig.width=8, fig.height=5}
-if(!is.null(results_list$cumul)) {
-  cumul_results <- results_list$cumul
-  sorted_sizes <- sort(unique(cumul_results$n))
-  cumul_results$n_cat <- factor(cumul_results$n, levels = sorted_sizes)
-
-  p_cumul <- ggplot(cumul_results, aes(x = n_cat, y = time_s, color = impl)) +
-    geom_boxplot() +
-    scale_x_discrete(labels = pow2_labels) +
-    labs(
-      title = "Cumulative Interval Insertion",
-      x = "Number of elements inserted",
-      y = "Total time (s)",
-      color = "Implementation"
-    ) +
-    theme_bw() +
-    scale_y_continuous() +
-    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
-  print(p_cumul)
-} else {
-  knitr::asis_output("*Benchmark results not yet generated.*")
-}
-```
-
-## Sweep-line over interval endpoints
-
-A small sweep-line algorithm: intervals start in *to-be-processed*, move
-to *in-process* when admitted at their start endpoint, and finish in
-*post-processed* when retired at their end endpoint. At each sorted
-unique endpoint *t*, the sweep admits intervals with `start == t` and
-retires those with `end == t`. `interval_index` uses
-`pop_all_point(.., match_at = "start" / "end")` to extract the relevant
-slice in O(log n + k) per event; `data.frame` and `IRanges` filter and
-re-bind in O(n_remaining) per event.
-
-```{r ivx-sweep-bench, eval=run_benchmarks, cache=FALSE}
-sweep_sizes <- 2^(9 + 0:4)
-rows <- flexseq()
-
-set.seed(789)
-max_sw <- max(sweep_sizes)
-all_starts_sw <- sample.int(max_sw * 5L, max_sw, replace = TRUE)
-all_widths_sw <- sample.int(50L, max_sw, replace = TRUE)
-all_ends_sw   <- all_starts_sw + all_widths_sw
-all_vals_sw   <- sprintf("interval_%06d", seq_len(max_sw))
-
-has_iranges_sw <- requireNamespace("IRanges", quietly = TRUE) &&
-  requireNamespace("S4Vectors", quietly = TRUE) &&
-  requireNamespace("BiocGenerics", quietly = TRUE)
-
-for(n in sweep_sizes) {
-  cat("Sweep-line, size ", n, "\n")
-  starts <- all_starts_sw[seq_len(n)]
-  ends   <- all_ends_sw[seq_len(n)]
-  vals   <- all_vals_sw[seq_len(n)]
-  events <- sort(unique(c(starts, ends)))
-
-  ivx_setup <- function() list(
-    ix = as_interval_index(as.list(vals), start = starts, end = ends, default_query_bounds = "[]"),
-    events = events
-  )
-
-  rows <- bench_one(rows, "interval_index", "sweep-line", n, repeats, ivx_setup,
-    function(st) {
-      to_proc <- st$ix
-      active  <- interval_index()
-      retired <- interval_index()
-      for(t in st$events) {
-        admit <- pop_all_point(to_proc, t, match_at = "start")
-        to_proc <- admit$remaining
-        for(e in Immutables:::.ivx_entries(admit$elements)) {
-          active <- insert(active, e$value, e$start, e$end)
-        }
-        retire <- pop_all_point(active, t, match_at = "end")
-        active <- retire$remaining
-        for(e in Immutables:::.ivx_entries(retire$elements)) {
-          retired <- insert(retired, e$value, e$start, e$end)
-        }
-      }
-      retired
-    })
-
-  df_setup <- function() list(
-    df = data.frame(start = starts, end = ends, value = vals, stringsAsFactors = FALSE),
-    events = events
-  )
-
-  rows <- bench_one(rows, "base R", "sweep-line", n, repeats, df_setup,
-    function(st) {
-      to_proc <- st$df
-      active  <- to_proc[0, , drop = FALSE]
-      retired <- to_proc[0, , drop = FALSE]
-      for(t in st$events) {
-        am <- to_proc$start == t
-        active  <- rbind(active, to_proc[am, , drop = FALSE])
-        to_proc <- to_proc[!am, , drop = FALSE]
-        rm <- active$end == t
-        retired <- rbind(retired, active[rm, , drop = FALSE])
-        active  <- active[!rm, , drop = FALSE]
-      }
-      retired
-    })
-
-  if(has_iranges_sw) {
-    ir_setup <- function() list(
-      ir = IRanges::IRanges(start = starts, end = ends),
-      v  = vals,
-      events = events
-    )
-    rows <- bench_one(rows, "IRanges", "sweep-line", n, repeats, ir_setup,
-      function(st) {
-        to_ir <- st$ir; to_v <- st$v
-        act_ir <- IRanges::IRanges(); act_v <- character(0)
-        ret_ir <- IRanges::IRanges(); ret_v <- character(0)
-        for(t in st$events) {
-          ai <- which(BiocGenerics::start(to_ir) == t)
-          if(length(ai)) {
-            act_ir <- c(act_ir, to_ir[ai]); act_v <- c(act_v, to_v[ai])
-            to_ir <- to_ir[-ai]; to_v <- to_v[-ai]
-          }
-          ri <- which(BiocGenerics::end(act_ir) == t)
-          if(length(ri)) {
-            ret_ir <- c(ret_ir, act_ir[ri]); ret_v <- c(ret_v, act_v[ri])
-            act_ir <- act_ir[-ri]; act_v <- act_v[-ri]
-          }
-        }
-        list(ir = ret_ir, v = ret_v)
-      })
-  }
-}
-
-results_list$sweep <- do.call(rbind, as.list(rows))
-```
-
-```{r ivx-sweep-plot, fig.width=8, fig.height=5}
-if(!is.null(results_list$sweep)) {
-  sweep_results <- results_list$sweep
-  sorted_sizes <- sort(unique(sweep_results$n))
-  sweep_results$n_cat <- factor(sweep_results$n, levels = sorted_sizes)
-
-  p_sweep <- ggplot(sweep_results, aes(x = n_cat, y = time_s, color = impl)) +
-    geom_boxplot() +
-    scale_x_discrete(labels = pow2_labels) +
-    labs(
-      title = "Sweep-line over interval endpoints",
-      x = "Number of intervals",
-      y = "Total time (s)",
-      color = "Implementation"
-    ) +
-    theme_bw() +
-    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
-  print(p_sweep)
-} else {
-  knitr::asis_output("*Benchmark results not yet generated.*")
-}
-```
-
 ```{r save-results, eval=run_benchmarks, include=FALSE}
 # Persist this run so subsequent builds (CRAN, pkgdown) render the same
 # figures without re-timing. Path resolves from knit_root_dir, which the
@@ -610,6 +442,4 @@ dir.create("paper/figures", showWarnings = FALSE, recursive = TRUE)
 if(exists("p_sequence")) ggsave("paper/figures/benchmarks-sequence.pdf", p_sequence, width = 9, height = 7)
 if(exists("p_pq"))       ggsave("paper/figures/benchmarks-pq.pdf",       p_pq,       width = 9, height = 7)
 if(exists("p_ivx"))      ggsave("paper/figures/benchmarks-ivx.pdf",      p_ivx,      width = 9, height = 6)
-if(exists("p_cumul"))    ggsave("paper/figures/benchmarks-cumul.pdf",    p_cumul,    width = 8, height = 5)
-if(exists("p_sweep"))    ggsave("paper/figures/benchmarks-sweep.pdf",    p_sweep,    width = 8, height = 5)
 ```
