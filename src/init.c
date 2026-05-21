@@ -18,6 +18,7 @@ extern SEXP ft_cpp_get_by_index(SEXP, SEXP);
 extern SEXP ft_cpp_get_many_by_index(SEXP, SEXP);
 extern SEXP ft_cpp_name_positions(SEXP);
 extern SEXP ft_cpp_split_at_index(SEXP, SEXP, SEXP);
+extern SEXP ft_cpp_ivx_native_query(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
   {"ft_cpp_append_right", (DL_FUNC) &ft_cpp_append_right, 3},
@@ -36,6 +37,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"ft_cpp_get_many_by_index", (DL_FUNC) &ft_cpp_get_many_by_index, 2},
   {"ft_cpp_name_positions", (DL_FUNC) &ft_cpp_name_positions, 1},
   {"ft_cpp_split_at_index", (DL_FUNC) &ft_cpp_split_at_index, 3},
+  {"ft_cpp_ivx_native_query", (DL_FUNC) &ft_cpp_ivx_native_query, 10},
   {NULL, NULL, 0}
 };
 

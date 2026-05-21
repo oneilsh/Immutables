@@ -737,6 +737,405 @@ bool ivx_combine_measure_fast(SEXP left, SEXP right, SEXP& out) {
   return true;
 }
 
+// Native compound interval-index query walk.
+//
+// Walks a pre-partitioned candidate subtree leaf-by-leaf, applying the relation
+// predicate at each leaf, and pruning entire subtrees via the cached
+// .ivx_max_end measure where applicable (point / overlaps / containing). For
+// "within" there is no max_end prune (max_end provides no useful upper bound).
+//
+// Peek-only (with_unmatched = FALSE) in this task; pop-side fields come later.
+
+// Predicate: 1 = match, 0 = miss, -1 = NA (compare failed). entries are leaf
+// records list(value, start, end, key) per R/60-interval_index-internals.R
+// (.ivx_make_entry); we read $start at index 1 and $end at index 2 by
+// VECTOR_ELT.
+int ivx_native_predicate(
+    SEXP s, SEXP en,
+    const std::string& relation_kind,
+    SEXP qlo, SEXP qhi,
+    ScalarKind kind,
+    bool include_start, bool include_end
+) {
+  if(relation_kind == "point") {
+    int cmp_lo = 0, cmp_hi = 0;
+    if(!scalar_compare_fast(qlo, s,  kind, cmp_lo)) return -1;
+    if(!scalar_compare_fast(qlo, en, kind, cmp_hi)) return -1;
+    bool left_ok  = include_start ? (cmp_lo >= 0) : (cmp_lo > 0);
+    bool right_ok = include_end   ? (cmp_hi <= 0) : (cmp_hi < 0);
+    return (left_ok && right_ok) ? 1 : 0;
+  }
+  if(relation_kind == "overlaps") {
+    bool touching_is_overlap = include_start && include_end;
+    int cmp_aend_blo = 0, cmp_bend_alo = 0;
+    if(!scalar_compare_fast(en,  qlo, kind, cmp_aend_blo)) return -1;
+    if(!scalar_compare_fast(qhi, s,   kind, cmp_bend_alo)) return -1;
+    bool a_before_b = touching_is_overlap ? (cmp_aend_blo < 0) : (cmp_aend_blo <= 0);
+    bool b_before_a = touching_is_overlap ? (cmp_bend_alo < 0) : (cmp_bend_alo <= 0);
+    return (!(a_before_b || b_before_a)) ? 1 : 0;
+  }
+  if(relation_kind == "containing") {
+    // Mirrors R .ivx_spec_containing leaf_match:
+    //   contains: start <= qlo && end >= qhi (always inclusive)
+    //   then overlaps with touching_is_overlap = include_start && include_end
+    int cmp_s_lo = 0, cmp_e_hi = 0;
+    if(!scalar_compare_fast(s,  qlo, kind, cmp_s_lo)) return -1;
+    if(!scalar_compare_fast(en, qhi, kind, cmp_e_hi)) return -1;
+    if(!(cmp_s_lo <= 0 && cmp_e_hi >= 0)) return 0;
+    bool touching_is_overlap = include_start && include_end;
+    int cmp_e_lo = 0, cmp_hi_s = 0;
+    if(!scalar_compare_fast(en,  qlo, kind, cmp_e_lo)) return -1;
+    if(!scalar_compare_fast(qhi, s,   kind, cmp_hi_s)) return -1;
+    bool a_before_b = touching_is_overlap ? (cmp_e_lo < 0) : (cmp_e_lo <= 0);
+    bool b_before_a = touching_is_overlap ? (cmp_hi_s < 0) : (cmp_hi_s <= 0);
+    return (!(a_before_b || b_before_a)) ? 1 : 0;
+  }
+  if(relation_kind == "within") {
+    // Mirrors R .ivx_spec_within leaf_match:
+    //   within: qlo <= start && qhi >= end (always inclusive)
+    //   then overlaps with touching_is_overlap = include_start && include_end
+    int cmp_s_lo = 0, cmp_e_hi = 0;
+    if(!scalar_compare_fast(s,  qlo, kind, cmp_s_lo)) return -1;
+    if(!scalar_compare_fast(en, qhi, kind, cmp_e_hi)) return -1;
+    if(!(cmp_s_lo >= 0 && cmp_e_hi <= 0)) return 0;
+    bool touching_is_overlap = include_start && include_end;
+    int cmp_e_lo = 0, cmp_hi_s = 0;
+    if(!scalar_compare_fast(en,  qlo, kind, cmp_e_lo)) return -1;
+    if(!scalar_compare_fast(qhi, s,   kind, cmp_hi_s)) return -1;
+    bool a_before_b = touching_is_overlap ? (cmp_e_lo < 0) : (cmp_e_lo <= 0);
+    bool b_before_a = touching_is_overlap ? (cmp_hi_s < 0) : (cmp_hi_s <= 0);
+    return (!(a_before_b || b_before_a)) ? 1 : 0;
+  }
+  return -1;
+}
+
+// Read the .size measure from a structural node; returns subtree leaf count.
+// .size is stored as a numeric (double) scalar in the measures named list.
+int ivx_native_subtree_size(SEXP node) {
+  if(!is_structural_node_cpp(node)) return 1;
+  if(has_class(node, "Empty")) return 0;
+  List ms = Rf_getAttrib(node, measures_sym);
+  if(ms.containsElementNamed(".size")) {
+    SEXP s = ms[".size"];
+    if(TYPEOF(s) == INTSXP && Rf_xlength(s) >= 1) return INTEGER(s)[0];
+    if(TYPEOF(s) == REALSXP && Rf_xlength(s) >= 1) return (int) REAL(s)[0];
+  }
+  return (int) compute_tree_size_fallback(node);
+}
+
+// Returns true if the subtree can be pruned: its max_end is strictly less than
+// the prune threshold (qpt for point, qlo for overlaps, qhi for containing).
+// "has = FALSE" indicates the subtree contributes no entries (Empty); we treat
+// that as prunable.
+bool ivx_native_can_prune(
+    SEXP node,
+    SEXP prune_threshold,
+    ScalarKind kind
+) {
+  if(!is_structural_node_cpp(node)) return false;
+  List ms = Rf_getAttrib(node, measures_sym);
+  if(!ms.containsElementNamed(".ivx_max_end")) return false;
+  SEXP me = ms[".ivx_max_end"];
+  if(TYPEOF(me) != VECSXP) return false;
+  List me_list(me);
+  if(me_list.containsElementNamed("has")) {
+    SEXP has_val = me_list["has"];
+    if(TYPEOF(has_val) == LGLSXP && Rf_xlength(has_val) >= 1) {
+      if(LOGICAL(has_val)[0] == FALSE) return true;
+    }
+  }
+  if(!me_list.containsElementNamed("end")) return false;
+  SEXP end_val = me_list["end"];
+  if(end_val == R_NilValue) return false;
+  int cmp = 0;
+  if(!scalar_compare_fast(end_val, prune_threshold, kind, cmp)) return false;
+  return cmp < 0;
+}
+
+// Recursively walk a structural subtree, appending every leaf to `out`
+// (in left-to-right order). Used to drain pruned subtrees into the
+// unmatched accumulator.
+void ivx_native_collect_leaves(SEXP node, std::vector<SEXP>& out) {
+  if(node == R_NilValue) return;
+
+  if(!is_structural_node_cpp(node)) {
+    // Leaf entry
+    out.push_back(node);
+    return;
+  }
+
+  if(has_class(node, "Empty")) return;
+
+  if(has_class(node, "Single")) {
+    List s(node);
+    ivx_native_collect_leaves(s[0], out);
+    return;
+  }
+
+  if(has_class(node, "Deep")) {
+    List d(node);
+    ivx_native_collect_leaves(d["prefix"], out);
+    ivx_native_collect_leaves(d["middle"], out);
+    ivx_native_collect_leaves(d["suffix"], out);
+    return;
+  }
+
+  // Digit / Node / Node2 / Node3 — iterate children left-to-right
+  List xs(node);
+  R_xlen_t n = xs.size();
+  for(R_xlen_t i = 0; i < n; ++i) {
+    ivx_native_collect_leaves(xs[i], out);
+  }
+}
+
+// Recursive walk. Returns false to signal "stop the walk" (used for want_first
+// after the first match has been recorded AND with_unmatched is false).
+//
+// When `with_unmatched` is true:
+//   - Pre-match leaf misses are appended to `unmatched`.
+//   - After a match has been recorded under `want_first`, remaining leaves are
+//     drained into `unmatched` without predicate evaluation. The flag
+//     `first_already_found` signals this post-match drain mode.
+//   - Pruned subtrees have all of their leaves collected into `unmatched`.
+bool ivx_native_walk_node(
+    SEXP node,
+    const std::string& relation_kind,
+    SEXP qlo, SEXP qhi,
+    ScalarKind kind,
+    bool include_start, bool include_end,
+    bool prune_enabled,
+    SEXP prune_threshold,
+    bool want_first,
+    int& position_counter,
+    std::vector<SEXP>& matched,
+    std::vector<int>& matched_indices,
+    bool with_unmatched,
+    std::vector<SEXP>& unmatched,
+    bool& first_already_found
+) {
+  if(node == R_NilValue) return true;
+
+  if(!is_structural_node_cpp(node)) {
+    // Leaf entry
+    if(TYPEOF(node) != VECSXP || Rf_xlength(node) < 3) {
+      position_counter += 1;
+      return true;
+    }
+
+    // Post-match drain: everything else goes to unmatched without predicate.
+    if(want_first && first_already_found) {
+      if(with_unmatched) unmatched.push_back(node);
+      position_counter += 1;
+      return true;
+    }
+
+    SEXP s  = VECTOR_ELT(node, 1);
+    SEXP en = VECTOR_ELT(node, 2);
+    int hit = ivx_native_predicate(s, en, relation_kind, qlo, qhi, kind,
+                                   include_start, include_end);
+    if(hit == 1) {
+      matched.push_back(node);
+      matched_indices.push_back(position_counter);
+      position_counter += 1;
+      if(want_first) {
+        first_already_found = true;
+        // If we're collecting unmatched, keep walking to drain the remainder.
+        // Otherwise stop immediately.
+        if(!with_unmatched) return false;
+      }
+      return true;
+    }
+    if(with_unmatched) unmatched.push_back(node);
+    position_counter += 1;
+    return true;
+  }
+
+  // Structural node: try max_end prune
+  if(prune_enabled && ivx_native_can_prune(node, prune_threshold, kind)) {
+    if(with_unmatched) {
+      // Drain the pruned subtree's leaves into unmatched. In post-match drain
+      // mode they're going to unmatched anyway; same destination either way.
+      ivx_native_collect_leaves(node, unmatched);
+    }
+    position_counter += ivx_native_subtree_size(node);
+    return true;
+  }
+
+  if(has_class(node, "Empty")) return true;
+
+  if(has_class(node, "Single")) {
+    List s(node);
+    return ivx_native_walk_node(
+      s[0], relation_kind, qlo, qhi, kind,
+      include_start, include_end,
+      prune_enabled, prune_threshold,
+      want_first, position_counter, matched, matched_indices,
+      with_unmatched, unmatched, first_already_found
+    );
+  }
+
+  if(has_class(node, "Deep")) {
+    List d(node);
+    SEXP prefix = d["prefix"];
+    SEXP middle = d["middle"];
+    SEXP suffix = d["suffix"];
+    if(!ivx_native_walk_node(prefix, relation_kind, qlo, qhi, kind,
+                             include_start, include_end,
+                             prune_enabled, prune_threshold,
+                             want_first, position_counter, matched, matched_indices,
+                             with_unmatched, unmatched, first_already_found)) return false;
+    if(!ivx_native_walk_node(middle, relation_kind, qlo, qhi, kind,
+                             include_start, include_end,
+                             prune_enabled, prune_threshold,
+                             want_first, position_counter, matched, matched_indices,
+                             with_unmatched, unmatched, first_already_found)) return false;
+    if(!ivx_native_walk_node(suffix, relation_kind, qlo, qhi, kind,
+                             include_start, include_end,
+                             prune_enabled, prune_threshold,
+                             want_first, position_counter, matched, matched_indices,
+                             with_unmatched, unmatched, first_already_found)) return false;
+    return true;
+  }
+
+  // Digit / Node / Node2 / Node3 — iterate children left-to-right
+  List xs(node);
+  R_xlen_t n = xs.size();
+  for(R_xlen_t i = 0; i < n; ++i) {
+    if(!ivx_native_walk_node(xs[i], relation_kind, qlo, qhi, kind,
+                             include_start, include_end,
+                             prune_enabled, prune_threshold,
+                             want_first, position_counter, matched, matched_indices,
+                             with_unmatched, unmatched, first_already_found)) return false;
+  }
+  return true;
+}
+
+// Forward declaration: defined later in the file, needed here for rebuilding
+// matched/unmatched trees from sorted accumulators.
+SEXP tree_from_sorted_list_cpp(const List& xs, const List& monoids);
+
+SEXP ivx_native_query_impl(
+    SEXP candidate_tree,
+    const std::string& relation_kind,
+    SEXP qlo, SEXP qhi,
+    List bounds_flags,
+    int endpoint_kind,
+    const std::string& which,
+    bool with_unmatched,
+    SEXP monoids_sexp,
+    bool as_list
+) {
+  ScalarKind kind;
+  if(endpoint_kind == 1 || endpoint_kind == 2) {
+    kind = ScalarKind::NUMERIC;
+  } else {
+    stop("ivx_native_query: unsupported endpoint_kind");
+  }
+
+  bool include_start = as<bool>(bounds_flags["include_start"]);
+  bool include_end   = as<bool>(bounds_flags["include_end"]);
+
+  bool prune_enabled = (relation_kind != "within");
+  SEXP prune_threshold = R_NilValue;
+  if(relation_kind == "point")           prune_threshold = qlo;
+  else if(relation_kind == "overlaps")   prune_threshold = qlo;
+  else if(relation_kind == "containing") prune_threshold = qhi;
+  else if(relation_kind == "within")     prune_threshold = R_NilValue;
+  else stop("ivx_native_query: unknown relation_kind");
+
+  std::vector<SEXP> matched;
+  std::vector<int> matched_indices;
+  std::vector<SEXP> unmatched;
+  int position_counter = 1;  // 1-based, relative to candidate
+  bool want_first = (which == "first");
+  bool first_already_found = false;
+
+  ivx_native_walk_node(
+    candidate_tree, relation_kind, qlo, qhi, kind,
+    include_start, include_end,
+    prune_enabled, prune_threshold,
+    want_first, position_counter, matched, matched_indices,
+    with_unmatched, unmatched, first_already_found
+  );
+
+  R_xlen_t m = (R_xlen_t) matched.size();
+  List matched_list(m);
+  for(R_xlen_t i = 0; i < m; ++i) matched_list[i] = matched[(size_t) i];
+  IntegerVector indices_vec(m);
+  for(R_xlen_t i = 0; i < m; ++i) indices_vec[i] = matched_indices[(size_t) i];
+
+  if(!with_unmatched) {
+    // Peek path. For which == "all", optionally build the final result shape
+    // directly so R-side dispatch doesn't have to re-walk the matched list.
+    // The extra fields are opt-in: as_list = TRUE adds parallel vectors;
+    // as_list = FALSE adds matched_tree iff monoids were supplied.
+    if(which == "all" && as_list) {
+      // Parallel-vector shape: values + scalar-SEXP lists for starts/ends.
+      // R-side caller runs .ivx_simplify_endpoints on starts_l/ends_l.
+      List values_list(m);
+      List starts_l(m);
+      List ends_l(m);
+      for(R_xlen_t i = 0; i < m; ++i) {
+        SEXP entry = matched[(size_t) i];
+        values_list[i] = VECTOR_ELT(entry, 0);
+        starts_l[i]   = VECTOR_ELT(entry, 1);
+        ends_l[i]     = VECTOR_ELT(entry, 2);
+      }
+      return List::create(
+        _["matched"]         = matched_list,
+        _["matched_indices"] = indices_vec,
+        _["values"]          = values_list,
+        _["starts_l"]        = starts_l,
+        _["ends_l"]          = ends_l
+      );
+    }
+    if(which == "all" && !as_list && monoids_sexp != R_NilValue && TYPEOF(monoids_sexp) == VECSXP) {
+      // Slice shape: build matched_tree natively (skips the C++ -> R -> C++
+      // round trip through .ivx_tree_from_ordered_entries).
+      List monoids(monoids_sexp);
+      Shield<SEXP> matched_tree(tree_from_sorted_list_cpp(matched_list, monoids));
+      return List::create(
+        _["matched"]         = matched_list,
+        _["matched_indices"] = indices_vec,
+        _["matched_tree"]    = (SEXP) matched_tree
+      );
+    }
+    // Legacy / first-hit shape (engine pre-Task-3 still uses this for which="all").
+    return List::create(
+      _["matched"]         = matched_list,
+      _["matched_indices"] = indices_vec
+    );
+  }
+
+  // Build unmatched_tree (and matched_tree for which == "all") from the
+  // accumulators. Both accumulators are in left-to-right (sorted) order.
+  if(monoids_sexp == R_NilValue || TYPEOF(monoids_sexp) != VECSXP) {
+    stop("ivx_native_query: monoids required when with_unmatched = TRUE");
+  }
+  List monoids(monoids_sexp);
+
+  R_xlen_t u = (R_xlen_t) unmatched.size();
+  List unmatched_list(u);
+  for(R_xlen_t i = 0; i < u; ++i) unmatched_list[i] = unmatched[(size_t) i];
+  Shield<SEXP> unmatched_tree(tree_from_sorted_list_cpp(unmatched_list, monoids));
+
+  if(which == "all") {
+    Shield<SEXP> matched_tree(tree_from_sorted_list_cpp(matched_list, monoids));
+    return List::create(
+      _["matched"]         = matched_list,
+      _["matched_indices"] = indices_vec,
+      _["unmatched_tree"]  = (SEXP) unmatched_tree,
+      _["matched_tree"]    = (SEXP) matched_tree
+    );
+  }
+
+  return List::create(
+    _["matched"]         = matched_list,
+    _["matched_indices"] = indices_vec,
+    _["unmatched_tree"]  = (SEXP) unmatched_tree
+  );
+}
+
 bool monoid_combine_fast(SEXP left, SEXP right, const std::string& monoid_name, SEXP& out) {
   bool is_min = false;
   if(monoid_name_is_pq_minmax(monoid_name, is_min)) {
@@ -2025,5 +2424,31 @@ extern "C" SEXP ft_cpp_name_positions(SEXP t) {
   }
   out.attr("names") = nms;
   return out;
+  END_RCPP
+}
+
+extern "C" SEXP ft_cpp_ivx_native_query(
+    SEXP candidate_tree,
+    SEXP relation_kind_,
+    SEXP qlo,
+    SEXP qhi,
+    SEXP bounds_flags_,
+    SEXP endpoint_kind_,
+    SEXP which_,
+    SEXP with_unmatched_,
+    SEXP monoids_,
+    SEXP as_list_
+) {
+  BEGIN_RCPP
+  std::string relation_kind = as<std::string>(relation_kind_);
+  List bounds_flags(bounds_flags_);
+  int endpoint_kind = as<int>(endpoint_kind_);
+  std::string which = as<std::string>(which_);
+  bool with_unmatched = as<bool>(with_unmatched_);
+  bool as_list = as<bool>(as_list_);
+  return ivx_native_query_impl(
+    candidate_tree, relation_kind, qlo, qhi,
+    bounds_flags, endpoint_kind, which, with_unmatched, monoids_, as_list
+  );
   END_RCPP
 }

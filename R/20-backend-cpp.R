@@ -105,3 +105,42 @@
 .ft_cpp_name_positions <- function(t) {
   .Call("ft_cpp_name_positions", t, PACKAGE = "Immutables")
 }
+
+# Native compound interval-index query: walks the candidate subtree leaf-by-leaf
+# with .ivx_max_end pruning (where applicable), applying one of the four
+# interval-relation predicates (point / overlaps / containing / within) at each
+# leaf.
+#
+# Result shapes:
+#   - which = "first": list(matched, matched_indices) — matched is len 0 or 1.
+#   - which = "all", with_unmatched = FALSE, as_list = TRUE:
+#       list(matched, matched_indices, values, starts_l, ends_l) — caller passes
+#       starts_l/ends_l through .ivx_simplify_endpoints (one C-level unlist per
+#       axis on numeric endpoints).
+#   - which = "all", with_unmatched = FALSE, as_list = FALSE:
+#       list(matched, matched_indices, matched_tree) — matched_tree is a bare
+#       structural tree built natively from the matched entries; caller wraps
+#       it via .ivx_wrap_like(x, matched_tree). Requires `monoids`.
+#   - with_unmatched = TRUE: list(matched, matched_indices, unmatched_tree
+#       [, matched_tree when which = "all"]). Requires `monoids`. `as_list` is
+#       ignored on this branch.
+#
+# - candidate_tree: pre-partitioned candidate subtree
+# - relation_kind:  "point" | "overlaps" | "containing" | "within"
+# - qlo, qhi:       scalar query endpoints (equal for point queries)
+# - bounds_flags:   list(include_start = <lgl>, include_end = <lgl>)
+# - endpoint_kind:  1L = integer, 2L = double/numeric
+# - which:          "first" or "all"
+# - with_unmatched: logical
+# - monoids:        required when the C++ side may build a tree (with_unmatched,
+#                   or peek/all + !as_list); otherwise may be NULL.
+# - as_list:        logical; only meaningful for peek/all (ignored elsewhere).
+.ivx_native_query <- function(candidate_tree, relation_kind, qlo, qhi, bounds_flags,
+                              endpoint_kind, which, with_unmatched, monoids,
+                              as_list = FALSE) {
+  .Call("ft_cpp_ivx_native_query",
+        candidate_tree, relation_kind, qlo, qhi,
+        bounds_flags, as.integer(endpoint_kind), which,
+        isTRUE(with_unmatched), monoids, isTRUE(as_list),
+        PACKAGE = "Immutables")
+}
