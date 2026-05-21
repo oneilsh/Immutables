@@ -79,12 +79,13 @@ peek_point <- function(x, point, bounds = NULL,
                        match_at = c("interval", "start", "end", "either")) {
   .ivx_assert_index(x)
   match_at <- match.arg(match_at)
-  qp <- .ivx_normalize_endpoint(point, "point", endpoint_type = .ivx_endpoint_type_state(x))
+  et <- .ivx_endpoint_type_state(x)
+  qp <- .ivx_normalize_endpoint(point, "point", endpoint_type = et)
   if(identical(match_at, "interval")) {
     b <- .ivx_resolve_bounds(x, bounds)
-    spec <- .ivx_spec_point(qp, b, .ivx_bounds_flags(b), match_at)
+    spec <- .ivx_spec_point(qp, b, .ivx_bounds_flags(b), match_at, endpoint_type = et)
   } else {
-    spec <- .ivx_spec_point(qp, NULL, NULL, match_at)
+    spec <- .ivx_spec_point(qp, NULL, NULL, match_at, endpoint_type = et)
   }
   .ivx_run_relation_query(x, spec, mode = "peek", which = "first")
 }
@@ -99,9 +100,19 @@ peek_point <- function(x, point, bounds = NULL,
 #' @param match_at How the query point is matched against each entry. One of
 #'   `"interval"` (default; containment under `bounds`), `"start"`, `"end"`,
 #'   or `"either"`. See [peek_point()] for details.
-#' @return An `interval_index` slice of all matches (possibly empty).
+#' @param as_list If `TRUE`, return a list with `values` (list of payloads),
+#'   `starts`, and `ends` parallel vectors instead of an `interval_index`
+#'   slice. Avoids the result-tree rebuild and is significantly faster for
+#'   large match sets when the caller doesn't need a queryable result.
+#' @return When `as_list = FALSE` (default): an `interval_index` slice of all
+#'   matches (possibly empty). When `as_list = TRUE`: a named list with
+#'   `values` (list of payloads), `starts`, and `ends`. For `numeric` /
+#'   integer endpoint domains, `starts` and `ends` are atomic vectors; for
+#'   class-bearing endpoint domains (e.g. `Date`, `POSIXct`) they are
+#'   returned as lists to preserve the endpoint class.
 #' @details
-#' The returned `interval_index` can be inspected with [as.list()].
+#' With `as_list = FALSE`, the returned `interval_index` can be inspected with
+#' [as.list()].
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))
 #' as.list(peek_all_point(ix, 2))
@@ -110,17 +121,19 @@ peek_point <- function(x, point, bounds = NULL,
 #' as.list(peek_all_point(ix, 3, match_at = "end"))
 #' @export
 peek_all_point <- function(x, point, bounds = NULL,
-                           match_at = c("interval", "start", "end", "either")) {
+                           match_at = c("interval", "start", "end", "either"),
+                           as_list = FALSE) {
   .ivx_assert_index(x)
   match_at <- match.arg(match_at)
-  qp <- .ivx_normalize_endpoint(point, "point", endpoint_type = .ivx_endpoint_type_state(x))
+  et <- .ivx_endpoint_type_state(x)
+  qp <- .ivx_normalize_endpoint(point, "point", endpoint_type = et)
   if(identical(match_at, "interval")) {
     b <- .ivx_resolve_bounds(x, bounds)
-    spec <- .ivx_spec_point(qp, b, .ivx_bounds_flags(b), match_at)
+    spec <- .ivx_spec_point(qp, b, .ivx_bounds_flags(b), match_at, endpoint_type = et)
   } else {
-    spec <- .ivx_spec_point(qp, NULL, NULL, match_at)
+    spec <- .ivx_spec_point(qp, NULL, NULL, match_at, endpoint_type = et)
   }
-  .ivx_run_relation_query(x, spec, mode = "peek", which = "all")
+  .ivx_run_relation_query(x, spec, mode = "peek", which = "all", as_list = isTRUE(as_list))
 }
 
 # Runtime: O(log n + c).
@@ -147,12 +160,13 @@ pop_point <- function(x, point, bounds = NULL,
                       match_at = c("interval", "start", "end", "either")) {
   .ivx_assert_index(x)
   match_at <- match.arg(match_at)
-  qp <- .ivx_normalize_endpoint(point, "point", endpoint_type = .ivx_endpoint_type_state(x))
+  et <- .ivx_endpoint_type_state(x)
+  qp <- .ivx_normalize_endpoint(point, "point", endpoint_type = et)
   if(identical(match_at, "interval")) {
     b <- .ivx_resolve_bounds(x, bounds)
-    spec <- .ivx_spec_point(qp, b, .ivx_bounds_flags(b), match_at)
+    spec <- .ivx_spec_point(qp, b, .ivx_bounds_flags(b), match_at, endpoint_type = et)
   } else {
-    spec <- .ivx_spec_point(qp, NULL, NULL, match_at)
+    spec <- .ivx_spec_point(qp, NULL, NULL, match_at, endpoint_type = et)
   }
   .ivx_run_relation_query(x, spec, mode = "pop", which = "first")
 }
@@ -185,12 +199,13 @@ pop_all_point <- function(x, point, bounds = NULL,
                           match_at = c("interval", "start", "end", "either")) {
   .ivx_assert_index(x)
   match_at <- match.arg(match_at)
-  qp <- .ivx_normalize_endpoint(point, "point", endpoint_type = .ivx_endpoint_type_state(x))
+  et <- .ivx_endpoint_type_state(x)
+  qp <- .ivx_normalize_endpoint(point, "point", endpoint_type = et)
   if(identical(match_at, "interval")) {
     b <- .ivx_resolve_bounds(x, bounds)
-    spec <- .ivx_spec_point(qp, b, .ivx_bounds_flags(b), match_at)
+    spec <- .ivx_spec_point(qp, b, .ivx_bounds_flags(b), match_at, endpoint_type = et)
   } else {
-    spec <- .ivx_spec_point(qp, NULL, NULL, match_at)
+    spec <- .ivx_spec_point(qp, NULL, NULL, match_at, endpoint_type = et)
   }
   .ivx_run_relation_query(x, spec, mode = "pop", which = "all")
 }
@@ -218,8 +233,9 @@ pop_all_point <- function(x, point, bounds = NULL,
 peek_overlaps <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
-  q <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  spec <- .ivx_spec_overlaps(q, b, .ivx_bounds_flags(b))
+  et <- .ivx_endpoint_type_state(x)
+  q <- .ivx_normalize_interval(start, end, endpoint_type = et)
+  spec <- .ivx_spec_overlaps(q, b, .ivx_bounds_flags(b), endpoint_type = et)
   .ivx_run_relation_query(x, spec, mode = "peek", which = "first")
 }
 
@@ -230,19 +246,30 @@ peek_overlaps <- function(x, start, end, bounds = NULL) {
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
-#' @return An `interval_index` slice of all matches (possibly empty).
+#' @param as_list If `TRUE`, return a list with `values` (list of payloads),
+#'   `starts`, and `ends` parallel vectors instead of an `interval_index`
+#'   slice. Avoids the result-tree rebuild and is significantly faster for
+#'   large match sets when the caller doesn't need a queryable result.
+#' @return When `as_list = FALSE` (default): an `interval_index` slice of all
+#'   matches (possibly empty). When `as_list = TRUE`: a named list with
+#'   `values` (list of payloads), `starts`, and `ends`. For `numeric` /
+#'   integer endpoint domains, `starts` and `ends` are atomic vectors; for
+#'   class-bearing endpoint domains (e.g. `Date`, `POSIXct`) they are
+#'   returned as lists to preserve the endpoint class.
 #' @details
-#' The returned `interval_index` can be inspected with [as.list()].
+#' With `as_list = FALSE`, the returned `interval_index` can be inspected with
+#' [as.list()].
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
 #' as.list(peek_all_overlaps(ix, 2, 5))
 #' @export
-peek_all_overlaps <- function(x, start, end, bounds = NULL) {
+peek_all_overlaps <- function(x, start, end, bounds = NULL, as_list = FALSE) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
-  q <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  spec <- .ivx_spec_overlaps(q, b, .ivx_bounds_flags(b))
-  .ivx_run_relation_query(x, spec, mode = "peek", which = "all")
+  et <- .ivx_endpoint_type_state(x)
+  q <- .ivx_normalize_interval(start, end, endpoint_type = et)
+  spec <- .ivx_spec_overlaps(q, b, .ivx_bounds_flags(b), endpoint_type = et)
+  .ivx_run_relation_query(x, spec, mode = "peek", which = "all", as_list = isTRUE(as_list))
 }
 
 # Runtime: O(log n + c).
@@ -263,8 +290,9 @@ peek_all_overlaps <- function(x, start, end, bounds = NULL) {
 peek_containing <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
-  q <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  spec <- .ivx_spec_containing(q, b, .ivx_bounds_flags(b))
+  et <- .ivx_endpoint_type_state(x)
+  q <- .ivx_normalize_interval(start, end, endpoint_type = et)
+  spec <- .ivx_spec_containing(q, b, .ivx_bounds_flags(b), endpoint_type = et)
   .ivx_run_relation_query(x, spec, mode = "peek", which = "first")
 }
 
@@ -275,19 +303,30 @@ peek_containing <- function(x, start, end, bounds = NULL) {
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
-#' @return An `interval_index` slice of all matches (possibly empty).
+#' @param as_list If `TRUE`, return a list with `values` (list of payloads),
+#'   `starts`, and `ends` parallel vectors instead of an `interval_index`
+#'   slice. Avoids the result-tree rebuild and is significantly faster for
+#'   large match sets when the caller doesn't need a queryable result.
+#' @return When `as_list = FALSE` (default): an `interval_index` slice of all
+#'   matches (possibly empty). When `as_list = TRUE`: a named list with
+#'   `values` (list of payloads), `starts`, and `ends`. For `numeric` /
+#'   integer endpoint domains, `starts` and `ends` are atomic vectors; for
+#'   class-bearing endpoint domains (e.g. `Date`, `POSIXct`) they are
+#'   returned as lists to preserve the endpoint class.
 #' @details
-#' The returned `interval_index` can be inspected with [as.list()].
+#' With `as_list = FALSE`, the returned `interval_index` can be inspected with
+#' [as.list()].
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 5, 7))
 #' as.list(peek_all_containing(ix, 2, 4))
 #' @export
-peek_all_containing <- function(x, start, end, bounds = NULL) {
+peek_all_containing <- function(x, start, end, bounds = NULL, as_list = FALSE) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
-  q <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  spec <- .ivx_spec_containing(q, b, .ivx_bounds_flags(b))
-  .ivx_run_relation_query(x, spec, mode = "peek", which = "all")
+  et <- .ivx_endpoint_type_state(x)
+  q <- .ivx_normalize_interval(start, end, endpoint_type = et)
+  spec <- .ivx_spec_containing(q, b, .ivx_bounds_flags(b), endpoint_type = et)
+  .ivx_run_relation_query(x, spec, mode = "peek", which = "all", as_list = isTRUE(as_list))
 }
 
 # Runtime: O(log n + c).
@@ -308,8 +347,9 @@ peek_all_containing <- function(x, start, end, bounds = NULL) {
 peek_within <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
-  q <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  spec <- .ivx_spec_within(q, b, .ivx_bounds_flags(b))
+  et <- .ivx_endpoint_type_state(x)
+  q <- .ivx_normalize_interval(start, end, endpoint_type = et)
+  spec <- .ivx_spec_within(q, b, .ivx_bounds_flags(b), endpoint_type = et)
   .ivx_run_relation_query(x, spec, mode = "peek", which = "first")
 }
 
@@ -320,19 +360,30 @@ peek_within <- function(x, start, end, bounds = NULL) {
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
-#' @return An `interval_index` slice of all matches (possibly empty).
+#' @param as_list If `TRUE`, return a list with `values` (list of payloads),
+#'   `starts`, and `ends` parallel vectors instead of an `interval_index`
+#'   slice. Avoids the result-tree rebuild and is significantly faster for
+#'   large match sets when the caller doesn't need a queryable result.
+#' @return When `as_list = FALSE` (default): an `interval_index` slice of all
+#'   matches (possibly empty). When `as_list = TRUE`: a named list with
+#'   `values` (list of payloads), `starts`, and `ends`. For `numeric` /
+#'   integer endpoint domains, `starts` and `ends` are atomic vectors; for
+#'   class-bearing endpoint domains (e.g. `Date`, `POSIXct`) they are
+#'   returned as lists to preserve the endpoint class.
 #' @details
-#' The returned `interval_index` can be inspected with [as.list()].
+#' With `as_list = FALSE`, the returned `interval_index` can be inspected with
+#' [as.list()].
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 5))
 #' as.list(peek_all_within(ix, 1, 4))
 #' @export
-peek_all_within <- function(x, start, end, bounds = NULL) {
+peek_all_within <- function(x, start, end, bounds = NULL, as_list = FALSE) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
-  q <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  spec <- .ivx_spec_within(q, b, .ivx_bounds_flags(b))
-  .ivx_run_relation_query(x, spec, mode = "peek", which = "all")
+  et <- .ivx_endpoint_type_state(x)
+  q <- .ivx_normalize_interval(start, end, endpoint_type = et)
+  spec <- .ivx_spec_within(q, b, .ivx_bounds_flags(b), endpoint_type = et)
+  .ivx_run_relation_query(x, spec, mode = "peek", which = "all", as_list = isTRUE(as_list))
 }
 
 # Runtime: O(log n + c).
@@ -355,8 +406,9 @@ peek_all_within <- function(x, start, end, bounds = NULL) {
 pop_overlaps <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
-  q <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  spec <- .ivx_spec_overlaps(q, b, .ivx_bounds_flags(b))
+  et <- .ivx_endpoint_type_state(x)
+  q <- .ivx_normalize_interval(start, end, endpoint_type = et)
+  spec <- .ivx_spec_overlaps(q, b, .ivx_bounds_flags(b), endpoint_type = et)
   .ivx_run_relation_query(x, spec, mode = "pop", which = "first")
 }
 
@@ -378,8 +430,9 @@ pop_overlaps <- function(x, start, end, bounds = NULL) {
 pop_all_overlaps <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
-  q <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  spec <- .ivx_spec_overlaps(q, b, .ivx_bounds_flags(b))
+  et <- .ivx_endpoint_type_state(x)
+  q <- .ivx_normalize_interval(start, end, endpoint_type = et)
+  spec <- .ivx_spec_overlaps(q, b, .ivx_bounds_flags(b), endpoint_type = et)
   .ivx_run_relation_query(x, spec, mode = "pop", which = "all")
 }
 
@@ -403,8 +456,9 @@ pop_all_overlaps <- function(x, start, end, bounds = NULL) {
 pop_containing <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
-  q <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  spec <- .ivx_spec_containing(q, b, .ivx_bounds_flags(b))
+  et <- .ivx_endpoint_type_state(x)
+  q <- .ivx_normalize_interval(start, end, endpoint_type = et)
+  spec <- .ivx_spec_containing(q, b, .ivx_bounds_flags(b), endpoint_type = et)
   .ivx_run_relation_query(x, spec, mode = "pop", which = "first")
 }
 
@@ -426,8 +480,9 @@ pop_containing <- function(x, start, end, bounds = NULL) {
 pop_all_containing <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
-  q <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  spec <- .ivx_spec_containing(q, b, .ivx_bounds_flags(b))
+  et <- .ivx_endpoint_type_state(x)
+  q <- .ivx_normalize_interval(start, end, endpoint_type = et)
+  spec <- .ivx_spec_containing(q, b, .ivx_bounds_flags(b), endpoint_type = et)
   .ivx_run_relation_query(x, spec, mode = "pop", which = "all")
 }
 
@@ -451,8 +506,9 @@ pop_all_containing <- function(x, start, end, bounds = NULL) {
 pop_within <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
-  q <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  spec <- .ivx_spec_within(q, b, .ivx_bounds_flags(b))
+  et <- .ivx_endpoint_type_state(x)
+  q <- .ivx_normalize_interval(start, end, endpoint_type = et)
+  spec <- .ivx_spec_within(q, b, .ivx_bounds_flags(b), endpoint_type = et)
   .ivx_run_relation_query(x, spec, mode = "pop", which = "first")
 }
 
@@ -474,7 +530,8 @@ pop_within <- function(x, start, end, bounds = NULL) {
 pop_all_within <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
-  q <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  spec <- .ivx_spec_within(q, b, .ivx_bounds_flags(b))
+  et <- .ivx_endpoint_type_state(x)
+  q <- .ivx_normalize_interval(start, end, endpoint_type = et)
+  spec <- .ivx_spec_within(q, b, .ivx_bounds_flags(b), endpoint_type = et)
   .ivx_run_relation_query(x, spec, mode = "pop", which = "all")
 }
