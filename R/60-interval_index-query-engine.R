@@ -122,6 +122,14 @@
     return(1L)
   }
 
+  if(.ft_cpp_enabled()) {
+    idx <- .ft_cpp_ivx_bound_index(x, key, strict)
+    if(!is.na(idx)) {
+      return(idx)
+    }
+    # NA: key or measures not natively comparable; fall through to locate.
+  }
+
   pred <- if(!isTRUE(strict)) {
     function(v) {
       isTRUE(v$has) && .ivx_compare_scalar_fast(v$start, key, v$endpoint_type) >= 0L
@@ -254,6 +262,58 @@
   out <- concat_trees(left, middle)
   out <- concat_trees(out, right)
   .ivx_wrap_like(template, out)
+}
+
+# Runtime: O(r log n) for r contiguous runs of removed positions.
+# Removes sorted 1-based leaf positions `idx` from `x` by splicing: each
+# contiguous run is split out and the kept segments are concatenated back
+# together, so cost scales with the number of runs rather than the candidate
+# window size. The pop dispatch falls back to drain-and-rebuild when matches
+# are scattered into many runs.
+# **Inputs:** `x` interval_index; integer positions `idx`, sorted ascending.
+# **Outputs:** interval_index with those positions removed.
+# **Used by:** .ivx_run_relation_query() native pop splice path.
+.ivx_remove_index_runs <- function(x, idx) {
+  k <- length(idx)
+  if(k == 0L) {
+    return(x)
+  }
+  n <- length(x)
+  if(k >= n) {
+    return(.ivx_empty_like(x))
+  }
+  idx <- as.integer(idx)
+
+  new_run <- c(TRUE, diff(idx) != 1L)
+  run_starts <- idx[new_run]
+  run_ends <- idx[c(new_run[-1L], TRUE)]
+
+  # Kept segments are folded into `out` immediately rather than accumulated
+  # in a list: `l[[i]] <- tree` subassignment recursively marks the whole
+  # nested tree not-mutable (O(subtree size)), which would dominate the
+  # entire splice. Plain-variable rebinding has no such cost.
+  out <- NULL
+  rest <- x
+  consumed <- 0L  # count of original positions already split off the left
+  for(j in seq_along(run_starts)) {
+    a <- run_starts[[j]]
+    b <- run_ends[[j]]
+    s1 <- .ivx_split_at_index(rest, a - consumed)
+    if(length(s1$left) > 0L) {
+      out <- if(is.null(out)) s1$left else concat_trees(out, s1$left)
+    }
+    s2 <- .ivx_split_at_index(s1$right, b - a + 2L)
+    rest <- s2$right
+    consumed <- b
+  }
+  if(length(rest) > 0L) {
+    out <- if(is.null(out)) rest else concat_trees(out, rest)
+  }
+
+  if(is.null(out)) {
+    return(.ivx_empty_like(x))
+  }
+  .ivx_wrap_like(x, out)
 }
 
 # Runtime: O(1).
@@ -467,26 +527,30 @@
                       spec$native$relation_kind %in% c("point", "overlaps", "containing", "within")
 
   if(isTRUE(use_native_query)) {
-    parts <- .ivx_partition_span(x, span)
-    with_unmatched <- identical(mode, "pop")
     peek_all <- identical(mode, "peek") && identical(which, "all")
     native_as_list <- peek_all && isTRUE(list_shape)
-    # Monoids are needed whenever the C++ side may build a tree: pop (always)
-    # or peek/all with slice-shape result (matched_tree).
-    needs_tree <- with_unmatched || (peek_all && !isTRUE(list_shape))
+    # Monoids are needed when the C++ side builds the peek/all slice-shape
+    # matched_tree during the walk; pop builds its result trees afterwards.
+    needs_tree <- peek_all && !isTRUE(list_shape)
     ms <- if(needs_tree) resolve_tree_monoids(x, required = TRUE) else NULL
 
+    # Both peek and pop walk the full tree with matching restricted to the
+    # candidate window by leaf position, skipping the O(log n)
+    # split-and-rebuild partition entirely. Pop reconstructs its result trees
+    # from the matched entries and positions after the walk.
     q <- .ivx_native_query(
-      candidate_tree = parts$candidate,
+      candidate_tree = x,
       relation_kind  = spec$native$relation_kind,
       qlo            = spec$native$qlo,
       qhi            = spec$native$qhi,
       bounds_flags   = spec$native$bounds_flags,
       endpoint_kind  = spec$native$endpoint_kind,
       which          = which,
-      with_unmatched = with_unmatched,
+      with_unmatched = FALSE,
       monoids        = ms,
-      as_list        = native_as_list
+      as_list        = native_as_list,
+      span_lo        = span$start,
+      span_hi        = span$end_excl
     )
 
     matched <- q$matched
@@ -511,24 +575,52 @@
     }
 
     # mode == "pop"
-    # q$unmatched_tree is a bare structural tree; wrap before concat
-    unmatched_wrapped <- .ivx_wrap_like(x, q$unmatched_tree)
-    remaining <- .ivx_concat3_like(x, parts$left, unmatched_wrapped, parts$right)
-
-    if(identical(which, "first")) {
-      if(length(matched) == 0L) return(.ivx_query_pop_miss(x, which = which))
-      e <- matched[[1L]]
-      return(list(value = .subset2(e, "value"),
-                  start = .subset2(e, "start"),
-                  end   = .subset2(e, "end"),
-                  remaining = remaining))
-    }
-
-    # pop / all
     if(length(matched) == 0L) {
       return(.ivx_query_pop_miss(x, which = which))
     }
-    elements <- .ivx_wrap_like(x, q$matched_tree)
+
+    idx <- q$matched_indices
+    # The contiguous-run count decides the rebuild strategy: splicing costs
+    # ~2 O(log n) splits per run, while drain-and-rebuild costs O(window).
+    # Splice when matches form few runs (the common case); fall back to the
+    # drain walk when they are scattered across a large candidate window.
+    r_runs <- if(length(idx) <= 1L) 1L else sum(diff(idx) != 1L) + 1L
+    window <- span$end_excl - span$start
+    use_splice <- identical(which, "first") || r_runs <= max(4L, window %/% 100L)
+
+    if(use_splice) {
+      remaining <- .ivx_remove_index_runs(x, idx)
+      if(identical(which, "first")) {
+        e <- matched[[1L]]
+        return(list(value = .subset2(e, "value"),
+                    start = .subset2(e, "start"),
+                    end   = .subset2(e, "end"),
+                    remaining = remaining))
+      }
+      ms_pop <- resolve_tree_monoids(x, required = TRUE)
+      elements <- .ivx_wrap_like(x, .ivx_tree_from_ordered_entries(matched, ms_pop))
+      return(list(elements = elements, remaining = remaining))
+    }
+
+    # Scattered matches: drain-and-rebuild bounded by the candidate window.
+    # q$unmatched_tree is a bare structural tree; wrap before concat.
+    ms_pop <- resolve_tree_monoids(x, required = TRUE)
+    parts <- .ivx_partition_span(x, span)
+    q2 <- .ivx_native_query(
+      candidate_tree = parts$candidate,
+      relation_kind  = spec$native$relation_kind,
+      qlo            = spec$native$qlo,
+      qhi            = spec$native$qhi,
+      bounds_flags   = spec$native$bounds_flags,
+      endpoint_kind  = spec$native$endpoint_kind,
+      which          = which,
+      with_unmatched = TRUE,
+      monoids        = ms_pop,
+      as_list        = FALSE
+    )
+    unmatched_wrapped <- .ivx_wrap_like(x, q2$unmatched_tree)
+    remaining <- .ivx_concat3_like(x, parts$left, unmatched_wrapped, parts$right)
+    elements <- .ivx_wrap_like(x, q2$matched_tree)
     return(list(elements = elements, remaining = remaining))
   }
 

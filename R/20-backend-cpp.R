@@ -125,22 +125,38 @@
 #       [, matched_tree when which = "all"]). Requires `monoids`. `as_list` is
 #       ignored on this branch.
 #
-# - candidate_tree: pre-partitioned candidate subtree
+# - candidate_tree: tree to walk — either a pre-partitioned candidate subtree
+#                   (span_lo/span_hi covering the whole tree) or the full tree
+#                   with span_lo/span_hi restricting matching to the candidate
+#                   index window.
 # - relation_kind:  "point" | "overlaps" | "containing" | "within"
 # - qlo, qhi:       scalar query endpoints (equal for point queries)
 # - bounds_flags:   list(include_start = <lgl>, include_end = <lgl>)
-# - endpoint_kind:  1L = integer, 2L = double/numeric
+# - endpoint_kind:  1L = integer, 2L = double/numeric, 3L = character,
+#                   4L = Date, 5L = POSIXct (see .ivx_endpoint_kind_code)
 # - which:          "first" or "all"
 # - with_unmatched: logical
 # - monoids:        required when the C++ side may build a tree (with_unmatched,
 #                   or peek/all + !as_list); otherwise may be NULL.
 # - as_list:        logical; only meaningful for peek/all (ignored elsewhere).
+# - span_lo, span_hi: 1-based half-open leaf-position window [span_lo, span_hi);
+#                   leaves outside it are treated as predicate misses without
+#                   evaluation, and wholly-outside subtrees are skipped.
+# Callback-free candidate-span bound search over cached .ivx_max_start
+# measures. Returns the 1-based position of the first leaf whose start crosses
+# `key`, n+1 when none does, or NA when not natively comparable (caller falls
+# back to locate_by_predicate).
+.ft_cpp_ivx_bound_index <- function(t, key, strict) {
+  .Call("ft_cpp_ivx_bound_index", t, key, isTRUE(strict), PACKAGE = "Immutables")
+}
+
 .ivx_native_query <- function(candidate_tree, relation_kind, qlo, qhi, bounds_flags,
                               endpoint_kind, which, with_unmatched, monoids,
-                              as_list = FALSE) {
+                              as_list = FALSE, span_lo = 1L, span_hi = .Machine$integer.max) {
   .Call("ft_cpp_ivx_native_query",
         candidate_tree, relation_kind, qlo, qhi,
         bounds_flags, as.integer(endpoint_kind), which,
         isTRUE(with_unmatched), monoids, isTRUE(as_list),
+        as.integer(span_lo), as.integer(span_hi),
         PACKAGE = "Immutables")
 }

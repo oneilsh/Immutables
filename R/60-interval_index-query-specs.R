@@ -1,11 +1,20 @@
 #SO
 
-# Map an endpoint-type tag to an integer code consumed by the C++ leaf scan.
-# Returns 0L for endpoint types the native scan does not support; the dispatch
-# site falls back to the R loop in that case.
+# Map an endpoint-type tag to an integer code consumed by the C++ native scan.
+# Codes must agree with the switch in ivx_native_query_impl (src/ft_cpp.cpp).
+# Returns 0L for endpoint types the native scan does not support (e.g. logical
+# or custom S3 orderings); the dispatch site falls back to the R loop in that
+# case. All listed types are compared natively via scalar_compare_fast.
 .ivx_endpoint_kind_code <- function(type) {
   if(is.null(type) || length(type) != 1L) return(0L)
-  switch(type, integer = 1L, numeric = 2L, double = 2L, 0L)
+  switch(type,
+    integer   = 1L,
+    numeric   = 2L,
+    double    = 2L,
+    character = 3L,
+    Date      = 4L,
+    POSIXct   = 5L,
+    0L)
 }
 
 # Query-spec builders return a plan consumed by .ivx_run_relation_query():
