@@ -273,16 +273,16 @@ split_by_predicate <- function(x, predicate, monoid_name) {
 #' Splits by a single one-based position or a single element name.
 #'
 #' @param x A `flexseq`.
-#' @param at A single positive integer position or a single character name.
+#' @param index A single positive integer position or a single character name.
 #' @param pull_index Controls output shape:
 #' - `FALSE` (default): returns `list(left, value, right)`.
 #' - `TRUE`: returns `list(left, right)`.
 #' @return A split result with shape controlled by `pull_index`.
 #' @details
-#' `split_at(x, at, pull_index = FALSE)` is a convenience wrapper around
+#' `split_at(x, index, pull_index = FALSE)` is a convenience wrapper around
 #' [split_around_by_predicate()] using positional scanning.
 #'
-#' `split_at(x, at, pull_index = TRUE)` is the two-way variant using
+#' `split_at(x, index, pull_index = TRUE)` is the two-way variant using
 #' [split_by_predicate()].
 #' @examples
 #' x <- flexseq("a", "b", "c", "d")
@@ -292,7 +292,7 @@ split_by_predicate <- function(x, predicate, monoid_name) {
 #' n <- flexseq(a = 1, b = 2, c = 3)
 #' split_at(n, "b")
 #' @export
-split_at <- function(x, at, pull_index = FALSE) {
+split_at <- function(x, index, pull_index = FALSE) {
   UseMethod("split_at")
 }
 
@@ -306,9 +306,9 @@ split_at <- function(x, at, pull_index = FALSE) {
 #' @return Updated object of the same class as `x`.
 #' @details
 #' `insert()` is an S3 generic. Required arguments in `...` depend on `x`:
-#' - `priority_queue`: `element`, `priority` (optional `name`)
-#' - `ordered_sequence`: `element`, `key` (optional `name`)
-#' - `interval_index`: `element`, `start`, `end` (optional `name`)
+#' - `priority_queue`: `value`, `priority` (optional `name`)
+#' - `ordered_sequence`: `value`, `key` (optional `name`)
+#' - `interval_index`: `value`, `start`, `end` (optional `name`)
 #'
 #' This operation is persistent: `x` is not modified.
 #' @examples

@@ -57,10 +57,10 @@ add_monoids.priority_queue <- function(t, monoids, overwrite = FALSE) {
 #' @method insert priority_queue
 #' @export
 #' @noRd
-insert.priority_queue <- function(x, element, priority, name = NULL, ...) {
+insert.priority_queue <- function(x, value, priority, name = NULL, ...) {
   q <- x
   .pq_assert_queue(q)
-  parsed <- .pq_make_entry(element, priority, priority_type = .pq_priority_type_state(q))
+  parsed <- .pq_make_entry(value, priority, priority_type = .pq_priority_type_state(q))
   entry <- parsed$entry
 
   if(!is.null(name)) {

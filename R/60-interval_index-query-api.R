@@ -146,8 +146,8 @@ peek_all_point <- function(x, point, bounds = NULL,
 #' @param match_at How the query point is matched against each entry. One of
 #'   `"interval"` (default; containment under `bounds`), `"start"`, `"end"`,
 #'   or `"either"`. See [peek_point()] for details.
-#' @return A list with `element`, `start`, `end`, and `remaining`.
-#'   On miss: `element`, `start`, and `end` are `NULL`.
+#' @return A list with `value`, `start`, `end`, and `remaining`.
+#'   On miss: `value`, `start`, and `end` are `NULL`.
 #' @details
 #' Removes the first match in canonical interval order. On miss, returns a
 #' non-throwing miss object with `remaining = x`.
@@ -393,8 +393,8 @@ peek_all_within <- function(x, start, end, bounds = NULL, as_list = FALSE) {
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
-#' @return A list with `element`, `start`, `end`, and `remaining`.
-#'   On miss: `element`, `start`, and `end` are `NULL`.
+#' @return A list with `value`, `start`, `end`, and `remaining`.
+#'   On miss: `value`, `start`, and `end` are `NULL`.
 #' @details
 #' Removes the first match in canonical interval order. On miss, returns a
 #' non-throwing miss object with `remaining = x`.
@@ -443,8 +443,8 @@ pop_all_overlaps <- function(x, start, end, bounds = NULL) {
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
-#' @return A list with `element`, `start`, `end`, and `remaining`.
-#'   On miss: `element`, `start`, and `end` are `NULL`.
+#' @return A list with `value`, `start`, `end`, and `remaining`.
+#'   On miss: `value`, `start`, and `end` are `NULL`.
 #' @details
 #' Removes the first match in canonical interval order. On miss, returns a
 #' non-throwing miss object with `remaining = x`.
@@ -493,8 +493,8 @@ pop_all_containing <- function(x, start, end, bounds = NULL) {
 #' @param start Query interval start.
 #' @param end Query interval end.
 #' @param bounds Optional boundary override. One of `"[)"`, `"[]"`, `"()"`, `"(]"`.
-#' @return A list with `element`, `start`, `end`, and `remaining`.
-#'   On miss: `element`, `start`, and `end` are `NULL`.
+#' @return A list with `value`, `start`, `end`, and `remaining`.
+#'   On miss: `value`, `start`, and `end` are `NULL`.
 #' @details
 #' Removes the first match in canonical interval order. On miss, returns a
 #' non-throwing miss object with `remaining = x`.

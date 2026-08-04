@@ -4,12 +4,12 @@
 \alias{split_at}
 \title{Split at a Position or Name}
 \usage{
-split_at(x, at, pull_index = FALSE)
+split_at(x, index, pull_index = FALSE)
 }
 \arguments{
 \item{x}{A \code{flexseq}.}
 
-\item{at}{A single positive integer position or a single character name.}
+\item{index}{A single positive integer position or a single character name.}
 
 \item{pull_index}{Controls output shape:
 \itemize{
@@ -24,10 +24,10 @@ A split result with shape controlled by \code{pull_index}.
 Splits by a single one-based position or a single element name.
 }
 \details{
-\code{split_at(x, at, pull_index = FALSE)} is a convenience wrapper around
+\code{split_at(x, index, pull_index = FALSE)} is a convenience wrapper around
 \code{\link[=split_around_by_predicate]{split_around_by_predicate()}} using positional scanning.
 
-\code{split_at(x, at, pull_index = TRUE)} is the two-way variant using
+\code{split_at(x, index, pull_index = TRUE)} is the two-way variant using
 \code{\link[=split_by_predicate]{split_by_predicate()}}.
 }
 \examples{

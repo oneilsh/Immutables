@@ -183,8 +183,8 @@ max_key <- function(x) {
 #' @method insert ordered_sequence
 #' @export
 #' @noRd
-insert.ordered_sequence <- function(x, element, key, ...) {
-  .oms_insert_impl(x, element, key)
+insert.ordered_sequence <- function(x, value, key, ...) {
+  .oms_insert_impl(x, value, key)
 }
 
 # Runtime: O(log n).

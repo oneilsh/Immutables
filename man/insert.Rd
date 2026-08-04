@@ -21,9 +21,9 @@ semantics.
 \details{
 \code{insert()} is an S3 generic. Required arguments in \code{...} depend on \code{x}:
 \itemize{
-\item \code{priority_queue}: \code{element}, \code{priority} (optional \code{name})
-\item \code{ordered_sequence}: \code{element}, \code{key} (optional \code{name})
-\item \code{interval_index}: \code{element}, \code{start}, \code{end} (optional \code{name})
+\item \code{priority_queue}: \code{value}, \code{priority} (optional \code{name})
+\item \code{ordered_sequence}: \code{value}, \code{key} (optional \code{name})
+\item \code{interval_index}: \code{value}, \code{start}, \code{end} (optional \code{name})
 }
 
 This operation is persistent: \code{x} is not modified.

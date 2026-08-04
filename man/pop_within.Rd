@@ -16,8 +16,8 @@ pop_within(x, start, end, bounds = NULL)
 \item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
 }
 \value{
-A list with \code{element}, \code{start}, \code{end}, and \code{remaining}.
-On miss: \code{element}, \code{start}, and \code{end} are \code{NULL}.
+A list with \code{value}, \code{start}, \code{end}, and \code{remaining}.
+On miss: \code{value}, \code{start}, and \code{end} are \code{NULL}.
 }
 \description{
 Pop First Interval Within a Query Interval

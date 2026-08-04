@@ -24,8 +24,8 @@ Ignored when \code{match_at} is not \code{"interval"}.}
 or \code{"either"}. See \code{\link[=peek_point]{peek_point()}} for details.}
 }
 \value{
-A list with \code{element}, \code{start}, \code{end}, and \code{remaining}.
-On miss: \code{element}, \code{start}, and \code{end} are \code{NULL}.
+A list with \code{value}, \code{start}, \code{end}, and \code{remaining}.
+On miss: \code{value}, \code{start}, and \code{end} are \code{NULL}.
 }
 \description{
 Pop First Interval Matching a Point
