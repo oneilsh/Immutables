@@ -455,7 +455,7 @@ run_fortune_frontier_immutables <- function(
   event_q <- priority_queue()
   for(i in seq_len(nrow(pts))) {
     site_i <- list(id = as.character(pts$id[[i]]), x = as.numeric(pts$x[[i]]), y = as.numeric(pts$y[[i]]), index = as.integer(i))
-    event_q <- insert(event_q, element = site_i, priority = as.numeric(pts$x[[i]]))
+    event_q <- insert(event_q, value = site_i, priority = as.numeric(pts$x[[i]]))
   }
 
   active <- ordered_sequence()
@@ -506,10 +506,10 @@ run_fortune_frontier_immutables <- function(
       if(as.numeric(cand$x) <= (sweep_x + 1e-9)) {
         event_q <- event_rest
         site_key <- as.numeric(cand$y) * 1e6 + as.numeric(cand$x) * 1e3 + as.numeric(cand$index)
-        active <- insert(active, element = cand, key = site_key)
+        active <- insert(active, value = cand, key = site_key)
       } else {
         # Not yet ready; restore and continue sweep.
-        event_q <- insert(event_rest, element = cand, priority = as.numeric(cand$x))
+        event_q <- insert(event_rest, value = cand, priority = as.numeric(cand$x))
         break
       }
     }

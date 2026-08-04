@@ -185,7 +185,7 @@ wrapper that splits by position using the built-in `.size` monoid (which counts 
 each leaf node's measure is `1` and it uses the `sum` operator):
 
 ```{r}
-split_at(x, at = 5)
+split_at(x, index = 5)
 ```
 
 

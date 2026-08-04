@@ -16,6 +16,7 @@
 ^AGENTS\.md$
 ^\.agents$
 ^\.github$
+^\.worktrees$
 ^\.review$
 ^\.vscode$
 ^\.codex$

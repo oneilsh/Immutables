@@ -182,7 +182,7 @@ dijkstra_reachable <- function(blocked, weights, source_x, source_y) {
   q <- priority_queue()
   q <- insert(
     q,
-    element = list(x = as.integer(source_x), y = as.integer(source_y)),
+    value = list(x = as.integer(source_x), y = as.integer(source_y)),
     priority = 0
   )
   dirs <- rbind(c(1L, 0L), c(-1L, 0L), c(0L, 1L), c(0L, -1L))
@@ -205,7 +205,7 @@ dijkstra_reachable <- function(blocked, weights, source_x, source_y) {
       nd <- d0 + step_cost
       if(nd + 1e-9 < dist[nx, ny]) {
         dist[nx, ny] <- nd
-        q <- insert(q, element = list(x = as.integer(nx), y = as.integer(ny)), priority = nd)
+        q <- insert(q, value = list(x = as.integer(nx), y = as.integer(ny)), priority = nd)
       }
     }
   }
@@ -459,12 +459,12 @@ astar_trail_search_immutables <- function(
     if(!is.null(peek_key(closed, current_key))) next
 
     step <- step + 1L
-    closed <- insert(closed, element = current, key = current_key)
+    closed <- insert(closed, value = current, key = current_key)
 
     # Enter trail, schedule retirement at step + lag_base + lag_warp * h.
     h_cur <- heuristic_fn(current, goal)
     s_clear <- as.numeric(step) + lag_base + lag_warp * h_cur
-    trail <- insert(trail, element = current, key = current_key)
+    trail <- insert(trail, value = current, key = current_key)
     clear_q <- insert(clear_q, current, priority = s_clear)
     trail_meta[[as.character(current_key)]] <- list(
       id = current, s_expand = as.numeric(step), s_clear = s_clear

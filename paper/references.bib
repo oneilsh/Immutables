@@ -1,136 +1,720 @@
-@article{hinze2006finger,
-  author  = {Ralf Hinze and Ross Paterson},
-  title   = {Finger Trees: {A} Simple General-Purpose Data Structure},
-  journal = {Journal of Functional Programming},
-  year    = {2006},
-  volume  = {16},
-  number  = {2},
-  pages   = {197--217},
-  doi     = {10.1017/S0956796805005769}
+@INPROCEEDINGS{Zhu2022-vq,
+  title     = "{R} on Raspberry Pi: The ``{RaspberryPiR}'' package for
+               collecting and analysing streaming sensor data",
+  author    = "Zhu, Alex and de Micheaux, Pierre Lafaye and Mozharovskyi, Pavlo
+               and Navarro, Fabien",
+  booktitle = "useR! 2022",
+  abstract  = "Raspberry Pi is a powerful, popular, low-cost minicomputer with
+               the ability to collect physical environmental data from sensors
+               and circuits, such as temperature, luminosity, gas concentration,
+               images and infrared radiation level. Our new R package
+               RaspberryPiR can store sensor data using sensor controlling
+               modules on the Pi (GPIO pins) into shared memory. The data
+               analysis can then be done in a streaming manner, using various
+               streaming statistical and machine learning algorithms. In its
+               current implementation, our package is compatible with the
+               following sensors: DHT11 Temperature and Humidity Sensor, Photo
+               Resistor, MQ2 Gas Sensor and Raspberry Pi Camera Module V2, which
+               already allows for numerous streaming applications. We review and
+               suggest implementation of a set of existing statistics tools for
+               windowed data streams, such as Control Charts and Tukey Region.
+               These can help visualizing data streams collected using our
+               package. To summarize, our package simplifies the process of
+               collecting data streams from surroundings using a Raspberry Pi.
+               This permits scientists, statisticians, data scientists and
+               practitioners to be in control of their environmental research
+               and data project without the need of understanding complexity of
+               data storage and electric circuits on the Raspberry Pi.
+               https://github.com/alexzhu1998/RaspberryPiR",
+  month     =  "20~" # jun,
+  year      =  2022,
+  url       = "https://hal.science/hal-05522032",
+  keywords  = "Immutables",
+  language  = "en"
 }
 
-% -----------------------------------------------------------------------------
-% TODO placeholders. Each entry below corresponds to a \citep{TODO-*} call in
-% manuscript.Rmd. Fill in real references and drop the TODO- prefix in both
-% places. These are stubs only so the document compiles during drafting.
-% -----------------------------------------------------------------------------
-
-@misc{TODO-web-services,
-  title = {TODO: citation for R in web services},
-  note  = {Placeholder}
+@ARTICLE{Jia2022-si,
+  title     = "Development of interactive biological web applications with
+               {R}/Shiny",
+  author    = "Jia, Lihua and Yao, Wen and Jiang, Yingru and Li, Yang and Wang,
+               Zhizhan and Li, Haoran and Huang, Fangfang and Li, Jiaming and
+               Chen, Tiantian and Zhang, Huiyong",
+  journal   = "Brief. Bioinform.",
+  publisher = "Oxford University Press (OUP)",
+  volume    =  23,
+  number    =  1,
+  pages     = "bbab415",
+  abstract  = "Development of interactive web applications to deposit, visualize
+               and analyze biological datasets is a major subject of
+               bioinformatics. R is a programming language for data science,
+               which is also one of the most popular languages used in
+               biological data analysis and bioinformatics. However, building
+               interactive web applications was a great challenge for R users
+               before the Shiny package was developed by the RStudio company in
+               2012. By compiling R code into HTML, CSS and JavaScript code,
+               Shiny has made it incredibly easy to build web applications for
+               the large R community in bioinformatics and for even
+               non-programmers. Over 470 biological web applications have been
+               developed with R/Shiny up to now. To further promote the
+               utilization of R/Shiny, we reviewed the development of biological
+               web applications with R/Shiny, including eminent biological web
+               applications built with R/Shiny, basic steps to build an R/Shiny
+               application, commonly used R packages to build the interface and
+               server of R/Shiny applications, deployment of R/Shiny
+               applications in the cloud and online resources for R/Shiny.",
+  month     =  "17~" # jan,
+  year      =  2022,
+  url       = "https://dx.doi.org/10.1093/bib/bbab415",
+  keywords  = "R; Shiny; biological database; biological web application
+               development; data analysis; web server;Immutables",
+  doi       = "10.1093/bib/bbab415",
+  language  = "en"
 }
 
-@misc{TODO-user-interfaces,
-  title = {TODO: citation for R user interfaces (e.g. Shiny)},
-  note  = {Placeholder}
+@INPROCEEDINGS{Idreos2020-zz,
+  title     = "Key-value storage engines",
+  author    = "Idreos, Stratos and Callaghan, Mark",
+  booktitle = "Proceedings of the 2020 ACM SIGMOD International Conference on
+               Management of Data",
+  publisher = "ACM",
+  address   = "New York, NY, USA",
+  abstract  = "Key-value stores are everywhere. They power a diverse set of
+               data-driven applications across both industry and science.
+               Key-value stores are used as stand-alone NoSQL systems but they
+               are also used as a part of more complex pipelines and systems
+               such as machine learning and relational systems. In this
+               tutorial, we survey the state-of-the-art approaches on how the
+               core storage engine of a key-value store system is designed. We
+               focus on several critical components of the engine, starting with
+               the core data structures to lay out data across the memory
+               hierarchy. We also discuss design issues related to caching,
+               timestamps, concurrency control, updates, shifting workloads, as
+               well as mixed workloads with both analytical and transactional
+               characteristics. We cover designs that are read-optimized,
+               write-optimized as well as hybrids. We draw examples from several
+               state-of-the-art systems but we also put everything together in a
+               general framework which allows us to model storage engine designs
+               under a single unified model and reason about the expected
+               behavior of diverse designs. In addition, we show that given the
+               vast number of possible storage engine designs and their
+               complexity, there is a need to be able to describe and
+               communicate design decisions at a high level descriptive language
+               and we present a first version of such a language. We then use
+               that framework to present several open challenges in the field,
+               especially in terms of supporting increasingly more diverse and
+               dynamic applications in the era of data science and AI, including
+               neural networks, graphs, and data versioning.",
+  month     =  "11~" # jun,
+  year      =  2020,
+  url       = "http://dx.doi.org/10.1145/3318464.3383133",
+  keywords  = "Immutables",
+  doi       = "10.1145/3318464.3383133"
 }
 
-@misc{TODO-machine-learning,
-  title = {TODO: citation for R in machine learning},
-  note  = {Placeholder}
+@ARTICLE{Goel2019-mz,
+  title     = "On the design, implementation, and use of laziness in {R}",
+  author    = "Goel, Aviral and Vitek, Jan",
+  journal   = "Proc. ACM Program. Lang.",
+  publisher = "Association for Computing Machinery (ACM)",
+  volume    =  3,
+  number    = "OOPSLA",
+  pages     = "1--27",
+  abstract  = "The R programming language has been lazy for over twenty-five
+               years. This paper presents a review of the design and
+               implementation of call-by-need in R, and a data-driven study of
+               how generations of programmers have put laziness to use in their
+               code. We analyze 16,707 packages and observe the creation of
+               270.9 B promises. Our data suggests that there is little
+               supporting evidence to assert that programmers use laziness to
+               avoid unnecessary computation or to operate over infinite data
+               structures. For the most part R code appears to have been written
+               without reliance on, and in many cases even knowledge of, delayed
+               argument evaluation. The only significant exception is a small
+               number of packages which leverage call-by-need for
+               meta-programming.",
+  month     =  "10~" # oct,
+  year      =  2019,
+  url       = "http://dx.doi.org/10.1145/3360579",
+  keywords  = "Immutables",
+  doi       = "10.1145/3360579",
+  language  = "en"
 }
 
-@misc{TODO-simulation,
-  title = {TODO: citation for R in simulation},
-  note  = {Placeholder}
+@INPROCEEDINGS{Atchison2018-ct,
+  title     = "A topic analysis of the {R} programming language",
+  author    = "Atchison, Abigail and Anderson, Haley and Berardi, Christina and
+               Best, Natalie and Firmani, Cristiano and German, Rene and
+               Linstead, Erik",
+  booktitle = "Proceedings of the 40th International Conference on Software
+               Engineering: Companion Proceeedings",
+  publisher = "ACM",
+  address   = "New York, NY, USA",
+  pages     = "183--184",
+  abstract  = "We leverage Latent Dirichlet Allocation to analyze R source code
+               from 10,051 R packages in order to better understand the topic
+               space of scientific computing. Our method is able to identify
+               several generic programming concepts and, more importantly,
+               identify concepts that are highly specific to scientific and high
+               performance computing applications.",
+  month     =  "27~" # may,
+  year      =  2018,
+  url       = "http://dx.doi.org/10.1145/3183440.3195087",
+  keywords  = "Immutables",
+  doi       = "10.1145/3183440.3195087"
 }
 
-@misc{TODO-rpigpio,
-  title = {TODO: citation for rpigpio / mobile computing in R},
-  note  = {Placeholder}
+@MISC{Barry2018-mv,
+  title        = "Collections in {R}: Review and Proposal",
+  author       = "Barry, Timothy",
+  booktitle    = "DigitalCommons@University of Nebraska - Lincoln",
+  abstract     = "R is a powerful tool for data processing, visualization, and
+                  modeling. However, R is slower than other languages used for
+                  similar purposes, such as Python. One reason for this is that
+                  R lacks base support for collections, abstract data types that
+                  store, manipulate, and return data (e.g., sets, maps, stacks).
+                  An exciting recent trend in the R extension ecosystem is the
+                  development of collection packages, packages that provide
+                  classes that implement common collections. At least 12
+                  collection packages are available across the two major R
+                  extension repositories, the Comprehensive R Archive Network
+                  (CRAN) and Bioconductor. In this article, we compare
+                  collection packages in terms of their features, design
+                  philosophy, ease of use, and performance on benchmark tests.
+                  We demonstrate that, when used well, the data structures
+                  provided by collection packages are in many cases
+                  significantly faster than the data structures provided by base
+                  R. We also highlight current deficiencies among R collection
+                  packages and propose avenues of possible improvement. This
+                  article provides useful recommendations to R programmers
+                  seeking to speed up their programs and aims to inform the
+                  development of future collection-oriented software for R",
+  year         =  2018,
+  howpublished = "\url{https://digitalcommons.unl.edu/r-journal/624}",
+  note         = "Accessed: 2026-6-11",
+  keywords     = "Immutables",
+  language     = "en"
 }
 
-@misc{TODO-comp-geometry,
-  title = {TODO: citation for R in computational geometry},
-  note  = {Placeholder}
+@BOOK{Gillespie2016-qx,
+  title     = "Efficient {R} Programming",
+  author    = "Gillespie, Colin and Lovelace, Robin",
+  publisher = "O'Reilly Media, Inc.",
+  abstract  = "There are many excellent R resources for visualization, data
+               science, and package development. Hundreds of scattered
+               vignettes, web pages, and forums explain how to use R in... -
+               Selection from Efficient R Programming [Book]",
+  month     =  "15~" # dec,
+  year      =  2016,
+  url       = "https://www.oreilly.com/library/view/efficient-r-programming/9781491950777/",
+  keywords  = "Immutables",
+  language  = "en"
 }
 
-@misc{TODO-graph-algos,
-  title = {TODO: citation for graph algorithms in R},
-  note  = {Placeholder}
+@ARTICLE{Eddelbuettel2016-iq,
+  title     = "{RProtoBuf}: Efficient Cross-Language Data Serialization {inR}",
+  author    = "Eddelbuettel, Dirk and Stokely, Murray and Ooms, Jeroen",
+  journal   = "J. Stat. Softw.",
+  publisher = "Foundation for Open Access Statistic",
+  volume    =  71,
+  number    =  2,
+  pages     = "1--24",
+  abstract  = "Modern data collection and analysis pipelines often involve a
+               sophisticated mix of applications written in general purpose and
+               specialized programming languages. Many formats commonly used to
+               import and export data between different programs or systems,
+               such as CSV or JSON, are verbose, inefficient, not type-safe, or
+               tied to a specific programming language. Protocol Buffers are a
+               popular method of serializing structured data between
+               applications - while remaining independent of programming
+               languages or operating systems. They offer a unique combination
+               of features, performance, and maturity that seems particularly
+               well suited for data-driven applications and numerical computing.
+               The RProtoBuf package provides a complete interface to Protocol
+               Buffers from the R environment for statistical computing. This
+               paper outlines the general class of data serialization
+               requirements for statistical computing, describes the
+               implementation of the RProtoBuf package, and illustrates its use
+               with example applications in large-scale data collection
+               pipelines and web services.",
+  month     =  "11~" # jul,
+  year      =  2016,
+  url       = "https://doi.org/10.18637/jss.v071.i02",
+  keywords  = "R; Rcpp; Protocol Buffers; serialization;
+               cross-platform;Immutables",
+  doi       = "10.18637/jss.v071.i02",
+  language  = "en"
 }
 
-@misc{TODO-misc-applications,
-  title = {TODO: citation for miscellaneous/broad R applications},
-  note  = {Placeholder}
+@ARTICLE{O-Neil2015-je,
+  title     = "Implementing persistent {O}(1) stacks and queues in {R}",
+  author    = "O'Neil, Shawn,t",
+  journal   = "R J.",
+  publisher = "The R Foundation",
+  volume    =  7,
+  number    =  1,
+  pages     =  118,
+  abstract  = "True to their functional roots, most R functions are
+               side-effect-free, and users expect datatypes to be persistent.
+               However, these semantics complicate the creation of efficient and
+               dynamic data structures. Here, we describe the implementation of
+               stack and queue data structures satisfying these conditions in R,
+               available in the CRAN package rstackdeque. Guided by important
+               work in purely functional languages, we look at both partiallyand
+               fully-persistent versions of queues, comparing their performance
+               characteristics. Finally, we illustrate the usefulness of such
+               dynamic structures with examples of generating and solving mazes.",
+  month     =  "24~" # jun,
+  year      =  2015,
+  url       = "https://doi.org/10.32614/RJ-2015-009",
+  keywords  = "Immutables",
+  doi       = "10.32614/rj-2015-009",
+  language  = "en"
 }
 
-@misc{TODO-deque-uses,
-  title = {TODO: citation for deque uses (state search, scheduling)},
-  note  = {Placeholder}
+@INPROCEEDINGS{Gautam2015-bl,
+  title     = "A survey on job scheduling algorithms in Big data processing",
+  author    = "Gautam, Jyoti V and Prajapati, Harshadkumar B and Dabhi, Vipul K
+               and Chaudhary, Sanjay",
+  booktitle = "2015 IEEE International Conference on Electrical, Computer and
+               Communication Technologies (ICECCT)",
+  publisher = "IEEE",
+  pages     = "1--11",
+  abstract  = "Scheduling problem has been an active area of research in
+               computing systems since their inception. The Apache Hadoop
+               framework has emerged as most widely adopted framework for
+               distributed data processing because of open source and allowing
+               use of commodity hardware. Job scheduling has become an important
+               factor to achieve high performance in Hadoop cluster. Several
+               scheduling algorithms have been developed for Hadoop-MapReduce
+               model which vary widely in design and behavior, handling
+               different issues such as locality of data, user share fairness
+               and resource awareness. This paper highlights fundamental issues
+               in job scheduling, presents classification of Hadoop schedulers,
+               and discusses presented survey of existing scheduling algorithm.
+               Moreover paper also discusses features, advantages, and
+               limitations of the scheduling algorithms. This paper also
+               discusses about how various resource monitoring tools or
+               frameworks help in achieving better result from MapReduce. It
+               also discusses customized MapReduce frameworks used for improving
+               the performance. This paper would be useful to beginners and
+               researchers for understanding the state-of-the-art on scheduling
+               in Big data processing.",
+  month     =  mar,
+  year      =  2015,
+  url       = "http://dx.doi.org/10.1109/ICECCT.2015.7226035",
+  keywords  = "Immutables",
+  doi       = "10.1109/icecct.2015.7226035",
+  language  = "en"
 }
 
-@misc{TODO-ordered-sequence-uses,
-  title = {TODO: citation for ordered-sequence / range-query uses},
-  note  = {Placeholder}
+@MISC{O-Neil2015-yl,
+  title        = "Implementing Persistent {O}(1) Stacks and Queues in {R}",
+  author       = "O'Neil, Shawn T",
+  booktitle    = "DigitalCommons@University of Nebraska - Lincoln",
+  abstract     = "True to their functional roots, most R functions are
+                  side-effect-free, and users expect datatypes to be persistent.
+                  However, these semantics complicate the creation of efficient
+                  and dynamic data structures. Here, we describe the
+                  implementation of stack and queue data structures satisfying
+                  these conditions in R, available in the CRAN package
+                  rstackdeque. Guided by important work in purely functional
+                  languages, we look at both partially- and fully-persistent
+                  versions of queues, comparing their performance
+                  characteristics. Finally, we illustrate the usefulness of such
+                  dynamic structures with examples of generating and solving
+                  mazes.",
+  year         =  2015,
+  howpublished = "\url{https://digitalcommons.unl.edu/r-journal/579}",
+  note         = "Accessed: 2026-6-11",
+  keywords     = "Immutables",
+  language     = "en"
 }
 
-@misc{TODO-pq-uses,
-  title = {TODO: citation for priority queue uses (graph, simulation)},
-  note  = {Placeholder}
+@ARTICLE{Ooms2014-hc,
+  title         = "The jsonlite package: A practical and consistent mapping
+                   between {JSON} data and {R} objects",
+  author        = "Ooms, Jeroen",
+  journal       = "arXiv [stat.CO]",
+  abstract      = "A naive realization of JSON data in R maps JSON arrays to an
+                   unnamed list, and JSON objects to a named list. However, in
+                   practice a list is an awkward, inefficient type to store and
+                   manipulate data. Most statistical applications work with
+                   (homogeneous) vectors, matrices or data frames. Therefore
+                   JSON packages in R typically define certain special cases of
+                   JSON structures which map to simpler R types. Currently there
+                   exist no formal guidelines, or even consensus between
+                   implementations on how R data should be represented in JSON.
+                   Furthermore, upon closer inspection, even the most basic data
+                   structures in R actually do not perfectly map to their JSON
+                   counterparts and leave some ambiguity for edge cases. These
+                   problems have resulted in different behavior between
+                   implementations and can lead to unexpected output. This paper
+                   explicitly describes a mapping between R classes and JSON
+                   data, highlights potential problems, and proposes conventions
+                   that generalize the mapping to cover all common structures.
+                   We emphasize the importance of type consistency when using
+                   JSON to exchange dynamic data, and illustrate using examples
+                   and anecdotes. The jsonlite R package is used throughout the
+                   paper as a reference implementation.",
+  month         =  "12~" # mar,
+  year          =  2014,
+  url           = "http://arxiv.org/abs/1403.2805",
+  archivePrefix = "arXiv",
+  primaryClass  = "stat.CO",
+  keywords      = "Immutables",
+  doi           = "10.48550/arXiv.1403.2805"
 }
 
-@misc{TODO-pretty-trees-bioinf,
-  title = {TODO: citation for pretty trees in bioinformatics},
-  note  = {Placeholder}
+@BOOK{Matloff2011-fh,
+  title     = "The art of {R} programming: A tour of statistical software design",
+  author    = "Matloff, Norman",
+  publisher = "No Starch Press",
+  address   = "San Francisco, CA",
+  month     =  "22~" # sep,
+  year      =  2011,
+  url       = "https://diytranscriptomics.com/Reading/files/The%20Art%20of%20R%20Programming.pdf",
+  keywords  = "Immutables",
+  language  = "en"
 }
 
-@misc{TODO-interval-tree-geom,
-  title = {TODO: citation for interval trees in computational geometry},
-  note  = {Placeholder}
+@ARTICLE{Sipos2011-qc,
+  title     = "{PhyloSim} - Monte Carlo simulation of sequence evolution in the
+               {R} statistical computing environment",
+  author    = "Sipos, Botond and Massingham, Tim and Jordan, Gregory E and
+               Goldman, Nick",
+  journal   = "BMC Bioinformatics",
+  publisher = "Springer Science and Business Media LLC",
+  volume    =  12,
+  number    =  1,
+  pages     =  104,
+  abstract  = "BACKGROUND: The Monte Carlo simulation of sequence evolution is
+               routinely used to assess the performance of phylogenetic
+               inference methods and sequence alignment algorithms. Progress in
+               the field of molecular evolution fuels the need for more
+               realistic and hence more complex simulations, adapted to
+               particular situations, yet current software makes unreasonable
+               assumptions such as homogeneous substitution dynamics or a
+               uniform distribution of indels across the simulated sequences.
+               This calls for an extensible simulation framework written in a
+               high-level functional language, offering new functionality and
+               making it easy to incorporate further complexity. RESULTS:
+               PhyloSim is an extensible framework for the Monte Carlo
+               simulation of sequence evolution, written in R, using the
+               Gillespie algorithm to integrate the actions of many concurrent
+               processes such as substitutions, insertions and deletions.
+               Uniquely among sequence simulation tools, PhyloSim can simulate
+               arbitrarily complex patterns of rate variation and multiple indel
+               processes, and allows for the incorporation of selective
+               constraints on indel events. User-defined complex patterns of
+               mutation and selection can be easily integrated into simulations,
+               allowing PhyloSim to be adapted to specific needs. CONCLUSIONS:
+               Close integration with R and the wide range of features
+               implemented offer unmatched flexibility, making it possible to
+               simulate sequence evolution under a wide range of realistic
+               settings. We believe that PhyloSim will be useful to future
+               studies involving simulated alignments.",
+  month     =  "19~" # apr,
+  year      =  2011,
+  url       = "http://dx.doi.org/10.1186/1471-2105-12-104",
+  keywords  = "Immutables",
+  doi       = "10.1186/1471-2105-12-104",
+  language  = "en"
 }
 
-@misc{TODO-okasaki,
-  title = {TODO: Okasaki, Purely Functional Data Structures},
-  note  = {Placeholder}
+@BOOK{Okasaki2011-lz,
+  title     = "Purely Functional Data Structures",
+  author    = "Okasaki, Chris",
+  publisher = "Cambridge University Press",
+  address   = "Cambridge, England",
+  abstract  = "When a C programmer needs an efficient data structure for a
+               particular problem, he or she can often simply look one up in any
+               of a number of good textbooks or handbooks. Unfortunately,
+               programmers ...",
+  month     =  "4~" # mar,
+  year      =  2011,
+  url       = "http://dx.doi.org/10.5555/925926",
+  keywords  = "Immutables",
+  doi       = "10.5555/925926",
+  language  = "en"
 }
 
-@misc{TODO-r-semantics,
-  title = {TODO: citation for R pass-by-value / side-effect-free semantics},
-  note  = {Placeholder}
+@INCOLLECTION{Rheinlander2010-wk,
+  title     = "Prefix tree indexing for similarity search and similarity joins
+               on genomic data",
+  author    = "Rheinländer, Astrid and Knobloch, Martin and Hochmuth, Nicky and
+               Leser, Ulf",
+  booktitle = "Lecture Notes in Computer Science",
+  publisher = "Springer Berlin Heidelberg",
+  address   = "Berlin, Heidelberg",
+  pages     = "519--536",
+  abstract  = "Similarity search and similarity join on strings are important
+               for applications such as duplicate detection, error detection,
+               data cleansing, or comparison of biological sequences. Especially
+               DNA sequencing produces large collections of erroneous strings
+               which need to be searched, compared, and merged. However, current
+               RDBMS offer similarity operations only in a very limited and
+               inefficient form that does not scale to the amount of data
+               produced in Life Science projects. We present PETER, a prefix
+               tree based indexing algorithm supporting approximate search and
+               approimate joins. Our tool supports Hamming and edit distance as
+               similarity measure and is available as C++ library, as Unix
+               command line tool, and as cartridge for a commercial database. It
+               combines an efficient implementation of compressed prefix trees
+               with advanced pre-filtering techniques that exclude many
+               candidate strings early. The achieved speed-ups are dramatic,
+               especially for DNA with its small alphabet. We evaluate our tool
+               on several collections of long strings containing up to 5,000,000
+               entries of length up to 3,500. We compare its performance to
+               agrep, nrgrep, and user-defined functions inside a relational
+               database. Our experiments reveal that PETER is faster by orders
+               of magnitudes compared to the command-line tools. Compared to
+               RDBMS, it computes similarity joins in minutes for which UDFs did
+               not finish within a day and outperforms the built-in join methods
+               even in the exact case.",
+  series    = "Lecture Notes in Computer Science",
+  year      =  2010,
+  url       = "http://dx.doi.org/10.1007/978-3-642-13818-8_36",
+  keywords  = "Immutables",
+  doi       = "10.1007/978-3-642-13818-8\_36",
+  language  = "en"
 }
 
-@misc{TODO-r-perf,
-  title = {TODO: citation for performance limits of native R types},
-  note  = {Placeholder}
+@ARTICLE{Borodin2010-pl,
+  title     = "Priority algorithms for graph optimization problems",
+  author    = "Borodin, Allan and Boyar, Joan and Larsen, Kim S and
+               Mirmohammadi, Nazanin",
+  journal   = "Theor. Comput. Sci.",
+  publisher = "Elsevier BV",
+  volume    =  411,
+  number    =  1,
+  pages     = "239--258",
+  abstract  = "We continue the study of priority or “greedy-like” algorithms as
+               initiated in Borodin et al. (2003) [10] and as extended to graph
+               theoretic problems in Davis and Impagliazzo (2009) [12]. Graph
+               theoretic problems pose some modeling problems that did not exist
+               in the original applications of Borodin et al. and Angelopoulos
+               and Borodin (2002) [3]. Following the work of Davis and
+               Impagliazzo, we further clarify these concepts. In the graph
+               theoretic setting, there are several natural input formulations
+               for a given problem and we show that priority algorithm bounds in
+               general depend on the input formulation. We study a variety of
+               graph problems in the context of arbitrary and restricted
+               priority models corresponding to known “greedy algorithms”.",
+  month     =  "1~" # jan,
+  year      =  2010,
+  url       = "http://dx.doi.org/10.1016/j.tcs.2009.09.033",
+  keywords  = "Immutables",
+  doi       = "10.1016/j.tcs.2009.09.033",
+  language  = "en"
 }
 
-@misc{TODO-2019-review,
-  title = {TODO: 2019 review of R ecosystem noting lazy structures},
-  note  = {Placeholder}
+@ARTICLE{Meyer2009-vu,
+  title     = "Generalized and Customizable Sets {inR}",
+  author    = "Meyer, David and Hornik, Kurt",
+  journal   = "J. Stat. Softw.",
+  publisher = "Foundation for Open Access Statistic",
+  volume    =  31,
+  number    =  2,
+  pages     = "1--27",
+  abstract  = "We present data structures and algorithms for sets and some
+               generalizations thereof (fuzzy sets, multisets, and fuzzy
+               multisets) available for R through the sets package. Fuzzy
+               (multi-)sets are based on dynamically bound fuzzy logic families.
+               Further extensions include user-definable iterators and matching
+               functions.",
+  month     =  "4~" # aug,
+  year      =  2009,
+  url       = "https://doi.org/10.18637/jss.v031.i02",
+  keywords  = "Immutables",
+  doi       = "10.18637/jss.v031.i02",
+  language  = "en"
 }
 
-@misc{TODO-barry-2018,
-  title = {TODO: Barry (2018) survey of R collection packages},
-  note  = {Placeholder}
+@ARTICLE{Hinze2006-jv,
+  title     = "Finger trees: a simple general-purpose data structure",
+  author    = "Hinze, Ralf and Paterson, Ross",
+  journal   = "J. Funct. Prog.",
+  publisher = "Cambridge University Press (CUP)",
+  volume    =  16,
+  number    =  2,
+  pages     = "197--217",
+  abstract  = "We introduce 2-3 finger trees, a functional representation of
+               persistent sequences supporting access to the ends in amortized
+               constant time, and concatenation and splitting in time
+               logarithmic in the size of the smaller piece. Representations
+               achieving these bounds have appeared previously, but 2-3 finger
+               trees are much simpler, as are the operations on them. Further,
+               by defining the split operation in a general form, we obtain a
+               general purpose data structure that can serve as a sequence,
+               priority queue, search tree, priority search queue and more.",
+  month     =  mar,
+  year      =  2006,
+  url       = "http://dx.doi.org/10.1017/S0956796805005769",
+  keywords  = "Immutables",
+  doi       = "10.1017/s0956796805005769",
+  language  = "en"
 }
 
-@misc{TODO-rstackdeque,
-  title = {TODO: citation for rstackdeque package},
-  note  = {Placeholder}
+@ARTICLE{Hinze1999-yr,
+  title     = "\textit{purely functional data structures} by Chris okasaki,
+               Cambridge university press, 1998, {220pp}",
+  author    = "Hinze, Ralf",
+  journal   = "J. Funct. Prog.",
+  publisher = "Cambridge University Press (CUP)",
+  volume    =  9,
+  number    =  5,
+  pages     = "577--578",
+  abstract  = "An abstract is not available for this content so a preview has
+               been provided. As you have access to this content, a full PDF is
+               available via the ‘Save PDF’ action button.",
+  month     =  sep,
+  year      =  1999,
+  url       = "http://dx.doi.org/10.1017/S0956796899009995",
+  keywords  = "Immutables",
+  doi       = "10.1017/s0956796899009995",
+  language  = "en"
 }
 
-@misc{TODO-sets,
-  title = {TODO: citation for sets package},
-  note  = {Placeholder}
+@ARTICLE{Lee1984-xw,
+  title     = "Computational geometry—A survey",
+  author    = "{Lee} and {Preparata}",
+  journal   = "IEEE Trans. Comput.",
+  publisher = "Institute of Electrical and Electronics Engineers (IEEE)",
+  volume    = "C-33",
+  number    =  12,
+  pages     = "1072--1101",
+  abstract  = "We survey the state of the art of computational geometry, a
+               discipline that deals with the complexity of geometric problems
+               within the framework of the analysis of algorithms. This newly
+               emerged area of activities has found numerous applications in
+               various other disciplines, such as computer-aided design,
+               computer graphics, operations research, pattern recognition,
+               robotics, and statistics. Five major problem areas—convex hulls,
+               intersections, searching, proximity, and combinatorial
+               optimizations—are discussed. Seven algorithmic
+               techniques—incremental construction, plane-sweep, locus,
+               divide-and-conquer, geometric transformation, prune-and-search,
+               and dynamization—are each illustrated with an example. A
+               collection of problem transformations to establish lower bounds
+               for geo-metric problems in the algebraic computation/decision
+               model is also included.",
+  month     =  dec,
+  year      =  1984,
+  url       = "http://dx.doi.org/10.1109/TC.1984.1676388",
+  keywords  = "Immutables",
+  doi       = "10.1109/tc.1984.1676388",
+  language  = "en"
 }
 
-@misc{TODO-s4vectors,
-  title = {TODO: citation for S4Vectors package},
-  note  = {Placeholder}
+@ARTICLE{Lawrence2013-ly,
+  title     = "Software for computing and annotating genomic ranges",
+  author    = "Lawrence, Michael and Huber, Wolfgang and Pagès, Hervé and
+               Aboyoun, Patrick and Carlson, Marc and Gentleman, Robert and
+               Morgan, Martin T and Carey, Vincent J",
+  journal   = "PLoS Comput. Biol.",
+  publisher = "Public Library of Science (PLoS)",
+  volume    =  9,
+  number    =  8,
+  pages     = "e1003118",
+  abstract  = "We describe Bioconductor infrastructure for representing and
+               computing on annotated genomic ranges and integrating genomic
+               data with the statistical computing features of R and its
+               extensions. At the core of the infrastructure are three packages:
+               IRanges, GenomicRanges, and GenomicFeatures. These packages
+               provide scalable data structures for representing annotated
+               ranges on the genome, with special support for transcript
+               structures, read alignments and coverage vectors. Computational
+               facilities include efficient algorithms for overlap and nearest
+               neighbor detection, coverage calculation and other range
+               operations. This infrastructure directly supports more than 80
+               other Bioconductor packages, including those for sequence
+               analysis, differential expression analysis and visualization.",
+  month     =  "8~" # aug,
+  year      =  2013,
+  url       = "http://dx.doi.org/10.1371/journal.pcbi.1003118",
+  keywords  = "Immutables",
+  doi       = "10.1371/journal.pcbi.1003118",
+  language  = "en"
 }
 
-@misc{TODO-iranges,
-  title = {TODO: citation for IRanges package},
-  note  = {Placeholder}
+@ARTICLE{Eddelbuettel2011-lq,
+  title     = "Rcpp: {SeamlessRandC++Integration}",
+  author    = "Eddelbuettel, Dirk and François, Romain",
+  journal   = "J. Stat. Softw.",
+  publisher = "Foundation for Open Access Statistic",
+  volume    =  40,
+  number    =  8,
+  pages     = "1--18",
+  abstract  = "The Rcpp package simplifies integrating C++ code with R. It
+               provides a consistent C++ class hierarchy that maps various types
+               of R objects (vectors, matrices, functions, environments, . . . )
+               to dedicated C++ classes. Object interchange between R and C++ is
+               managed by simple, flexible and extensible concepts which include
+               broad support for C++ Standard Template Library idioms. C++ code
+               can both be compiled, linked and loaded on the fly, or added via
+               packages. Flexible error and exception code handling is provided.
+               Rcpp substantially lowers the barrier for programmers wanting to
+               combine C++ code with R.",
+  month     =  "13~" # apr,
+  year      =  2011,
+  url       = "https://doi.org/10.18637/jss.v040.i08",
+  keywords  = "Immutables",
+  doi       = "10.18637/jss.v040.i08",
+  language  = "en"
 }
 
-@misc{TODO-finger-tree-applications,
-  title = {TODO: citation for finger-tree specializations},
-  note  = {Placeholder}
+@ARTICLE{Puglisi2007-rk,
+  title     = "A taxonomy of suffix array construction algorithms",
+  author    = "Puglisi, Simon J and Smyth, W F and Turpin, Andrew H",
+  journal   = "ACM Comput. Surv.",
+  publisher = "Association for Computing Machinery (ACM)",
+  volume    =  39,
+  number    =  2,
+  pages     =  4,
+  abstract  = "In 1990, Manber and Myers proposed suffix arrays as a
+               space-saving alternative to suffix trees and described the first
+               algorithms for suffix array construction and use. Since that
+               time, and especially in the last few years, suffix array
+               construction algorithms have proliferated in bewildering
+               abundance. This survey paper attempts to provide simple
+               high-level descriptions of these numerous algorithms that
+               highlight both their distinctive features and their
+               commonalities, while avoiding as much as possible the
+               complexities of implementation details. New hybrid algorithms are
+               also described. We provide comparisons of the algorithms'
+               worst-case time complexity and use of additional space, together
+               with results of recent experimental test runs on many of their
+               implementations.",
+  month     =  "6~" # jul,
+  year      =  2007,
+  url       = "http://dx.doi.org/10.1145/1242471.1242472",
+  keywords  = "Immutables",
+  doi       = "10.1145/1242471.1242472",
+  language  = "en"
 }
 
-@misc{TODO-rcpp,
-  title = {TODO: citation for Rcpp},
-  note  = {Placeholder}
+
+
+@book{kuhn2022tidy,
+  title={Tidy modeling with R: A framework for modeling in the tidyverse},
+  author={Kuhn, Max and Silge, Julia},
+  year={2022},
+  publisher={" O'Reilly Media, Inc."}
 }
+
+@book{zhang1999state,
+  title={State-space search: Algorithms, complexity, extensions, and applications},
+  author={Zhang, Weixiong},
+  year={1999},
+  publisher={Springer Science \& Business Media}
+}
+
+@article{pages2020s4vectors,
+  title={S4Vectors: Foundation of vector-like and list-like containers in Bioconductor},
+  author={Pag{\`e}s, H and Lawrence, M and Aboyoun, P},
+  journal={R package version 0.26},
+  volume={1},
+  year={2020}
+}
+
+

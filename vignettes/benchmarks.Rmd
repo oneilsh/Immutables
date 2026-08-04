@@ -24,100 +24,98 @@ library(ggplot2)
 library(dplyr)
 
 # Two env-var gates control this vignette:
-#   IMMUTABLES_RUN_SLOW=true       -> re-run all benchmarks and save
-#                                     results to inst/extdata/benchmarks.rds
-#   IMMUTABLES_SAVE_FIGURES=true   -> also write pub-ready figures to
-#                                     paper/figures/*.pdf
-# When neither is set (CRAN, ordinary pkgdown build) the vignette loads
+#   IMMUTABLES_RUN_SLOW=true       -> re-run all benchmarks and save per-batch
+#                                     results to inst/extdata/benchmarks-*.rds
+# When neither is set (CRAN, ordinary pkgdown build) the vignette loads the
 # cached results and renders plots without re-timing.
+#
+# Results are cached per batch (one .rds per section) so a single section can
+# be re-timed in isolation; each bench chunk writes its own .rds; each plot chunk 
+# writes its own .pdf.
 run_benchmarks <- identical(Sys.getenv("IMMUTABLES_RUN_SLOW"), "true")
-save_figures   <- identical(Sys.getenv("IMMUTABLES_SAVE_FIGURES"), "true")
 repeats <- 10L
+
+proj_root <- tryCatch(
+  rprojroot::find_root(rprojroot::is_r_package),
+  error = function(e) "."
+)
 
 pow2_labels <- function(x) parse(text = paste0("2^", log2(as.numeric(x))))
 
+# scales::label_timespan() prints microseconds with a Greek mu (U+03BC), which
+# the default pdf() device can't render (it drops the glyph -> ".s"). Swap it
+# for the micro sign (U+00B5), which lives in the device's ISO-Latin-1
+# encoding and renders as a proper "us".
+label_time <- function(x) sub("μ", "µ", scales::label_timespan()(x))
+
 # Accumulator populated either by the benchmark chunks (when
-# run_benchmarks) or by the loader chunk below (otherwise).
+# run_benchmarks) or by the loader chunk below (otherwise). One named slot
+# per batch: sequence / pq / ordered / ivx.
 results_list <- list()
 
 bench_one <- function(rows, impl, op, n, repeats, setup, bench) {
   state <- setup()
   gc(full = TRUE)
-  
+
   # warmup
   for(i in 1:3) bench(state)
-  
-  res <- bench::mark(bench(state), 
-                     min_iterations = repeats, 
+
+  res <- bench::mark(bench(state),
+                     min_iterations = repeats,
                      max_iterations = repeats + 0)
-  
+
   gcs <- res$gc[[1]] # tibble w/ 3 colums; level0, level1, level2
   gcs$times <- unlist(res$time[[1]])
-  non_gc_times <- gcs |> 
-    filter(level0 == 0 & level1 == 0 & level2 == 0) |>
-    pull(times)
-  non_gc_times <- gcs |> pull(times)
-    
-  push_back(rows, data.frame(impl = impl, op = op, n = n, time_s = non_gc_times))
+  # keeping gc-triggering measures rather than bumping them out
+  #non_gc_times <- gcs |>
+  #  filter(level0 == 0 & level1 == 0 & level2 == 0) |>
+  #  pull(times)
+  gc_times <- gcs |> pull(times)
+
+  push_back(rows, data.frame(impl = impl, op = op, n = n, time_s = gc_times))
+}
+
+# Per-batch cache helpers. Each batch is one data.frame persisted to its own
+# file so a single section can be re-benched without touching the others.
+.batch_path <- function(batch) {
+  file.path(proj_root, "inst", "extdata", paste0("benchmarks-", batch, ".rds"))
+}
+save_batch <- function(batch) {
+  dir.create(file.path(proj_root, "inst", "extdata"),
+             showWarnings = FALSE, recursive = TRUE)
+  saveRDS(results_list[[batch]], .batch_path(batch))
+}
+save_figure <- function(plot, file, width, height) {
+    out_dir <- file.path(proj_root, "paper", "figures")
+    dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+    ggsave(file.path(out_dir, file), plot, width = width, height = height)
 }
 ```
 
 ```{r load-cached, eval=!run_benchmarks, include=FALSE}
-.cache_path <- system.file("extdata", "benchmarks.rds", package = "Immutables")
-if(nzchar(.cache_path) && file.exists(.cache_path)) {
-  results_list <- readRDS(.cache_path)
-  # Older caches stored microsecond timings as `time_us`; the current plot
-  # chunks expect `time_s`. Normalize so cached and freshly-run results plot
-  # uniformly.
-  for(.nm in names(results_list)) {
-    .df <- results_list[[.nm]]
-    if(!is.null(.df) && !is.null(.df$time_us) && is.null(.df$time_s)) {
-      .df$time_s <- .df$time_us / 1e6
-      results_list[[.nm]] <- .df
-    }
-  }
-  rm(.nm, .df)
+for(batch in c("sequence", "pq", "ordered", "ivx")) {
+  p <- system.file("extdata", paste0("benchmarks-", batch, ".rds"),
+                   package = "Immutables")
+  if(nzchar(p) && file.exists(p)) results_list[[batch]] <- readRDS(p)
 }
 ```
 
-## Method
+## Methods
 
 This article measures individual operation times for each collection type
-provided by `immutables`. Each recorded repetition rebuilds the fixture for
-size *n*, then uses `microbenchmark(..., times = 1)` to time one operation on
-that fresh state.
+provided by `Immutables`. Each recorded repetition rebuilds the setup for
+size *n*, then times one operation on that fresh state with `bench::mark()`.
 
 The numbers shown below are loaded from cached results shipped with the
 package; re-running `data-raw/generate_publication_results.R` regenerates
-them. See the script's header for runtime and options.
-
-Comparisons use base R implementations and select structures from
-`rstackdeque` and `IRanges`:
-
-- **Sequences and queue operations**:
-  - immutables: `flexseq()`
-  - base R: `list()`
-  - `rstackdeque`: `rpqueue()`
-- **Priority operations**:
-  - immutables: `priority_queue()`
-  - base R: parallel value and priority vectors with
-    `which.min()` / `which.max()`
-- **Interval operations**:
-  - immutables: `interval_index()`
-  - base R: `data.frame` with start/end columns, filtered with vectorized
-    comparisons
-  - `IRanges`: `IRanges()`
-
+them.
 
 
 ## Sequence operations
 
-Seven operations on sequences of 1,024 to 131,072 elements. Append, prepend,
-concatenate, and split exploit the finger tree's O(log n) structural sharing;
-get, replace, and remove at the middle exercise index-based splitting.
 
 ```{r sequence-bench, eval=run_benchmarks, cache=FALSE}
-sequence_sizes <- 2^(12 + 0:6) # 2^12 up to +6
+sequence_sizes <- 2^(12 + 0:6) # 2^12 up to 2^18
 rows <- flexseq()
 
 for(n in sequence_sizes) {
@@ -142,17 +140,17 @@ for(n in sequence_sizes) {
   rows <- bench_one(rows, "flexseq", "split at middle", n, repeats, flex_setup,
     function(st) split_at(st$s, st$mid))
 
-  rows <- bench_one(rows, "base R list", "enqueue", n, repeats, list_setup,
+  rows <- bench_one(rows, "base R", "enqueue", n, repeats, list_setup,
     function(st) c(st$s, list("d")))
-  rows <- bench_one(rows, "base R list", "dequeue", n, repeats, list_setup,
+  rows <- bench_one(rows, "base R", "dequeue", n, repeats, list_setup,
     function(st) st$s[-1L])
-  rows <- bench_one(rows, "base R list", "replace middle", n, repeats, list_setup,
+  rows <- bench_one(rows, "base R", "replace middle", n, repeats, list_setup,
     function(st) { s <- st$s; s[[st$mid]] <- "y"; s })
-  rows <- bench_one(rows, "base R list", "remove middle", n, repeats, list_setup,
+  rows <- bench_one(rows, "base R", "remove middle", n, repeats, list_setup,
     function(st) st$s[-st$mid])
-  rows <- bench_one(rows, "base R list", "concatenate", n, repeats, pair_list,
+  rows <- bench_one(rows, "base R", "concatenate", n, repeats, pair_list,
     function(st) c(st$a, st$b))
-  rows <- bench_one(rows, "base R list", "split at middle", n, repeats, list_setup,
+  rows <- bench_one(rows, "base R", "split at middle", n, repeats, list_setup,
     function(st) list(
       left = st$s[seq_len(st$mid - 1L)],
       value = st$s[[st$mid]],
@@ -161,26 +159,33 @@ for(n in sequence_sizes) {
 }
 
 results_list$sequence <- do.call(rbind, as.list(rows))
+save_batch("sequence")
 ```
-```{r sequence-plot, fig.width=9, fig.height=7}
+
+
+```{r sequence-plot, fig.width=9, fig.height=5}
 if(!is.null(results_list$sequence)) {
   seq_results <- results_list$sequence
   sorted_sizes <- sort(unique(seq_results$n))
   seq_results$n_cat <- factor(seq_results$n, levels = sorted_sizes)
 
-  p_sequence <- ggplot(seq_results, aes(x = n_cat, y = time_s, color = impl)) +
+  p_sequence <- ggplot(seq_results, aes(x = n_cat, y = as.numeric(time_s), color = impl)) +
     geom_boxplot() +
     facet_wrap(~ op, scales = "free_y") +
     scale_x_discrete(labels = pow2_labels) +
     labs(
       title = "Sequence Operations",
       x = "Number of elements",
-      y = "Time (s)",
+      y = "Time",
       color = "Implementation"
     ) +
+    scale_y_log10(labels = label_time, guide = "axis_logticks") +
+    scale_color_manual(values = c("base R" = "#fc8d62", "flexseq" = "#66c2a5")) +
+    #scale_y_continuous(labels = label_time, trans = "log10") +
     theme_bw() +
     theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
   print(p_sequence)
+  save_figure(p_sequence, "benchmarks-sequence.pdf", width = 9, height = 5)
 } else {
   knitr::asis_output("*Benchmark results not yet generated. Run `data-raw/generate_publication_results.R` to populate.*")
 }
@@ -190,14 +195,10 @@ if(!is.null(results_list$sequence)) {
 
 ## Priority queue operations
 
-Insert, peek, and pop operations for min and max priority. The base R
-baseline stores values and priorities as parallel vectors and uses
-`which.min()` / `which.max()` for queries, so those reads are O(n) per call.
-`priority_queue` maintains a sorted finger tree with cached min/max monoids,
-giving O(log n) insert and pop.
+
 
 ```{r pq-bench, eval=run_benchmarks, cache=FALSE}
-pq_sizes <- 2^(12 + 0:7) # 2^12 up to 2^19
+pq_sizes <- 2^(12 + 0:6)
 rows <- flexseq()
 
 set.seed(42)
@@ -210,7 +211,9 @@ for(n in pq_sizes) {
   pv <- as.list(all_pq_vals[seq_len(n)])
   pw <- all_pq_pri[seq_len(n)]
   pq_setup   <- function() list(pq = as_priority_queue(pv, priorities = pw))
-  base_setup <- function() list(v = all_pq_vals[seq_len(n)], p = pw)
+  # Values in a list (arbitrary payloads, as the priority_queue stores);
+  # priorities in a numeric vector.
+  base_setup <- function() list(v = as.list(all_pq_vals[seq_len(n)]), p = pw)
 
   rows <- bench_one(rows, "priority_queue", "insert",   n, repeats, pq_setup,
     function(st) insert(st$pq, "val_new", 0.5))
@@ -220,36 +223,41 @@ for(n in pq_sizes) {
     function(st) pop_max(st$pq)$remaining)
 
   rows <- bench_one(rows, "base R", "insert",   n, repeats, base_setup,
-    function(st) list(values = c(st$v, "val_new"), priorities = c(st$p, 0.5)))
+    function(st) list(values = c(st$v, list("val_new")), priorities = c(st$p, 0.5)))
   rows <- bench_one(rows, "base R", "peek max", n, repeats, base_setup,
-    function(st) st$v[which.max(st$p)])
+    function(st) st$v[[which.max(st$p)]])
   rows <- bench_one(rows, "base R", "pop max",  n, repeats, base_setup,
     function(st) { i <- which.max(st$p); list(values = st$v[-i], priorities = st$p[-i]) })
 }
 
 results_list$pq <- do.call(rbind, as.list(rows))
+save_batch("pq")
 ```
 
 
-```{r pq-plot, fig.width=9, fig.height=7}
+```{r pq-plot, fig.width=9, fig.height=3.2}
 if(!is.null(results_list$pq)) {
   pq_results <- results_list$pq
   sorted_sizes <- sort(unique(pq_results$n))
   pq_results$n_cat <- factor(pq_results$n, levels = sorted_sizes)
 
-  p_pq <- ggplot(pq_results, aes(x = n_cat, y = time_s, color = impl)) +
+  p_pq <- ggplot(pq_results, aes(x = n_cat, y = as.numeric(time_s), color = impl)) +
     geom_boxplot() +
     facet_wrap(~ op, scales = "free_y") +
     scale_x_discrete(labels = pow2_labels) +
     labs(
       title = "Priority Queue Operations",
       x = "Number of elements",
-      y = "Time (s)",
+      y = "Time",
       color = "Implementation"
     ) +
     theme_bw() +
+    scale_color_manual(values = c("base R" = "#fc8d62", "priority_queue" = "#66c2a5")) +
+    scale_y_log10(labels = label_time, guide = "axis_logticks") +
+    #scale_y_continuous(labels = label_time) +
     theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
   print(p_pq)
+  save_figure(p_pq, "benchmarks-pq.pdf", width = 9, height = 3.2)
 } else {
   knitr::asis_output("*Benchmark results not yet generated.*")
 }
@@ -258,27 +266,107 @@ if(!is.null(results_list$pq)) {
 
 
 
-## Interval queries
+## Ordered sequence operations
 
-Insert and three query types (single-point lookup, all-point matches, and
-range overlap) on a collection of intervals with integer endpoints. The base R
-baseline stores intervals in a `data.frame` and filters with vectorized
-comparisons, which is simple and fast for small *n* but O(n) per query.
-`interval_index` uses an augmented finger tree for O(log n + k) queries, where
-*k* is the number of matches.
+```{r ordered-bench, eval=run_benchmarks, cache=FALSE}
+ord_sizes <- 2^(14 + 0:6)
+rows <- flexseq()
 
-The single-shot query benchmarks pay the index-build cost up front and only
-amortize it across one query. A separate `cumulative insert` operation
-measures the cost of building a collection of *n* intervals one at a time
-with no batched constructor — the natural pattern for streaming or online
-algorithms. `data.frame` and `IRanges` rebuild a new vector each call
-(`rbind` and `c()` respectively); `interval_index` shares structure across
-versions, so each `insert` is O(log n). This is run at smaller sizes because
-the O(n²) build cost on the mutable baselines becomes prohibitive otherwise.
+set.seed(99)
+max_ord <- max(ord_sizes)
+all_ord_keys <- sample.int(max_ord, max_ord, replace = TRUE) # duplicates present
+all_ord_vals <- sprintf("e_%06d", seq_len(max_ord))
+
+for(n in ord_sizes) {
+  cat("Ordered sequence ops, size ", n, "\n")
+  keys <- all_ord_keys[seq_len(n)]
+  vals <- all_ord_vals[seq_len(n)]
+  sk   <- sort(keys)
+
+  # Query key and range bounds derive from the size-n subset so they always
+  # land inside the key range; the range window spans a fixed number of keys
+  # so result-set size k stays roughly constant (~50) as n grows.
+  qk    <- sk[n %/% 2L]
+  rlo   <- sk[n %/% 2L]
+  rhi   <- sk[min(n, n %/% 2L + 50L)]
+  ins_k <- qk
+
+  ord_setup  <- function() list(os = as_ordered_sequence(as.list(vals), keys = keys))
+  # Naive base R ordered map: a numeric key vector and a parallel value list,
+  # sorted by key. All queries are plain linear scans over the real key vector
+  # (no binary search, no key encoding), so the baseline is O(n) per op and
+  # key-type-agnostic. Values live in a list, as the ordered_sequence stores
+  # arbitrary element payloads.
+  base_setup <- function() { o <- order(keys); list(k = keys[o], v = as.list(vals[o])) }
+
+  rows <- bench_one(rows, "ordered_sequence", "insert", n, repeats, ord_setup,
+    function(st) insert(st$os, "e_new", ins_k))
+  rows <- bench_one(rows, "ordered_sequence", "peek key", n, repeats, ord_setup,
+    function(st) peek_key(st$os, qk))
+  rows <- bench_one(rows, "ordered_sequence", "pop key", n, repeats, ord_setup,
+    function(st) pop_key(st$os, qk)$remaining)
+  rows <- bench_one(rows, "ordered_sequence", "count key", n, repeats, ord_setup,
+    function(st) count_key(st$os, qk))
+  rows <- bench_one(rows, "ordered_sequence", "range query", n, repeats, ord_setup,
+    function(st) elements_between(st$os, rlo, rhi))
+  rows <- bench_one(rows, "ordered_sequence", "lower bound", n, repeats, ord_setup,
+    function(st) lower_bound(st$os, qk))
+
+  rows <- bench_one(rows, "base R", "insert", n, repeats, base_setup,
+    function(st) { p <- sum(st$k <= ins_k)
+      list(k = append(st$k, ins_k, p), v = append(st$v, list("e_new"), after = p)) })
+  rows <- bench_one(rows, "base R", "peek key", n, repeats, base_setup,
+    function(st) st$v[[match(qk, st$k)]])
+  rows <- bench_one(rows, "base R", "pop key", n, repeats, base_setup,
+    function(st) { i <- match(qk, st$k); list(k = st$k[-i], v = st$v[-i]) })
+  rows <- bench_one(rows, "base R", "count key", n, repeats, base_setup,
+    function(st) sum(st$k == qk))
+  rows <- bench_one(rows, "base R", "range query", n, repeats, base_setup,
+    function(st) st$v[st$k >= rlo & st$k <= rhi])
+  rows <- bench_one(rows, "base R", "lower bound", n, repeats, base_setup,
+    function(st) which.max(st$k >= qk))
+}
+
+results_list$ordered <- do.call(rbind, as.list(rows))
+save_batch("ordered")
+```
+
+
+```{r ordered-plot, fig.width=9, fig.height=5}
+if(!is.null(results_list$ordered)) {
+  ord_results <- results_list$ordered
+  sorted_sizes <- sort(unique(ord_results$n))
+  ord_results$n_cat <- factor(ord_results$n, levels = sorted_sizes)
+
+  p_ordered <- ggplot(ord_results, aes(x = n_cat, y = as.numeric(time_s), color = impl)) +
+    geom_boxplot() +
+    facet_wrap(~ op, scales = "free_y") +
+    scale_x_discrete(labels = pow2_labels) +
+    labs(
+      title = "Ordered Sequence Operations",
+      x = "Number of elements",
+      y = "Time",
+      color = "Implementation"
+    ) +
+    theme_bw() +
+    #scale_y_continuous(labels = label_time) +
+    scale_color_manual(values = c("base R" = "#fc8d62", "ordered_sequence" = "#66c2a5")) +
+    scale_y_log10(labels = label_time, guide = "axis_logticks") +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+  print(p_ordered)
+  save_figure(p_ordered, "benchmarks-ordered.pdf", width = 9, height = 5)
+} else {
+  knitr::asis_output("*Benchmark results not yet generated.*")
+}
+```
+
+
+
+
+## Interval index operations
 
 ```{r ivx-bench, eval=run_benchmarks, cache=FALSE}
-ivx_sizes       <- 2^(12 + 0:6) # 2^12 (4096) up to 2^18 (262144)
-ivx_cumul_sizes <- 2^(9 + 0:5)  # 2^9 (512)  up to 2^14 (16384)
+ivx_sizes <- 2^(12 + 0:6)
 rows <- flexseq()
 
 set.seed(123)
@@ -287,12 +375,6 @@ all_starts <- sort(sample.int(max_ivx * 10L, max_ivx))
 all_widths <- sample.int(100L, max_ivx, replace = TRUE)
 all_ends   <- all_starts + all_widths
 all_vals   <- sprintf("interval_%06d", seq_len(max_ivx))
-
-qpt   <- all_starts[as.integer(max_ivx / 2)] + 10L
-qlo   <- all_starts[as.integer(max_ivx * 0.4)]
-qhi   <- all_starts[as.integer(max_ivx * 0.5)]
-ins_s <- all_starts[as.integer(max_ivx / 2)]
-ins_e <- ins_s + 50L
 
 has_iranges <- requireNamespace("IRanges", quietly = TRUE) &&
   requireNamespace("S4Vectors", quietly = TRUE)
@@ -303,8 +385,22 @@ for(n in ivx_sizes) {
   ends   <- all_ends[seq_len(n)]
   vals   <- all_vals[seq_len(n)]
 
+  # Query and insertion points are derived from the size-n subset so they fall
+  # inside the indexed coordinate range at every size, and the overlap window
+  # spans a fixed number of starts so result-set size k stays constant
+  # (~50 matches) as n grows. (Fixed global points computed from the largest
+  # size would fall beyond the data for smaller n, timing only the
+  # empty-result path.)
+  qpt   <- starts[n %/% 2L] + 10L
+  qlo   <- starts[n %/% 2L]
+  qhi   <- starts[n %/% 2L + 50L]
+  ins_s <- starts[n %/% 2L]
+  ins_e <- ins_s + 50L
+
   ivx_setup  <- function() list(ix = as_interval_index(as.list(vals), start = starts, end = ends, default_query_bounds = "[]"))
-  df_setup   <- function() list(df = data.frame(start = starts, end = ends, value = vals, stringsAsFactors = FALSE))
+  # Endpoints in a data.frame (the natural interval table); payloads in a
+  # parallel list, as the interval_index stores arbitrary value objects.
+  df_setup   <- function() list(df = data.frame(start = starts, end = ends), value = as.list(vals))
 
   rows <- bench_one(rows, "interval_index", "insert", n, repeats, ivx_setup,
     function(st) insert(st$ix, "interval_new", ins_s, ins_e))
@@ -314,34 +410,46 @@ for(n in ivx_sizes) {
     function(st) peek_all_point(st$ix, qpt, bounds = "[]", as_list = TRUE))
   rows <- bench_one(rows, "interval_index", "overlap query", n, repeats, ivx_setup,
     function(st) peek_all_overlaps(st$ix, qlo, qhi, bounds = "[]", as_list = TRUE))
+  rows <- bench_one(rows, "interval_index", "within query", n, repeats, ivx_setup,
+    function(st) peek_all_within(st$ix, qlo, qhi, bounds = "[]", as_list = TRUE))
+  rows <- bench_one(rows, "interval_index", "remove by overlap", n, repeats, ivx_setup,
+    function(st) pop_all_overlaps(st$ix, qlo, qhi, bounds = "[]")$remaining)
 
   rows <- bench_one(rows, "base R", "insert", n, repeats, df_setup,
-    function(st) rbind(st$df, data.frame(start = ins_s, end = ins_e, value = "interval_new", stringsAsFactors = FALSE)))
+    function(st) list(
+      df = rbind(st$df, data.frame(start = ins_s, end = ins_e)),
+      value = c(st$value, list("interval_new"))
+    ))
   rows <- bench_one(rows, "base R", "point query", n, repeats, df_setup,
     function(st) {
       hits <- which(st$df$start <= qpt & qpt <= st$df$end)
-      if(length(hits)) st$df$value[hits[1L]] else NULL
+      if(length(hits)) st$value[[hits[1L]]] else NULL
     })
   rows <- bench_one(rows, "base R", "all point matches", n, repeats, df_setup,
-    function(st) st$df[st$df$start <= qpt & qpt <= st$df$end, , drop = FALSE])
+    function(st) st$value[st$df$start <= qpt & qpt <= st$df$end])
   rows <- bench_one(rows, "base R", "overlap query", n, repeats, df_setup,
-    function(st) st$df[st$df$start <= qhi & st$df$end >= qlo, , drop = FALSE])
+    function(st) st$value[st$df$start <= qhi & st$df$end >= qlo])
+  rows <- bench_one(rows, "base R", "within query", n, repeats, df_setup,
+    function(st) st$value[st$df$start >= qlo & st$df$end <= qhi])
+  rows <- bench_one(rows, "base R", "remove by overlap", n, repeats, df_setup,
+    function(st) { keep <- !(st$df$start <= qhi & st$df$end >= qlo)
+      list(df = st$df[keep, , drop = FALSE], value = st$value[keep]) })
 
   if(has_iranges) {
     ir_setup <- function() list(
       ir = IRanges::IRanges(start = starts, end = ends),
-      v  = vals
+      v  = as.list(vals)
     )
 
     rows <- bench_one(rows, "IRanges", "insert", n, repeats, ir_setup,
       function(st) list(
         ir = c(st$ir, IRanges::IRanges(start = ins_s, end = ins_e)),
-        v  = c(st$v, "interval_new")
+        v  = c(st$v, list("interval_new"))
       ))
     rows <- bench_one(rows, "IRanges", "point query", n, repeats, ir_setup,
       function(st) {
         hits <- S4Vectors::subjectHits(IRanges::findOverlaps(IRanges::IRanges(start = qpt, width = 1L), st$ir))
-        if(length(hits)) st$v[hits[1L]] else NULL
+        if(length(hits)) st$v[[hits[1L]]] else NULL
       })
     rows <- bench_one(rows, "IRanges", "all point matches", n, repeats, ir_setup,
       function(st) {
@@ -351,95 +459,49 @@ for(n in ivx_sizes) {
       function(st) {
         st$v[S4Vectors::subjectHits(IRanges::findOverlaps(IRanges::IRanges(start = qlo, end = qhi), st$ir))]
       })
-  }
-}
-
-# Cumulative incremental insertion, run at smaller sizes where the O(n^2)
-# mutable baselines are still feasible. Uses an independent fixture seed so
-# the start/width distribution is decorrelated from the query benchmarks.
-set.seed(456)
-max_cum <- max(ivx_cumul_sizes)
-all_starts_c <- sort(sample.int(max_cum * 10L, max_cum))
-all_widths_c <- sample.int(100L, max_cum, replace = TRUE)
-all_ends_c   <- all_starts_c + all_widths_c
-all_vals_c   <- sprintf("interval_%06d", seq_len(max_cum))
-
-for(n in ivx_cumul_sizes) {
-  cat("Cumulative insert, size ", n, "\n")
-  starts_c <- all_starts_c[seq_len(n)]
-  ends_c   <- all_ends_c[seq_len(n)]
-  vals_c   <- all_vals_c[seq_len(n)]
-  cum_setup <- function() list(s = starts_c, e = ends_c, v = vals_c, n = n)
-
-  rows <- bench_one(rows, "interval_index", "cumulative insert", n, repeats, cum_setup,
-    function(st) {
-      ix <- interval_index()
-      for(i in seq_len(st$n)) ix <- insert(ix, st$v[i], st$s[i], st$e[i])
-      ix
-    })
-
-  rows <- bench_one(rows, "base R", "cumulative insert", n, repeats, cum_setup,
-    function(st) {
-      df <- data.frame(start = integer(), end = integer(), value = character(),
-                       stringsAsFactors = FALSE)
-      for(i in seq_len(st$n)) {
-        df <- rbind(df, data.frame(start = st$s[i], end = st$e[i], value = st$v[i],
-                                   stringsAsFactors = FALSE))
-      }
-      df
-    })
-
-  if(has_iranges) {
-    rows <- bench_one(rows, "IRanges", "cumulative insert", n, repeats, cum_setup,
+    rows <- bench_one(rows, "IRanges", "within query", n, repeats, ir_setup,
       function(st) {
-        ir <- IRanges::IRanges()
-        v  <- character(0)
-        for(i in seq_len(st$n)) {
-          ir <- c(ir, IRanges::IRanges(start = st$s[i], end = st$e[i]))
-          v  <- c(v, st$v[i])
-        }
-        list(ir = ir, v = v)
+        st$v[S4Vectors::queryHits(IRanges::findOverlaps(st$ir, IRanges::IRanges(start = qlo, end = qhi), type = "within"))]
+      })
+    rows <- bench_one(rows, "IRanges", "remove by overlap", n, repeats, ir_setup,
+      function(st) {
+        hits <- S4Vectors::subjectHits(IRanges::findOverlaps(IRanges::IRanges(start = qlo, end = qhi), st$ir))
+        keep <- setdiff(seq_along(st$v), hits)
+        list(ir = st$ir[keep], v = st$v[keep])
       })
   }
 }
 
 results_list$ivx <- do.call(rbind, as.list(rows))
+save_batch("ivx")
 ```
-```{r ivx-plot, fig.width=9, fig.height=6}
+
+
+```{r ivx-plot, fig.width=9, fig.height=5}
 if(!is.null(results_list$ivx)) {
   ivx_results <- results_list$ivx
   sorted_sizes <- sort(unique(ivx_results$n))
   ivx_results$n_cat <- factor(ivx_results$n, levels = sorted_sizes)
+  ivx_results$impl <- factor(ivx_results$impl, levels = c("base R", "IRanges", "interval_index"))
 
-  p_ivx <- ggplot(ivx_results, aes(x = n_cat, y = time_s, color = impl)) +
-    geom_boxplot() +
+  p_ivx <- ggplot(ivx_results, aes(x = n_cat, y = as.numeric(time_s), color = impl)) +
+    geom_boxplot(position = position_dodge()) +
     facet_wrap(~ op, scales = "free_y") +
     scale_x_discrete(labels = pow2_labels) +
     labs(
       title = "Interval Index Queries",
       x = "Number of elements",
-      y = "Time (s)",
+      y = "Time",
       color = "Implementation"
     ) +
     theme_bw() +
-    scale_y_continuous() +
+    scale_color_manual(values = c("base R" = "#fc8d62", "IRanges" = "#8da0cb", "interval_index" = "#66c2a5")) +
+    scale_y_log10(labels = label_time, guide = "axis_logticks") +
+    #scale_y_continuous(labels = label_time) +
     theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
   print(p_ivx)
+  save_figure(p_ivx, "benchmarks-ivx.pdf", width = 9, height = 5)
 } else {
   knitr::asis_output("*Benchmark results not yet generated.*")
 }
-```
-
-```{r save-results, eval=run_benchmarks, include=FALSE}
-# Persist this run so subsequent builds (CRAN, pkgdown) render the same
-# figures without re-timing. Path resolves from knit_root_dir, which the
-# generator script sets to the repo root.
-saveRDS(results_list, "inst/extdata/benchmarks.rds")
-```
-
-```{r save-figures, eval=save_figures, include=FALSE}
-dir.create("paper/figures", showWarnings = FALSE, recursive = TRUE)
-if(exists("p_sequence")) ggsave("paper/figures/benchmarks-sequence.pdf", p_sequence, width = 9, height = 7)
-if(exists("p_pq"))       ggsave("paper/figures/benchmarks-pq.pdf",       p_pq,       width = 9, height = 7)
-if(exists("p_ivx"))      ggsave("paper/figures/benchmarks-ivx.pdf",      p_ivx,      width = 9, height = 6)
 ```
