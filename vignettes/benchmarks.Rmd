@@ -269,7 +269,7 @@ if(!is.null(results_list$pq)) {
 ## Ordered sequence operations
 
 ```{r ordered-bench, eval=run_benchmarks, cache=FALSE}
-ord_sizes <- 2^(14 + 0:6)
+ord_sizes <- 2^(14 + 0:8)
 rows <- flexseq()
 
 set.seed(99)

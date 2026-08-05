@@ -37,9 +37,9 @@ Finally, the developer API supports the addition of custom structures via combin
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://oneilsh.github.io/immutables/}
-  \item \url{https://github.com/oneilsh/immutables}
-  \item Report bugs at \url{https://github.com/oneilsh/immutables/issues}
+  \item \url{https://oneilsh.github.io/Immutables/}
+  \item \url{https://github.com/oneilsh/Immutables}
+  \item Report bugs at \url{https://github.com/oneilsh/Immutables/issues}
 }
 
 }

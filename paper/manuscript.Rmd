@@ -129,7 +129,7 @@ side-effect-free data structures to support advanced use cases in the
 
 Here we describe \pkg{Immutables}, which implements a remarkable data
 structure known as monoid-annotated 2-3 finger trees. First described
-by Hinze and Paterson 20 years ago \citep{Hinze2006-jv}, these
+by Hinze and Paterson \citep{Hinze2006-jv}, these
 provide persistent, amortized constant-time access to ends,
 $O(\log n)$ search/insertion/removal, and via monoid annotation can
 be purposed as other specialized structures. We implement four such
@@ -163,7 +163,7 @@ fs2 <- push_back(fs1, "z")
 length(fs1)                    # 10
 length(fs2)                    # 11
 
-fs3 <- insert_at(fs2, 8, 4.2)  # all Immutables structures can store mixed types
+fs3 <- insert_at(fs2, 8, 4.2)  # Immutables structures can store mixed types
 length(fs3)                    # 12
 
 fs4 <- fs1[1:5]                # flexseq with "a", "b", "c", "d", "e"
@@ -224,7 +224,7 @@ pq3$value                  # "z"
 pq3$remaining              # priority queue with 6 entries
 ```
 
-Elements of priority queues are not stored in priority order, accordingly,
+Elements of priority queues are not stored in priority order, accordingly
 priority queues only support indexing and replacement with \code{[}, \code{[[},
 and \code{$} by name, with the same caveats as for named \code{flexseq}s.
 Priority queues and other advanced types (below) may be 
@@ -368,7 +368,7 @@ our annotated tasks sequence in Figure \ref{fig:tasks-structure}.
 ```r
 plot_structure(tasks2, node_label = function(node) {
   if(node$type == "Element") {
-    sprintf("ID: %s, T: %d\nSum: %.1f", 
+    sprintf("ID: %s, H: %d\nTotal: %d", 
             node$element$id, 
             node$element$hours, 
             node$measures$total_time)
@@ -378,7 +378,7 @@ plot_structure(tasks2, node_label = function(node) {
 })
 ```
 
-```{r tasks-structure, echo=FALSE, dev="pdf", fig.cap="Internal structure of a monoid-annotated finger tree. User values are stored a leaves, illustrated with \\code{ID} and \\code{H} (for Hours). Leaves and internal nodes accumulate a \\code{total\\_time} (shown as \\code{Time}) measure using the associated monoid.", fig.align="center", fig.width=8, fig.height=3.5, out.width="0.95\\textwidth"}
+```{r tasks-structure, echo=FALSE, dev="pdf", fig.cap="Internal structure of a monoid-annotated finger tree. User values are stored a leaves, illustrated with \\code{ID} and \\code{H} (for Hours). Leaves and internal nodes accumulate a \\code{total\\_time} (shown as \\code{Total}) measure using the associated monoid.", fig.align="center", fig.width=8, fig.height=3.5, out.width="0.95\\textwidth"}
 set.seed(42)
 tasks <- lapply(1:11, 
                 function(i) {
@@ -486,7 +486,7 @@ subseqs <- add_monoids(subseqs, list(max_seq = max_seq))
 
 # fill with indices keyed on length-8 substrings
 for(index in 1:nchar(sequence)) {
-  subseq <- substr(sequence, index, index + 10)
+  subseq <- substr(sequence, index, index + 7)
   subseqs <- insert(subseqs, index, key = subseq)
 }
 ```
@@ -543,7 +543,7 @@ with \code{bench::mark} with 10 iterations on newly initialized structures, garb
 \code{gc()} before each. Because operations dispatched through S3 methods 
 incur first-call costs (method resolution, byte-compilation) that dominate timing 
 at small $n$, we warm each operation with three untimed calls before measurement. 
-Full benchmark code and results can be found in supplementary materials TODO and in the
+Full benchmark code and results can be found in supplementary materials and in the
 \emph{Benchmarks} package vignette.
 
 Sequence and queue operations benchmarked include enqueue (via \code{push_back()}),
@@ -637,7 +637,7 @@ multiple class systems, including \code{R6} which formalizes first-class support
 mutable data types. Loops and \code{if/then/else} constructs are familiar to those coming
 from more procedural languages. Still, \proglang{R}'s roots as a functional language
 dominate: functions are pass-by-value, and the generic-dispatch \code{S3} object system 
-is most commonly used, followed by \code{S4} in the Bioconductor community \citep{TODO};
+is most commonly used, followed by \code{S4} in the Bioconductor community \citep{Gentleman2004-tc};
 both are typically used in a value-oriented style, where updates create new 
 objects via copy-on-modify semantics rather than in-place mutation. Seasoned \proglang{R}
 programmers avoid dynamically growing or shrinking structures, which can easily 
@@ -645,7 +645,9 @@ result in $O(n^2)$ behavior.
 
 The relative lack of performant, immutable collection types in \proglang{R} has been
 previously noted, and \citet{Barry2018-mv} call specifically for their development.
-TODO
+\pkg{Immutables} addresses this by drawing on existing methods in purely functional data structures, 
+providing fast off-the-shelf implementations of several common data structures, 
+as well as a developer API for custom structures via monoid-annotation.
 
 # Computational details {-}
 
