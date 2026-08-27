@@ -18,7 +18,7 @@ title:
 abstract: >
   We present \pkg{Immutables}, an R package providing side-effect-free data structures
   including: catenable, indexable sequences that also serve as double-ended queues;
-  priority queues; key-ordered sequences; and interval indices for overlap and similar queries.
+  priority queues; key-ordered sequences; and interval indices for range overlap and similar queries.
   Based on monoid-annotated finger trees first described by Hinze and Paterson in 2006, almost all
   operations are fast, either $O(\log(n))$ or amortized constant time. Finally, a developer
   API exposes custom monoids and aggregations for extensibility. We describe the user and
@@ -555,7 +555,7 @@ and concatenation and enqueue backed by \code{c()}.
 To reveal scaling dynamics we ran all tests on structures of between
 $2^{12}$ (4,096) and $2^{18}$ (262,144) elements. Results in Figure \ref{fig:benchmarks-sequence}
 reveal the $O(n)$ nature of operations on base R lists. The $O(\log(n))$ sequence
-operations outperform base lists at between $2^{13}$ (for enqueue/dequeue)q
+operations outperform base lists at between $2^{13}$ (for enqueue/dequeue)
 and $2^{17}$ (for middle-element operations) elements.
 
 
@@ -584,7 +584,7 @@ knitr::include_graphics("figures/benchmarks-ordered.pdf")
 ```
 
 For priority queues we tested simple insertion, peeking, and popping the
-maximum priority element (mirroring \code{max}-based operations have
+maximum priority element (we did not test symmetric \code{max}-based operations which have
 identical performance characteristics). Base-\proglang{R} priority queues were implemented 
 on an R list with corresponding numeric priority vector, using \code{which.max()}
 for index identification and \code{[]}-based indexing and removal. 
@@ -656,8 +656,9 @@ as well as a developer API for custom structures via monoid-annotation.
 \pkg{Immutables} is available on CRAN at
 \url{https://CRAN.R-project.org/package=Immutables} and may be installed with 
 \code{install.packages("Immutables")}. All source code is available at
-\url{https://github.com/oneilsh/Immutables}, including a \code{generate_publication_results.R} 
-script in the \code{data-raw} directory to reproduce benchmark results. User-facing
+\url{https://github.com/oneilsh/Immutables}, including a \code{generate_publication_results.R}
+script in the \code{data-raw/replication} directory to reproduce all benchmark results, alongside
+a faster \code{replication-quick.R} that reproduces representative results in minutes. User-facing
 documentation is available in package help pages and vignettes, with
 \pkg{pkgdown}-formatted documentation available at \url{https://oneilsh.github.io/Immutables}.
 

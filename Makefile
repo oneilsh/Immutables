@@ -1,4 +1,8 @@
-.PHONY: help document test check check-cran coverage coverage-report coverage-dump snapshot-accept snapshot-review site paper build install clean
+.PHONY: help document test check check-cran coverage coverage-report coverage-dump snapshot-accept snapshot-review site paper build supplementary install clean
+
+# Staging directory (transient) and output archive for the JSS supplementary bundle.
+REPL_STAGE := Immutables-Supplementary
+REPL_ZIP   := paper/Immutables-Supplementary.zip
 
 # Passed to covr::package_coverage(code = ...) so local coverage runs the full test
 # suite once with the default (C++) backend AND once with the pure-R backend,
@@ -25,6 +29,7 @@ help:
 	@echo "  site            - Build pkgdown site into docs/"
 	@echo "  paper           - Render paper/manuscript.Rmd to PDF"
 	@echo "  build           - Build the source tarball"
+	@echo "  supplementary   - Assemble paper/Immutables-Supplementary.zip (tarball + scripts + README)"
 	@echo "  install         - Install the package locally"
 	@echo "  clean           - Remove check directory, tarballs, and paper artifacts"
 
@@ -74,8 +79,28 @@ paper:
 build:
 	Rscript -e 'devtools::build()'
 
+# Assemble the JStatSoft supplementary archive: a freshly built source tarball
+# plus the full and quick replication scripts and the README.
+# `R CMD build` writes the tarball into the current directory (unlike
+# devtools::build, which writes to the parent).
+supplementary:
+	@VERSION=$$(Rscript -e 'cat(as.character(read.dcf("DESCRIPTION")[,"Version"]))') && \
+	 TARBALL=Immutables_$$VERSION.tar.gz && \
+	 rm -rf $(REPL_STAGE) $(REPL_ZIP) && \
+	 R CMD build . && \
+	 mkdir -p $(REPL_STAGE) && \
+	 cp $$TARBALL $(REPL_STAGE)/ && \
+	 cp data-raw/replication/generate_publication_results.R $(REPL_STAGE)/ && \
+	 cp data-raw/replication/replication-quick.R $(REPL_STAGE)/ && \
+	 sed "s/<version>/$$VERSION/g" data-raw/replication/README.txt > $(REPL_STAGE)/README.txt && \
+	 zip -r $(REPL_ZIP) $(REPL_STAGE) && \
+	 rm -rf $(REPL_STAGE) && \
+	 echo "" && \
+	 echo "Built $(REPL_ZIP) for package version $$VERSION."
+
 install:
 	Rscript -e 'devtools::install()'
 
 clean:
-	rm -rf *.Rcheck ..Rcheck *.tar.gz paper/manuscript.pdf paper/manuscript.tex
+	rm -rf *.Rcheck ..Rcheck *.tar.gz paper/manuscript.pdf paper/manuscript.tex \
+	       $(REPL_STAGE) $(REPL_ZIP)

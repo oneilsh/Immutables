@@ -6,7 +6,7 @@
 # then typesets the manuscript itself against the freshly written results.
 #
 # Usage (from any directory; the script locates the package root):
-#   Rscript data-raw/generate_publication_results.R
+#   Rscript data-raw/replication/generate_publication_results.R
 #
 # Outputs (all under the package source tree):
 #   inst/extdata/benchmarks-*.rds - raw benchmark timings, one file per batch
