@@ -108,10 +108,11 @@ Unfortunately, native \proglang{R} types do not emphasize
 performance; many operations require a full scan or copy of the
 data, making them prohibitively expensive for use in highly dynamic or
 large-data applications \citep{Gillespie2016-qx}. Attempts have been made
-to fill these gaps. We previously published an implementation of
-efficient, persistent stack and queue structures based on lazy
-evaluation techniques, noted as the only use of lazy structures in a
-2019 review of the \proglang{R} ecosystem \citep{O-Neil2015-je,Goel2019-mz}.
+to fill these gaps. One approach is to embrace mutability, taken by
+for example by the \pkg{collapse} package \citep{krantz2026collapse}. Keeping immutability,
+we previously published an implementation of
+efficient, persistent stack and queue structures based on functional lazy
+evaluation techniques \citep{O-Neil2015-je,Goel2019-mz}.
 In 2018 T. Barry surveyed the state of collection packages,
 identifying 11 packages providing set, map, stack, queue, and/or
 sequence structures \citep{Barry2018-mv}. Of these, only three
