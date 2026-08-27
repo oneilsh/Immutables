@@ -302,7 +302,7 @@ run_segment_sweep_immutables <- function(segments, max_steps = 5000L, track_snap
     if(length(events_now) > 0L) {
       for(ev in events_now) {
         if(identical(ev$type, "intersection") && !is.null(ev$point)) {
-          discovered <- insert(discovered, element = ev$point, key = as.numeric(ev$x))
+          discovered <- insert(discovered, value = ev$point, key = as.numeric(ev$x))
         }
       }
     }

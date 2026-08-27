@@ -62,17 +62,17 @@ add_monoids.interval_index <- function(t, monoids, overwrite = FALSE) {
 
 # Runtime: O(log n) near split point depth.
 # Public insert method for interval_index.
-# **Inputs:** `x` interval_index; payload `element`; scalar `start`/`end`; optional `name`.
+# **Inputs:** `x` interval_index; payload `value`; scalar `start`/`end`; optional `name`.
 # **Outputs:** updated interval_index.
 # **Used by:** users/tests.
 #' @method insert interval_index
 #' @export
 #' @noRd
-insert.interval_index <- function(x, element, start, end, name = NULL, ...) {
+insert.interval_index <- function(x, value, start, end, name = NULL, ...) {
   .ivx_assert_index(x)
 
   norm <- .ivx_normalize_interval(start, end, endpoint_type = .ivx_endpoint_type_state(x))
-  entry <- .ivx_make_entry(element, norm$start, norm$end)
+  entry <- .ivx_make_entry(value, norm$start, norm$end)
 
   if(!is.null(name)) {
     entry <- .ft_set_name(entry, name)

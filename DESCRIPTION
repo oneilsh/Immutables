@@ -1,9 +1,9 @@
 Package: Immutables
 Type: Package
 Title: Fast and Functional Data Structures
-URL: https://oneilsh.github.io/immutables/, https://github.com/oneilsh/immutables
-BugReports: https://github.com/oneilsh/immutables/issues
-Version: 1.0.1
+URL: https://oneilsh.github.io/Immutables/, https://github.com/oneilsh/Immutables
+BugReports: https://github.com/oneilsh/Immutables/issues
+Version: 1.1.0
 Authors@R: c(
     person(given = "Shawn T.", family = "O'Neil", email = "shawn@tislab.org", role = c("aut", "cre"))
   )
@@ -23,7 +23,9 @@ Imports:
 LinkingTo:
     Rcpp
 Suggests:
+    bench,
     covr,
+    dplyr,
     ggplot2,
     ggtext,
     igraph,

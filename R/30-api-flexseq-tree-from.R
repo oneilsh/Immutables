@@ -122,6 +122,51 @@ tree_from <- function(x, monoids = NULL) {
   .ft_tree_from_list_linear(x_list, ms)
 }
 
+# Iterative twin of core `measured_nodes()` (R/00-core-ref-concat.R), producing
+# the identical Node2/Node3 grouping without the recursion.
+#
+# `measured_nodes()` is a faithful transliteration of Hinze & Paterson's `nodes`
+# and is left exactly as-is: in the paper it is only ever applied to the bounded
+# concatenation bridge (via `app3`), where its O(k) recursion depth is trivial.
+# This package's direct bulk builder below, however, is NOT from the paper, and
+# it feeds the whole ~n-element middle to the grouping step at every level. The
+# paper's recursion is safe in Haskell (heap-allocated, growable stack) but on
+# R's fixed C stack an O(n)-deep call overflows for large n (~21k frames at
+# n=65536). So the *bulk* caller groups iteratively; the canonical primitive
+# keeps its recursive form for the bounded `app3` use it was written for.
+#
+# Grouping rule matches `measured_nodes` exactly: greedy Node3s while more than
+# four elements remain, then 2 -> Node2, 3 -> Node3, 4 -> Node2 + Node2.
+# Runtime: O(k) time, O(1) stack.
+.ft_measured_nodes_bulk <- function(l, monoids) {
+  k <- length(l)
+  if(k < 2L) {
+    stop("measured_nodes requires at least two elements.")
+  }
+  out <- vector("list", (k + 2L) %/% 3L)
+  oi <- 0L
+  i <- 1L
+  while(k - i + 1L > 4L) {
+    oi <- oi + 1L
+    out[[oi]] <- measured_node3(l[[i]], l[[i + 1L]], l[[i + 2L]], monoids)
+    i <- i + 3L
+  }
+  remaining <- k - i + 1L
+  if(remaining == 2L) {
+    oi <- oi + 1L
+    out[[oi]] <- measured_node2(l[[i]], l[[i + 1L]], monoids)
+  } else if(remaining == 3L) {
+    oi <- oi + 1L
+    out[[oi]] <- measured_node3(l[[i]], l[[i + 1L]], l[[i + 2L]], monoids)
+  } else {
+    oi <- oi + 1L
+    out[[oi]] <- measured_node2(l[[i]], l[[i + 1L]], monoids)
+    oi <- oi + 1L
+    out[[oi]] <- measured_node2(l[[i + 2L]], l[[i + 3L]], monoids)
+  }
+  out[seq_len(oi)]
+}
+
 # Runtime: O(n) in total elements across recursive levels.
 .ft_tree_from_ordered_ref <- function(xs, monoids) {
   n <- length(xs)
@@ -166,7 +211,7 @@ tree_from <- function(x, monoids = NULL) {
   prefix <- build_digit(xs[seq_len(prefix_len)], monoids)
   suffix <- build_digit(xs[(n - suffix_len + 1L):n], monoids)
   middle_elems <- xs[(prefix_len + 1L):(n - suffix_len)]
-  middle_nodes <- measured_nodes(middle_elems, monoids)
+  middle_nodes <- .ft_measured_nodes_bulk(middle_elems, monoids)
   middle <- .ft_tree_from_ordered_ref(middle_nodes, monoids)
 
   measured_deep(prefix, middle, suffix, monoids)

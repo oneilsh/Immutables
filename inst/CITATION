@@ -7,5 +7,5 @@ bibentry(
   year    = format(Sys.Date(), "%Y"),
   note    = sprintf("R package version %s", meta$Version),
   doi     = "10.5281/zenodo.19686096",
-  url     = "https://oneilsh.github.io/immutables/"
+  url     = "https://oneilsh.github.io/Immutables/"
 )

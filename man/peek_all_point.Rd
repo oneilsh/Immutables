@@ -8,7 +8,8 @@ peek_all_point(
   x,
   point,
   bounds = NULL,
-  match_at = c("interval", "start", "end", "either")
+  match_at = c("interval", "start", "end", "either"),
+  as_list = FALSE
 )
 }
 \arguments{
@@ -22,15 +23,26 @@ Ignored when \code{match_at} is not \code{"interval"}.}
 \item{match_at}{How the query point is matched against each entry. One of
 \code{"interval"} (default; containment under \code{bounds}), \code{"start"}, \code{"end"},
 or \code{"either"}. See \code{\link[=peek_point]{peek_point()}} for details.}
+
+\item{as_list}{If \code{TRUE}, return a list with \code{values} (list of payloads),
+\code{starts}, and \code{ends} parallel vectors instead of an \code{interval_index}
+slice. Avoids the result-tree rebuild and is significantly faster for
+large match sets when the caller doesn't need a queryable result.}
 }
 \value{
-An \code{interval_index} slice of all matches (possibly empty).
+When \code{as_list = FALSE} (default): an \code{interval_index} slice of all
+matches (possibly empty). When \code{as_list = TRUE}: a named list with
+\code{values} (list of payloads), \code{starts}, and \code{ends}. For \code{numeric} /
+integer endpoint domains, \code{starts} and \code{ends} are atomic vectors; for
+class-bearing endpoint domains (e.g. \code{Date}, \code{POSIXct}) they are
+returned as lists to preserve the endpoint class.
 }
 \description{
 Peek All Intervals Matching a Point
 }
 \details{
-The returned \code{interval_index} can be inspected with \code{\link[=as.list]{as.list()}}.
+With \code{as_list = FALSE}, the returned \code{interval_index} can be inspected with
+\code{\link[=as.list]{as.list()}}.
 }
 \examples{
 ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(3, 2, 5))

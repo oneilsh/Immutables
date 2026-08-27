@@ -378,7 +378,7 @@ astar_search_immutables <- function(
       return(list(found = TRUE, path = final_path, snapshots = snapshots, steps = step))
     }
 
-    closed <- insert(closed, element = current, key = current_key)
+    closed <- insert(closed, value = current, key = current_key)
     current_g <- score_get(g_score, current)
 
     for(nb in neighbors_fn(current)) {
@@ -589,7 +589,7 @@ persistent_rewind_steps <- function(snapshots) {
   out <- integer(0)
   while(length(rest) > 0L) {
     popped <- pop_back(rest)
-    out <- c(out, as.integer(popped$element$step))
+    out <- c(out, as.integer(popped$value$step))
     rest <- popped$remaining
   }
   out

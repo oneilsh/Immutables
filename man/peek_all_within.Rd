@@ -4,7 +4,7 @@
 \alias{peek_all_within}
 \title{Peek All Intervals Within a Query Interval}
 \usage{
-peek_all_within(x, start, end, bounds = NULL)
+peek_all_within(x, start, end, bounds = NULL, as_list = FALSE)
 }
 \arguments{
 \item{x}{An \code{interval_index}.}
@@ -14,15 +14,26 @@ peek_all_within(x, start, end, bounds = NULL)
 \item{end}{Query interval end.}
 
 \item{bounds}{Optional boundary override. One of \code{"[)"}, \code{"[]"}, \code{"()"}, \code{"(]"}.}
+
+\item{as_list}{If \code{TRUE}, return a list with \code{values} (list of payloads),
+\code{starts}, and \code{ends} parallel vectors instead of an \code{interval_index}
+slice. Avoids the result-tree rebuild and is significantly faster for
+large match sets when the caller doesn't need a queryable result.}
 }
 \value{
-An \code{interval_index} slice of all matches (possibly empty).
+When \code{as_list = FALSE} (default): an \code{interval_index} slice of all
+matches (possibly empty). When \code{as_list = TRUE}: a named list with
+\code{values} (list of payloads), \code{starts}, and \code{ends}. For \code{numeric} /
+integer endpoint domains, \code{starts} and \code{ends} are atomic vectors; for
+class-bearing endpoint domains (e.g. \code{Date}, \code{POSIXct}) they are
+returned as lists to preserve the endpoint class.
 }
 \description{
 Peek All Intervals Within a Query Interval
 }
 \details{
-The returned \code{interval_index} can be inspected with \code{\link[=as.list]{as.list()}}.
+With \code{as_list = FALSE}, the returned \code{interval_index} can be inspected with
+\code{\link[=as.list]{as.list()}}.
 }
 \examples{
 ix <- interval_index("a", "b", "c", start = c(1, 2, 4), end = c(6, 3, 5))

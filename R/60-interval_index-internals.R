@@ -241,12 +241,39 @@
   st$out
 }
 
-# Runtime: O(1).
+# Cache of empty interval_index instances keyed by (endpoint_type, bounds,
+# monoid_names). Hot tree-traversal paths call .ivx_empty_like() many times
+# per query (e.g. partition early-return branches); recomputing the empty
+# tree + wrapping it each call is the dominant per-call constant. The cache
+# returns a precomputed empty for the common case (matching configuration)
+# and falls through to the slow path otherwise.
+.ivx_empty_like_cache <- new.env(parent = emptyenv())
+
+# Runtime: O(1) on cache hit; otherwise builds an empty + wraps once.
 # Builds an empty interval_index preserving class/attrs/monoids from template.
 # **Inputs:** `template` interval_index.
 # **Outputs:** empty interval_index with template metadata.
 # **Used by:** query miss/slice helpers and split partitioning.
 .ivx_empty_like <- function(template) {
+  ep <- attr(template, "ivx_endpoint_type", exact = TRUE)
+  b  <- attr(template, "ivx_bounds", exact = TRUE)
+  ms <- attr(template, "monoids", exact = TRUE)
+  if(!is.null(ms)) {
+    key <- paste0(
+      if(is.null(ep)) "_" else ep, "|",
+      if(is.null(b))  "_" else b,  "|",
+      paste(names(ms), collapse = ",")
+    )
+    cached <- .ivx_empty_like_cache[[key]]
+    if(!is.null(cached)) {
+      return(cached)
+    }
+    empty <- .ivx_wrap_like(template, empty_tree(monoids = ms))
+    .ivx_empty_like_cache[[key]] <- empty
+    return(empty)
+  }
+  # Fallback (no monoids resolvable): preserve original behavior, error if
+  # required is not met.
   ms <- resolve_tree_monoids(template, required = TRUE)
   .ivx_wrap_like(template, empty_tree(monoids = ms))
 }

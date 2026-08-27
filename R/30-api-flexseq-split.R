@@ -57,24 +57,24 @@ split_by_predicate.flexseq <- function(x, predicate, monoid_name) {
 #' @method split_at flexseq
 #' @export
 # Runtime: O(log n) for scalar index splits; O(n) for scalar name lookup + split.
-split_at.flexseq <- function(x, at, pull_index = FALSE) {
-  if(is.logical(at)) {
-    stop("`at` must be a scalar index or name.")
+split_at.flexseq <- function(x, index, pull_index = FALSE) {
+  if(is.logical(index)) {
+    stop("`index` must be a scalar index or name.")
   }
 
   idx <- NULL
-  if(is.numeric(at) && length(at) == 1L && !is.na(at) && at == as.integer(at)) {
+  if(is.numeric(index) && length(index) == 1L && !is.na(index) && index == as.integer(index)) {
     n <- as.integer(node_measure(x, ".size"))
-    idx <- .ft_assert_int_indices(as.integer(at), n)
+    idx <- .ft_assert_int_indices(as.integer(index), n)
     if(length(idx) != 1L) {
-      stop("`at` must be a single valid index.")
+      stop("`index` must be a single valid index.")
     }
     idx <- as.integer(idx[[1L]])
-  } else if(is.character(at) && length(at) == 1L && !is.na(at) && at != "") {
-    idx <- .ft_match_name_indices(x, at, strict_missing = TRUE)
+  } else if(is.character(index) && length(index) == 1L && !is.na(index) && index != "") {
+    idx <- .ft_match_name_indices(x, index, strict_missing = TRUE)
     idx <- as.integer(idx[[1L]])
   } else {
-    stop("`at` must be a positive scalar integer index or a scalar non-empty name.")
+    stop("`index` must be a positive scalar integer index or a scalar non-empty name.")
   }
 
   predicate <- function(v) v >= idx

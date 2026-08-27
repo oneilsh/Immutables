@@ -25,6 +25,6 @@ split_around_by_predicate.priority_queue <- function(t, predicate, monoid_name, 
 #' @method split_at priority_queue
 #' @export
 #' @noRd
-split_at.priority_queue <- function(x, at, pull_index = FALSE) {
+split_at.priority_queue <- function(x, index, pull_index = FALSE) {
   stop("`split_at()` is not supported for priority_queue. Cast first with `as_flexseq()`.")
 }

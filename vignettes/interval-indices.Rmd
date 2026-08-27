@@ -45,7 +45,7 @@ ix2
 
 ## Point and interval queries
 
-`peek_point()` returns the *first* (in FIFO order) element whose interval contains a query point; `peek_all_point()` returns all matches as an `interval_index` slice.
+`peek_point()` returns the *first* element (in canonical interval order — smallest start, with insertion/FIFO order breaking ties among equal starts) whose interval contains a query point; `peek_all_point()` returns all matches as an `interval_index` slice.
 
 ```{r pointops}
 peek_point(ix, point = 2)

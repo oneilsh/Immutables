@@ -58,6 +58,59 @@
   .ivx_wrap_like(x, tree)
 }
 
+# Runtime: O(k) in matched entry count.
+# Converts a list of interval entries to parallel-vector list shape used by
+# `as_list = TRUE` peek_all_* paths. Skips the result-tree rebuild.
+# **Inputs:** `entries` list of interval entry records; scalar character
+#   `endpoint_type` from `.ivx_endpoint_type_state()`.
+# **Outputs:** list(values=<list>, starts=<atomic-or-list>, ends=<atomic-or-list>).
+# **Used by:** .ivx_run_relation_query() as_list peek branches.
+.ivx_entries_to_list <- function(entries, endpoint_type) {
+  values <- lapply(entries, .subset2, "value")
+  starts_l <- lapply(entries, .subset2, "start")
+  ends_l   <- lapply(entries, .subset2, "end")
+  list(
+    values = values,
+    starts = .ivx_simplify_endpoints(starts_l, endpoint_type),
+    ends   = .ivx_simplify_endpoints(ends_l,   endpoint_type)
+  )
+}
+
+# Runtime: O(k).
+# Concatenates a list of scalar endpoints into an atomic vector when the
+# index's endpoint domain is the simple `numeric` family (covering integer
+# and double). For class-bearing domains (e.g. `Date`, `POSIXct`) and other
+# non-simple domains, preserves the original list so each element keeps its
+# class. Domain-driven design mirrors `.ivx_empty_endpoint_vector`.
+# **Inputs:** `xs` list of scalar endpoint values; scalar character
+#   `endpoint_type` from `.ivx_endpoint_type_state()`.
+# **Outputs:** atomic vector or list.
+# **Used by:** .ivx_entries_to_list().
+.ivx_simplify_endpoints <- function(xs, endpoint_type) {
+  if(length(xs) == 0L) {
+    return(list())
+  }
+  if(identical(endpoint_type, "numeric")) {
+    return(unlist(xs, use.names = FALSE))
+  }
+  xs
+}
+
+# Runtime: O(1).
+# Returns a typed empty endpoint vector matching the index's endpoint domain.
+# **Inputs:** scalar character `endpoint_type` (e.g. from `.ivx_endpoint_type_state`).
+# **Outputs:** zero-length atomic vector or empty list for non-simple domains.
+# **Used by:** .ivx_query_peek_miss() as_list branch.
+.ivx_empty_endpoint_vector <- function(endpoint_type) {
+  if(is.null(endpoint_type)) {
+    return(list())
+  }
+  switch(endpoint_type,
+    numeric = numeric(0),
+    list()
+  )
+}
+
 # Runtime: O(log n) near locate point depth.
 # Computes lower/upper bound index from prepared start key and strictness.
 # **Inputs:** `x` interval_index; scalar `key`; scalar logical `strict`.
@@ -67,6 +120,14 @@
   n <- length(x)
   if(n == 0L) {
     return(1L)
+  }
+
+  if(.ft_cpp_enabled()) {
+    idx <- .ft_cpp_ivx_bound_index(x, key, strict)
+    if(!is.na(idx)) {
+      return(idx)
+    }
+    # NA: key or measures not natively comparable; fall through to locate.
   }
 
   pred <- if(!isTRUE(strict)) {
@@ -155,6 +216,17 @@
     return(list(left = x, right = .ivx_empty_like(x)))
   }
 
+  ms <- resolve_tree_monoids(x, required = TRUE)
+  if(.ft_cpp_can_use(ms)) {
+    # Native 3-way split returns (left, value-at-idx, right). Re-attach the
+    # value-at-idx to the front of `right` to produce the 2-way split we need
+    # (left = elements 1..idx-1, right = elements idx..n).
+    s <- .ft_cpp_split_at_index(x, idx, ms)
+    return(list(
+      left  = .ivx_wrap_like(x, s$left),
+      right = .ivx_wrap_like(x, push_front(s$right, s$value))
+    ))
+  }
   s <- split_by_predicate(x, function(v) v >= idx, ".size")
   list(
     left = .ivx_wrap_like(x, s$left),
@@ -192,17 +264,77 @@
   .ivx_wrap_like(template, out)
 }
 
+# Runtime: O(r log n) for r contiguous runs of removed positions.
+# Removes sorted 1-based leaf positions `idx` from `x` by splicing: each
+# contiguous run is split out and the kept segments are concatenated back
+# together, so cost scales with the number of runs rather than the candidate
+# window size. The pop dispatch falls back to drain-and-rebuild when matches
+# are scattered into many runs.
+# **Inputs:** `x` interval_index; integer positions `idx`, sorted ascending.
+# **Outputs:** interval_index with those positions removed.
+# **Used by:** .ivx_run_relation_query() native pop splice path.
+.ivx_remove_index_runs <- function(x, idx) {
+  k <- length(idx)
+  if(k == 0L) {
+    return(x)
+  }
+  n <- length(x)
+  if(k >= n) {
+    return(.ivx_empty_like(x))
+  }
+  idx <- as.integer(idx)
+
+  new_run <- c(TRUE, diff(idx) != 1L)
+  run_starts <- idx[new_run]
+  run_ends <- idx[c(new_run[-1L], TRUE)]
+
+  # Kept segments are folded into `out` immediately rather than accumulated
+  # in a list: `l[[i]] <- tree` subassignment recursively marks the whole
+  # nested tree not-mutable (O(subtree size)), which would dominate the
+  # entire splice. Plain-variable rebinding has no such cost.
+  out <- NULL
+  rest <- x
+  consumed <- 0L  # count of original positions already split off the left
+  for(j in seq_along(run_starts)) {
+    a <- run_starts[[j]]
+    b <- run_ends[[j]]
+    s1 <- .ivx_split_at_index(rest, a - consumed)
+    if(length(s1$left) > 0L) {
+      out <- if(is.null(out)) s1$left else concat_trees(out, s1$left)
+    }
+    s2 <- .ivx_split_at_index(s1$right, b - a + 2L)
+    rest <- s2$right
+    consumed <- b
+  }
+  if(length(rest) > 0L) {
+    out <- if(is.null(out)) rest else concat_trees(out, rest)
+  }
+
+  if(is.null(out)) {
+    return(.ivx_empty_like(x))
+  }
+  .ivx_wrap_like(x, out)
+}
+
 # Runtime: O(1).
 # Standardized miss return for peek relation endpoints.
 # **Inputs:** `x` interval_index; `which` in {"first","all"}.
 # **Outputs:** NULL for first; empty interval_index for all.
 # **Used by:** .ivx_run_relation_query() miss branches.
-.ivx_query_peek_miss <- function(x, which = c("first", "all")) {
+.ivx_query_peek_miss <- function(x, which = c("first", "all"), as_list = FALSE) {
   which <- match.arg(which)
-  if(identical(which, "all")) {
-    return(.ivx_empty_like(x))
+  if(identical(which, "first")) {
+    return(NULL)
   }
-  NULL
+  if(isTRUE(as_list)) {
+    et <- .ivx_endpoint_type_state(x)
+    return(list(
+      values = list(),
+      starts = .ivx_empty_endpoint_vector(et),
+      ends   = .ivx_empty_endpoint_vector(et)
+    ))
+  }
+  .ivx_empty_like(x)
 }
 
 # Runtime: O(1).
@@ -359,11 +491,15 @@
 # - pop/all: list(elements=<interval_index>, remaining=<interval_index>).
 #
 # **Used by:** public query API (peek_*/pop_* endpoints).
-.ivx_run_relation_query <- function(x, spec, mode = c("peek", "pop"), which = c("first", "all")) {
+.ivx_run_relation_query <- function(x, spec, mode = c("peek", "pop"),
+                                    which = c("first", "all"),
+                                    as_list = FALSE) {
   mode <- match.arg(mode)
   which <- match.arg(which)
   ms <- resolve_tree_monoids(x, required = TRUE)
   use_window_fast_path <- isTRUE(.ft_cpp_can_use(ms))
+  # `as_list` only affects peek/all returns; pop paths still need rebuilt trees.
+  list_shape <- isTRUE(as_list) && identical(mode, "peek") && identical(which, "all")
 
   # Phase 1: derive candidate start-index window span from query-spec bounds.
   span <- .ivx_query_candidate_span(
@@ -376,20 +512,130 @@
   # if the span is empty we return no data (depending on peek/pop/which behavior)
   if(isTRUE(span$empty)) {
     if(identical(mode, "peek")) {
-      return(.ivx_query_peek_miss(x, which = which))
+      return(.ivx_query_peek_miss(x, which = which, as_list = list_shape))
     }
     return(.ivx_query_pop_miss(x, which = which))
+  }
+
+  # Native compound query path: walks the candidate subtree leaf-by-leaf
+  # with .ivx_max_end pruning (where applicable), avoiding the candidate-
+  # window materialisation. Covers all four predicate kinds for peek.
+  use_native_query <- isTRUE(getOption("immutables.ivx.cpp_scan", TRUE)) &&
+                      !is.null(spec$native) &&
+                      isTRUE(spec$native$endpoint_kind != 0L) &&
+                      !is.null(spec$native$bounds_flags) &&
+                      spec$native$relation_kind %in% c("point", "overlaps", "containing", "within")
+
+  if(isTRUE(use_native_query)) {
+    peek_all <- identical(mode, "peek") && identical(which, "all")
+    native_as_list <- peek_all && isTRUE(list_shape)
+    # Monoids are needed when the C++ side builds the peek/all slice-shape
+    # matched_tree during the walk; pop builds its result trees afterwards.
+    needs_tree <- peek_all && !isTRUE(list_shape)
+    ms <- if(needs_tree) resolve_tree_monoids(x, required = TRUE) else NULL
+
+    # Both peek and pop walk the full tree with matching restricted to the
+    # candidate window by leaf position, skipping the O(log n)
+    # split-and-rebuild partition entirely. Pop reconstructs its result trees
+    # from the matched entries and positions after the walk.
+    q <- .ivx_native_query(
+      candidate_tree = x,
+      relation_kind  = spec$native$relation_kind,
+      qlo            = spec$native$qlo,
+      qhi            = spec$native$qhi,
+      bounds_flags   = spec$native$bounds_flags,
+      endpoint_kind  = spec$native$endpoint_kind,
+      which          = which,
+      with_unmatched = FALSE,
+      monoids        = ms,
+      as_list        = native_as_list,
+      span_lo        = span$start,
+      span_hi        = span$end_excl
+    )
+
+    matched <- q$matched
+
+    if(identical(mode, "peek")) {
+      if(identical(which, "first")) {
+        return(if(length(matched) == 0L) NULL else .subset2(matched[[1L]], "value"))
+      }
+      # which == "all": consume the C++-built result shape directly.
+      if(length(matched) == 0L) {
+        return(.ivx_query_peek_miss(x, which = which, as_list = list_shape))
+      }
+      if(isTRUE(list_shape)) {
+        et <- .ivx_endpoint_type_state(x)
+        return(list(
+          values = q$values,
+          starts = .ivx_simplify_endpoints(q$starts_l, et),
+          ends   = .ivx_simplify_endpoints(q$ends_l,   et)
+        ))
+      }
+      return(.ivx_wrap_like(x, q$matched_tree))
+    }
+
+    # mode == "pop"
+    if(length(matched) == 0L) {
+      return(.ivx_query_pop_miss(x, which = which))
+    }
+
+    idx <- q$matched_indices
+    # The contiguous-run count decides the rebuild strategy: splicing costs
+    # ~2 O(log n) splits per run, while drain-and-rebuild costs O(window).
+    # Splice when matches form few runs (the common case); fall back to the
+    # drain walk when they are scattered across a large candidate window.
+    r_runs <- if(length(idx) <= 1L) 1L else sum(diff(idx) != 1L) + 1L
+    window <- span$end_excl - span$start
+    use_splice <- identical(which, "first") || r_runs <= max(4L, window %/% 100L)
+
+    if(use_splice) {
+      remaining <- .ivx_remove_index_runs(x, idx)
+      if(identical(which, "first")) {
+        e <- matched[[1L]]
+        return(list(value = .subset2(e, "value"),
+                    start = .subset2(e, "start"),
+                    end   = .subset2(e, "end"),
+                    remaining = remaining))
+      }
+      ms_pop <- resolve_tree_monoids(x, required = TRUE)
+      elements <- .ivx_wrap_like(x, .ivx_tree_from_ordered_entries(matched, ms_pop))
+      return(list(elements = elements, remaining = remaining))
+    }
+
+    # Scattered matches: drain-and-rebuild bounded by the candidate window.
+    # q$unmatched_tree is a bare structural tree; wrap before concat.
+    ms_pop <- resolve_tree_monoids(x, required = TRUE)
+    parts <- .ivx_partition_span(x, span)
+    q2 <- .ivx_native_query(
+      candidate_tree = parts$candidate,
+      relation_kind  = spec$native$relation_kind,
+      qlo            = spec$native$qlo,
+      qhi            = spec$native$qhi,
+      bounds_flags   = spec$native$bounds_flags,
+      endpoint_kind  = spec$native$endpoint_kind,
+      which          = which,
+      with_unmatched = TRUE,
+      monoids        = ms_pop,
+      as_list        = FALSE
+    )
+    unmatched_wrapped <- .ivx_wrap_like(x, q2$unmatched_tree)
+    remaining <- .ivx_concat3_like(x, parts$left, unmatched_wrapped, parts$right)
+    elements <- .ivx_wrap_like(x, q2$matched_tree)
+    return(list(elements = elements, remaining = remaining))
   }
 
   # Phase 2: C++-friendly window scan fast path for peek and first-hit pop.
   # When C++ backend is active, candidate-window scanning has lower constants
   # for read-heavy/first-hit queries than split+rebuild traversal.
+  # With native_query handling all eligible peek cases above, this block now
+  # serves pop first-hit and non-eligible peek (e.g. point match_at != "interval",
+  # non-numeric endpoints) via the R closure loop.
   if(isTRUE(use_window_fast_path) && (identical(mode, "peek") || identical(which, "first"))) {
     entries <- .ft_get_elems_at(x, seq.int(span$start, span$end_excl - 1L))
     n <- length(entries)
     if(n == 0L) {
       if(identical(mode, "peek")) {
-        return(.ivx_query_peek_miss(x, which = which))
+        return(.ivx_query_peek_miss(x, which = which, as_list = list_shape))
       }
       return(.ivx_query_pop_miss(x, which = which))
     }
@@ -413,7 +659,7 @@
 
     if(is.null(first_i)) {
       if(identical(mode, "peek")) {
-        return(.ivx_query_peek_miss(x, which = which))
+        return(.ivx_query_peek_miss(x, which = which, as_list = list_shape))
       }
       return(.ivx_query_pop_miss(x, which = which))
     }
@@ -430,7 +676,10 @@
 
     matched_entries <- entries[hit]
     if(length(matched_entries) == 0L) {
-      return(.ivx_query_peek_miss(x, which = which))
+      return(.ivx_query_peek_miss(x, which = which, as_list = list_shape))
+    }
+    if(isTRUE(list_shape)) {
+      return(.ivx_entries_to_list(matched_entries, endpoint_type = .ivx_endpoint_type_state(x)))
     }
     return(.ivx_slice_entries(x, matched_entries))
   }
@@ -440,7 +689,7 @@
   cand <- parts$candidate
   if(length(cand) == 0L) {
     if(identical(mode, "peek")) {
-      return(.ivx_query_peek_miss(x, which = which))
+      return(.ivx_query_peek_miss(x, which = which, as_list = list_shape))
     }
     return(.ivx_query_pop_miss(x, which = which))
   }
@@ -463,7 +712,10 @@
     }
 
     if(length(hit$matched_entries) == 0L) {
-      return(.ivx_query_peek_miss(x, which = which))
+      return(.ivx_query_peek_miss(x, which = which, as_list = list_shape))
+    }
+    if(isTRUE(list_shape)) {
+      return(.ivx_entries_to_list(hit$matched_entries, endpoint_type = .ivx_endpoint_type_state(x)))
     }
     return(.ivx_slice_entries(x, hit$matched_entries))
   }

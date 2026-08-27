@@ -349,7 +349,7 @@ plot_structure <- function(t1, vertex.size = 15, vertex.shape = "rounded_rect",
   }
   # Shrink default margins so the tree fills the panel; leave a little on
   # top for the optional `title`.
-  par(mar = c(0.2, 0.2, if(is.null(title)) 0.2 else 2, 0.2))
+  par(mar = c(0.2, 0.2, if(is.null(title)) 0.2 else 2, 0.2), family = "sans")
 
   if(is.function(node_label)) {
     vertex_ids <- igraph::V(g)$name
@@ -384,6 +384,7 @@ plot_structure <- function(t1, vertex.size = 15, vertex.shape = "rounded_rect",
        layout = igraph::layout_as_tree(g),
        vertex.label = vlabels,
        vertex.label.cex = auto_cex,
+       vertex.label.family = "sans",
        vertex.size = vertex.size,
        vertex.shape = vertex.shape,
        asp = asp,
@@ -391,6 +392,7 @@ plot_structure <- function(t1, vertex.size = 15, vertex.shape = "rounded_rect",
        edge.arrow.mode = 0,
        edge.width = edge.width,
        edge.label = ifelse(label_edges, t1_edge_df$label, ""),
+       edge.label.family = "sans",
        main = title,
        ...
   )
