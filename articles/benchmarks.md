@@ -7,18 +7,18 @@ type provided by `Immutables`. Each recorded repetition rebuilds the
 setup for size *n*, then times one operation on that fresh state with
 [`bench::mark()`](https://bench.r-lib.org/reference/mark.html).
 
-**NOTE**: This script takes \>48 hours to run in total as a result of
+**NOTE**: This script takes several hours to run in total as a result of
 the large number of tests and repetitions, run serially with full
 garbage collection between each. The numbers shown below are loaded from
 cached results shipped with the package; re-running the cells in this
 document regenerates them, as does executing the script version
-`data-raw/generate_publication_results.R`.
+`data-raw/replication/generate_publication_results.R`.
 
 ## Sequence operations
 
 ``` r
 
-sequence_sizes <- 2^(12 + 0:6) # 2^12 up to 2^18
+sequence_sizes <- fast_sizes(2^(12 + 0:6)) # 2^12 up to 2^18 (smallest 3 in fast mode)
 rows <- flexseq()
 
 for(n in sequence_sizes) {
@@ -90,7 +90,7 @@ if(!is.null(results_list$sequence)) {
   print(p_sequence)
   save_figure(p_sequence, "benchmarks-sequence.pdf", width = 9, height = 5)
 } else {
-  knitr::asis_output("*Benchmark results not yet generated. Run `data-raw/generate_publication_results.R` to populate.*")
+  knitr::asis_output("*Benchmark results not yet generated. Run `data-raw/replication/generate_publication_results.R` to populate.*")
 }
 ```
 
@@ -100,7 +100,7 @@ if(!is.null(results_list$sequence)) {
 
 ``` r
 
-pq_sizes <- 2^(12 + 0:6)
+pq_sizes <- fast_sizes(2^(12 + 0:6))
 rows <- flexseq()
 
 set.seed(42)
@@ -171,7 +171,7 @@ if(!is.null(results_list$pq)) {
 
 ``` r
 
-ord_sizes <- 2^(14 + 0:6) # crossover is at 2^23 for peek_key
+ord_sizes <- fast_sizes(2^(14 + 0:6)) # crossover is at 2^23 for peek_key
 rows <- flexseq()
 
 set.seed(99)
@@ -268,7 +268,7 @@ if(!is.null(results_list$ordered)) {
 
 ``` r
 
-ivx_sizes <- 2^(12 + 0:6)
+ivx_sizes <- fast_sizes(2^(12 + 0:6))
 rows <- flexseq()
 
 set.seed(123)
