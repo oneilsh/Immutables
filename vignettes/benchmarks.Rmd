@@ -106,10 +106,11 @@ This article measures individual operation times for each collection type
 provided by `Immutables`. Each recorded repetition rebuilds the setup for
 size *n*, then times one operation on that fresh state with `bench::mark()`.
 
-The numbers shown below are loaded from cached results shipped with the
-package; re-running `data-raw/generate_publication_results.R` regenerates
-them.
-
+**NOTE**: This script takes >48 hours to run in total as a result of the 
+large number of tests and repetitions, run serially with full garbage collection 
+between each. The numbers shown below are loaded from cached results shipped with the 
+package; re-running the cells in this document regenerates them, as does
+executing the script version `data-raw/generate_publication_results.R`.
 
 ## Sequence operations
 
@@ -269,7 +270,7 @@ if(!is.null(results_list$pq)) {
 ## Ordered sequence operations
 
 ```{r ordered-bench, eval=run_benchmarks, cache=FALSE}
-ord_sizes <- 2^(14 + 0:8)
+ord_sizes <- 2^(14 + 0:6) # crossover is at 2^23 for peek_key
 rows <- flexseq()
 
 set.seed(99)

@@ -17,9 +17,9 @@ title:
   short:     "\\pkg{Immutables} for R"
 abstract: >
   We present \pkg{Immutables}, an R package providing side-effect-free data structures
-  including catenable, indexable sequences that also serve as double-ended queues,
-  priority queues, key-ordered sequences, and interval indices for overlap and similar queries.
-  Based on monoid-annotated finger trees first described by Hinze and Paterson in 2006, all
+  including: catenable, indexable sequences that also serve as double-ended queues;
+  priority queues; key-ordered sequences; and interval indices for overlap and similar queries.
+  Based on monoid-annotated finger trees first described by Hinze and Paterson in 2006, almost all
   operations are fast, either $O(\log(n))$ or amortized constant time. Finally, a developer
   API exposes custom monoids and aggregations for extensibility. We describe the user and
   developer APIs, provide benchmarks against base-\proglang{R} and comparable implementations,
@@ -271,7 +271,7 @@ order. A warning is produced if this is not the requested order
 supported to preserve the ordering invariant.
 
 Also supported is \code{fapply()}, here calling
-functions accepting elements and keys, returning an ordered sequence 
+functions accepting elements and keys and returning an ordered sequence 
 with transformed elements, \code{loop()} (in key order), 
 and key-aware \code{merge()}. 
 
@@ -378,7 +378,7 @@ plot_structure(tasks2, node_label = function(node) {
 })
 ```
 
-```{r tasks-structure, echo=FALSE, dev="pdf", fig.cap="Internal structure of a monoid-annotated finger tree. User values are stored a leaves, illustrated with \\code{ID} and \\code{H} (for Hours). Leaves and internal nodes accumulate a \\code{total\\_time} (shown as \\code{Total}) measure using the associated monoid.", fig.align="center", fig.width=8, fig.height=3.5, out.width="0.95\\textwidth"}
+```{r tasks-structure, echo=FALSE, dev="pdf", fig.cap="Internal structure of a monoid-annotated finger tree. User values are stored at leaves, illustrated with \\code{ID} and \\code{H} (for Hours). Leaves and internal nodes accumulate a \\code{total\\_time} (shown as \\code{Total}) measure using the associated monoid.", fig.align="center", fig.width=8, fig.height=3.5, out.width="0.95\\textwidth"}
 set.seed(42)
 tasks <- lapply(1:11, 
                 function(i) {
@@ -575,7 +575,9 @@ Results in Figure \ref{fig:benchmarks-ordered} show that base-\proglang{R}
 \code{match()}-based lookup and logical indexing is highly optimized, achieving
 ~200$\mu s$ key lookups for $2^{18}$ elements. Nevertheless, the linear / logarithmic
 divide between implementations is evident, and ordered sequences outperform
-base-\proglang{R} lookup at between $2^{17}$ (131k) and $2^{22}$ (4.1m) elements. TODO verify 4.1m claim
+base-\proglang{R} lookup at between $2^{17}$ (131k) and $2^{20}$ (1m) elements,
+with the exception of \code{peek_key()}, where ordered sequences outperform at
+$2^{23}$ (8.3m) elements (not shown).
 
 ```{r benchmarks-ordered, echo=FALSE, out.width="0.95\\textwidth", fig.align="center", fig.cap="Benchmark timings for ordered sequence operations.", fig.pos="htb"}
 knitr::include_graphics("figures/benchmarks-ordered.pdf")
