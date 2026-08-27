@@ -27,11 +27,11 @@ Updated object of the same class as `x`.
 
 `insert()` is an S3 generic. Required arguments in `...` depend on `x`:
 
-- `priority_queue`: `element`, `priority` (optional `name`)
+- `priority_queue`: `value`, `priority` (optional `name`)
 
-- `ordered_sequence`: `element`, `key` (optional `name`)
+- `ordered_sequence`: `value`, `key` (optional `name`)
 
-- `interval_index`: `element`, `start`, `end` (optional `name`)
+- `interval_index`: `value`, `start`, `end` (optional `name`)
 
 This operation is persistent: `x` is not modified.
 

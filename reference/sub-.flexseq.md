@@ -85,6 +85,7 @@ Replacement behavior:
 ## Examples
 
 ``` r
+
 # $ extracts by name
 x <- as_flexseq(setNames(as.list(1:3), c("a", "b", "c")))
 x$b

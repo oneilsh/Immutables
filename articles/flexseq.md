@@ -8,6 +8,7 @@ arbitrary items. All updates return a new object and keep the original
 unchanged.
 
 ``` r
+
 x <- flexseq(1, 2, 3)
 x
 #> Unnamed flexseq with 3 elements.
@@ -52,6 +53,7 @@ ones; for efficient key/value stores consider using an
 [`ordered_sequence()`](https://oneilsh.github.io/immutables/reference/ordered_sequence.md).
 
 ``` r
+
 x <- flexseq(a = 1, b = 2, c = 3)
 x
 #> Named flexseq with 3 elements.
@@ -93,10 +95,11 @@ x
 In general indexing and slicing works as it does with lists: `[]`
 returns a sublist indexed by integer (by position), character vector (by
 name if named), or logical vector (by inclusion). Note that these
-operations are $O\left( k\log n \right)$ where $k$ is the length of the
-indexing vector.
+operations are $`O(k\log n)`$ where $`k`$ is the length of the indexing
+vector.
 
 ``` r
+
 x <- as_flexseq(letters[1:6])
 
 x[[3]]
@@ -133,6 +136,7 @@ is the symmetric counterpart to
 [`peek_front()`](https://oneilsh.github.io/immutables/reference/peek_front.md).
 
 ``` r
+
 x <- as_flexseq(4:6)
 
 x <- x |>
@@ -193,6 +197,7 @@ removes an element at a given index and returns `$value`/`$remaining`;
 inserts before a given index, or at `length(x) + 1` to append.
 
 ``` r
+
 x <- flexseq("a", "b", "c", "d")
 
 peek_at(x, 10)  # NULL, no error
@@ -244,6 +249,7 @@ flexseq, analygous to [`lapply()`](https://rdrr.io/r/base/lapply.html)
 for R lists.
 
 ``` r
+
 x <- as_flexseq(4:6)
 x2 <- as_flexseq(8:10)
 
@@ -296,6 +302,7 @@ performs a proper sorted/priority-aware combine.
 yielding elements left-to-right lazily without materializing a list.
 
 ``` r
+
 x <- flexseq("a", "b", "c", "d")
 
 loop(for (el in x) {
@@ -315,6 +322,7 @@ use [`as.list()`](https://rdrr.io/r/base/list.html) when you need names
 alongside values.
 
 ``` r
+
 x <- flexseq(a = 1, b = 2, c = 3)
 loop(for (el in x) print(el))
 #> [1] 1
@@ -338,6 +346,7 @@ count in O(1), and [`str()`](https://rdrr.io/r/utils/str.html) gives a
 compact diagnostic display.
 
 ``` r
+
 x <- flexseq(a = 1, b = 2, c = 3)
 
 as.list(x)

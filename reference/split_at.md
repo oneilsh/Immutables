@@ -5,7 +5,7 @@ Splits by a single one-based position or a single element name.
 ## Usage
 
 ``` r
-split_at(x, at, pull_index = FALSE)
+split_at(x, index, pull_index = FALSE)
 ```
 
 ## Arguments
@@ -14,7 +14,7 @@ split_at(x, at, pull_index = FALSE)
 
   A `flexseq`.
 
-- at:
+- index:
 
   A single positive integer position or a single character name.
 
@@ -32,11 +32,11 @@ A split result with shape controlled by `pull_index`.
 
 ## Details
 
-`split_at(x, at, pull_index = FALSE)` is a convenience wrapper around
+`split_at(x, index, pull_index = FALSE)` is a convenience wrapper around
 [`split_around_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_around_by_predicate.md)
 using positional scanning.
 
-`split_at(x, at, pull_index = TRUE)` is the two-way variant using
+`split_at(x, index, pull_index = TRUE)` is the two-way variant using
 [`split_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_by_predicate.md).
 
 ## Examples

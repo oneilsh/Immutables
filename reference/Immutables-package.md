@@ -40,11 +40,11 @@ via combinations of monoids and measures.
 
 Useful links:
 
-- <https://oneilsh.github.io/immutables/>
+- <https://oneilsh.github.io/Immutables/>
 
-- <https://github.com/oneilsh/immutables>
+- <https://github.com/oneilsh/Immutables>
 
-- Report bugs at <https://github.com/oneilsh/immutables/issues>
+- Report bugs at <https://github.com/oneilsh/Immutables/issues>
 
 ## Author
 

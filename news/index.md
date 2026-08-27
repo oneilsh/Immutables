@@ -1,6 +1,34 @@
 # Changelog
 
+## Immutables 1.1.0
+
+CRAN release: 2026-08-21
+
+### New features
+
+- `interval_index` queries and removals now run through a native C++
+  engine, yielding large speedups.
+- Interval endpoints now use the same native query fast path as other
+  structures for `character`, `Date`, or `POSIXct` (in addition to
+  numeric and integer) endpoints.
+
+### Documentation and fixes
+
+- Corrected the documented return field of the interval `pop_*`
+  functions to `$value`
+- Clarified that
+  [`peek_point()`](https://oneilsh.github.io/immutables/reference/peek_point.md)
+  and the other “first match” interval queries return the match in
+  canonical interval order: smallest start, with insertion/FIFO order
+  breaking ties.
+- Hardened the pure-R reference tree builder against C-stack overflow
+  when constructing very large structures, by replacing a deep recursion
+  in the bulk builder with iterative node grouping.
+- Reworking benchmarks vignette in preparation for publication.
+
 ## Immutables 1.0.1
+
+CRAN release: 2026-04-28
 
 - CRAN resubmission. Addresses reviewer feedback:
   - Added a reference to Hinze and Paterson (2006)

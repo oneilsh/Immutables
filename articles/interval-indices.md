@@ -14,6 +14,7 @@ the interval endpoints, and `$remaining` the rest of the index without
 that element.
 
 ``` r
+
 ix <- interval_index(
   "A", "B", "C",
   start = c(1, 2, 4),
@@ -41,6 +42,7 @@ start/end vectors, useful when endpoints are already in separate
 vectors.
 
 ``` r
+
 ix2 <- as_interval_index(c("phase1", "phase2", "phase3"), start = c(1, 3, 2), end = c(4, 5, 6))
 ix2
 #> Unnamed interval_index with 3 elements, default query bounds [start, end).
@@ -64,12 +66,14 @@ interval metadata).
 ## Point and interval queries
 
 [`peek_point()`](https://oneilsh.github.io/immutables/reference/peek_point.md)
-returns the *first* (in FIFO order) element whose interval contains a
-query point;
+returns the *first* element (in canonical interval order — smallest
+start, with insertion/FIFO order breaking ties among equal starts) whose
+interval contains a query point;
 [`peek_all_point()`](https://oneilsh.github.io/immutables/reference/peek_all_point.md)
 returns all matches as an `interval_index` slice.
 
 ``` r
+
 peek_point(ix, point = 2)
 #> [1] "A"
 peek_all_point(ix, point = 2)
@@ -92,6 +96,7 @@ returns `$elements` (an interval_index of removed matches) and
 `$remaining`.
 
 ``` r
+
 res <- pop_point(ix, 2)
 res$value
 #> [1] "A"
@@ -119,6 +124,7 @@ retiring at a specific event point. `bounds` is ignored for these modes
 (coordinate equality is structural).
 
 ``` r
+
 # Entries whose start coordinate equals 2
 peek_all_point(ix, point = 2, match_at = "start")
 #> Unnamed interval_index with 1 element, default query bounds [start, end).
@@ -151,6 +157,7 @@ Interval-vs-interval queries select overlaps of different kinds. First
 we’ll build a new index to query:
 
 ``` r
+
 ix3 <- interval_index(
   "narrow", "wide", "right", "inner",
   start = c(2, 1, 4, 3),
@@ -183,6 +190,7 @@ returns intervals that fully contain the query range.
 returns intervals fully contained by the query range.
 
 ``` r
+
 # overlaps [2, 5]: any shared point
 peek_all_overlaps(ix3, start = 2, end = 5)
 #> Unnamed interval_index with 4 elements, default query bounds [start, end).
@@ -246,6 +254,7 @@ on this index don’t specify their own. Query functions (`peek_*` /
 call.
 
 ``` r
+
 edge <- interval_index("E", start = 1, end = 3, default_query_bounds = "[)")
 
 # right endpoint excluded by default
@@ -263,6 +272,7 @@ match any query. Use `"[]"` if you need point intervals where
 `start == end`.
 
 ``` r
+
 # [2, 2) contains nothing under half-open bounds
 pt_open <- interval_index("X", start = 2, end = 2, default_query_bounds = "[)")
 peek_point(pt_open, point = 2)
@@ -280,6 +290,7 @@ peek_point(pt_closed, point = 2)
 adds an element preserving interval start order.
 
 ``` r
+
 ix4 <- insert(ix, "D", start = 2, end = 6)
 ix4
 #> Unnamed interval_index with 4 elements, default query bounds [start, end).
@@ -306,6 +317,7 @@ return the current smallest start and largest end endpoints (not the
 stored elements).
 
 ``` r
+
 min_endpoint(ix)
 #> [1] 1
 max_endpoint(ix)
@@ -321,6 +333,7 @@ Query and endpoint helpers are non-throwing on empty indices, and
 checking.
 
 ``` r
+
 empty_ix <- interval_index()
 length(empty_ix)
 #> [1] 0
@@ -350,6 +363,7 @@ index-based assignment may break the ordering invariant. Named and
 unnamed elements cannot be mixed within one index.
 
 ``` r
+
 ix_named <- as_interval_index(
   setNames(list("alice", "bob", "carol"), c("a", "b", "c")),
   start = c(1, 3, 2),
@@ -404,6 +418,7 @@ read-only, and the return value replaces the stored element (similar to
 [`lapply()`](https://rdrr.io/r/base/lapply.html) for named R lists).
 
 ``` r
+
 fapply(ix, function(value, start, end) paste0(value, "[", start, ",", end, "]"))
 #> Unnamed interval_index with 3 elements, default query bounds [start, end).
 #> 
@@ -427,6 +442,7 @@ dropped from each yield; use
 if your callback needs `(value, start, end)`.
 
 ``` r
+
 loop(for (v in ix) print(v))
 #> [1] "A"
 #> [1] "B"
@@ -447,6 +463,7 @@ O(log(min(m, n))) via concat. The reserved `.ivx_min_end` /
 queries work immediately on the result.
 
 ``` r
+
 a <- as_interval_index(c("A1", "A2"), start = c(1, 5), end = c(4, 8))
 b <- as_interval_index(c("B1", "B2"), start = c(3, 7), end = c(6, 10))
 m <- merge(a, b)

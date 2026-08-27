@@ -19,6 +19,7 @@ end.
 Maintainer note: re-render one demo asset
 
 ``` r
+
 source("vignettes/articles/helpers/render_algorithm_demo_assets.R")
 render_algorithm_demo_assets(demos = "sweep_line")
 ```
@@ -52,6 +53,7 @@ flexseq. Because these structures are immutable, we needn’t worry about
 the active set changing as the algorithm proceeds.
 
 ``` r
+
 items  <- c("a", "b", "c", "d")
 starts <- c( 1,   2,   3,   4)
 ends   <- c( 3,   5,   5,   6)
@@ -111,7 +113,7 @@ can replay the sweep with the intersection list growing step by step.
 Computing convex hull also utilizes a sweep line method, or rather a
 pair of sweeps, at least for [Andrew’s monotone
 chain](https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain)
-method. After sorting the points by $x$ value, we sweep once to build
+method. After sorting the points by $`x`$ value, we sweep once to build
 the lower hull, and then sweep again for the upper hull. Each sweep uses
 a stack: push the next point, then pop while the last three points turn
 the wrong way.

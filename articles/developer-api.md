@@ -46,6 +46,7 @@ recursively, and cached for fast access at any level.
 This monoid keeps track of the sum of values:
 
 ``` r
+
 sum_monoid <- measure_monoid(
   f = `+`,
   i = 0,
@@ -61,6 +62,7 @@ which accepts a named list of monoids. We can pass
 information:
 
 ``` r
+
 set.seed(42)
 task_times <- runif(20, min = 1, max = 10) |>
   round(digits = 1) |>
@@ -101,6 +103,7 @@ functions visualizes the internal tree layout. Passing a function to
 measures produced by monoids:
 
 ``` r
+
 plot_structure(x, node_label = function(node) {
   if(node$type == "Element") sprintf("%.1f\nΣ=%.1f", node$element, node$measures$sum)
   else sprintf("Σ=%.1f", node$measures$sum)
@@ -110,8 +113,8 @@ plot_structure(x, node_label = function(node) {
 ![](developer-api_files/figure-html/unnamed-chunk-3-1.png)
 
 The tree now caches cumulative sum annotations at every internal node,
-enabling $O(logn)$ search by accumulated sum. Setting `overwrite = TRUE`
-replaces an existing monoid with the same name.
+enabling $`O(log n)`$ search by accumulated sum. Setting
+`overwrite = TRUE` replaces an existing monoid with the same name.
 
 Each structure type reserves certain monoid names for internal use
 (e.g. `.size`, `.named_count`, `.pq_min`). Attempting to add a monoid
@@ -131,6 +134,7 @@ This means a monoid that works on one structure type may not work on
 another. Here is a monoid that sums keys on an `ordered_sequence`:
 
 ``` r
+
 key_sum <- measure_monoid(`+`, 0L, function(entry) as.integer(entry$key))
 
 os <- as_ordered_sequence(c("alice", "bob", "carol"), keys = c(10, 20, 30))
@@ -162,16 +166,17 @@ Predicate-based operations scan accumulated monoid values left-to-right
 and find the first point where a predicate transitions from `FALSE` to
 `TRUE`. The predicate must be *monotonic*: once it returns `TRUE`, it
 must stay `TRUE` for all subsequent accumulated values. This is what
-enables the $O(logn)$ search for a single split point.
+enables the $`O(log n)`$ search for a single split point.
 
 [`locate_by_predicate()`](https://oneilsh.github.io/immutables/reference/locate_by_predicate.md)
 finds the *first* element where the predicate fires, without splitting
 the tree. With `include_metadata = TRUE` it returns additional scan
 information. The predicate function is applied to accumulated measure
 values for a given monoid name; here we find the first element where the
-accumulated sum exceeds $25$.
+accumulated sum exceeds $`25`$.
 
 ``` r
+
 loc <- locate_by_predicate(x, function(v) v > 25, "sum", include_metadata = TRUE)
 str(loc)
 #> List of 3
@@ -194,14 +199,15 @@ the match), `hit_measure` (the matched element’s own accumulated
 measure), `right_measure` (accumulated value of everything after), and
 `index` (1-based position). In this example index 4 is where the first
 time where the accumulated sum is greater than 25, which we can verify
-in the plot above ($9.2 + 9.4 + 3.6 = 22.2$, adding in $8.5$ brings the
-sum to $30.7$).
+in the plot above ($`9.2 + 9.4 + 3.6 = 22.2`$, adding in $`8.5`$ brings
+the sum to $`30.7`$).
 
 [`split_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_by_predicate.md)
 splits the structure at the predicate point, returning `$left` and
 `$right`. The matched element is the first element of `$right`:
 
 ``` r
+
 s <- split_by_predicate(x, function(v) v > 25, "sum")
 s$left
 #> Unnamed flexseq with 3 elements.
@@ -241,6 +247,7 @@ is similar but extracts the matched element into a separate `$value`
 field:
 
 ``` r
+
 sa <- split_around_by_predicate(x, function(v) v > 25, "sum")
 sa$left
 #> Unnamed flexseq with 3 elements.
@@ -285,7 +292,8 @@ is a convenience wrapper that splits by position using the built-in
 it uses the `sum` operator):
 
 ``` r
-split_at(x, at = 5)
+
+split_at(x, index = 5)
 #> $left
 #> Unnamed flexseq with 4 elements.
 #> 
@@ -357,8 +365,8 @@ subtree absorbed a slot with this priority yet?”, and hand it to
 [`split_around_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_around_by_predicate.md)
 over `.pq_min`. The descent uses cached subtree aggregates to prune
 branches whose min is a different value, so the whole thing runs in
-$O\left( \log n \right)$ even though the leaves themselves are not in
-priority order.
+$`O(\log n)`$ even though the leaves themselves are not in priority
+order.
 
 ### Ordered sequence: `.oms_max_key`
 
@@ -396,6 +404,7 @@ and use it to find all positions where a query pattern occurs as a
 prefix.
 
 ``` r
+
 sequence <- "ACGCGCTCGCGCATAGTCGCGCCTG"
 query <- "CGCGC" # goal: find indices where query occurs
 ```
@@ -433,6 +442,7 @@ We can add the monoid to an empty tree, and values for new entries will
 be automatically computed on addition/removal etc.
 
 ``` r
+
 max_seq <- measure_monoid(max, i = -Inf, measure = function(entry) entry$key)
 
 subseqs <- ordered_sequence()
@@ -443,6 +453,7 @@ Next we index every position in the DNA string by its length-10
 subsequence, inserting them into the structure:
 
 ``` r
+
 for(i in 1:nchar(sequence)) {
   subseq <- substr(sequence, i, i + 10)
   subseqs <- insert(subseqs, i, key = subseq)
@@ -472,6 +483,7 @@ Now we can search for all subsequences starting with the query. First,
 split to find the first entry where the measure is `>=` the query:
 
 ``` r
+
 first_split <- split_by_predicate(subseqs, function(m) query <= m, "max_seq")
 first_split$left
 #> Unnamed ordered_sequence with 7 elements.
@@ -527,6 +539,7 @@ query *and* no longer starts with it (resulting in the index of the
 first non-match in the run).
 
 ``` r
+
 if(length(first_split$right) > 0) {
   right_measures = get_measures(first_split$right, "max_seq")
   first_measure = right_measures[[1]]
@@ -560,6 +573,7 @@ Finally we can extract the original string positions from the matching
 entries:
 
 ``` r
+
 positions <- fapply(matches, function(value, key) value) |> unlist()
 positions
 #> [1]  8 18  2
@@ -572,9 +586,10 @@ checks structural invariants (monoid consistency, node structure) across
 the entire tree.
 [`validate_name_state()`](https://oneilsh.github.io/immutables/reference/validate_name_state.md)
 verifies that a tree is either fully unnamed or fully named with unique,
-non-empty names. Both are $O(n)$ and intended for debugging and tests.
+non-empty names. Both are $`O(n)`$ and intended for debugging and tests.
 
 ``` r
+
 validate_tree(x)
 validate_name_state(flexseq(a = 1, b = 2, c = 3))
 ```

@@ -14,6 +14,7 @@ the priority, and `$remaining` the rest of the priority queue without
 those elements.
 
 ``` r
+
 x <- priority_queue("task_a", "task_b", "task_c", priorities = c(3, 1, 2))
 x
 #> Unnamed priority_queue with 3 elements.
@@ -58,6 +59,7 @@ priority vector. useful when priorities are already in a separate
 vector.
 
 ``` r
+
 q <- as_priority_queue(letters[1:4], priorities = c(3, 1, 2, 1))
 q
 #> Unnamed priority_queue with 4 elements.
@@ -88,6 +90,7 @@ priorities: in `$elements` the elements peeked/popped and in
 symmetrically on the maximum-priority tie run.
 
 ``` r
+
 y <- priority_queue() |>
   insert("Jones", priority = "B") |>
   insert("Smith", priority = "A") |>
@@ -153,6 +156,7 @@ parameter defaulting to `FALSE` controls whether priority values are
 included.
 
 ``` r
+
 as.list(res2$elements) |> str()
 #> List of 2
 #>  $ :List of 2
@@ -174,6 +178,7 @@ Peek/pop helpers are non-throwing on empty queues,
 checking.
 
 ``` r
+
 empty_q <- priority_queue()
 length(empty_q)
 #> [1] 0
@@ -199,6 +204,7 @@ return the current extrema *priority* (not the stored element), in O(1)
 via cached monoid state.
 
 ``` r
+
 q <- priority_queue("a", "b", "c", priorities = c(3, 1, 2))
 min_priority(q)
 #> [1] 1
@@ -219,6 +225,7 @@ all replacement forms (`[<-`, `[[<-`, `$<-`) error; cast to
 first to mutate.
 
 ``` r
+
 q <- priority_queue(a = "task-a", b = "task-b", priorities = c(2, 1)) |>
   insert("task-c", priority = 3, name = "c")
 
@@ -253,6 +260,7 @@ it accepts a third argument — priorities and names are passed in
 read-only, and the return value replaces the stored element.
 
 ``` r
+
 q <- priority_queue("alice", "bob", "carol", priorities = c(3, 1, 2))
 fapply(q, function(value, priority) toupper(value))
 #> Unnamed priority_queue with 3 elements.
@@ -275,10 +283,11 @@ fapply(q, function(value, priority) toupper(value))
 priority-ascending order, yielding bare values. Traversal is driven by
 repeated
 [`pop_min()`](https://oneilsh.github.io/immutables/reference/pop_min.md),
-so full traversal is $O\left( n\log n \right)$ ($O\left( \log n \right)$
-per step); ties within equal priority follow insertion order.
+so full traversal is $`O(n \log n)`$ ($`O(\log n)`$ per step); ties
+within equal priority follow insertion order.
 
 ``` r
+
 q <- priority_queue("task_a", "task_b", "task_c", priorities = c(3, 1, 2))
 loop(for (v in q) print(v))
 #> [1] "task_b"
@@ -301,6 +310,7 @@ monoids recompute automatically on the merged tree, so extremum queries
 work immediately on the result.
 
 ``` r
+
 a <- priority_queue("x", "y", priorities = c(5, 1))
 b <- priority_queue("z", priorities = 3)
 m <- merge(a, b)
@@ -324,6 +334,7 @@ monoids are dropped. To instead obtain a `flexseq` of entry records
 [`as.list()`](https://rdrr.io/r/base/list.html).
 
 ``` r
+
 y <- priority_queue() |>
   insert("Jones", priority = "B") |>
   insert("Smith", priority = "A") |>

@@ -14,6 +14,7 @@ a list with `$value` containing the stored element, `$key` the key, and
 `$remaining` the rest of the sequence without that element.
 
 ``` r
+
 xs <- ordered_sequence("a1", "b1", "b2", "c1", keys = c(1, 2, 2, 3))
 xs
 #> Unnamed ordered_sequence with 4 elements.
@@ -39,6 +40,7 @@ variant builds a sequence from a vector or list of elements paired with
 a key vector, useful when keys are already in a separate vector.
 
 ``` r
+
 xs2 <- as_ordered_sequence(c(3, 1, 2, 1), keys = letters[1:4])
 xs2
 #> Unnamed ordered_sequence with 4 elements.
@@ -66,6 +68,7 @@ monoids are dropped (see `as.list` to convert and preservekey metadata).
 Insertion is by key, and *keys may be duplicated*.
 
 ``` r
+
 seq <- as_ordered_sequence(1:3, keys = letters[1:3])
 seq2 <- insert(seq, 10, key = "b")
 seq2
@@ -94,6 +97,7 @@ removes the entire tie run for that key, returning `$elements` (an
 ordered sequence of removed matches) and `$remaining`.
 
 ``` r
+
 one <- pop_key(seq, key = "b")
 one$value
 #> [1] 2
@@ -137,6 +141,7 @@ returns one element, the first in insertion order.
 returns an ordered sequence with all matching keys.
 
 ``` r
+
 count_key(seq, key = "b")
 #> [1] 1
 peek_key(seq, key = "b")
@@ -154,6 +159,7 @@ Counting and accessing elements over query ranges support
 inclusive/exclusive on both sides (defaulting to `TRUE`).
 
 ``` r
+
 elements_between(seq, from_key = "b", to_key ="c", include_from = TRUE, include_to = TRUE)
 #> Unnamed ordered_sequence with 2 elements.
 #> 
@@ -188,6 +194,7 @@ Together they support successor queries (“find the nearest entry at or
 above this key”) and duplicate counting via index arithmetic.
 
 ``` r
+
 seq <- as_ordered_sequence(1:4, keys = c("b", "d", "d", "f"))
 
 lower_bound(seq, key = "d") |> str()
@@ -210,6 +217,7 @@ returns the next entry at or above, useful for nearest-match lookups.
 Both return `found = FALSE` when no keys satisfy the condition.
 
 ``` r
+
 lower_bound(seq, key = "a") |> str()
 #> List of 4
 #>  $ found: logi TRUE
@@ -231,6 +239,7 @@ the count of entries with key `k` (this is what
 does internally).
 
 ``` r
+
 upper_bound(seq, key = "d")$index - lower_bound(seq, key = "d")$index
 #> [1] 2
 count_key(seq, key = "d")
@@ -243,6 +252,7 @@ and
 return the current minimum and maximum *keys* (not the stored elements).
 
 ``` r
+
 min_key(xs)
 #> [1] 1
 max_key(xs)
@@ -258,6 +268,7 @@ Key and range helpers are non-throwing on empty sequences, and
 checking.
 
 ``` r
+
 empty_os <- ordered_sequence()
 length(empty_os)
 #> [1] 0
@@ -280,6 +291,7 @@ or [`as.list()`](https://rdrr.io/r/base/list.html). Named and unnamed
 elements cannot be mixed within one sequence.
 
 ``` r
+
 xs_named <- as_ordered_sequence(
   setNames(list("alice", "bob", "carol"), c("a", "b", "c")),
   keys = c(3, 1, 2)
@@ -335,6 +347,7 @@ value replaces the stored element at the associated key (and name if
 named).
 
 ``` r
+
 xs_t <- ordered_sequence("alice", "bob", "carol", keys = c(3, 1, 2))
 fapply(xs_t, function(value, key) toupper(value))
 #> Unnamed ordered_sequence with 3 elements.
@@ -361,6 +374,7 @@ if your callback needs the key alongside the value, or iterate over
 keyed by name.
 
 ``` r
+
 loop(for (v in xs_t) print(v))
 #> [1] "bob"
 #> [1] "carol"
@@ -381,6 +395,7 @@ when the key ranges are disjoint it collapses to O(log(min(m, n))) via
 concat.
 
 ``` r
+
 a <- as_ordered_sequence(c("a1", "a2", "a3"), keys = c(1, 3, 5))
 b <- as_ordered_sequence(c("b1", "b2", "b3"), keys = c(2, 3, 6))
 merge(a, b)

@@ -28,8 +28,8 @@ pop_overlaps(x, start, end, bounds = NULL)
 
 ## Value
 
-A list with `element`, `start`, `end`, and `remaining`. On miss:
-`element`, `start`, and `end` are `NULL`.
+A list with `value`, `start`, `end`, and `remaining`. On miss: `value`,
+`start`, and `end` are `NULL`.
 
 ## Details
 

@@ -12,8 +12,8 @@
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Developer API">
@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Immutables</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/oneilsh/immutables/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/oneilsh/Immutables/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -75,7 +75,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Developer API</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/oneilsh/immutables/blob/main/vignettes/developer-api.Rmd" class="external-link"><code>vignettes/developer-api.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/oneilsh/Immutables/blob/main/vignettes/developer-api.Rmd" class="external-link"><code>vignettes/developer-api.Rmd</code></a></small>
       <div class="d-none name"><code>developer-api.Rmd</code></div>
     </div>
 
@@ -178,7 +178,7 @@ monoids:</p>
 <p><img src="developer-api_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="960"></p>
 <p>The tree now caches cumulative sum annotations at every internal
 node, enabling
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(log n)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(log n)</annotation></semantics></math>
 search by accumulated sum. Setting <code>overwrite = TRUE</code>
 replaces an existing monoid with the same name.</p>
 <p>Each structure type reserves certain monoid names for internal use
@@ -243,7 +243,7 @@ from <code>FALSE</code> to <code>TRUE</code>. The predicate must be
 <em>monotonic</em>: once it returns <code>TRUE</code>, it must stay
 <code>TRUE</code> for all subsequent accumulated values. This is what
 enables the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(log n)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(log n)</annotation></semantics></math>
 search for a single split point.</p>
 <p><code><a href="../reference/locate_by_predicate.html">locate_by_predicate()</a></code> finds the <em>first</em> element
 where the predicate fires, without splitting the tree. With
@@ -359,7 +359,7 @@ using the built-in <code>.size</code> monoid (which counts nodes; each
 leaf node’s measure is <code>1</code> and it uses the <code>sum</code>
 operator):</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/split_at.html">split_at</a></span><span class="op">(</span><span class="va">x</span>, at <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/split_at.html">split_at</a></span><span class="op">(</span><span class="va">x</span>, index <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $left</span></span>
 <span><span class="co">#&gt; Unnamed flexseq with 4 elements.</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -432,7 +432,7 @@ hand it to <code><a href="../reference/split_around_by_predicate.html">split_aro
 <code>.pq_min</code>. The descent uses cached subtree aggregates to
 prune branches whose min is a different value, so the whole thing runs
 in
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>log</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mi>n</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math>
 even though the leaves themselves are not in priority order.</p>
 </div>
 <div class="section level3">
@@ -624,7 +624,7 @@ matching entries:</p>
 consistency, node structure) across the entire tree.
 <code><a href="../reference/validate_name_state.html">validate_name_state()</a></code> verifies that a tree is either fully
 unnamed or fully named with unique, non-empty names. Both are
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><mi>n</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math>
 and intended for debugging and tests.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/validate_tree.html">validate_tree</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
@@ -641,7 +641,7 @@ and intended for debugging and tests.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>
