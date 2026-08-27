@@ -23,17 +23,30 @@ library(bench)
 library(ggplot2)
 library(dplyr)
 
-# Two env-var gates control this vignette:
-#   IMMUTABLES_RUN_SLOW=true       -> re-run all benchmarks and save per-batch
-#                                     results to inst/extdata/benchmarks-*.rds
-# When neither is set (CRAN, ordinary pkgdown build) the vignette loads the
-# cached results and renders plots without re-timing.
+# Three run modes, selected by environment variable:
+#   IMMUTABLES_RUN_SLOW=true -> full re-run: all sizes, 10 reps per op. Writes
+#                               the canonical inst/extdata/benchmarks-*.rds and
+#                               paper/figures/benchmarks-*.pdf used by the paper.
+#   IMMUTABLES_RUN_FAST=true -> quick re-run for reviewers: only the smallest
+#                               few sizes, 1 rep per op. Writes SEPARATE
+#                               *-fast.rds / *-fast.pdf files so the canonical
+#                               slow results are never overwritten. Finishes in
+#                               well under an hour on a regular PC.
+#   (neither set)            -> CRAN / ordinary pkgdown build: load the cached
+#                               results and render plots without re-timing.
 #
 # Results are cached per batch (one .rds per section) so a single section can
-# be re-timed in isolation; each bench chunk writes its own .rds; each plot chunk 
+# be re-timed in isolation; each bench chunk writes its own .rds; each plot chunk
 # writes its own .pdf.
-run_benchmarks <- identical(Sys.getenv("IMMUTABLES_RUN_SLOW"), "true")
-repeats <- 10L
+run_slow <- identical(Sys.getenv("IMMUTABLES_RUN_SLOW"), "true")
+run_fast <- identical(Sys.getenv("IMMUTABLES_RUN_FAST"), "true")
+run_benchmarks <- run_slow || run_fast
+
+# Fast mode uses a single repetition and only the smallest few sizes per batch;
+# `suffix` keeps its outputs (.rds and .pdf) in separate files.
+repeats <- if(run_fast) 1L else 10L
+suffix  <- if(run_fast) "-fast" else ""
+fast_sizes <- function(s) if(run_fast) utils::head(s, 3L) else s
 
 proj_root <- tryCatch(
   rprojroot::find_root(rprojroot::is_r_package),
@@ -78,7 +91,8 @@ bench_one <- function(rows, impl, op, n, repeats, setup, bench) {
 # Per-batch cache helpers. Each batch is one data.frame persisted to its own
 # file so a single section can be re-benched without touching the others.
 .batch_path <- function(batch) {
-  file.path(proj_root, "inst", "extdata", paste0("benchmarks-", batch, ".rds"))
+  file.path(proj_root, "inst", "extdata",
+            paste0("benchmarks-", batch, suffix, ".rds"))
 }
 save_batch <- function(batch) {
   dir.create(file.path(proj_root, "inst", "extdata"),
@@ -88,6 +102,8 @@ save_batch <- function(batch) {
 save_figure <- function(plot, file, width, height) {
     out_dir <- file.path(proj_root, "paper", "figures")
     dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+    # In fast mode, redirect e.g. benchmarks-sequence.pdf -> benchmarks-sequence-fast.pdf
+    file <- sub("\\.pdf$", paste0(suffix, ".pdf"), file)
     ggsave(file.path(out_dir, file), plot, width = width, height = height)
 }
 ```
@@ -106,17 +122,17 @@ This article measures individual operation times for each collection type
 provided by `Immutables`. Each recorded repetition rebuilds the setup for
 size *n*, then times one operation on that fresh state with `bench::mark()`.
 
-**NOTE**: This script takes >48 hours to run in total as a result of the 
+**NOTE**: This script takes several hours to run in total as a result of the 
 large number of tests and repetitions, run serially with full garbage collection 
 between each. The numbers shown below are loaded from cached results shipped with the 
 package; re-running the cells in this document regenerates them, as does
-executing the script version `data-raw/generate_publication_results.R`.
+executing the script version `data-raw/replication/generate_publication_results.R`.
 
 ## Sequence operations
 
 
 ```{r sequence-bench, eval=run_benchmarks, cache=FALSE}
-sequence_sizes <- 2^(12 + 0:6) # 2^12 up to 2^18
+sequence_sizes <- fast_sizes(2^(12 + 0:6)) # 2^12 up to 2^18 (smallest 3 in fast mode)
 rows <- flexseq()
 
 for(n in sequence_sizes) {
@@ -188,7 +204,7 @@ if(!is.null(results_list$sequence)) {
   print(p_sequence)
   save_figure(p_sequence, "benchmarks-sequence.pdf", width = 9, height = 5)
 } else {
-  knitr::asis_output("*Benchmark results not yet generated. Run `data-raw/generate_publication_results.R` to populate.*")
+  knitr::asis_output("*Benchmark results not yet generated. Run `data-raw/replication/generate_publication_results.R` to populate.*")
 }
 ```
 
@@ -199,7 +215,7 @@ if(!is.null(results_list$sequence)) {
 
 
 ```{r pq-bench, eval=run_benchmarks, cache=FALSE}
-pq_sizes <- 2^(12 + 0:6)
+pq_sizes <- fast_sizes(2^(12 + 0:6))
 rows <- flexseq()
 
 set.seed(42)
@@ -270,7 +286,7 @@ if(!is.null(results_list$pq)) {
 ## Ordered sequence operations
 
 ```{r ordered-bench, eval=run_benchmarks, cache=FALSE}
-ord_sizes <- 2^(14 + 0:6) # crossover is at 2^23 for peek_key
+ord_sizes <- fast_sizes(2^(14 + 0:6)) # crossover is at 2^23 for peek_key
 rows <- flexseq()
 
 set.seed(99)
@@ -367,7 +383,7 @@ if(!is.null(results_list$ordered)) {
 ## Interval index operations
 
 ```{r ivx-bench, eval=run_benchmarks, cache=FALSE}
-ivx_sizes <- 2^(12 + 0:6)
+ivx_sizes <- fast_sizes(2^(12 + 0:6))
 rows <- flexseq()
 
 set.seed(123)
