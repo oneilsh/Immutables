@@ -308,6 +308,108 @@ ix3$remaining       # interval index with "a" and "d"
 Beyond \code{fapply()}, \code{merge()}, \code{loop()}, and conversion methods, interval indices 
 can also report global minimum and maximum range endpoints.
 
+## Example: best-first feature selection
+
+These structures can serve many purposes, but to illustrate a statistical 
+use case we consider the problem of feature selection. We begin by constructing
+a matrix \code{X} with 25 potential feature columns, and an outcome \code{y}
+dependent only on features 3 and 7:
+
+```r
+set.seed(100)
+n <- 10000
+p <- 25
+X <- matrix(rnorm(n * p), n, p)
+
+# response depends on features 3 and 7 only
+y <- 3.5 * X[, 3] - 4 * X[, 7] + rnorm(n)
+```
+
+Our goal is to find a linear model using only main effects that results in a 
+small Akaike's Information Criterion (AIC, \citet{sakamoto1986akaike}). However,
+the number of potential models, $2^{25}$, is too large to exhaustively try 
+all possibilities. Rather than iterate feature combinations exhaustively, we'll 
+perform a best-first search: given a "current best" set of features, we'll add
+remaining features individually, evaluating as we go and storing them
+for potential later expansion. By keeping feature sets in a priority queue 
+prioritized by AIC, we can select the best-performing set to 
+build on at each iteration. We thus begin with a base model using no features, 
+and the corresponding empty feature set and AIC stored in a 
+\code{priority_queue}.
+
+```r
+# a model using no features, initially the "best"
+model <- lm(y ~ 1)
+best_features <- numeric(0)
+best_aic <- AIC(model)
+
+# store the initial model prioritized by its AIC
+pq <- priority_queue()
+pq <- insert(pq, best_features, priority = best_aic)
+```
+
+So long as there are feature sets available in the queue to expand on, we will
+do so, but limit the total number of considered models to approximately 1,000
+to prevent an exhaustive search. At each iteration we'll pop the best set
+and compute the remaining available features.
+
+```r
+models_considered <- 1
+
+while(length(pq) > 0 && models_considered < 1000) {
+  # pop the current best-performing set of features
+  current_best <- pop_min(pq)
+  
+  # replace the queue with the remaining (unpopped) portion
+  pq <- current_best$remaining
+  
+  # extract the current best features ($value) and AIC ($priority)
+  current_best_features <- current_best$value
+  current_best_aic <- current_best$priority
+  
+  # features we can add to the current best for potential improvement
+  available_features <- setdiff(1:ncol(X), current_best_features)
+```
+
+At this point we iterate over \code{available_features}, adding each to the
+current best set, resulting in a new model with corresponding AIC to add
+to the queue. If one of these performs better than the best so far we record it
+(and the best of these will form the basis for the next iteration). Along the
+way we update the number of models considered and close out the \code{while} loop.
+
+```r
+  # add each unused feature one at a time
+  for(available_feature in available_features) {
+    # add it to the set of best-performing features so far
+    selected_features <- c(current_best_features, available_feature)
+
+    # build a model with that updated set
+    model <- lm(y ~ X[ , selected_features, drop = FALSE])
+
+    # add the features to the queue prioritized by the AIC they deliver
+    cat("Considering: ", selected_features, " AIC: ", AIC(model), "\n")
+    pq <- insert(pq, selected_features, priority = AIC(model))
+
+    # if the current model is better than the best so far, record it
+    if(AIC(model) < best_aic) {
+      best_features <- selected_features
+      best_aic <- AIC(model)
+    }
+    
+    models_considered <- models_considered + 1
+  }
+} # close while loop
+
+print(best_features) # 7  3 19 24  2 21
+```
+
+In this instance the best encountered model by AIC uses features 7, 3, 19, 24, 
+2, and 21. Potential improvements to this example include ordering features
+avoid duplicated testing of feature permutations, more sophisticated stopping
+criteria based on AIC trend, and alternative prioritization values. The search
+history can also easily be inspected efficiently by growing a 
+\code{flexseq} with intermediate information.
+
 
 # Developer API
 
@@ -448,7 +550,7 @@ single efficient root-to-leaf traversal.
 Monotonicity of the predicate (switching from \code{FALSE} to 
 \code{TRUE} at most once) is thus necessary for correctness.
 
-## Example: Subsequence Search
+## Example: subsequence search
 
 Here we'll illustrate how these components can be used to build an efficient 
 subsequence-search data structure modeled after a suffix array, a common approach
