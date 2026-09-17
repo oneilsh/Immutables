@@ -32,7 +32,7 @@ navbar:
           href: articles/interval-indices.html
         - text: "---------"
         - text: "Examples"
-        - text: "Benchmarks"
+        - text: "Benchmarking"
           href: articles/benchmarks.html
         - text: "Gallery"
           href: articles/gallery.html

@@ -1,8 +1,8 @@
 ---
-title: "Priority Queues"
+title: "Priority Queues: Fast Min/Max Access by Priority"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Priority Queues}
+  %\VignetteIndexEntry{Priority Queues: Fast Min/Max Access by Priority}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

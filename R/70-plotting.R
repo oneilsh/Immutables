@@ -1,5 +1,5 @@
 
-#' Build graph data frames for a finger tree
+#' Build Graph Data Frames for a Finger Tree
 #'
 #' @param t FingerTree.
 #' @return A list with three elements: `edge_df` (parent/child/label),

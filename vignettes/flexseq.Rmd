@@ -1,8 +1,8 @@
 ---
-title: "flexseq"
+title: "Flexible Sequences: Persistent Lists, Deques, and Slicing"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{flexseq}
+  %\VignetteIndexEntry{Flexible Sequences: Persistent Lists, Deques, and Slicing}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

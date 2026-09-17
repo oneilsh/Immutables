@@ -88,7 +88,7 @@ as_iterator.priority_queue <- function(x) {
   }
 }
 
-#' Iterate over an iterator (re-exported from coro)
+#' Iterate Over an Iterator (Re-exported from coro)
 #'
 #' Re-exported [coro::loop()]. Enables `for`-loop-style iteration over
 #' `immutables` structures without needing to load `coro` separately.

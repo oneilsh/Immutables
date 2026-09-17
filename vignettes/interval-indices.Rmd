@@ -1,8 +1,8 @@
 ---
-title: "Interval Indices"
+title: "Interval Indices: Overlap and Containment Queries"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Interval Indices}
+  %\VignetteIndexEntry{Interval Indices: Overlap and Containment Queries}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

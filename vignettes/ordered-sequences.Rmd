@@ -1,8 +1,8 @@
 ---
-title: "Ordered Sequences"
+title: "Ordered Sequences: Key-Sorted Storage with Range Queries"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Ordered Sequences}
+  %\VignetteIndexEntry{Ordered Sequences: Key-Sorted Storage with Range Queries}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

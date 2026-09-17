@@ -1,8 +1,8 @@
 ---
-title: "Immutables"
+title: "Immutables: Fast, Persistent Data Structures for R"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{immutables}
+  %\VignetteIndexEntry{Immutables: Fast, Persistent Data Structures for R}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

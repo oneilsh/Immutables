@@ -1,8 +1,8 @@
 ---
-title: "Benchmarking immutables Collections"
+title: "Benchmarking Immutables Against Base R and Alternatives"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Benchmarking immutables Collections}
+  %\VignetteIndexEntry{Benchmarking Immutables Against Base R and Alternatives}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
