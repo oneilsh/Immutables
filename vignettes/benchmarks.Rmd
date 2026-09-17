@@ -76,16 +76,10 @@ bench_one <- function(rows, impl, op, n, repeats, setup, bench) {
   res <- bench::mark(bench(state),
                      min_iterations = repeats,
                      max_iterations = repeats + 0)
+  
+  times <- unlist(res$time[[1]])
 
-  gcs <- res$gc[[1]] # tibble w/ 3 colums; level0, level1, level2
-  gcs$times <- unlist(res$time[[1]])
-  # keeping gc-triggering measures rather than bumping them out
-  #non_gc_times <- gcs |>
-  #  filter(level0 == 0 & level1 == 0 & level2 == 0) |>
-  #  pull(times)
-  gc_times <- gcs |> pull(times)
-
-  push_back(rows, data.frame(impl = impl, op = op, n = n, time_s = gc_times))
+  push_back(rows, data.frame(impl = impl, op = op, n = n, time_s = times)
 }
 
 # Per-batch cache helpers. Each batch is one data.frame persisted to its own
@@ -198,7 +192,6 @@ if(!is.null(results_list$sequence)) {
     ) +
     scale_y_log10(labels = label_time, guide = "axis_logticks") +
     scale_color_manual(values = c("base R" = "#fc8d62", "flexseq" = "#66c2a5")) +
-    #scale_y_continuous(labels = label_time, trans = "log10") +
     theme_bw() +
     theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
   print(p_sequence)
