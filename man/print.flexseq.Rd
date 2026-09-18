@@ -2,7 +2,7 @@
 % Please edit documentation in R/30-api-flexseq-print.R
 \name{print.flexseq}
 \alias{print.flexseq}
-\title{Print a flexseq}
+\title{Print a \code{flexseq} Summary}
 \usage{
 \method{print}{flexseq}(x, max_elements = 4L, show_custom_monoids = FALSE, ...)
 }
@@ -21,7 +21,7 @@ The input \code{x}, returned invisibly. Called for its side effect
 of printing a formatted preview of the sequence to the console.
 }
 \description{
-Print a flexseq
+Print a \code{flexseq} Summary
 }
 \examples{
 x <- as_flexseq(setNames(as.list(1:6), letters[1:6]))

@@ -2,7 +2,7 @@
 % Please edit documentation in R/70-plotting.R
 \name{get_graph_df}
 \alias{get_graph_df}
-\title{Build graph data frames for a finger tree}
+\title{Build Graph Data Frames for a Finger Tree}
 \usage{
 get_graph_df(t)
 }
@@ -18,6 +18,6 @@ monoid values for structural nodes; \code{NULL} for element leaves), and
 nodes).
 }
 \description{
-Build graph data frames for a finger tree
+Build Graph Data Frames for a Finger Tree
 }
 \keyword{internal}
