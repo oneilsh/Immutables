@@ -79,7 +79,7 @@ bench_one <- function(rows, impl, op, n, repeats, setup, bench) {
   
   times <- unlist(res$time[[1]])
 
-  push_back(rows, data.frame(impl = impl, op = op, n = n, time_s = times)
+  push_back(rows, data.frame(impl = impl, op = op, n = n, time_s = times))
 }
 
 # Per-batch cache helpers. Each batch is one data.frame persisted to its own
