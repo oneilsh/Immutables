@@ -1,3 +1,10 @@
+# Immutables 1.1.1
+
+## Documentation and fixes
+
+* Minor documentation improvements
+* Trimming of unit tests to speed check times on CRAN machines
+
 # Immutables 1.1.0
 
 ## New features
