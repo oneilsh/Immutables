@@ -194,6 +194,70 @@ requiring named access, ordered sequences (discussed below) can be
 associated with character-based names as keys for fast
 access.
 
+### Example: simulating complex queueing systems
+
+Queueing systems represent one or more service queues, where arrival and
+service times are typically drawn from defined distributions such as the
+exponential. The dynamics of such systems are a common area of study, for 
+example in computing average wait times \citep{bose2013introduction}.
+While in many cases closed-form solutions for these dynamics exist, simple
+policy choices such as "each request joins the currently shortest queue"
+can complicate analyses significantly \citep{eschenfeldt2018join}. In this
+example we simulate such a system to generate and empirical wait-time
+distribution.
+
+We simulate \code{t} time steps; at each, a new request arrives with 
+probability \code{p_arrival} and joins the shorter of two queues, 
+\code{qa} or \code{qb}. We keep track of each server's next free
+timestep, processing requests from the front of its queue. Each request's
+wait time is calculated and collected in a running \code{flexseq}, which
+we convert to vector and summarize after.
+
+```r
+set.seed(100)
+steps <- 5000
+p_arrival <- 0.9
+mean_service <- 1 # service times ~ rpois(1, mean_service) + 1 (real mean 2)
+
+qa <- flexseq(); free_a <- 0
+qb <- flexseq(); free_b <- 0
+waits <- flexseq()
+
+for(t in seq_len(steps)) {
+  # process new arrivals into the shorter queue
+  if(runif(1) < p_arrival) {
+    request <- list(arrival = t)
+    if(length(qa) <= length(qb)) qa <- push_back(qa, request)
+    else                         qb <- push_back(qb, request)
+  }
+  
+  # if qa is free, process the front request and record total wait time
+  if(free_a <= t && length(qa) > 0) {
+    nxt <- pop_front(qa)
+    qa <- nxt$remaining    # overwrite queue with remaining portion
+    request <- nxt$value
+    waits <- push_back(waits, t - request$arrival)
+    free_a <- t + rpois(1, mean_service) + 1
+  }
+  
+  # if qb is free, process the front request and record total wait time
+  if(free_b <= t && length(qb) > 0) {
+    nxt <- pop_front(qb)
+    qb <- nxt$remaining    # overwrite queue with remaining portion
+    request <- nxt$value
+    waits <- push_back(waits, t - request$arrival)
+    free_b <- t + rpois(1, mean_service) + 1
+  }
+}
+
+mean(unlist(waits))  # 1.487
+```
+
+This example may extended in several ways, including tracking queue lengths, 
+requests that migrate between queues (as in queueing networks 
+\cite{bolch2006queueing}), or other policies such as length-weighted
+random queue assignment.
+
 ## Priority queues
 
 The \code{priority_queue} structure stores arbitrary or mixed types, much like
@@ -236,6 +300,109 @@ stored element and associated priority, and returns a priority queue
 with identical priorities on transformed values. Finally, priority queues may be iteratively
 accessed in priority order with \code{loop()}, and they additionally 
 provide a priority-aware `merge()`.
+
+### Example: best-first feature selection
+
+Priority queues have many applications, but we'll demonstrate applying them
+to the problem of feature selection in modeling: given a large number
+of features, only a few of which are informative, identify a small subset
+with good performance. We begin by constructing
+a matrix \code{X} with 25 potential feature columns, and an outcome \code{y}
+dependent only on features 3 and 7:
+
+```r
+set.seed(100)
+n <- 10000
+p <- 25
+X <- matrix(rnorm(n * p), n, p)
+
+# response depends on features 3 and 7 only
+y <- 3.5 * X[, 3] - 4 * X[, 7] + rnorm(n)
+```
+
+We'll consider linear models using only main effects, and use Akaike's 
+Information Criterion (AIC, \citet{sakamoto1986akaike}) as a measure of 
+performance. The number of potential models ($2^{25}$) is too large to try 
+all possibilities. Rather than iterate feature combinations exhaustively, we'll 
+perform a best-first search: given a "current best" set of features, we'll add
+remaining features individually, evaluating as we go and storing them
+for potential later expansion. By keeping feature sets in a priority queue 
+prioritized by resultant AIC, we can select the best-performing set to 
+build on at each iteration. We thus begin with a base model using no features, 
+and the corresponding empty feature set and AIC stored in a 
+\code{priority_queue}.
+
+```r
+# a model using no features, initially the "best"
+model <- lm(y ~ 1)
+best_features <- numeric(0)
+best_aic <- AIC(model)
+
+# store the initial model prioritized by its AIC
+pq <- priority_queue()
+pq <- insert(pq, best_features, priority = best_aic)
+```
+
+So long as there are feature sets available in the queue to expand on, we will
+do so, but limit the total number of considered models to approximately 1,000
+to prevent an exhaustive search. At each iteration we'll pop the best feature set
+considered so far and compute the remaining available features.
+
+```r
+models_considered <- 1
+
+while(length(pq) > 0 && models_considered < 1000) {
+  # pop the current best-performing set of features
+  current_best <- pop_min(pq)
+  
+  # replace the queue with the remaining (unpopped) portion
+  pq <- current_best$remaining
+  
+  # extract the current best features ($value) and AIC ($priority)
+  current_best_features <- current_best$value
+  current_best_aic <- current_best$priority
+  
+  # features we can add to the current best for potential improvement
+  available_features <- setdiff(1:ncol(X), current_best_features)
+```
+
+At this point we iterate over \code{available_features}, adding each to the
+current best set, resulting in a new model with corresponding AIC to add
+to the queue. If one of these performs better than the best so far we record it. Along the
+way we update the number of models considered.
+
+```r
+  # add each unused feature one at a time
+  for(available_feature in available_features) {
+    # add it to the set of best-performing features so far
+    selected_features <- c(current_best_features, available_feature)
+
+    # build a model with that updated set
+    model <- lm(y ~ X[ , selected_features, drop = FALSE])
+
+    # add the features to the queue prioritized by the AIC they deliver
+    cat("Considering: ", selected_features, " AIC: ", AIC(model), "\n")
+    pq <- insert(pq, selected_features, priority = AIC(model))
+
+    # if the current model is better than the best so far, record it
+    if(AIC(model) < best_aic) {
+      best_features <- selected_features
+      best_aic <- AIC(model)
+    }
+    
+    models_considered <- models_considered + 1
+  }
+} # close while loop
+
+print(best_features) # 7  3 19 24  2 21
+```
+
+In this instance the best encountered model by AIC uses features 7, 3, 19, 24, 
+2, and 21. Potential improvements to this example include ordering features
+avoid duplicated testing of feature permutations, more sophisticated stopping
+criteria based on AIC trend, and alternative prioritization values. The search
+history can also easily be inspected efficiently by growing a 
+\code{flexseq} with intermediate information.
 
 ## Ordered sequences
 
@@ -308,108 +475,83 @@ ix3$remaining       # interval index with "a" and "d"
 Beyond \code{fapply()}, \code{merge()}, \code{loop()}, and conversion methods, interval indices 
 can also report global minimum and maximum range endpoints.
 
-## Example: best-first feature selection
 
-These structures can serve many purposes, but to illustrate a statistical 
-use case we consider the problem of feature selection. We begin by constructing
-a matrix \code{X} with 25 potential feature columns, and an outcome \code{y}
-dependent only on features 3 and 7:
+### Example: hospital occupancy over time
+
+Many datasets are characterized by intervals, such that we wish to query
+which intervals overlap a given point. Sweep-line algorithms do so over
+each start or end point in order. Here we illustrate this basic pattern,
+considering a hypothetical computation of hospital occupancy over time.
+Patients arrive randomly, stay for a random number of days, and are associated
+with demographic variables for age and sex. For each day, we wish to capture
+the total occupancy, average age, and percent male. We begin by simulating
+data and building an interval index storing each patient with their stay:
 
 ```r
 set.seed(100)
-n <- 10000
-p <- 25
-X <- matrix(rnorm(n * p), n, p)
 
-# response depends on features 3 and 7 only
-y <- 3.5 * X[, 3] - 4 * X[, 7] + rnorm(n)
+num_days <- 1000
+n_patients <- 500
+
+starts <- sample(1:num_days, 
+                 size = n_reads,
+                 replace = TRUE)
+
+ends <- starts + rpois(n_patients, 2) # average stay = 2 days
+
+ages <- pmax(0, rnorm(n_patients, mean = 35, sd = 10))
+is_males <- sample(c(0, 1), n_patients, replace = TRUE)
+
+# list of patients (each a list with age and is_male)
+patients <- Map(list, age = ages, is_male = is_males)
+
+# store each patient in an interval index with their stay
+ix <- as_interval_index(patients, start = starts, end = ends)
 ```
 
-Our goal is to find a linear model using only main effects that results in a 
-small Akaike's Information Criterion (AIC, \citet{sakamoto1986akaike}). However,
-the number of potential models, $2^{25}$, is too large to exhaustively try 
-all possibilities. Rather than iterate feature combinations exhaustively, we'll 
-perform a best-first search: given a "current best" set of features, we'll add
-remaining features individually, evaluating as we go and storing them
-for potential later expansion. By keeping feature sets in a priority queue 
-prioritized by AIC, we can select the best-performing set to 
-build on at each iteration. We thus begin with a base model using no features, 
-and the corresponding empty feature set and AIC stored in a 
-\code{priority_queue}.
+Next, for each day we'll query for overlapping patients, 
+computing summary statistics. These are collected
+in a \code{flexseq}, which we later convert to a data frame
+for further analysis. This example also illustrates using `fapply` to unpack
+the contents of an interval index containing named lists.
 
 ```r
-# a model using no features, initially the "best"
-model <- lm(y ~ 1)
-best_features <- numeric(0)
-best_aic <- AIC(model)
+day_stats <- flexseq()
 
-# store the initial model prioritized by its AIC
-pq <- priority_queue()
-pq <- insert(pq, best_features, priority = best_aic)
-```
-
-So long as there are feature sets available in the queue to expand on, we will
-do so, but limit the total number of considered models to approximately 1,000
-to prevent an exhaustive search. At each iteration we'll pop the best set
-and compute the remaining available features.
-
-```r
-models_considered <- 1
-
-while(length(pq) > 0 && models_considered < 1000) {
-  # pop the current best-performing set of features
-  current_best <- pop_min(pq)
+for(day in seq_len(num_days)) {
+  overlaps <- peek_all_point(reads, pos)
   
-  # replace the queue with the remaining (unpopped) portion
-  pq <- current_best$remaining
+  count <- length(overlaps)
   
-  # extract the current best features ($value) and AIC ($priority)
-  current_best_features <- current_best$value
-  current_best_aic <- current_best$priority
-  
-  # features we can add to the current best for potential improvement
-  available_features <- setdiff(1:ncol(X), current_best_features)
-```
-
-At this point we iterate over \code{available_features}, adding each to the
-current best set, resulting in a new model with corresponding AIC to add
-to the queue. If one of these performs better than the best so far we record it
-(and the best of these will form the basis for the next iteration). Along the
-way we update the number of models considered and close out the \code{while} loop.
-
-```r
-  # add each unused feature one at a time
-  for(available_feature in available_features) {
-    # add it to the set of best-performing features so far
-    selected_features <- c(current_best_features, available_feature)
-
-    # build a model with that updated set
-    model <- lm(y ~ X[ , selected_features, drop = FALSE])
-
-    # add the features to the queue prioritized by the AIC they deliver
-    cat("Considering: ", selected_features, " AIC: ", AIC(model), "\n")
-    pq <- insert(pq, selected_features, priority = AIC(model))
-
-    # if the current model is better than the best so far, record it
-    if(AIC(model) < best_aic) {
-      best_features <- selected_features
-      best_aic <- AIC(model)
-    }
+  ages <- overlaps |> 
+    fapply(function(patient, start, end) {
+      patient$age
+    }) |>
+    unlist() |> # fapply returns an interval_index, convert to vector
+    mean()
     
-    models_considered <- models_considered + 1
-  }
-} # close while loop
+  is_males <- overlaps |> 
+    fapply(function(patient, start, end) {
+      patient$is_male
+    }) |> unlist() |> mean()
 
-print(best_features) # 7  3 19 24  2 21
+  stats <- data.frame(day = day, 
+                      mean_age = mean(ages), 
+                      coverage = mean(is_males))
+
+  day_stats <- push_back(day_stats, stats)
+}
+
+# convert the flexseq of lists into a data.frame
+# containing columns for pos, mean_qual, and coverage
+stats_df <- do.call(rbind, as.list(day_stats))
 ```
 
-In this instance the best encountered model by AIC uses features 7, 3, 19, 24, 
-2, and 21. Potential improvements to this example include ordering features
-avoid duplicated testing of feature permutations, more sophisticated stopping
-criteria based on AIC trend, and alternative prioritization values. The search
-history can also easily be inspected efficiently by growing a 
-\code{flexseq} with intermediate information.
-
+This example is designed for simplicity, but is not optimally efficient. Real
+sweep-line algorithms consider only sorted used endpoints, and keep three 
+indices: one with as-yet-unprocessed elements, an active set overlapping the
+virtual sweep line, and a processed set, moving elements through them 
+with `pop_all_point`.
 
 # Developer API
 
