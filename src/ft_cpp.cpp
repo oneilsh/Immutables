@@ -2436,6 +2436,79 @@ List oms_split_tree_gt_key(
   stop("oms_split_tree_gt_key precondition violated: no element with key > target.");
 }
 
+// Callback-free bound search over the cached .oms_max_key measures. The tree is
+// ordered by key, so the first leaf position whose running max-key prefix
+// crosses `key` equals the first leaf whose own key crosses it. Returns the
+// count of elements strictly before the bound within `node`; if no element in
+// the subtree crosses, returns the subtree size. `strict=false` -> first key
+// >= target; `strict=true` -> first key > target. `key_type` is uniform for the
+// sequence (numeric/character/logical), so no per-node fallback is needed.
+int oms_bound_search_node(SEXP node, SEXP key, const std::string& key_type, bool strict) {
+  if(node == R_NilValue) return 0;
+
+  if(!is_structural_node_cpp(node)) {
+    const int cmp = oms_compare_keys(oms_entry_key(node), key, key_type);
+    const bool crosses = strict ? (cmp > 0) : (cmp >= 0);
+    return crosses ? 0 : 1;
+  }
+
+  if(has_class(node, "Empty")) return 0;
+
+  // Whole-subtree short-circuit via the cached .oms_max_key measure.
+  {
+    List measures = Rf_getAttrib(node, measures_sym);
+    if(Rf_isNull(measures) || !List(measures).containsElementNamed(".oms_max_key")) {
+      stop("Missing .oms_max_key measure on ordered_multiset tree.");
+    }
+    List mv = List(measures)[".oms_max_key"];
+    if(mv.size() < 2) {
+      stop("Invalid .oms_max_key measure payload.");
+    }
+    SEXP has = mv[0];
+    if(TYPEOF(has) != LGLSXP || XLENGTH(has) != 1 || LOGICAL(has)[0] == NA_LOGICAL) {
+      stop("Invalid .oms_max_key `has` flag.");
+    }
+    if(LOGICAL(has)[0] == FALSE) return 0;  // no entries in subtree
+    SEXP smax = mv[1];
+    if(Rf_isNull(smax)) {
+      stop("Invalid .oms_max_key payload: missing key.");
+    }
+    const int cmp = oms_compare_keys(smax, key, key_type);
+    const bool crosses = strict ? (cmp > 0) : (cmp >= 0);
+    if(!crosses) return (int) child_size(node);
+  }
+
+  // Crossing lies inside this subtree: scan children left-to-right.
+  if(has_class(node, "Single")) {
+    List s(node);
+    return oms_bound_search_node(s[0], key, key_type, strict);
+  }
+
+  if(has_class(node, "Deep")) {
+    List d(node);
+    SEXP kids[3] = { d["prefix"], d["middle"], d["suffix"] };
+    int acc = 0;
+    for(int i = 0; i < 3; ++i) {
+      const int sz = (int) child_size(kids[i]);
+      const int r = oms_bound_search_node(kids[i], key, key_type, strict);
+      acc += r;
+      if(r < sz) return acc;
+    }
+    return acc;
+  }
+
+  // Digit / Node2 / Node3
+  List xs(node);
+  int acc = 0;
+  for(R_xlen_t i = 0; i < xs.size(); ++i) {
+    const int sz = (int) child_size(xs[i]);
+    const int r = oms_bound_search_node(xs[i], key, key_type, strict);
+    acc += r;
+    if(r < sz) return acc;
+  }
+  return acc;
+}
+
 SEXP oms_insert_cpp_impl(SEXP x, SEXP entry, const List& monoids, const std::string& key_type) {
   SEXP key = oms_entry_key(entry);
   if(!oms_tree_has_gt_key(x, key, key_type)) {
@@ -2522,6 +2595,23 @@ extern "C" SEXP ft_cpp_oms_insert(SEXP x, SEXP entry, SEXP monoids_, SEXP key_ty
   }
   List monoids(monoids_);
   return oms_insert_cpp_impl(x, entry, monoids, key_type);
+  END_RCPP
+}
+
+extern "C" SEXP ft_cpp_oms_bound_index(SEXP x, SEXP key_, SEXP key_type_, SEXP strict_) {
+  BEGIN_RCPP
+  std::string key_type = as<std::string>(key_type_);
+  // Native path covers the same key types as oms insert; anything else returns
+  // NA and the caller reverts to the R locate path.
+  if(key_type != "numeric" && key_type != "character" && key_type != "logical") {
+    return IntegerVector::create(NA_INTEGER);
+  }
+  if(Rf_isNull(key_) || XLENGTH(key_) != 1) {
+    return IntegerVector::create(NA_INTEGER);
+  }
+  const bool strict = as<bool>(strict_);
+  const int skipped = oms_bound_search_node(x, key_, key_type, strict);
+  return IntegerVector::create(skipped + 1);
   END_RCPP
 }
 

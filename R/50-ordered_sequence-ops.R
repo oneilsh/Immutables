@@ -11,6 +11,16 @@
     return(1L)
   }
 
+  # Native callback-free descent for cpp-eligible key types; the R predicate
+  # locate below is the fallback (Date/POSIXct and other orderable key types).
+  key_type <- .oms_key_type_state(x)
+  if(.ft_cpp_can_use_oms_bound(attr(x, "monoids", exact = TRUE), key_type)) {
+    idx <- .ft_cpp_oms_bound_index(x, key, key_type, strict)
+    if(!is.na(idx)) {
+      return(as.integer(idx))
+    }
+  }
+
   pred <- if(!isTRUE(strict)) {
     function(v) {
       isTRUE(v$has) && .oms_compare_key(v$key, key, v$key_type) >= 0L

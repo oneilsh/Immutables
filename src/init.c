@@ -11,6 +11,7 @@ extern SEXP ft_cpp_tree_from_prepared(SEXP, SEXP, SEXP);
 extern SEXP ft_cpp_tree_from_sorted(SEXP, SEXP);
 extern SEXP ft_cpp_concat(SEXP, SEXP, SEXP);
 extern SEXP ft_cpp_oms_insert(SEXP, SEXP, SEXP, SEXP);
+extern SEXP ft_cpp_oms_bound_index(SEXP, SEXP, SEXP, SEXP);
 extern SEXP ft_cpp_locate(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP ft_cpp_split_tree(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP ft_cpp_find_name_position(SEXP, SEXP);
@@ -31,6 +32,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"ft_cpp_tree_from_sorted", (DL_FUNC) &ft_cpp_tree_from_sorted, 2},
   {"ft_cpp_concat", (DL_FUNC) &ft_cpp_concat, 3},
   {"ft_cpp_oms_insert", (DL_FUNC) &ft_cpp_oms_insert, 4},
+  {"ft_cpp_oms_bound_index", (DL_FUNC) &ft_cpp_oms_bound_index, 4},
   {"ft_cpp_locate", (DL_FUNC) &ft_cpp_locate, 5},
   {"ft_cpp_split_tree", (DL_FUNC) &ft_cpp_split_tree, 5},
   {"ft_cpp_find_name_position", (DL_FUNC) &ft_cpp_find_name_position, 2},

@@ -10,6 +10,14 @@
   one-based position without removing it (the positional companion to
   `peek_at()`, and the general form of `min_key()` / `max_key()`).
 
+## Performance
+
+* `ordered_sequence` key-boundary lookups now use a native C++ descent for
+  `numeric`, `character`, and `logical` keys, speeding up `lower_bound()`,
+  `upper_bound()`, `peek_key()`, `pop_key()`, `peek_all_key()`, `pop_all_key()`,
+  `count_key()`, `elements_between()`, and `count_between()`. Other key types
+  (e.g. `Date`, `POSIXct`) transparently use the existing R path.
+
 ## Documentation and fixes
 
 * Minor documentation improvements
