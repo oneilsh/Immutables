@@ -12,9 +12,11 @@
 * New `nearest_key()` returns the existing key closest to a query key, composing
   with `peek_key()` / `pop_key()`. It resolves by order alone at the extremes and
   on an exact hit (any key type), and uses `abs(query - key)` when the query
-  falls strictly between two distinct keys (numeric/Date/POSIXct; ties go to the
-  lower key). It errors for non-subtractable keys (e.g. `character`) in that
-  between case, where "closer" is undefined.
+  falls strictly between two distinct keys (numeric/Date/POSIXct). The `ties`
+  argument resolves an equidistant tie between two distinct keys: `"lower"`
+  (default), `"upper"`, or `"both"` (returns both keys). It errors for
+  non-subtractable keys (e.g. `character`) in that between case, where "closer"
+  is undefined.
 
 ## Performance
 

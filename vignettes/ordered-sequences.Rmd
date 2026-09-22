@@ -132,11 +132,12 @@ front$value
 front$key
 ```
 
-`nearest_key()` returns the existing key closest to a query, which then composes with `peek_key()` / `pop_key()` to read or remove the matching element. It resolves by order alone at the extremes and on an exact hit, and only needs a distance metric when the query falls strictly between two distinct keys — so it supports `numeric`, `Date`, and `POSIXct` keys there (equidistant ties go to the lower key). For `character` keys the between-case is undefined ("is `"Ben"` closer to `"Alex"` or `"Charlie"`?") and errors; use `lower_bound()` / `peek_key()` for order-based lookup instead.
+`nearest_key()` returns the existing key closest to a query, which then composes with `peek_key()` / `pop_key()` to read or remove the matching element. It resolves by order alone at the extremes and on an exact hit, and only needs a distance metric when the query falls strictly between two distinct keys — so it supports `numeric`, `Date`, and `POSIXct` keys there. An equidistant tie between two distinct keys is resolved by `ties` — `"lower"` (default), `"upper"`, or `"both"` (returns both keys). For `character` keys the between-case is undefined ("is `"Ben"` closer to `"Alex"` or `"Charlie"`?") and errors; use `lower_bound()` / `peek_key()` for order-based lookup instead.
 
 ```{r}
 nearest_key(xs, 2.4)                    # between 2 and 3 -> closer key (2)
 nearest_key(xs, 0)                      # below all -> min_key (1)
+nearest_key(xs, 2.5, ties = "both")     # exactly between 2 and 3 -> c(2, 3)
 
 k <- nearest_key(xs, 2.4)               # locate, then act with the keyed helpers
 pop_key(xs, k)$value

@@ -348,14 +348,20 @@ upper_bound <- function(x, key) {
 #'
 #' @param x An `ordered_sequence`.
 #' @param query Query key.
-#' @return The nearest key, or `NULL` when `x` is empty. Feed the result to
-#'   [peek_key()] / [pop_key()] to read or remove the matching element.
+#' @param ties How to resolve an equidistant tie between the two distinct
+#'   neighbouring keys (the only case a tie can arise): `"lower"` (default)
+#'   returns the lower key, `"upper"` the higher key, and `"both"` returns both
+#'   as a length-2 vector.
+#' @return The nearest key, or `NULL` when `x` is empty. A length-1 key except
+#'   with `ties = "both"` on an exact tie, which returns both equidistant keys.
+#'   Feed the result to [peek_key()] / [pop_key()] to read or remove the matching
+#'   element.
 #' @details
 #' Resolution:
 #' - Exact match, or `query` below/above every key: decided by order alone, so it
 #'   works for every key type (including `character`).
 #' - `query` strictly between two distinct keys: returns the closer of the two by
-#'   `abs(query - key)`, with an equidistant tie going to the lower key. This case
+#'   `abs(query - key)`, with an equidistant tie resolved by `ties`. This case
 #'   needs a numeric difference, so it supports `numeric`, `Date`, and `POSIXct`
 #'   keys; for `character` (and other non-subtractable orderable keys) it errors,
 #'   because "closer" is undefined -- use [lower_bound()] / [peek_key()] for
@@ -366,13 +372,16 @@ upper_bound <- function(x, key) {
 #' @examples
 #' x <- ordered_sequence("a", "b", "c", "d", keys = c(1, 2, 4, 8))
 #' nearest_key(x, 3)                 # 2 and 4 are equidistant -> lower key (2)
+#' nearest_key(x, 3, ties = "upper") # 4
+#' nearest_key(x, 3, ties = "both")  # c(2, 4)
 #' nearest_key(x, 5)                 # 4
 #' nearest_key(x, 100)               # 8 (above all)
 #' nearest_key(ordered_sequence())   # NULL
 #' @seealso [lower_bound()], [peek_key()], [min_key()], [max_key()], [key_at()]
 #' @export
 # Nearest existing key to a query; composes with peek_key()/pop_key().
-nearest_key <- function(x, query) {
+nearest_key <- function(x, query, ties = c("lower", "upper", "both")) {
+  ties <- match.arg(ties)
   .oms_stop_interval_index(x, "nearest_key")
   .oms_assert_set(x)
   n <- length(x)
@@ -411,7 +420,20 @@ nearest_key <- function(x, query) {
       }
     )
   }
-  if(key_dist(above, q) < key_dist(q, below)) above else below   # tie -> lower key
+  d_above <- key_dist(above, q)
+  d_below <- key_dist(q, below)
+  if(d_above < d_below) {
+    return(above)
+  }
+  if(d_below < d_above) {
+    return(below)
+  }
+  # equidistant tie between two distinct keys
+  switch(ties,
+    lower = below,
+    upper = above,
+    both  = c(below, above)
+  )
 }
 
 # Runtime: O(log n).

@@ -360,6 +360,22 @@ testthat::test_that("nearest_key resolves by order, and by distance when between
   testthat::expect_identical(pop_key(xs, nearest_key(xs, 5))$value, "c")
 })
 
+testthat::test_that("nearest_key ties argument selects lower/upper/both", {
+  xs <- as_ordered_sequence(list("a", "b", "c", "d"), keys = c(1, 2, 4, 8))
+
+  # query 3 is equidistant between keys 2 and 4
+  testthat::expect_identical(nearest_key(xs, 3, ties = "lower"), 2)
+  testthat::expect_identical(nearest_key(xs, 3, ties = "upper"), 4)
+  testthat::expect_identical(nearest_key(xs, 3, ties = "both"), c(2, 4))
+
+  # ties argument only matters on an exact tie; a unique nearest is unaffected
+  testthat::expect_identical(nearest_key(xs, 5, ties = "upper"), 4)
+  testthat::expect_identical(nearest_key(xs, 5, ties = "both"), 4)
+
+  # invalid ties value errors via match.arg
+  testthat::expect_error(nearest_key(xs, 3, ties = "middle"))
+})
+
 testthat::test_that("nearest_key supports Date and POSIXct between-cases", {
   d <- as_ordered_sequence(
     list("a", "b", "c"),

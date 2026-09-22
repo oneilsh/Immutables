@@ -4,16 +4,23 @@
 \alias{nearest_key}
 \title{Nearest Key to a Query}
 \usage{
-nearest_key(x, query)
+nearest_key(x, query, ties = c("lower", "upper", "both"))
 }
 \arguments{
 \item{x}{An \code{ordered_sequence}.}
 
 \item{query}{Query key.}
+
+\item{ties}{How to resolve an equidistant tie between the two distinct
+neighbouring keys (the only case a tie can arise): \code{"lower"} (default)
+returns the lower key, \code{"upper"} the higher key, and \code{"both"} returns both
+as a length-2 vector.}
 }
 \value{
-The nearest key, or \code{NULL} when \code{x} is empty. Feed the result to
-\code{\link[=peek_key]{peek_key()}} / \code{\link[=pop_key]{pop_key()}} to read or remove the matching element.
+The nearest key, or \code{NULL} when \code{x} is empty. A length-1 key except
+with \code{ties = "both"} on an exact tie, which returns both equidistant keys.
+Feed the result to \code{\link[=peek_key]{peek_key()}} / \code{\link[=pop_key]{pop_key()}} to read or remove the matching
+element.
 }
 \description{
 Returns the existing key closest to \code{query}. Generalizes \code{\link[=min_key]{min_key()}} and
@@ -27,7 +34,7 @@ Resolution:
 \item Exact match, or \code{query} below/above every key: decided by order alone, so it
 works for every key type (including \code{character}).
 \item \code{query} strictly between two distinct keys: returns the closer of the two by
-\code{abs(query - key)}, with an equidistant tie going to the lower key. This case
+\code{abs(query - key)}, with an equidistant tie resolved by \code{ties}. This case
 needs a numeric difference, so it supports \code{numeric}, \code{Date}, and \code{POSIXct}
 keys; for \code{character} (and other non-subtractable orderable keys) it errors,
 because "closer" is undefined -- use \code{\link[=lower_bound]{lower_bound()}} / \code{\link[=peek_key]{peek_key()}} for
@@ -40,6 +47,8 @@ Duplicate keys are not disambiguated here: the return is a key value, and
 \examples{
 x <- ordered_sequence("a", "b", "c", "d", keys = c(1, 2, 4, 8))
 nearest_key(x, 3)                 # 2 and 4 are equidistant -> lower key (2)
+nearest_key(x, 3, ties = "upper") # 4
+nearest_key(x, 3, ties = "both")  # c(2, 4)
 nearest_key(x, 5)                 # 4
 nearest_key(x, 100)               # 8 (above all)
 nearest_key(ordered_sequence())   # NULL
