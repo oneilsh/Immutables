@@ -142,6 +142,7 @@ reference:
       - min_key
       - max_key
       - key_at
+      - nearest_key
       - fapply
       - "merge.ordered_sequence"
       - "[.ordered_sequence"

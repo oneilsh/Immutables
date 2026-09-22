@@ -337,6 +337,69 @@ testthat::test_that("key_at reads the key at a position", {
   )
 })
 
+testthat::test_that("nearest_key resolves by order, and by distance when between", {
+  xs <- as_ordered_sequence(list("a", "b", "c", "d"), keys = c(1, 2, 4, 8))
+
+  # resolved by order alone
+  testthat::expect_identical(nearest_key(xs, 4), 4)     # exact match
+  testthat::expect_identical(nearest_key(xs, 0), 1)     # below all -> min key
+  testthat::expect_identical(nearest_key(xs, 100), 8)   # above all -> max key
+
+  # resolved by distance (strictly between two distinct keys)
+  testthat::expect_identical(nearest_key(xs, 5), 4)     # 4 (dist 1) vs 8 (dist 3)
+  testthat::expect_identical(nearest_key(xs, 7), 8)     # 8 (dist 1) vs 4 (dist 3)
+  testthat::expect_identical(nearest_key(xs, 3), 2)     # 2 and 4 equidistant -> lower
+
+  # single element and empty
+  one <- as_ordered_sequence(list("z"), keys = 5)
+  testthat::expect_identical(nearest_key(one, 999), 5)
+  testthat::expect_identical(nearest_key(one, 5), 5)
+  testthat::expect_null(nearest_key(ordered_sequence()))
+
+  # composes with the keyed helpers
+  testthat::expect_identical(pop_key(xs, nearest_key(xs, 5))$value, "c")
+})
+
+testthat::test_that("nearest_key supports Date and POSIXct between-cases", {
+  d <- as_ordered_sequence(
+    list("a", "b", "c"),
+    keys = as.Date(c("2020-01-01", "2020-01-10", "2020-01-20"))
+  )
+  testthat::expect_identical(nearest_key(d, as.Date("2020-01-12")), as.Date("2020-01-10"))
+
+  p <- as_ordered_sequence(
+    list("a", "b"),
+    keys = as.POSIXct(c("2020-01-01 00:00:00", "2020-01-01 01:00:00"), tz = "UTC")
+  )
+  testthat::expect_equal(
+    nearest_key(p, as.POSIXct("2020-01-01 00:10:00", tz = "UTC")),
+    as.POSIXct("2020-01-01 00:00:00", tz = "UTC")
+  )
+})
+
+testthat::test_that("nearest_key handles character by order, errors only when between", {
+  xc <- as_ordered_sequence(list("x1", "x2", "x3"), keys = c("b", "d", "f"))
+
+  testthat::expect_identical(nearest_key(xc, "d"), "d")   # exact
+  testthat::expect_identical(nearest_key(xc, "a"), "b")   # below all -> min
+  testthat::expect_identical(nearest_key(xc, "z"), "f")   # above all -> max
+
+  # strictly between two distinct character keys has no distance metric
+  testthat::expect_error(nearest_key(xc, "c"), "numeric difference")
+})
+
+testthat::test_that("nearest_key guards non-ordered inputs", {
+  testthat::expect_error(nearest_key(flexseq("a", "b"), 1), "must be an ordered_sequence")
+  testthat::expect_error(
+    nearest_key(priority_queue("a", priorities = 1), 1),
+    "must be an ordered_sequence"
+  )
+  testthat::expect_error(
+    nearest_key(interval_index(1, start = 1, end = 2), 1),
+    "not supported for interval_index"
+  )
+})
+
 testthat::test_that("fapply dispatches for ordered_sequence and no reset_ties arg", {
   xs <- as_ordered_sequence(setNames(list("x1", "x2", "x3"), c("a", "b", "c")), keys = c(1, 1, 2))
 

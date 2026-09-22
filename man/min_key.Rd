@@ -24,5 +24,5 @@ min_key(x)
 min_key(ordered_sequence())
 }
 \seealso{
-\code{\link[=max_key]{max_key()}}, \code{\link[=key_at]{key_at()}}
+\code{\link[=max_key]{max_key()}}, \code{\link[=key_at]{key_at()}}, \code{\link[=nearest_key]{nearest_key()}}
 }

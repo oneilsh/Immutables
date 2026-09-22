@@ -32,5 +32,5 @@ key_at(x, 2)
 key_at(x, 10)
 }
 \seealso{
-\code{\link[=peek_at]{peek_at()}}, \code{\link[=min_key]{min_key()}}, \code{\link[=max_key]{max_key()}}, \code{\link[=lower_bound]{lower_bound()}}, \code{\link[=pop_at]{pop_at()}}
+\code{\link[=peek_at]{peek_at()}}, \code{\link[=min_key]{min_key()}}, \code{\link[=max_key]{max_key()}}, \code{\link[=nearest_key]{nearest_key()}}, \code{\link[=lower_bound]{lower_bound()}}, \code{\link[=pop_at]{pop_at()}}
 }
