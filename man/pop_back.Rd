@@ -15,6 +15,9 @@ A list with fields:
 \item \code{value}: the last element, or \code{NULL} when \code{x} is empty.
 \item \code{remaining}: the sequence after removing the last element.
 }
+
+For an \code{ordered_sequence} the list additionally carries \code{key}: the key of the
+popped element (\code{NULL} on an empty-sequence miss), matching \code{\link[=pop_key]{pop_key()}}.
 }
 \description{
 Returns the last element and the remaining sequence.

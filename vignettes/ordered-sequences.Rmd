@@ -119,6 +119,19 @@ max_key(xs)
 min_key(ordered_sequence())  # NULL when empty
 ```
 
+Because keys are stored in sorted order, ordered sequences also support the positional operators inherited from `flexseq` — `peek_at()`, `pop_front()`, `pop_back()`, and `pop_at()`. On an ordered sequence the pops additionally return `$key` (alongside `$value`/`$remaining`), and `key_at()` reads the key at a one-based position without removing anything: the positional companion to `peek_at()` (which reads the value there) and the general form of `min_key()`/`max_key()`.
+
+```{r}
+key_at(xs, 2)                          # key at position 2
+key_at(xs, 1) == min_key(xs)           # first position holds the minimum key
+key_at(xs, length(xs)) == max_key(xs)  # last position holds the maximum key
+key_at(xs, 10)                         # NULL when out of bounds
+
+front <- pop_front(xs)                 # positional pop carries the key too
+front$value
+front$key
+```
+
 ## Empty sequences
 
 Key and range helpers are non-throwing on empty sequences, and `length()` allows for empty checking.

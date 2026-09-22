@@ -278,17 +278,63 @@ testthat::test_that("pop helpers preserve ordered class", {
   pm <- pop_at(xs, 2)
 
   testthat::expect_identical(pf$value, "x1")
+  testthat::expect_identical(pf$key, 1)
   testthat::expect_s3_class(pf$remaining, "ordered_sequence")
   testthat::expect_equal(as.list(pf$remaining), list("x2", "x3"))
 
   testthat::expect_identical(pb$value, "x3")
+  testthat::expect_identical(pb$key, 3)
   testthat::expect_s3_class(pb$remaining, "ordered_sequence")
   testthat::expect_equal(as.list(pb$remaining), list("x1", "x2"))
 
   testthat::expect_identical(peek_at(xs, 2), "x2")
   testthat::expect_identical(pm$value, "x2")
+  testthat::expect_identical(pm$key, 2)
   testthat::expect_s3_class(pm$remaining, "ordered_sequence")
   testthat::expect_equal(as.list(pm$remaining), list("x1", "x3"))
+
+  # out-of-bounds pop_at miss: value/key NULL, remaining unchanged and still ordered
+  miss <- pop_at(xs, 10)
+  testthat::expect_null(miss$value)
+  testthat::expect_null(miss$key)
+  testthat::expect_s3_class(miss$remaining, "ordered_sequence")
+
+  # empty-sequence pop: key is NULL, mirroring pop_key() on a miss
+  empty <- pop_front(ordered_sequence())
+  testthat::expect_null(empty$value)
+  testthat::expect_null(empty$key)
+})
+
+testthat::test_that("key_at reads the key at a position", {
+  xs <- as_ordered_sequence(list("x1", "x2", "x3"), keys = c(10, 20, 30))
+
+  testthat::expect_identical(key_at(xs, 1), 10)
+  testthat::expect_identical(key_at(xs, 2), 20)
+  testthat::expect_identical(key_at(xs, 3), 30)
+
+  # general form of min_key()/max_key()
+  testthat::expect_identical(key_at(xs, 1), min_key(xs))
+  testthat::expect_identical(key_at(xs, length(xs)), max_key(xs))
+
+  # value at the same position comes from peek_at()
+  testthat::expect_identical(peek_at(xs, 2), "x2")
+
+  # out-of-bounds -> NULL (mirrors peek_at); empty -> NULL
+  testthat::expect_null(key_at(xs, 10))
+  testthat::expect_null(key_at(ordered_sequence(), 1))
+
+  # invalid indices error (same validation as peek_at)
+  testthat::expect_error(key_at(xs, 0))
+  testthat::expect_error(key_at(xs, NA))
+  testthat::expect_error(key_at(xs, 1.5))
+  testthat::expect_error(key_at(xs, c(1, 2)))
+
+  # not supported off the ordered-sequence axis
+  testthat::expect_error(key_at(flexseq("a", "b"), 1), "must be an ordered_sequence")
+  testthat::expect_error(
+    key_at(interval_index(1, start = 1, end = 2), 1),
+    "not supported for interval_index"
+  )
 })
 
 testthat::test_that("fapply dispatches for ordered_sequence and no reset_ties arg", {

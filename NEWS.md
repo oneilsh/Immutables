@@ -1,4 +1,14 @@
-# Immutables 1.1.1
+# Immutables 1.2.0
+
+## New features
+
+* `pop_front()`, `pop_back()`, and `pop_at()` on an `ordered_sequence` now
+  return the popped element's `key` alongside `value` and `remaining` (`NULL`
+  on a miss), matching `pop_key()`, `pop_min()`, and the interval `pop_*`
+  helpers. Plain `flexseq` pops are unchanged.
+* New `key_at()` reads the key of an `ordered_sequence` element at a given
+  one-based position without removing it (the positional companion to
+  `peek_at()`, and the general form of `min_key()` / `max_key()`).
 
 ## Documentation and fixes
 

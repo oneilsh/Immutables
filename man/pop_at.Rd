@@ -17,6 +17,9 @@ A list with fields:
 \item \code{value}: the element at \code{index}, or \code{NULL} when \code{index} is out of bounds.
 \item \code{remaining}: the sequence after removing the selected element.
 }
+
+For an \code{ordered_sequence} the list additionally carries \code{key}: the key of the
+popped element (\code{NULL} on an out-of-bounds miss), matching \code{\link[=pop_key]{pop_key()}}.
 }
 \description{
 Returns the selected element and the remaining sequence.

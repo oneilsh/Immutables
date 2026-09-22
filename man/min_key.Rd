@@ -16,10 +16,13 @@ Minimum key, or \code{NULL} when \code{x} is empty.
 Returns the smallest key currently present in the ordered sequence.
 }
 \details{
-This follows sequence key order directly.
+This follows sequence key order directly. Equivalent to \code{key_at(x, 1)}.
 }
 \examples{
 x <- ordered_sequence("a", "b", keys = c(2, 1))
 min_key(x)
 min_key(ordered_sequence())
+}
+\seealso{
+\code{\link[=max_key]{max_key()}}, \code{\link[=key_at]{key_at()}}
 }

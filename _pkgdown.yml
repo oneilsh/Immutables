@@ -141,6 +141,7 @@ reference:
       - count_between
       - min_key
       - max_key
+      - key_at
       - fapply
       - "merge.ordered_sequence"
       - "[.ordered_sequence"

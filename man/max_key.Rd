@@ -16,10 +16,13 @@ Maximum key, or \code{NULL} when \code{x} is empty.
 Returns the largest key currently present in the ordered sequence.
 }
 \details{
-Uses cached \code{.oms_max_key} monoid state.
+Uses cached \code{.oms_max_key} monoid state. Equivalent to \code{key_at(x, length(x))}.
 }
 \examples{
 x <- ordered_sequence("a", "b", keys = c(2, 1))
 max_key(x)
 max_key(ordered_sequence())
+}
+\seealso{
+\code{\link[=min_key]{min_key()}}, \code{\link[=key_at]{key_at()}}
 }

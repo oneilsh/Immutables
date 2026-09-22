@@ -442,6 +442,19 @@ peek_at <- function(x, index) {
   .ft_unwrap_public_value(x, element)
 }
 
+# Build the return list for a positional pop (`pop_front`/`pop_back`/`pop_at`).
+# `ordered_sequence` carries a key coordinate alongside each value, so its pops
+# surface `key` too (matching `pop_key()`/`pop_min()`); plain flexseq pops omit
+# it. `entry` is the raw stored record from the split, or NULL on a miss.
+# Runtime: O(1).
+.ft_pop_result <- function(x, entry, value, remaining) {
+  if(inherits(x, "ordered_sequence")) {
+    key <- if(is.null(entry)) NULL else entry$key
+    return(list(value = value, key = key, remaining = remaining))
+  }
+  list(value = value, remaining = remaining)
+}
+
 #' Pop the Front Element
 #'
 #' Returns the first element and the remaining sequence.
@@ -450,6 +463,9 @@ peek_at <- function(x, index) {
 #' @return A list with fields:
 #' - `value`: the first element, or `NULL` when `x` is empty.
 #' - `remaining`: the sequence after removing the first element.
+#'
+#' For an `ordered_sequence` the list additionally carries `key`: the key of the
+#' popped element (`NULL` on an empty-sequence miss), matching [pop_key()].
 #' @details
 #' This operation is persistent: `x` is not modified.
 #'
@@ -477,19 +493,19 @@ pop_front <- function(x) {
   }
   n <- .ft_size(x)
   if(n == 0L) {
-    return(list(value = NULL, remaining = x))
+    return(.ft_pop_result(x, NULL, NULL, x))
   }
   ms <- attr(x, "monoids", exact = TRUE)
   if(.ft_cpp_can_use(ms)) {
     s <- .ft_cpp_split_at_index(x, 1L, ms)
     element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
     remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_front()") else .ft_restore_subclass(s$right, x, context = "pop_front()")
-    return(list(value = element, remaining = remaining))
+    return(.ft_pop_result(x, s$value, element, remaining))
   }
   s <- split_around_by_predicate(x, function(v) v >= 1L, ".size")
   element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
   remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_front()") else s$right
-  list(value = element, remaining = remaining)
+  .ft_pop_result(x, s$value, element, remaining)
 }
 
 #' Pop the Back Element
@@ -500,6 +516,9 @@ pop_front <- function(x) {
 #' @return A list with fields:
 #' - `value`: the last element, or `NULL` when `x` is empty.
 #' - `remaining`: the sequence after removing the last element.
+#'
+#' For an `ordered_sequence` the list additionally carries `key`: the key of the
+#' popped element (`NULL` on an empty-sequence miss), matching [pop_key()].
 #' @details
 #' This operation is persistent: `x` is not modified.
 #'
@@ -527,19 +546,19 @@ pop_back <- function(x) {
   }
   n <- .ft_size(x)
   if(n == 0L) {
-    return(list(value = NULL, remaining = x))
+    return(.ft_pop_result(x, NULL, NULL, x))
   }
   ms <- attr(x, "monoids", exact = TRUE)
   if(.ft_cpp_can_use(ms)) {
     s <- .ft_cpp_split_at_index(x, n, ms)
     element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
     remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_back()") else .ft_restore_subclass(s$left, x, context = "pop_back()")
-    return(list(value = element, remaining = remaining))
+    return(.ft_pop_result(x, s$value, element, remaining))
   }
   s <- split_around_by_predicate(x, function(v) v >= n, ".size")
   element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
   remaining <- if(n == 1L) .ft_empty_same_type(x, context = "pop_back()") else s$left
-  list(value = element, remaining = remaining)
+  .ft_pop_result(x, s$value, element, remaining)
 }
 
 #' Pop an Element by Position
@@ -551,6 +570,9 @@ pop_back <- function(x) {
 #' @return A list with fields:
 #' - `value`: the element at `index`, or `NULL` when `index` is out of bounds.
 #' - `remaining`: the sequence after removing the selected element.
+#'
+#' For an `ordered_sequence` the list additionally carries `key`: the key of the
+#' popped element (`NULL` on an out-of-bounds miss), matching [pop_key()].
 #' @details
 #' This operation is persistent: `x` is not modified.
 #'
@@ -581,7 +603,7 @@ pop_at <- function(x, index) {
   n <- length(x)
   idx <- .ft_validate_scalar_position_missable(index, n)
   if(is.null(idx)) {
-    return(list(value = NULL, remaining = x))
+    return(.ft_pop_result(x, NULL, NULL, x))
   }
   ms <- attr(x, "monoids", exact = TRUE)
   if(.ft_cpp_can_use(ms)) {
@@ -592,7 +614,7 @@ pop_at <- function(x, index) {
     } else {
       .ft_restore_subclass(.ft_cpp_concat(s$left, s$right, ms), x, context = "pop_at()")
     }
-    return(list(value = element, remaining = remaining))
+    return(.ft_pop_result(x, s$value, element, remaining))
   }
   s <- split_around_by_predicate(x, function(v) v >= idx, ".size")
   element <- .ft_unwrap_public_value(x, .ft_strip_name(s$value))
@@ -601,7 +623,7 @@ pop_at <- function(x, index) {
   } else {
     .ft_restore_subclass(.ft_concat_same_monoids(s$left, s$right, ms), x, context = "pop_at()")
   }
-  list(value = element, remaining = remaining)
+  .ft_pop_result(x, s$value, element, remaining)
 }
 
 #' Insert Elements at a Position

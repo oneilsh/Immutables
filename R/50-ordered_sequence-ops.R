@@ -51,11 +51,12 @@ add_monoids.ordered_sequence <- function(t, monoids, overwrite = FALSE) {
 #' @param x An `ordered_sequence`.
 #' @return Minimum key, or `NULL` when `x` is empty.
 #' @details
-#' This follows sequence key order directly.
+#' This follows sequence key order directly. Equivalent to `key_at(x, 1)`.
 #' @examples
 #' x <- ordered_sequence("a", "b", keys = c(2, 1))
 #' min_key(x)
 #' min_key(ordered_sequence())
+#' @seealso [max_key()], [key_at()]
 #' @export
 min_key <- function(x) {
   .oms_stop_interval_index(x, "min_key")
@@ -74,11 +75,12 @@ min_key <- function(x) {
 #' @param x An `ordered_sequence`.
 #' @return Maximum key, or `NULL` when `x` is empty.
 #' @details
-#' Uses cached `.oms_max_key` monoid state.
+#' Uses cached `.oms_max_key` monoid state. Equivalent to `key_at(x, length(x))`.
 #' @examples
 #' x <- ordered_sequence("a", "b", keys = c(2, 1))
 #' max_key(x)
 #' max_key(ordered_sequence())
+#' @seealso [min_key()], [key_at()]
 #' @export
 max_key <- function(x) {
   .oms_stop_interval_index(x, "max_key")
@@ -88,6 +90,39 @@ max_key <- function(x) {
     return(NULL)
   }
   m$key
+}
+
+# Runtime: O(log n).
+#' Key at a Position
+#'
+#' Returns the key of the element at a one-based position, without removing it.
+#' This is the positional companion to [peek_at()] (which returns the value at a
+#' position) and the general form of [min_key()] (`key_at(x, 1)`) and
+#' [max_key()] (`key_at(x, length(x))`).
+#'
+#' @param x An `ordered_sequence`.
+#' @param index One-based position to read.
+#' @return The key at `index`, or `NULL` when `index` is out of bounds.
+#' @details
+#' Positive integer indices beyond `length(x)` return `NULL`. Invalid indices
+#' (`NA`, non-integer, `<= 0`, or length not equal to 1) error. Pair with
+#' [peek_at()] to read the value at the same position, or use [pop_at()] when
+#' you also want the remaining sequence.
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", keys = c(10, 20, 30))
+#' key_at(x, 2)
+#' key_at(x, 10)
+#' @seealso [peek_at()], [min_key()], [max_key()], [lower_bound()], [pop_at()]
+#' @export
+key_at <- function(x, index) {
+  .oms_stop_interval_index(x, "key_at")
+  .oms_assert_set(x)
+  n <- length(x)
+  idx <- .ft_validate_scalar_position_missable(index, n)
+  if(is.null(idx)) {
+    return(NULL)
+  }
+  .ft_get_elem_at(x, idx)$key
 }
 
 # Runtime: O(log n) near locate point depth.
