@@ -68,7 +68,9 @@ if(FALSE) named_count_measure_monoid <- function() NULL
 named_count_measure_monoid() %::% MeasureMonoid
 named_count_measure_monoid() %as% {
   measure_monoid(function(a, b) a + b, 0L, function(el) {
-    if(isTRUE(.ft_has_name(el))) 1L else 0L
+    # .ft_get_name_fast skips lambda.r dispatch; this runs once per leaf on
+    # every R-side tree build.
+    if(is.null(.ft_get_name_fast(el))) 0L else 1L
   })
 }
 
