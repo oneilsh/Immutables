@@ -441,7 +441,47 @@ supported to preserve the ordering invariant.
 Also supported is \code{fapply()}, here calling
 functions accepting elements and keys and returning an ordered sequence 
 with transformed elements, \code{loop()} (in key order), 
-and key-aware \code{merge()}. 
+and key-aware \code{merge()}. Finally, ordered sequences support flexible
+key-order-based queries. These include \code{min_key()} and \code{max_key()}, 
+\code{nearest_key()} to identify the closest existing key to a query 
+key (undefined for keys without a simple distance metric),
+and \code{lower_bound()}, returning the first element with key greater than 
+or equal to a query key.
+
+### Example: scalar matching without replacement
+
+Many potential uses for ordered sequences are handled well by named lists and
+vectors, where access-by-key is the primary functionality. In some cases we 
+need to dynamically find, add, and remove elements by key, but as the benchmarks
+in section \ref{sec-benchmarks} show these operations are excessively slow
+on large base-\proglang{R} structures. Matching without replacement is one
+such case, often employed for cohort matching purposes in observational studies
+using propensity scores \citep{benedetto2018statistical}. Foregoing details,
+"treated" patients are matched to a subset of distinct "control" patients
+with similar scores. We start by simulating some populations and scores, 
+and initialize an empty \code{flexseq} to store matches.
+
+```r
+n_patients <- 200
+patients <- data.frame(treated = sample(c(TRUE, FALSE),
+                                        n_patients,
+                                        prob = c(0.1, 0.9),
+                                        replace = TRUE),
+                       score = runif(n_patients))
+
+# row numbers act as identifiers
+treated_rows <- which(patients$treated)
+treated_scores <- patients$score[patients$treated]
+
+untreated_rows <- which(!patients$treated)
+untreated_scores <- patients$score[!patients$treated]
+
+treated_seq <- as_ordered_sequence(treated_rows, keys = treated_scores)
+untreated_seq <- as_ordered_sequence(untreated_rows, keys = untreated_scores)
+matches <- flexseq()
+```
+
+
 
 ## Interval indices
 
@@ -775,7 +815,7 @@ and $O(k + \log(n))$ query time where $k$ is the number of matches.
 
 
 
-# Benchmarks
+# Benchmarks {#sec-benchmarks}
 
 As discussed above, few comparable side-effect-free structures are implemented
 in R for comparison. Barry et al. compared performance across several non-persistent

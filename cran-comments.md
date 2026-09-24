@@ -1,7 +1,6 @@
 ## Resubmission
 
-This submission provides improved performance and minor documentation 
-fixes.
+This submission provides new functionality, documentation, and performance.
 
 ## R CMD check results
 
