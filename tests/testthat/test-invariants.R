@@ -30,7 +30,7 @@ validate_fingertree_invariants <- function(t) {
       testthat::expect_true(is_homogeneous(x$suffix))
       testthat::expect_true(!is.null(attr(x, "monoids")))
       testthat::expect_true(!is.null(attr(x, "measures")))
-      walk(x$middle)
+      walk(.ft_middle(x))
       return(invisible(TRUE))
     }
 
@@ -59,6 +59,8 @@ validate_fingertree_invariants <- function(t) {
       }
       return(invisible(TRUE))
     }
+
+    testthat::fail(paste("Unexpected node type:", paste(class(x), collapse = "/")))
   }
 
   walk(t)

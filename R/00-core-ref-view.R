@@ -26,11 +26,11 @@ build_digit(xs, monoids) %as% {
 }
 
 # build a Deep node from prefix digit, middle tree, and suffix digit.
-# input: pr (Digit), m (FingerTree), sf (Digit), measure monoid r.
+# input: pr (Digit), m (FingerTree or suspended FTThunk), sf (Digit), measure monoid r.
 # output: measured Deep(pr, m, sf).
 # Runtime: O(1) with measured children.
 if(FALSE) build_deep <- function(pr, m, sf, monoids) NULL
-build_deep(pr, m, sf, monoids) %::% Digit : FingerTree : Digit : list : Deep
+build_deep(pr, m, sf, monoids) %::% Digit : . : Digit : list : Deep
 build_deep(pr, m, sf, monoids) %as% with_tree_monoids(measured_deep(pr, m, sf, monoids), monoids)
 
 # convert a small list/digit (size 0..4) into a valid measured FingerTree shape.
@@ -68,7 +68,8 @@ node_to_digit(node, monoids) %as% build_digit(as.list(node), monoids)
 # viewL: return leftmost element and the remaining tree
 # input: t non-empty FingerTree, measure monoid r.
 # output: list(value = leftmost element of t, rest = t without that element).
-# Runtime: O(log n) worst-case.
+# Runtime: O(1) amortized, including under persistent reuse of t, since any
+# recursion into the middle tree is suspended; O(log n) worst-case.
 if(FALSE) viewL <- function(t, monoids) NULL
 viewL(t, monoids) %::% FingerTree : list : list
 viewL(t, monoids) %as% {
@@ -96,17 +97,13 @@ viewL(t, monoids) %as% {
   }
   # Prefix had one element but middle is non-empty: pull the leftmost node from
   # middle, expand it to a digit, and use that as the new prefix.
-  res <- viewL(m, monoids)
-  node <- res$value
-  m_rest <- res$rest
-  new_pr <- node_to_digit(node, monoids)
-  list(value = head, rest = .as_flexseq(build_deep(new_pr, m_rest, .subset2(t,"suffix"), monoids)))
+  list(value = head, rest = rot_left(m, .subset2(t,"suffix"), monoids))
 }
 
 # viewR: return rightmost element and the remaining tree
 # input: t non-empty FingerTree, measure monoid r.
 # output: list(value = rightmost element of t, rest = t without that element).
-# Runtime: O(log n) worst-case.
+# Runtime: O(1) amortized (see viewL); O(log n) worst-case.
 if(FALSE) viewR <- function(t, monoids) NULL
 viewR(t, monoids) %::% FingerTree : list : list
 viewR(t, monoids) %as% {
@@ -128,54 +125,90 @@ viewR(t, monoids) %as% {
   if(m %isa% Empty) {
     return(list(value = head, rest = .as_flexseq(digit_to_tree(.subset2(t,"prefix"), monoids))))
   }
-  res <- viewR(m, monoids)
-  node <- res$value
-  m_rest <- res$rest
-  new_sf <- node_to_digit(node, monoids)
-  list(value = head, rest = .as_flexseq(build_deep(.subset2(t,"prefix"), m_rest, new_sf, monoids)))
+  list(value = head, rest = rot_right(.subset2(t,"prefix"), m, monoids))
+}
+
+# rot_left: rebuild a Deep whose prefix just emptied, from its non-empty middle
+# m and suffix sf: the leftmost node of m becomes the new prefix. Removing that
+# node from m is suspended when it would recurse (m's own prefix has one node),
+# which keeps viewL amortized O(1) under persistence (Hinze & Paterson's rotL).
+# input: m non-empty forced FingerTree of nodes, sf suffix digit, monoids.
+# Runtime: O(1).
+if(FALSE) rot_left <- function(m, sf, monoids) NULL
+rot_left(m, sf, monoids) %::% FingerTree : . : list : FingerTree
+rot_left(m, sf, monoids) %as% {
+  if(m %isa% Single) {
+    new_pr <- node_to_digit(.subset2(m, 1), monoids)
+    return(.as_flexseq(build_deep(new_pr, with_tree_monoids(measured_empty(monoids), monoids), sf, monoids)))
+  }
+  mpr <- .subset2(m, "prefix")
+  new_pr <- node_to_digit(mpr[[1]], monoids)
+  m_rest <- if(length(mpr) > 1) {
+    viewL(m, monoids)$rest
+  } else {
+    .ft_make_thunk(.FT_THUNK_TAIL_LEFT, m, NULL,
+                   list(.subset2(m, "middle"), .subset2(m, "suffix")), monoids)
+  }
+  .as_flexseq(build_deep(new_pr, m_rest, sf, monoids))
+}
+
+# rot_right: mirror of rot_left for a Deep whose suffix just emptied.
+# Runtime: O(1).
+if(FALSE) rot_right <- function(pr, m, monoids) NULL
+rot_right(pr, m, monoids) %::% . : FingerTree : list : FingerTree
+rot_right(pr, m, monoids) %as% {
+  if(m %isa% Single) {
+    new_sf <- node_to_digit(.subset2(m, 1), monoids)
+    return(.as_flexseq(build_deep(pr, with_tree_monoids(measured_empty(monoids), monoids), new_sf, monoids)))
+  }
+  msf <- .subset2(m, "suffix")
+  new_sf <- node_to_digit(msf[[length(msf)]], monoids)
+  m_rest <- if(length(msf) > 1) {
+    viewR(m, monoids)$rest
+  } else {
+    .ft_make_thunk(.FT_THUNK_INIT_RIGHT, m, NULL,
+                   list(.subset2(m, "prefix"), .subset2(m, "middle")), monoids)
+  }
+  .as_flexseq(build_deep(pr, m_rest, new_sf, monoids))
 }
 
 # deepL: rebuild Deep, possibly pulling from middle if prefix is empty
-# input: pr digit/list for prefix, m middle FingerTree of nodes, sf suffix digit/list.
+# input: pr digit/list for prefix, m middle FingerTree of nodes (possibly
+# suspended), sf suffix digit/list.
 # output: a valid FingerTree preserving order; if pr is empty it borrows from m or
 # collapses to a tree built from sf.
-# Runtime: O(log n) worst-case.
+# Runtime: O(1) amortized.
 if(FALSE) deepL <- function(pr, m, sf, monoids) NULL
-deepL(pr, m, sf, monoids) %::% . : FingerTree : . : list : FingerTree
+deepL(pr, m, sf, monoids) %::% . : . : . : list : FingerTree
 deepL(pr, m, sf, monoids) %as% {
   if(length(pr) > 0) {
     # Normal Deep reconstruction when prefix is non-empty.
     return(.as_flexseq(build_deep(pr, m, sf, monoids)))
   }
+  m <- .ft_force(m)
   if(m %isa% Empty) {
     # Cannot build Deep with empty prefix and empty middle; collapse to suffix.
     return(.as_flexseq(digit_to_tree(sf, monoids)))
   }
   # Restore a non-empty prefix by borrowing the leftmost node from middle.
-  res <- viewL(m, monoids)
-  node <- res$value
-  m_rest <- res$rest
-  new_pr <- node_to_digit(node, monoids)
-  .as_flexseq(build_deep(new_pr, m_rest, sf, monoids))
+  rot_left(m, sf, monoids)
 }
 
 # deepR: rebuild Deep, possibly pulling from middle if suffix is empty
-# input: pr prefix digit/list, m middle FingerTree of nodes, sf suffix digit/list.
+# input: pr prefix digit/list, m middle FingerTree of nodes (possibly
+# suspended), sf suffix digit/list.
 # output: a valid FingerTree preserving order; if sf is empty it borrows from m or
 # collapses to a tree built from pr.
-# Runtime: O(log n) worst-case.
+# Runtime: O(1) amortized.
 if(FALSE) deepR <- function(pr, m, sf, monoids) NULL
-deepR(pr, m, sf, monoids) %::% . : FingerTree : . : list : FingerTree
+deepR(pr, m, sf, monoids) %::% . : . : . : list : FingerTree
 deepR(pr, m, sf, monoids) %as% {
   if(length(sf) > 0) {
     return(.as_flexseq(build_deep(pr, m, sf, monoids)))
   }
+  m <- .ft_force(m)
   if(m %isa% Empty) {
     return(.as_flexseq(digit_to_tree(pr, monoids)))
   }
-  res <- viewR(m, monoids)
-  node <- res$value
-  m_rest <- res$rest
-  new_sf <- node_to_digit(node, monoids)
-  .as_flexseq(build_deep(pr, m_rest, new_sf, monoids))
+  rot_right(pr, m, monoids)
 }
