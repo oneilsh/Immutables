@@ -36,7 +36,7 @@ split_tree_impl_fast <- function(p, i, t, ms, mr, monoid_name) {
 
   # Deep(pr, m, sf): test where predicate first flips using cached measures.
   vpr <- mr$f(i, node_measure(.subset2(t,"prefix"), monoid_name))
-  vm <- mr$f(vpr, node_measure(.subset2(t,"middle"), monoid_name))
+  vm <- mr$f(vpr, node_measure(.ft_middle(t), monoid_name))
 
   if(p(vpr)) {
     # split occurs in prefix digit
@@ -47,7 +47,7 @@ split_tree_impl_fast <- function(p, i, t, ms, mr, monoid_name) {
     # Right context starts with the suffix of the prefix digit, followed by the
     # original middle and suffix. `deepL` preserves Deep invariants when that
     # rebuilt prefix fragment is empty (borrowing from middle or collapsing).
-    right_tree <- deepL(build_digit(s$right, ms), .subset2(t,"middle"), .subset2(t,"suffix"), ms)
+    right_tree <- deepL(build_digit(s$right, ms), .ft_middle(t), .subset2(t,"suffix"), ms)
     return(list(left = left_tree, value = s$value, right = right_tree))
   }
 
@@ -55,7 +55,7 @@ split_tree_impl_fast <- function(p, i, t, ms, mr, monoid_name) {
     # split occurs in middle tree, then inside the selected Node2/Node3
     # Stage 1: split middle at node granularity. In a valid Deep shape, middle
     # stores Node2/Node3 blocks (not leaf elements), so `sm$value` is that block.
-    sm <- split_tree_impl_fast(p, vpr, .subset2(t,"middle"), ms, mr, monoid_name)
+    sm <- split_tree_impl_fast(p, vpr, .ft_middle(t), ms, mr, monoid_name)
     # Accumulator value immediately before the selected middle node.
     inode <- mr$f(vpr, node_measure(sm$left, monoid_name))
     # Stage 2: split inside the selected node to isolate the leaf element.
@@ -70,7 +70,7 @@ split_tree_impl_fast <- function(p, i, t, ms, mr, monoid_name) {
 
   # split occurs in suffix digit
   s <- split_digit_impl(p, vm, .subset2(t,"suffix"), ms, mr, monoid_name)
-  left_tree <- deepR(.subset2(t,"prefix"), .subset2(t,"middle"), build_digit(s$left, ms), ms)
+  left_tree <- deepR(.subset2(t,"prefix"), .ft_middle(t), build_digit(s$left, ms), ms)
   right_tree <- digit_to_tree(s$right, ms)
   list(left = left_tree, value = s$value, right = right_tree)
 }

@@ -45,7 +45,7 @@ app3(xs, ts, ys, monoids) %as% {
   )
   measured_deep(
     .subset2(xs, "prefix"),
-    app3(.subset2(xs, "middle"), mid_ts, .subset2(ys, "middle"), monoids),
+    app3(.ft_middle(xs), mid_ts, .ft_middle(ys), monoids),
     .subset2(ys, "suffix"),
     monoids
   )

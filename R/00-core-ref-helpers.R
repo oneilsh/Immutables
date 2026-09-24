@@ -7,3 +7,9 @@ is_structural_node <- function(x) {
   cls <- class(x)
   any(cls %in% c("FingerTree", "Deep", "Digit", "Node", "Single", "Empty"))
 }
+
+# middle tree of a Deep node as a structural tree.
+# Runtime: O(1).
+.ft_middle <- function(t) {
+  .subset2(t, "middle")
+}

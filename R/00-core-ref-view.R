@@ -88,7 +88,7 @@ viewL(t, monoids) %as% {
     return(list(value = head, rest = .as_flexseq(build_deep(new_pr, .subset2(t,"middle"), .subset2(t,"suffix"), monoids))))
   }
   head <- pr[[1]]
-  m <- .subset2(t,"middle")
+  m <- .ft_middle(t)
   if(m %isa% Empty) {
     # Prefix had exactly one element and middle is empty: remaining content is
     # entirely in suffix, so collapse to a minimal tree from that digit.
@@ -124,7 +124,7 @@ viewR(t, monoids) %as% {
     return(list(value = head, rest = .as_flexseq(build_deep(.subset2(t,"prefix"), .subset2(t,"middle"), new_sf, monoids))))
   }
   head <- sf[[1]]
-  m <- .subset2(t,"middle")
+  m <- .ft_middle(t)
   if(m %isa% Empty) {
     return(list(value = head, rest = .as_flexseq(digit_to_tree(.subset2(t,"prefix"), monoids))))
   }

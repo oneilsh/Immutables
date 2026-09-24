@@ -187,7 +187,7 @@ combine_measures(measures, r) %as% {
     if(inherits(x, "Deep")) {
       acc <- rr$i
       acc <- rr$f(acc, .measure_child_named_fast(.subset2(x, "prefix"), name, rr))
-      acc <- rr$f(acc, .measure_child_named_fast(.subset2(x, "middle"), name, rr))
+      acc <- rr$f(acc, .measure_child_named_fast(.ft_middle(x), name, rr))
       acc <- rr$f(acc, .measure_child_named_fast(.subset2(x, "suffix"), name, rr))
       return(acc)
     }
@@ -320,7 +320,7 @@ rebind_tree_monoids(x, monoids, recompute_names) %as% {
 
   if(inherits(x, "Deep")) {
     pr <- rebind_tree_monoids(.subset2(x,"prefix"), monoids, recompute_names)
-    m <- rebind_tree_monoids(.subset2(x,"middle"), monoids, recompute_names)
+    m <- rebind_tree_monoids(.ft_middle(x), monoids, recompute_names)
     sf <- rebind_tree_monoids(.subset2(x,"suffix"), monoids, recompute_names)
     return(set_measure_with_reuse(Deep(pr, m, sf), x, monoids, recompute_names))
   }
@@ -388,7 +388,7 @@ assert_structural_attrs(node) %as% {
     assert_structural_attrs(.subset2(node, 1))
   } else if(node %isa% Deep) {
     assert_structural_attrs(.subset2(node,"prefix"))
-    assert_structural_attrs(.subset2(node,"middle"))
+    assert_structural_attrs(.ft_middle(node))
     assert_structural_attrs(.subset2(node,"suffix"))
   } else {
     for(el in node) {

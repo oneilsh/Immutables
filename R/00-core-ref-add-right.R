@@ -34,7 +34,7 @@ add_right(d, el, monoids) %as% {
   if(length(.subset2(d, "suffix")) == 4) {
     new_suffix <- measured_digit(.subset2(d, "suffix")[[4]], el, monoids = monoids)
     new_middle_node <- measured_node3(.subset2(d, "suffix")[[1]], .subset2(d, "suffix")[[2]], .subset2(d, "suffix")[[3]], monoids)
-    new_middle <- add_right(.subset2(d, "middle"), new_middle_node, monoids)
+    new_middle <- add_right(.ft_middle(d), new_middle_node, monoids)
     measured_deep(prefix = .subset2(d, "prefix"), middle = new_middle, suffix = new_suffix, monoids)
   } else {
     new_suffix <- add_right(.subset2(d, "suffix"), el, monoids)

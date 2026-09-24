@@ -42,7 +42,7 @@ add_left(d, el, monoids) %as% {
   if(length(.subset2(d, "prefix")) == 4) {
     new_prefix <- measured_digit(el, .subset2(d, "prefix")[[1]], monoids = monoids)
     new_middle_node <- measured_node3(.subset2(d, "prefix")[[2]], .subset2(d, "prefix")[[3]], .subset2(d, "prefix")[[4]], monoids)
-    new_middle <- add_left(.subset2(d, "middle"), new_middle_node, monoids)
+    new_middle <- add_left(.ft_middle(d), new_middle_node, monoids)
     measured_deep(prefix = new_prefix, middle = new_middle, suffix = .subset2(d, "suffix"), monoids)
   } else {
     new_prefix <- add_left(.subset2(d, "prefix"), el, monoids)

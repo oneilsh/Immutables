@@ -46,6 +46,17 @@ bool is_structural_node_cpp(SEXP x) {
   return has_class(x, "FingerTree") || has_class(x, "Digit") || has_class(x, "Node");
 }
 
+// Middle-tree accessors for Deep nodes. `deep_middle()` returns the middle as
+// a structural tree; `deep_middle_raw()` returns the slot as stored, for
+// callers that pass it through to a new Deep unchanged.
+inline SEXP deep_middle_raw(SEXP d) {
+  return VECTOR_ELT(d, 1);
+}
+
+SEXP deep_middle(SEXP d) {
+  return VECTOR_ELT(d, 1);
+}
+
 bool has_name_attr(SEXP x) {
   SEXP nm = Rf_getAttrib(x, ft_name_sym);
   return !Rf_isNull(nm) && XLENGTH(nm) > 0;
@@ -75,7 +86,7 @@ double compute_tree_size_fallback(SEXP x) {
   if(has_class(x, "Deep")) {
     List d(x);
     return compute_tree_size_fallback(d["prefix"]) +
-      compute_tree_size_fallback(d["middle"]) +
+      compute_tree_size_fallback(deep_middle(d)) +
       compute_tree_size_fallback(d["suffix"]);
   }
   List xs(x);
@@ -100,7 +111,7 @@ int compute_tree_named_count_fallback(SEXP x) {
   if(has_class(x, "Deep")) {
     List d(x);
     return compute_tree_named_count_fallback(d["prefix"]) +
-      compute_tree_named_count_fallback(d["middle"]) +
+      compute_tree_named_count_fallback(deep_middle(d)) +
       compute_tree_named_count_fallback(d["suffix"]);
   }
   List xs(x);
@@ -158,7 +169,7 @@ int find_name_position_impl(SEXP x, const std::string& target, int offset) {
   if(has_class(x, "Deep")) {
     List d(x);
     SEXP prefix = d["prefix"];
-    SEXP middle = d["middle"];
+    SEXP middle = deep_middle(d);
     SEXP suffix = d["suffix"];
 
     int p = find_name_position_impl(prefix, target, offset);
@@ -212,7 +223,7 @@ SEXP get_by_index_impl(SEXP x, int idx) {
   if(has_class(x, "Deep")) {
     List d(x);
     SEXP prefix = d["prefix"];
-    SEXP middle = d["middle"];
+    SEXP middle = deep_middle(d);
     SEXP suffix = d["suffix"];
 
     const int npr = static_cast<int>(child_size(prefix));
@@ -270,7 +281,7 @@ void collect_names_impl(SEXP x, CharacterVector& out, int& pos) {
   if(has_class(x, "Deep")) {
     List d(x);
     collect_names_impl(d["prefix"], out, pos);
-    collect_names_impl(d["middle"], out, pos);
+    collect_names_impl(deep_middle(d), out, pos);
     collect_names_impl(d["suffix"], out, pos);
     return;
   }
@@ -880,7 +891,7 @@ int ivx_bound_search_node(SEXP node, SEXP key, ScalarKind key_kind, bool strict,
 
   if(has_class(node, "Deep")) {
     List d(node);
-    SEXP kids[3] = { d["prefix"], d["middle"], d["suffix"] };
+    SEXP kids[3] = { d["prefix"], deep_middle(d), d["suffix"] };
     int acc = 0;
     for(int i = 0; i < 3; ++i) {
       const int sz = (int) child_size(kids[i]);
@@ -1043,7 +1054,7 @@ void ivx_native_collect_leaves(SEXP node, std::vector<SEXP>& out) {
   if(has_class(node, "Deep")) {
     List d(node);
     ivx_native_collect_leaves(d["prefix"], out);
-    ivx_native_collect_leaves(d["middle"], out);
+    ivx_native_collect_leaves(deep_middle(d), out);
     ivx_native_collect_leaves(d["suffix"], out);
     return;
   }
@@ -1169,7 +1180,7 @@ bool ivx_native_walk_node(
   if(has_class(node, "Deep")) {
     List d(node);
     SEXP prefix = d["prefix"];
-    SEXP middle = d["middle"];
+    SEXP middle = deep_middle(d);
     SEXP suffix = d["suffix"];
     if(!ivx_native_walk_node(prefix, relation_kind, qlo, qhi, kind,
                              include_start, include_end,
@@ -1519,11 +1530,11 @@ SEXP add_right_cpp(SEXP t, SEXP el, const List& monoids) {
     if(suffix.size() == 4) {
       Shield<SEXP> new_suffix(make_digit(List::create(suffix[3], el), monoids));
       Shield<SEXP> middle_node(make_node3(suffix[0], suffix[1], suffix[2], monoids));
-      Shield<SEXP> new_middle(add_right_cpp(d["middle"], middle_node, monoids));
+      Shield<SEXP> new_middle(add_right_cpp(deep_middle(d), middle_node, monoids));
       return make_deep(d["prefix"], new_middle, new_suffix, monoids);
     }
     Shield<SEXP> new_suffix(add_right_cpp(d["suffix"], el, monoids));
-    return make_deep(d["prefix"], d["middle"], new_suffix, monoids);
+    return make_deep(d["prefix"], deep_middle_raw(d), new_suffix, monoids);
   }
   stop("Unsupported node type in ft_cpp_append_right.");
 }
@@ -1552,11 +1563,11 @@ SEXP add_left_cpp(SEXP t, SEXP el, const List& monoids) {
     if(prefix.size() == 4) {
       Shield<SEXP> new_prefix(make_digit(List::create(el, prefix[0]), monoids));
       Shield<SEXP> middle_node(make_node3(prefix[1], prefix[2], prefix[3], monoids));
-      Shield<SEXP> new_middle(add_left_cpp(d["middle"], middle_node, monoids));
+      Shield<SEXP> new_middle(add_left_cpp(deep_middle(d), middle_node, monoids));
       return make_deep(new_prefix, new_middle, d["suffix"], monoids);
     }
     Shield<SEXP> new_prefix(add_left_cpp(d["prefix"], el, monoids));
-    return make_deep(new_prefix, d["middle"], d["suffix"], monoids);
+    return make_deep(new_prefix, deep_middle_raw(d), d["suffix"], monoids);
   }
   stop("Unsupported node type in ft_cpp_prepend_left.");
 }
@@ -1762,7 +1773,7 @@ SEXP app3_cpp(SEXP xs, const List& ts, SEXP ys, const List& monoids) {
     for(int i = 0; i < pry.size(); ++i) bridge[j++] = pry[i];
 
     List nts = measured_nodes_cpp(bridge, monoids);
-    Shield<SEXP> m(app3_cpp(dx["middle"], nts, dy["middle"], monoids));
+    Shield<SEXP> m(app3_cpp(deep_middle(dx), nts, deep_middle(dy), monoids));
     return make_deep(dx["prefix"], m, dy["suffix"], monoids);
   }
 
@@ -1967,7 +1978,7 @@ List locate_tree_impl_cpp(
   if(has_class(t, "Deep")) {
     List d(t);
     SEXP prefix = d["prefix"];
-    SEXP middle = d["middle"];
+    SEXP middle = deep_middle(d);
     SEXP suffix = d["suffix"];
 
     List pm = Rf_getAttrib(prefix, measures_sym);
@@ -2111,12 +2122,12 @@ List viewL_cpp(SEXP t, const List& monoids) {
     Shield<SEXP> new_pr(build_digit_cpp(tail, monoids));
     return List::create(
       _["value"] = head,
-      _["rest"] = make_deep(new_pr, d["middle"], d["suffix"], monoids)
+      _["rest"] = make_deep(new_pr, deep_middle_raw(d), d["suffix"], monoids)
     );
   }
 
   Shield<SEXP> head(static_cast<SEXP>(pr[0]));
-  Shield<SEXP> m(static_cast<SEXP>(d["middle"]));
+  Shield<SEXP> m(static_cast<SEXP>(deep_middle(d)));
   if(has_class(m, "Empty")) {
     return List::create(_["value"] = head, _["rest"] = digit_to_tree_cpp(List(d["suffix"]), monoids));
   }
@@ -2145,12 +2156,12 @@ List viewR_cpp(SEXP t, const List& monoids) {
     Shield<SEXP> new_sf(build_digit_cpp(tail, monoids));
     return List::create(
       _["value"] = head,
-      _["rest"] = make_deep(d["prefix"], d["middle"], new_sf, monoids)
+      _["rest"] = make_deep(d["prefix"], deep_middle_raw(d), new_sf, monoids)
     );
   }
 
   Shield<SEXP> head(static_cast<SEXP>(sf[0]));
-  Shield<SEXP> m(static_cast<SEXP>(d["middle"]));
+  Shield<SEXP> m(static_cast<SEXP>(deep_middle(d)));
   if(has_class(m, "Empty")) {
     return List::create(_["value"] = head, _["rest"] = digit_to_tree_cpp(List(d["prefix"]), monoids));
   }
@@ -2214,7 +2225,7 @@ List split_tree_impl_cpp(
 
   List d(t);
   SEXP prefix = d["prefix"];
-  SEXP middle = d["middle"];
+  SEXP middle = deep_middle(d);
   SEXP suffix = d["suffix"];
 
   Shield<SEXP> vpr(monoid_combine(i, node_measure_named(prefix, monoid_name), monoid_name, monoid_spec, &f));
@@ -2286,7 +2297,7 @@ List split_tree_at_index_cpp(int i, int target_idx, SEXP t, const List& monoids)
 
   List d(t);
   SEXP prefix = d["prefix"];
-  SEXP middle = d["middle"];
+  SEXP middle = deep_middle(d);
   SEXP suffix = d["suffix"];
 
   int vpr = i + (int)child_size(prefix);
@@ -2404,7 +2415,7 @@ List oms_split_tree_gt_key(
 
   List d(t);
   SEXP prefix = d["prefix"];
-  SEXP middle = d["middle"];
+  SEXP middle = deep_middle(d);
   SEXP suffix = d["suffix"];
 
   if(oms_tree_has_gt_key(prefix, key, key_type)) {
@@ -2486,7 +2497,7 @@ int oms_bound_search_node(SEXP node, SEXP key, const std::string& key_type, bool
 
   if(has_class(node, "Deep")) {
     List d(node);
-    SEXP kids[3] = { d["prefix"], d["middle"], d["suffix"] };
+    SEXP kids[3] = { d["prefix"], deep_middle(d), d["suffix"] };
     int acc = 0;
     for(int i = 0; i < 3; ++i) {
       const int sz = (int) child_size(kids[i]);
