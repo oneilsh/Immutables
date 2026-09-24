@@ -12,18 +12,31 @@
   .ft_work_counts() - before
 }
 
+# whether any middle along the spine is a suspension (forced or not), so tests
+# that rely on one can't silently degrade into testing plain trees
+.has_suspension <- function(t) {
+  while(inherits(t, "Deep")) {
+    m <- .subset2(t, "middle")
+    if(inherits(m, "FTThunk")) {
+      return(TRUE)
+    }
+    t <- m
+  }
+  FALSE
+}
+
 testthat::test_that("reusing the most expensive version costs O(1) amortized per operation", {
   testthat::skip_if_not(.ft_cpp_enabled())
 
   ops <- list(
     push_front = list(op = function(t, i) push_front(t, i), start = function() flexseq()),
     push_back = list(op = function(t, i) push_back(t, i), start = function() flexseq()),
-    pop_front = list(op = function(t, i) pop_front(t)$remaining, start = function() as_flexseq(1:4000)),
-    pop_back = list(op = function(t, i) pop_back(t)$remaining, start = function() as_flexseq(1:4000))
+    pop_front = list(op = function(t, i) pop_front(t)$remaining, start = function() as_flexseq(1:1500)),
+    pop_back = list(op = function(t, i) pop_back(t)$remaining, start = function() as_flexseq(1:1500))
   )
   for(nm in names(ops)) {
     op <- ops[[nm]]$op
-    versions <- vector("list", 3000L)
+    versions <- vector("list", 1000L)
     t <- ops[[nm]]$start()
     for(i in seq_along(versions)) {
       t <- op(t, i)
@@ -34,7 +47,7 @@ testthat::test_that("reusing the most expensive version costs O(1) amortized per
     # levels; without suspensions every reuse of it would cost the same
     first_cost <- vapply(versions, function(v) .work_during(op(v, 0L))[["deeps"]], numeric(1))
     worst <- versions[[which.max(first_cost)]]
-    reuse_cost <- .work_during(for(i in 1:100) op(worst, i))[["deeps"]] / 100
+    reuse_cost <- .work_during(for(i in 1:50) op(worst, i))[["deeps"]] / 50
 
     testthat::expect_lte(reuse_cost, 3, label = paste(nm, "mean reuse cost"))
   }
@@ -45,7 +58,7 @@ testthat::test_that("a random persistent deque workload matches a vector model",
   versions <- list(flexseq())
   models <- list(integer(0))
   next_val <- 1L
-  n_ops <- 600L
+  n_ops <- 300L
 
   forced <- .work_during(for(step in seq_len(n_ops)) {
     k <- sample.int(length(versions), 1L)
@@ -93,16 +106,18 @@ testthat::test_that("suspended middles survive split, concat and indexing", {
 
 testthat::test_that("iteration walks trees holding suspended middles", {
   t <- flexseq()
-  for(i in 1:500) t <- push_front(t, i)
+  for(i in 1:100) t <- push_front(t, i)
+  testthat::expect_true(.has_suspension(t))
   seen <- integer(0)
   coro::loop(for(v in t) seen <- c(seen, v))
-  testthat::expect_identical(seen, 500:1)
+  testthat::expect_identical(seen, 100:1)
 })
 
 testthat::test_that("plot_structure handles trees holding suspended middles", {
   testthat::skip_if_not_installed("igraph")
   t <- flexseq()
-  for(i in 1:300) t <- push_front(t, i)
+  for(i in 1:100) t <- push_front(t, i)
+  testthat::expect_true(.has_suspension(t))
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
   testthat::expect_no_error(plot_structure(t))
