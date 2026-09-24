@@ -442,9 +442,9 @@ Also supported is \code{fapply()}, here calling
 functions accepting elements and keys and returning an ordered sequence 
 with transformed elements, \code{loop()} (in key order), 
 and key-aware \code{merge()}. Finally, ordered sequences support flexible
-key-order-based queries. These include \code{min_key()} and \code{max_key()}, 
-\code{nearest_key()} to identify the closest existing key to a query 
-key (undefined for keys without a simple distance metric),
+key-order-based queries. These include \code{min_key()}, \code{max_key()},
+and \code{key_at()}, \code{nearest_key()} to identify the closest existing 
+key to a query (undefined for keys without a simple distance metric),
 and \code{lower_bound()}, returning the first element with key greater than 
 or equal to a query key.
 
@@ -459,7 +459,9 @@ such case, often employed for cohort matching purposes in observational studies
 using propensity scores \citep{benedetto2018statistical}. Foregoing details,
 "treated" patients are matched to a subset of distinct "control" patients
 with similar scores. We start by simulating some populations and scores, 
-and initialize an empty \code{flexseq} to store matches.
+and initialize an empty \code{flexseq} to store matches. We also
+convert the treated and untreated row numbers (serving as identifiers) 
+to ordered sequences, keyed by their score.
 
 ```r
 n_patients <- 200
@@ -476,11 +478,48 @@ treated_scores <- patients$score[patients$treated]
 untreated_rows <- which(!patients$treated)
 untreated_scores <- patients$score[!patients$treated]
 
+matches <- flexseq()
+
 treated_seq <- as_ordered_sequence(treated_rows, keys = treated_scores)
 untreated_seq <- as_ordered_sequence(untreated_rows, keys = untreated_scores)
-matches <- flexseq()
 ```
 
+Matching itself is a simple greedy selection. Popping treated patients in 
+order, each is matched to their nearest untreated record by score key.
+That patient is popped from wherever it was located, and a data frame 
+describing the match is pushed onto the accumulating \code{flexseq}.
+This example also illustrates collecting these into a single result 
+data frame for use after.
+
+```r
+  # no untreated patients left to match against
+  if (length(untreated_seq) == 0L) break
+  
+  # pop the first (lowest-score) treated patient
+  front_el <- pop_front(treated_seq)
+  treated_seq <- front_el$remaining
+  
+  treated_pt_score <- front_el$key
+  treated_pt_row   <- front_el$value
+  
+  # find and remove the nearest-score untreated patient
+  match_key <- nearest_key(untreated_seq, treated_pt_score)
+  match_el  <- pop_key(untreated_seq, match_key)
+  untreated_seq <- match_el$remaining
+  
+  untreated_pt_score <- match_el$key
+  untreated_pt_row   <- match_el$value
+  
+  match_row <- data.frame(treated_pt_row,
+                          treated_pt_score,
+                          untreated_pt_row,
+                          untreated_pt_score)
+  
+  matches <- push_back(matches, match_row)
+}
+
+match_df <- do.call(rbind, as.list(matches))
+```
 
 
 ## Interval indices
