@@ -1,12 +1,13 @@
 #!/usr/bin/env Rscript
 # -----------------------------------------------------------------------------
-# JSS replication script for the Immutables paper.
+# Regenerates the benchmark results and figures for the Immutables paper.
+# (For the linear replication script, see replication_code.R.)
 #
 # Reproduces every benchmark figure and timing reported in the manuscript,
 # then typesets the manuscript itself against the freshly written results.
 #
-# Usage (from any directory; the script locates the package root):
-#   Rscript data-raw/replication/generate_publication_results.R
+# Usage (from anywhere inside the repository; the script locates its root):
+#   Rscript data-raw/replication/generate_benchmark_figs_slow.R
 #
 # Outputs (all under the package source tree):
 #   inst/extdata/benchmarks-*.rds - raw benchmark timings, one file per batch
@@ -20,16 +21,15 @@
 # load the cached results instead of re-timing.
 #
 # Required packages (all listed in DESCRIPTION's Suggests):
-#   Immutables, bench, ggplot2, rstackdeque, IRanges, S4Vectors,
-#   rmarkdown, rprojroot
+#   bench, dplyr, ggplot2, igraph, IRanges, knitr, microbenchmark, pkgload,
+#   rmarkdown, rprojroot, rticles, S4Vectors, scales
+# Also requires a C++ compiler toolchain (the vignette compiles the package
+# from this source tree) and a LaTeX installation.
 # -----------------------------------------------------------------------------
 
 repo_root <- rprojroot::find_root(rprojroot::is_r_package)
 
-Sys.setenv(
-  IMMUTABLES_RUN_SLOW     = "true",
-  IMMUTABLES_SAVE_FIGURES = "true"
-)
+Sys.setenv(IMMUTABLES_RUN_SLOW = "true")
 
 started_at <- Sys.time()
 
@@ -51,6 +51,6 @@ rmarkdown::render(
 
 elapsed <- difftime(Sys.time(), started_at, units = "mins")
 message(sprintf("\nDone in %.1f minutes.", as.numeric(elapsed)))
-message("Results:    ", file.path(repo_root, "inst/extdata/benchmarks.rds"))
+message("Results:    ", file.path(repo_root, "inst/extdata/benchmarks-*.rds"))
 message("Figures:    ", file.path(repo_root, "paper/figures/"))
 message("Manuscript: ", file.path(repo_root, "paper/manuscript.pdf"))

@@ -25,6 +25,49 @@ fs5$remaining                  # flexseq of length 10 (without "z")
 
 
 ##################################
+### Section 2.1 (Example: simulating complex queuing systems)
+##################################
+
+set.seed(100)
+steps <- 5000
+p_arrival <- 0.9
+mean_service <- 1 # service times ~ rpois(1, mean_service) + 1 (real mean 2)
+
+qa <- flexseq(); free_a <- 0
+qb <- flexseq(); free_b <- 0
+waits <- flexseq()
+
+for(t in seq_len(steps)) {
+  # process new arrivals into the shorter queue
+  if(runif(1) < p_arrival) {
+    request <- list(arrival = t)
+    if(length(qa) <= length(qb)) qa <- push_back(qa, request)
+    else                         qb <- push_back(qb, request)
+  }
+
+  # if qa is free, process the front request and record total wait time
+  if(free_a <= t && length(qa) > 0) {
+    nxt <- pop_front(qa)
+    qa <- nxt$remaining    # overwrite queue with remaining portion
+    request <- nxt$value
+    waits <- push_back(waits, t - request$arrival)
+    free_a <- t + rpois(1, mean_service) + 1
+  }
+
+  # if qb is free, process the front request and record total wait time
+  if(free_b <= t && length(qb) > 0) {
+    nxt <- pop_front(qb)
+    qb <- nxt$remaining    # overwrite queue with remaining portion
+    request <- nxt$value
+    waits <- push_back(waits, t - request$arrival)
+    free_b <- t + rpois(1, mean_service) + 1
+  }
+}
+
+mean(unlist(waits))  # 1.487
+
+
+##################################
 ### Section 2.2
 ##################################
 
@@ -40,41 +83,7 @@ pq3$remaining              # priority queue with 6 entries
 
 
 ##################################
-### Section 2.3
-##################################
-
-os1 <- as_ordered_sequence(letters[1:6], keys = c(20, 10, 30, 10, 90, 70))
-peek_key(os1, 10)               # "b"
-peek_all_key(os1, 10)           # ordered sequence with "b" "d"
-count_key(os1, 10)              # 2
-elements_between(os1, 15, 85)   # ordered seq with "a" "c" "f"
-
-os2 <- insert(os1, "z", key = 100)
-
-os3 <- pop_key(os2, 100)
-os3$value                       # character "z"
-os3$remaining                   # ordered sequence with "a" through "f"
-
-
-##################################
-### Section 2.4
-##################################
-
-ix1 <- as_interval_index(c("a", "b", "c"), 
-                         start = c(1, 2, 4), 
-                         end = c(3, 4, 5))
-
-peek_point(ix1, 2)  # character "a"
-
-ix2 <- insert(ix1, "d", start = 5, end = 6)
-
-ix3 <- pop_all_overlaps(ix2, 3, 4.5)
-ix3$elements        # interval index with "b" and "c"
-ix3$remaining       # interval index with "a" and "d"
-
-
-##################################
-### Section 2.5
+### Section 2.2 (Example: best-first feature selection)
 ##################################
 
 set.seed(100)
@@ -99,35 +108,34 @@ models_considered <- 1
 while(length(pq) > 0 && models_considered < 1000) {
   # pop the current best-performing set of features
   current_best <- pop_min(pq)
-  
+
   # replace the queue with the remaining (unpopped) portion
   pq <- current_best$remaining
-  
+
   # extract the current best features ($value) and AIC ($priority)
   current_best_features <- current_best$value
   current_best_aic <- current_best$priority
-  
+
   # features we can add to the current best for potential improvement
   available_features <- setdiff(1:ncol(X), current_best_features)
-  
+
   # add each unused feature one at a time
   for(available_feature in available_features) {
     # add it to the set of best-performing features so far
     selected_features <- c(current_best_features, available_feature)
-    
+
     # build a model with that updated set
     model <- lm(y ~ X[ , selected_features, drop = FALSE])
-    
+
     # add the features to the queue prioritized by the AIC they deliver
-    cat("Considering: ", selected_features, " AIC: ", AIC(model), "\n")
     pq <- insert(pq, selected_features, priority = AIC(model))
-    
+
     # if the current model is better than the best so far, record it
     if(AIC(model) < best_aic) {
       best_features <- selected_features
       best_aic <- AIC(model)
     }
-    
+
     models_considered <- models_considered + 1
   }
 } # close while loop
@@ -136,12 +144,169 @@ print(best_features) # 7  3 19 24  2 21
 
 
 ##################################
+### Section 2.3
+##################################
+
+os1 <- as_ordered_sequence(letters[1:6], keys = c(20, 10, 30, 10, 90, 70))
+peek_key(os1, 10)               # "b"
+peek_all_key(os1, 10)           # ordered sequence with "b" "d"
+count_key(os1, 10)              # 2
+elements_between(os1, 15, 85)   # ordered seq with "a" "c" "f"
+
+os2 <- insert(os1, "z", key = 100)
+
+os3 <- pop_key(os2, 100)
+os3$value                       # character "z"
+os3$remaining                   # ordered sequence with "a" through "f"
+
+
+##################################
+### Section 2.3 (Example: scalar matching without replacement)
+##################################
+
+set.seed(100)
+n_patients <- 200
+patients <- data.frame(treated = sample(c(TRUE, FALSE),
+                                        n_patients,
+                                        prob = c(0.1, 0.9),
+                                        replace = TRUE),
+                       score = runif(n_patients))
+
+# row numbers act as identifiers
+treated_rows <- which(patients$treated)
+treated_scores <- patients$score[patients$treated]
+
+untreated_rows <- which(!patients$treated)
+untreated_scores <- patients$score[!patients$treated]
+
+matches <- flexseq()
+
+treated_seq <- as_ordered_sequence(treated_rows, keys = treated_scores)
+untreated_seq <- as_ordered_sequence(untreated_rows, keys = untreated_scores)
+
+while(length(treated_seq) > 0) {
+  # no untreated patients left to match against
+  if (length(untreated_seq) == 0L) break
+
+  # pop the first (lowest-score) treated patient
+  front_el <- pop_front(treated_seq)
+  treated_seq <- front_el$remaining
+
+  treated_pt_score <- front_el$key
+  treated_pt_row   <- front_el$value
+
+  # find and remove the nearest-score untreated patient
+  match_key <- nearest_key(untreated_seq, treated_pt_score)
+  match_el  <- pop_key(untreated_seq, match_key)
+  untreated_seq <- match_el$remaining
+
+  untreated_pt_score <- match_el$key
+  untreated_pt_row   <- match_el$value
+
+  match_row <- data.frame(treated_pt_row,
+                          treated_pt_score,
+                          untreated_pt_row,
+                          untreated_pt_score)
+
+  matches <- push_back(matches, match_row)
+}
+
+match_df <- do.call(rbind, as.list(matches))
+
+
+##################################
+### Section 2.4
+##################################
+
+ix1 <- as_interval_index(c("a", "b", "c"),
+                         start = c(1, 2, 4),
+                         end = c(3, 4, 5))
+
+peek_point(ix1, 3)  # character "b"
+
+# start-only query; can also query at "end" or "either"
+peek_point(ix1, 3, match_at = "start")
+
+ix2 <- insert(ix1, "d", start = 5, end = 6)
+
+ix3 <- pop_all_overlaps(ix2, 3, 4.5)
+ix3$elements        # interval index with "b" and "c"
+ix3$remaining       # interval index with "a" and "d"
+
+
+##################################
+### Section 2.4 (Example: hospital occupancy over time)
+##################################
+
+set.seed(100)
+
+num_days <- 365
+n_patients <- 500
+
+starts <- sample(1:num_days,
+                 size = n_patients,
+                 replace = TRUE)
+
+ends <- starts + rpois(n_patients, 2) # average stay = 2 days
+
+ages <- pmax(0, rnorm(n_patients, mean = 35, sd = 10))
+is_males <- sample(c(0, 1), n_patients, replace = TRUE)
+
+# list of patients (each a list with age and is_male)
+patients <- Map(list, age = ages, is_male = is_males)
+
+# store each patient in an interval index with their stay
+ix <- as_interval_index(patients, start = starts, end = ends)
+
+day_stats <- flexseq()
+
+for(day in seq_len(num_days)) {
+  present <- peek_all_point(ix, day)
+  occupancy <- length(present)
+
+  if(occupancy == 0) {
+    stats <- data.frame(day = day, occupancy = 0, mean_age = NA, pct_male = NA)
+  } else {
+    day_ages <- present |>
+      fapply(function(patient, start, end) {
+        patient$age
+      }) |>
+      unlist() # fapply returns an interval_index, convert to vector
+
+    # use fapply() on the interval index to map each patient record
+    # (containing both $age and $is_male) to an interval_index
+    # containing just is_male values
+    day_males <- present |>
+      fapply(function(patient, start, end) {
+        patient$is_male
+      }) |>
+      unlist()
+
+    stats <- data.frame(day = day,
+                        occupancy = occupancy,
+                        mean_age = mean(day_ages),
+                        pct_male = 100 * mean(day_males))
+  }
+
+  day_stats <- push_back(day_stats, stats)
+}
+
+# convert the flexseq of data frames into a single data frame
+# with columns for day, occupancy, mean_age, and pct_male
+stats_df <- do.call(rbind, as.list(day_stats))
+head(stats_df)
+
+
+##################################
 ### Section 3
 ##################################
 
-tasks <- lapply(1:10, 
+set.seed(42)
+
+# flexseq of lists, each with $id and $hours
+tasks <- lapply(1:11,
                 function(i) {
-                  list(id = letters[i], 
+                  list(id = letters[i],
                        hours = rpois(n = 1, lambda = 5))
                 }) |>
          as_flexseq()
@@ -157,7 +322,7 @@ plot_structure(tasks2, node_label = function(node) {
             node$element$hours, 
             node$measures$total_time)
   } else {
-    sprintf("Sum: %d", node$measures$total_time)
+    sprintf("Total: %d", node$measures$total_time)
   }
 })
 
@@ -194,9 +359,14 @@ matches <- ordered_sequence()
 first_split <- split_by_predicate(subseqs, function(m) query <= m, "max_seq")
 
 if(length(first_split$right) > 0) {
-  right_measures = get_measures(first_split$right, "max_seq")
-  first_measure = right_measures[[1]]
-  
+  first_entry <- first_split$right[1]
+
+  # get_measures() returns a flexseq of measure values, [[1]] extracts
+  # the first (and only) returning a bare measure value
+  first_measure = get_measures(first_entry, "max_seq")[[1]]
+
+  # if the query is found in the first measure, we need to find the
+  # first entry with a key larger than the query that does not match it
   if(startsWith(first_measure, query)) {
     second_split <- split_by_predicate(
       first_split$right,

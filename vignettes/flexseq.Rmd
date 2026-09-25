@@ -130,3 +130,51 @@ as.list(x)
 unlist(x)
 length(x)
 ```
+
+## Example: simulating complex queueing systems
+
+Queueing systems represent one or more service queues, where arrival and service times are typically drawn from defined distributions such as the exponential. The dynamics of such systems are a common area of study, for example in computing average wait times. While in many cases closed-form solutions for these dynamics exist, simple policy choices such as "each request joins the currently shortest queue" can complicate analyses significantly. In this example we simulate such a system to generate an empirical wait-time distribution.
+
+We simulate `steps` time steps; at each, a new request arrives with probability `p_arrival` and joins the shorter of two queues, `qa` or `qb`. We keep track of each server's next free time step, processing requests from the front of its queue. Each request's wait time is calculated and collected in a running `flexseq`, which we convert to a vector and summarize after.
+
+```{r}
+set.seed(100)
+steps <- 1000
+p_arrival <- 0.9
+mean_service <- 1 # service times ~ rpois(1, mean_service) + 1 (real mean 2)
+
+qa <- flexseq(); free_a <- 0
+qb <- flexseq(); free_b <- 0
+waits <- flexseq()
+
+for(t in seq_len(steps)) {
+  # process new arrivals into the shorter queue
+  if(runif(1) < p_arrival) {
+    request <- list(arrival = t)
+    if(length(qa) <= length(qb)) qa <- push_back(qa, request)
+    else                         qb <- push_back(qb, request)
+  }
+
+  # if qa is free, process the front request and record total wait time
+  if(free_a <= t && length(qa) > 0) {
+    nxt <- pop_front(qa)
+    qa <- nxt$remaining    # overwrite queue with remaining portion
+    request <- nxt$value
+    waits <- push_back(waits, t - request$arrival)
+    free_a <- t + rpois(1, mean_service) + 1
+  }
+
+  # if qb is free, process the front request and record total wait time
+  if(free_b <= t && length(qb) > 0) {
+    nxt <- pop_front(qb)
+    qb <- nxt$remaining    # overwrite queue with remaining portion
+    request <- nxt$value
+    waits <- push_back(waits, t - request$arrival)
+    free_b <- t + rpois(1, mean_service) + 1
+  }
+}
+
+mean(unlist(waits))
+```
+
+This example may be extended in several ways, including tracking queue lengths, requests that migrate between queues (as in queueing networks), or other policies such as length-weighted random queue assignment.

@@ -22,8 +22,6 @@ AGENTS.md
 *.tar.gz
 Immutables-Supplementary/
 paper/Immutables-Supplementary.zip
-inst/extdata/*-fast.rds
-paper/figures/*-fast.pdf
 vignettes/*.html
 vignettes/*_files/
 vignettes/inst/
