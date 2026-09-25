@@ -83,3 +83,24 @@ testthat::test_that("pop_all_overlaps() warns and matches pop_all_overlapping()"
   )
   testthat::expect_length(empty_out$elements, 0L)
 })
+
+testthat::test_that("deprecation warnings name the old function when called indirectly", {
+  ix <- .ivx_dep_fixture()
+  # sapply()/do.call() hide the call name, so .Deprecated() must be told it
+  testthat::expect_warning(
+    sapply(list(ix), peek_overlaps, start = 2, end = 4),
+    regexp = "'peek_overlaps' is deprecated", class = "deprecatedWarning"
+  )
+  testthat::expect_warning(
+    do.call(peek_all_overlaps, list(ix, 2, 5)),
+    regexp = "'peek_all_overlaps' is deprecated", class = "deprecatedWarning"
+  )
+  testthat::expect_warning(
+    lapply(list(ix), pop_overlaps, start = 2, end = 4),
+    regexp = "'pop_overlaps' is deprecated", class = "deprecatedWarning"
+  )
+  testthat::expect_warning(
+    Map(pop_all_overlaps, list(ix), 2, 5),
+    regexp = "'pop_all_overlaps' is deprecated", class = "deprecatedWarning"
+  )
+})

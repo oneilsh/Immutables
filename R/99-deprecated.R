@@ -26,27 +26,27 @@ NULL
 #' @rdname Immutables-deprecated
 #' @export
 peek_overlaps <- function(x, start, end, bounds = NULL) {
-  .Deprecated("peek_overlapping", package = "Immutables")
+  .Deprecated("peek_overlapping", package = "Immutables", old = "peek_overlaps")
   peek_overlapping(x, start, end, bounds = bounds)
 }
 
 #' @rdname Immutables-deprecated
 #' @export
 peek_all_overlaps <- function(x, start, end, bounds = NULL, as_list = FALSE) {
-  .Deprecated("peek_all_overlapping", package = "Immutables")
+  .Deprecated("peek_all_overlapping", package = "Immutables", old = "peek_all_overlaps")
   peek_all_overlapping(x, start, end, bounds = bounds, as_list = as_list)
 }
 
 #' @rdname Immutables-deprecated
 #' @export
 pop_overlaps <- function(x, start, end, bounds = NULL) {
-  .Deprecated("pop_overlapping", package = "Immutables")
+  .Deprecated("pop_overlapping", package = "Immutables", old = "pop_overlaps")
   pop_overlapping(x, start, end, bounds = bounds)
 }
 
 #' @rdname Immutables-deprecated
 #' @export
 pop_all_overlaps <- function(x, start, end, bounds = NULL) {
-  .Deprecated("pop_all_overlapping", package = "Immutables")
+  .Deprecated("pop_all_overlapping", package = "Immutables", old = "pop_all_overlaps")
   pop_all_overlapping(x, start, end, bounds = bounds)
 }
