@@ -9,20 +9,6 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
-loaded <- tryCatch({
-  pkgload::load_all(quiet = TRUE)
-  TRUE
-}, error = function(e) FALSE)
-
-if(!loaded) {
-  library(Immutables)
-}
-
-library(microbenchmark)
-library(bench)
-library(ggplot2)
-library(dplyr)
-
 # Three run modes, selected by environment variable:
 #   IMMUTABLES_RUN_SLOW=true -> full re-run: all sizes, 10 reps per op. Writes
 #                               the canonical inst/extdata/benchmarks-*.rds and
@@ -41,6 +27,25 @@ library(dplyr)
 run_slow <- identical(Sys.getenv("IMMUTABLES_RUN_SLOW"), "true")
 run_fast <- identical(Sys.getenv("IMMUTABLES_RUN_FAST"), "true")
 run_benchmarks <- run_slow || run_fast
+
+
+loaded <- tryCatch({
+  # When re-timing, force a fresh optimized (-O2) build: load_all() defaults to
+  # debug = TRUE, which appends -O0, and otherwise reuses any stale objects.
+  pkgload::load_all(quiet = TRUE, debug = FALSE,
+                    recompile = run_benchmarks)
+  TRUE
+}, error = function(e) FALSE)
+
+if(!loaded) {
+  if(run_benchmarks) stop("load_all() failed; refusing to benchmark an installed build")
+  library(Immutables)
+}
+
+library(microbenchmark)
+library(bench)
+library(ggplot2)
+library(dplyr)
 
 # Fast mode uses a single repetition and only the smallest few sizes per batch;
 # `suffix` keeps its outputs (.rds and .pdf) in separate files.
