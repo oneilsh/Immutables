@@ -292,7 +292,7 @@ for(n in ivx_sizes) {
   # (~50 matches) as n grows. (Fixed global points computed from the largest
   # size would fall beyond the data for smaller n, timing only the
   # empty-result path.)
-  qpt   <- starts[n %/% 2L] + 10L
+  qpt   <- starts[n %/% 2L]
   qlo   <- starts[n %/% 2L]
   qhi   <- starts[n %/% 2L + 50L]
   ins_s <- starts[n %/% 2L]
