@@ -34,7 +34,7 @@ peek_all_point(
   How the query point is matched against each entry. One of `"interval"`
   (default; containment under `bounds`), `"start"`, `"end"`, or
   `"either"`. See
-  [`peek_point()`](https://oneilsh.github.io/immutables/reference/peek_point.md)
+  [`peek_point()`](https://oneilsh.github.io/Immutables/reference/peek_point.md)
   for details.
 
 - as_list:

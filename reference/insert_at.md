@@ -39,7 +39,7 @@ Common cases:
 - `flexseq`: inserts all of its elements.
 
 - Empty input ([`list()`](https://rdrr.io/r/base/list.html) or
-  [`flexseq()`](https://oneilsh.github.io/immutables/reference/flexseq.md)):
+  [`flexseq()`](https://oneilsh.github.io/Immutables/reference/flexseq.md)):
   no change.
 
 To insert one composite object (for example, a vector or a list) as a

@@ -41,9 +41,9 @@ monoid set. Mismatches error.
 
 The reserved monoids `.ivx_min_end` / `.ivx_max_end` recompute
 automatically on the merged tree, so
-[`min_endpoint()`](https://oneilsh.github.io/immutables/reference/min_endpoint.md)
+[`min_endpoint()`](https://oneilsh.github.io/Immutables/reference/min_endpoint.md)
 /
-[`max_endpoint()`](https://oneilsh.github.io/immutables/reference/max_endpoint.md)
+[`max_endpoint()`](https://oneilsh.github.io/Immutables/reference/max_endpoint.md)
 and interval-relation queries work immediately on the result.
 
 Both inputs are left unmodified.

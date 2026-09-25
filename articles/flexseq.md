@@ -1,4 +1,4 @@
-# flexseq
+# Flexible Sequences: Persistent Lists, Deques, and Slicing
 
 ## `flexseq` basics
 
@@ -50,7 +50,7 @@ x2
 Flexseqs may be named, but if any are named they must all have unique
 non-`NULL` names. Large named flexseqs are somewhat slower than unnamed
 ones; for efficient key/value stores consider using an
-[`ordered_sequence()`](https://oneilsh.github.io/immutables/reference/ordered_sequence.md).
+[`ordered_sequence()`](https://oneilsh.github.io/Immutables/reference/ordered_sequence.md).
 
 ``` r
 
@@ -127,13 +127,13 @@ sequences, peeking at the front or back (i.e., getting a copy of the
 first or last item), and popping from the front or back, which returns
 the removed element and a copy of the flexseq input with that item
 removed.
-[`pop_front()`](https://oneilsh.github.io/immutables/reference/pop_front.md)
+[`pop_front()`](https://oneilsh.github.io/Immutables/reference/pop_front.md)
 and
-[`pop_back()`](https://oneilsh.github.io/immutables/reference/pop_back.md)
+[`pop_back()`](https://oneilsh.github.io/Immutables/reference/pop_back.md)
 both return a list with fields `$value` and `$remaining`;
-[`peek_back()`](https://oneilsh.github.io/immutables/reference/peek_back.md)
+[`peek_back()`](https://oneilsh.github.io/Immutables/reference/peek_back.md)
 is the symmetric counterpart to
-[`peek_front()`](https://oneilsh.github.io/immutables/reference/peek_front.md).
+[`peek_front()`](https://oneilsh.github.io/Immutables/reference/peek_front.md).
 
 ``` r
 
@@ -188,12 +188,12 @@ xpopped$remaining
 
 Beyond the ends, flexseqs support arbitrary-position persistent
 operations.
-[`peek_at()`](https://oneilsh.github.io/immutables/reference/peek_at.md)
+[`peek_at()`](https://oneilsh.github.io/Immutables/reference/peek_at.md)
 is the non-throwing positional read (compare with `[[`, which errors
 when out of bounds);
-[`pop_at()`](https://oneilsh.github.io/immutables/reference/pop_at.md)
+[`pop_at()`](https://oneilsh.github.io/Immutables/reference/pop_at.md)
 removes an element at a given index and returns `$value`/`$remaining`;
-[`insert_at()`](https://oneilsh.github.io/immutables/reference/insert_at.md)
+[`insert_at()`](https://oneilsh.github.io/Immutables/reference/insert_at.md)
 inserts before a given index, or at `length(x) + 1` to append.
 
 ``` r
@@ -243,7 +243,7 @@ insert_at(x, 3, c("x", "y"))
 ## Transforming and combining
 
 [`c()`](https://rdrr.io/r/base/c.html) concatenates flexseqs, and
-[`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+[`fapply()`](https://oneilsh.github.io/Immutables/reference/fapply.md)
 applies a function to each element of one returning the result as a
 flexseq, analygous to [`lapply()`](https://rdrr.io/r/base/lapply.html)
 for R lists.
@@ -297,7 +297,7 @@ distinction matters for `ordered_sequence`, `interval_index`, and
 `priority_queue`, where [`merge()`](https://rdrr.io/r/base/merge.html)
 performs a proper sorted/priority-aware combine.
 
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md)
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md)
 (re-exported from the **coro** package) enables `for`-loop traversal,
 yielding elements left-to-right lazily without materializing a list.
 
@@ -315,9 +315,9 @@ loop(for (el in x) {
 ```
 
 For named flexseqs,
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md)
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md)
 yields bare values (matching
-[`peek_front()`](https://oneilsh.github.io/immutables/reference/peek_front.md));
+[`peek_front()`](https://oneilsh.github.io/Immutables/reference/peek_front.md));
 use [`as.list()`](https://rdrr.io/r/base/list.html) when you need names
 alongside values.
 
@@ -331,11 +331,11 @@ loop(for (el in x) print(el))
 ```
 
 Plain `for (el in x)` (without
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md)) does
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md)) does
 *not* dispatch to the iteration protocol — it walks the underlying
 finger-tree storage and yields internal nodes rather than sequence
 elements. Always wrap with
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md).
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md).
 
 Flexseqs convert back to standard R structures with
 [`as.list()`](https://rdrr.io/r/base/list.html) (preserves names and
@@ -364,3 +364,67 @@ unlist(x)
 length(x)
 #> [1] 3
 ```
+
+## Example: simulating complex queueing systems
+
+Queueing systems represent one or more service queues, where arrival and
+service times are typically drawn from defined distributions such as the
+exponential. The dynamics of such systems are a common area of study,
+for example in computing average wait times. While in many cases
+closed-form solutions for these dynamics exist, simple policy choices
+such as “each request joins the currently shortest queue” can complicate
+analyses significantly. In this example we simulate such a system to
+generate an empirical wait-time distribution.
+
+We simulate `steps` time steps; at each, a new request arrives with
+probability `p_arrival` and joins the shorter of two queues, `qa` or
+`qb`. We keep track of each server’s next free time step, processing
+requests from the front of its queue. Each request’s wait time is
+calculated and collected in a running `flexseq`, which we convert to a
+vector and summarize after.
+
+``` r
+
+set.seed(100)
+steps <- 1000
+p_arrival <- 0.9
+mean_service <- 1 # service times ~ rpois(1, mean_service) + 1 (real mean 2)
+
+qa <- flexseq(); free_a <- 0
+qb <- flexseq(); free_b <- 0
+waits <- flexseq()
+
+for(t in seq_len(steps)) {
+  # process new arrivals into the shorter queue
+  if(runif(1) < p_arrival) {
+    request <- list(arrival = t)
+    if(length(qa) <= length(qb)) qa <- push_back(qa, request)
+    else                         qb <- push_back(qb, request)
+  }
+
+  # if qa is free, process the front request and record total wait time
+  if(free_a <= t && length(qa) > 0) {
+    nxt <- pop_front(qa)
+    qa <- nxt$remaining    # overwrite queue with remaining portion
+    request <- nxt$value
+    waits <- push_back(waits, t - request$arrival)
+    free_a <- t + rpois(1, mean_service) + 1
+  }
+
+  # if qb is free, process the front request and record total wait time
+  if(free_b <= t && length(qb) > 0) {
+    nxt <- pop_front(qb)
+    qb <- nxt$remaining    # overwrite queue with remaining portion
+    request <- nxt$value
+    waits <- push_back(waits, t - request$arrival)
+    free_b <- t + rpois(1, mean_service) + 1
+  }
+}
+
+mean(unlist(waits))
+#> [1] 1.501116
+```
+
+This example may be extended in several ways, including tracking queue
+lengths, requests that migrate between queues (as in queueing networks),
+or other policies such as length-weighted random queue assignment.

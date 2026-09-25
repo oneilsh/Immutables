@@ -1,6 +1,6 @@
-# Print a flexseq
+# Print a `flexseq` Summary
 
-Print a flexseq
+Print a `flexseq` Summary
 
 ## Usage
 

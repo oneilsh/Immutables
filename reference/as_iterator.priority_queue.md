@@ -2,7 +2,7 @@
 
 Returns a lazy iterator that yields payload elements in
 priority-ascending order. Use with
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md):
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md):
 
 ## Usage
 
@@ -26,10 +26,10 @@ A `coro` iterator function.
     loop(for (x in pq) print(x))
 
 Traversal is driven by repeated
-[`pop_min()`](https://oneilsh.github.io/immutables/reference/pop_min.md):
+[`pop_min()`](https://oneilsh.github.io/Immutables/reference/pop_min.md):
 each step is O(log n), so full traversal is O(n log n). Ties within
 equal priorities are yielded in FIFO insertion order (inherited from
-[`pop_min()`](https://oneilsh.github.io/immutables/reference/pop_min.md)).
+[`pop_min()`](https://oneilsh.github.io/Immutables/reference/pop_min.md)).
 
 The original `x` is not modified; the iterator holds a private cursor
 and partial iteration (e.g. via
@@ -37,11 +37,11 @@ and partial iteration (e.g. via
 intact.
 
 Each yielded value is the bare payload (matching
-[`peek_min()`](https://oneilsh.github.io/immutables/reference/peek_min.md)).
+[`peek_min()`](https://oneilsh.github.io/Immutables/reference/peek_min.md)).
 Use
-[`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+[`fapply()`](https://oneilsh.github.io/Immutables/reference/fapply.md)
 if your callback needs the priority alongside the value, or cast with
-[`as_flexseq()`](https://oneilsh.github.io/immutables/reference/as_flexseq.md)
+[`as_flexseq()`](https://oneilsh.github.io/Immutables/reference/as_flexseq.md)
 for insertion-order iteration.
 
 ## Examples

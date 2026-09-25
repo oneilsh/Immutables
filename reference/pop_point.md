@@ -33,7 +33,7 @@ pop_point(
   How the query point is matched against each entry. One of `"interval"`
   (default; containment under `bounds`), `"start"`, `"end"`, or
   `"either"`. See
-  [`peek_point()`](https://oneilsh.github.io/immutables/reference/peek_point.md)
+  [`peek_point()`](https://oneilsh.github.io/Immutables/reference/peek_point.md)
   for details.
 
 ## Value
@@ -45,7 +45,7 @@ A list with `value`, `start`, `end`, and `remaining`. On miss: `value`,
 
 Removes the first match in canonical interval order. On miss, returns a
 non-throwing miss object with `remaining = x`. Use
-[`pop_all_point()`](https://oneilsh.github.io/immutables/reference/pop_all_point.md)
+[`pop_all_point()`](https://oneilsh.github.io/Immutables/reference/pop_all_point.md)
 to remove all matches.
 
 ## Examples

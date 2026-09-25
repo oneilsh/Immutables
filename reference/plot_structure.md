@@ -92,13 +92,13 @@ plot_structure(
       the leaf entry. Keys include built-ins (`.size`, `.named_count`,
       and any structure-specific ones like `.pq_min`) plus any custom
       name added via
-      [`add_monoids()`](https://oneilsh.github.io/immutables/reference/add_monoids.md).
+      [`add_monoids()`](https://oneilsh.github.io/Immutables/reference/add_monoids.md).
 
   `element`
 
   :   For element nodes, the raw leaf entry. Shape depends on the
       structure type; see
-      [`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md)
+      [`measure_monoid()`](https://oneilsh.github.io/Immutables/reference/measure_monoid.md)
       for the entry contract. `NULL` for structural nodes.
 
   Measure values are exposed as-is, including list-valued measures (e.g.
@@ -138,8 +138,8 @@ Returns `NULL` invisibly.
 
 ## See also
 
-[`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md),
-[`add_monoids()`](https://oneilsh.github.io/immutables/reference/add_monoids.md)
+[`measure_monoid()`](https://oneilsh.github.io/Immutables/reference/measure_monoid.md),
+[`add_monoids()`](https://oneilsh.github.io/Immutables/reference/add_monoids.md)
 
 ## Examples
 

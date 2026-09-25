@@ -1,4 +1,4 @@
-# Priority Queues
+# Priority Queues: Fast Min/Max Access by Priority
 
 ## Priority queue basics
 
@@ -53,7 +53,7 @@ res$remaining
 ```
 
 The
-[`as_priority_queue()`](https://oneilsh.github.io/immutables/reference/as_priority_queue.md)
+[`as_priority_queue()`](https://oneilsh.github.io/Immutables/reference/as_priority_queue.md)
 variant builds a queue from a vector or list of elements paired with a
 priority vector. useful when priorities are already in a separate
 vector.
@@ -197,9 +197,9 @@ pop_min(empty_q)
 
 ## Priority values
 
-[`min_priority()`](https://oneilsh.github.io/immutables/reference/min_priority.md)
+[`min_priority()`](https://oneilsh.github.io/Immutables/reference/min_priority.md)
 and
-[`max_priority()`](https://oneilsh.github.io/immutables/reference/max_priority.md)
+[`max_priority()`](https://oneilsh.github.io/Immutables/reference/max_priority.md)
 return the current extrema *priority* (not the stored element), in O(1)
 via cached monoid state.
 
@@ -217,11 +217,11 @@ min_priority(priority_queue())  # NULL when empty
 ## Named priorities
 
 Priority queues can carry names, set either at construction or on
-[`insert()`](https://oneilsh.github.io/immutables/reference/insert.md).
+[`insert()`](https://oneilsh.github.io/Immutables/reference/insert.md).
 Names support read-only indexing via `[`, `[[`, and `$`. This is the
 *only* indexing form `priority_queue` supports. Positional indexing and
 all replacement forms (`[<-`, `[[<-`, `$<-`) error; cast to
-[`as_flexseq()`](https://oneilsh.github.io/immutables/reference/as_flexseq.md)
+[`as_flexseq()`](https://oneilsh.github.io/Immutables/reference/as_flexseq.md)
 first to mutate.
 
 ``` r
@@ -253,7 +253,7 @@ try(q$a <- "!!")  # replacement blocked
 
 ## Transforming, iterating, merging
 
-[`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+[`fapply()`](https://oneilsh.github.io/Immutables/reference/fapply.md)
 maps a function over queue elements while preserving priorities. The
 function receives `(value, priority)`, or `(value, priority, name)` if
 it accepts a third argument — priorities and names are passed in
@@ -278,11 +278,11 @@ fapply(q, function(value, priority) toupper(value))
 #> [1] "ALICE"
 ```
 
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md)
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md)
 (re-exported from the **coro** package) walks the queue in
 priority-ascending order, yielding bare values. Traversal is driven by
 repeated
-[`pop_min()`](https://oneilsh.github.io/immutables/reference/pop_min.md),
+[`pop_min()`](https://oneilsh.github.io/Immutables/reference/pop_min.md),
 so full traversal is $`O(n \log n)`$ ($`O(\log n)`$ per step); ties
 within equal priority follow insertion order.
 
@@ -296,13 +296,13 @@ loop(for (v in q) print(v))
 ```
 
 Use
-[`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+[`fapply()`](https://oneilsh.github.io/Immutables/reference/fapply.md)
 if your callback needs the priority alongside the value, or cast with
-[`as_flexseq()`](https://oneilsh.github.io/immutables/reference/as_flexseq.md)
+[`as_flexseq()`](https://oneilsh.github.io/Immutables/reference/as_flexseq.md)
 for insertion-order iteration. Plain `for (v in q)` (without
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md))
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md))
 yields raw finger-tree internals rather than elements — always wrap with
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md).
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md).
 
 `merge(x, y)` combines two priority queues into a new one containing
 every entry from both, in O(log(min(m, n))). The `.pq_min` / `.pq_max`
@@ -327,7 +327,7 @@ error (rather than being silently harmonized). Both inputs are left
 unmodified.
 
 For full sequence-style operations, cast with
-[`as_flexseq()`](https://oneilsh.github.io/immutables/reference/as_flexseq.md).
+[`as_flexseq()`](https://oneilsh.github.io/Immutables/reference/as_flexseq.md).
 This returns payload items only; priority metadata and any custom
 monoids are dropped. To instead obtain a `flexseq` of entry records
 (`value` + `priority`), compose with
@@ -381,3 +381,107 @@ as_flexseq(as.list(y))
 #> $priority
 #> [1] "A"
 ```
+
+## Example: best-first feature selection
+
+Priority queues have many applications, but we’ll demonstrate applying
+them to the problem of feature selection in modeling: given a large
+number of features, only a few of which are informative, identify a
+small subset with good performance. We begin by constructing a matrix
+`X` with 25 potential feature columns, and an outcome `y` dependent only
+on features 3 and 7:
+
+``` r
+
+set.seed(100)
+n <- 2000
+p <- 25
+X <- matrix(rnorm(n * p), n, p)
+
+# response depends on features 3 and 7 only
+y <- 3.5 * X[, 3] - 4 * X[, 7] + rnorm(n)
+```
+
+We’ll consider linear models using only main effects, and use Akaike’s
+Information Criterion (AIC) as a measure of performance. The number of
+potential models ($`2^{25}`$) is too large to try all possibilities.
+Rather than iterate feature combinations exhaustively, we’ll perform a
+best-first search: given a “current best” set of features, we’ll add
+remaining features individually, evaluating as we go and storing them
+for potential later expansion. By keeping feature sets in a priority
+queue prioritized by resultant AIC, we can select the best-performing
+set to build on at each iteration. We thus begin with a base model using
+no features, and the corresponding empty feature set and AIC stored in a
+`priority_queue`.
+
+``` r
+
+# a model using no features, initially the "best"
+model <- lm(y ~ 1)
+best_features <- numeric(0)
+best_aic <- AIC(model)
+
+# store the initial model prioritized by its AIC
+pq <- priority_queue()
+pq <- insert(pq, best_features, priority = best_aic)
+```
+
+So long as there are feature sets available in the queue to expand on,
+we will do so, but limit the total number of considered models to
+approximately 200 to prevent an exhaustive search. At each iteration we
+pop the best feature set considered so far and compute the remaining
+available features. We then add each of those to the current best set in
+turn, resulting in a new model with corresponding AIC to add to the
+queue. If one of these performs better than the best so far we record
+it. Along the way we update the number of models considered.
+
+``` r
+
+models_considered <- 1
+
+while(length(pq) > 0 && models_considered < 200) {
+  # pop the current best-performing set of features
+  current_best <- pop_min(pq)
+
+  # replace the queue with the remaining (unpopped) portion
+  pq <- current_best$remaining
+
+  # extract the current best features ($value) and AIC ($priority)
+  current_best_features <- current_best$value
+  current_best_aic <- current_best$priority
+
+  # features we can add to the current best for potential improvement
+  available_features <- setdiff(1:ncol(X), current_best_features)
+
+  # add each unused feature one at a time
+  for(available_feature in available_features) {
+    # add it to the set of best-performing features so far
+    selected_features <- c(current_best_features, available_feature)
+
+    # build a model with that updated set
+    model <- lm(y ~ X[ , selected_features, drop = FALSE])
+
+    # add the features to the queue prioritized by the AIC they deliver
+    pq <- insert(pq, selected_features, priority = AIC(model))
+
+    # if the current model is better than the best so far, record it
+    if(AIC(model) < best_aic) {
+      best_features <- selected_features
+      best_aic <- AIC(model)
+    }
+
+    models_considered <- models_considered + 1
+  }
+}
+
+best_features
+#> [1]  7  3 22 21 25  2 17  6
+```
+
+The best model encountered by AIC includes the two informative features,
+7 and 3, along with several noise features that each improve AIC
+slightly. Potential improvements to this example include ordering
+features to avoid duplicated testing of feature permutations, more
+sophisticated stopping criteria based on AIC trend, and alternative
+prioritization values. The search history can also easily be inspected
+efficiently by growing a `flexseq` with intermediate information.

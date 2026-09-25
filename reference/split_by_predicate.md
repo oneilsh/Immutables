@@ -34,14 +34,14 @@ A list with fields:
 ## Details
 
 This is the two-way variant of
-[`split_around_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_around_by_predicate.md).
+[`split_around_by_predicate()`](https://oneilsh.github.io/Immutables/reference/split_around_by_predicate.md).
 
 As with
-[`split_around_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_around_by_predicate.md),
+[`split_around_by_predicate()`](https://oneilsh.github.io/Immutables/reference/split_around_by_predicate.md),
 a common setup is a custom monoid created with
-[`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md)
+[`measure_monoid()`](https://oneilsh.github.io/Immutables/reference/measure_monoid.md)
 and attached via
-[`add_monoids()`](https://oneilsh.github.io/immutables/reference/add_monoids.md).
+[`add_monoids()`](https://oneilsh.github.io/Immutables/reference/add_monoids.md).
 
 `left` and `right` preserve subclass when the input is a subclass of
 `flexseq`.

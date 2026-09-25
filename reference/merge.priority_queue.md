@@ -33,9 +33,9 @@ A new `priority_queue` of size `length(x) + length(y)`.
 
 The cached `.pq_min` / `.pq_max` monoids recompute automatically on the
 merged tree, so
-[`peek_min()`](https://oneilsh.github.io/immutables/reference/peek_min.md)
+[`peek_min()`](https://oneilsh.github.io/Immutables/reference/peek_min.md)
 /
-[`peek_max()`](https://oneilsh.github.io/immutables/reference/peek_max.md)
+[`peek_max()`](https://oneilsh.github.io/Immutables/reference/peek_max.md)
 reflect the combined extremum immediately.
 
 Both queues must share the same priority type and the same monoid set;

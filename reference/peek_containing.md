@@ -33,7 +33,7 @@ The payload value from the first match, or `NULL` on no match.
 ## Details
 
 Returns the first match in canonical interval order. Use
-[`peek_all_containing()`](https://oneilsh.github.io/immutables/reference/peek_all_containing.md)
+[`peek_all_containing()`](https://oneilsh.github.io/Immutables/reference/peek_all_containing.md)
 to retrieve all matches as an `interval_index` slice.
 
 ## Examples

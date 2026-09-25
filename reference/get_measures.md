@@ -40,9 +40,9 @@ into other immutables operations; use
 
 ## See also
 
-[`get_measure()`](https://oneilsh.github.io/immutables/reference/get_measure.md),
-[`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md),
-[`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+[`get_measure()`](https://oneilsh.github.io/Immutables/reference/get_measure.md),
+[`measure_monoid()`](https://oneilsh.github.io/Immutables/reference/measure_monoid.md),
+[`fapply()`](https://oneilsh.github.io/Immutables/reference/fapply.md)
 
 ## Examples
 

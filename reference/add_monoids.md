@@ -1,7 +1,7 @@
 # Add or Merge Measure Monoids
 
 Attaches one or more named
-[`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md)
+[`measure_monoid()`](https://oneilsh.github.io/Immutables/reference/measure_monoid.md)
 definitions to an existing immutable structure.
 
 ## Usage
@@ -19,7 +19,7 @@ add_monoids(t, monoids, overwrite = FALSE)
 - monoids:
 
   Named list of
-  [`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md)
+  [`measure_monoid()`](https://oneilsh.github.io/Immutables/reference/measure_monoid.md)
   objects.
 
 - overwrite:
@@ -61,16 +61,16 @@ Measure-function signatures:
 This operation is persistent: `t` is not modified.
 
 Use this when you want fast predicate scans (for example with
-[`locate_by_predicate()`](https://oneilsh.github.io/immutables/reference/locate_by_predicate.md),
-[`split_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_by_predicate.md),
-[`split_around_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_around_by_predicate.md))
+[`locate_by_predicate()`](https://oneilsh.github.io/Immutables/reference/locate_by_predicate.md),
+[`split_by_predicate()`](https://oneilsh.github.io/Immutables/reference/split_by_predicate.md),
+[`split_around_by_predicate()`](https://oneilsh.github.io/Immutables/reference/split_around_by_predicate.md))
 driven by domain-specific accumulated values.
 
 ## See also
 
-[`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md),
-[`get_measure()`](https://oneilsh.github.io/immutables/reference/get_measure.md),
-[`get_measures()`](https://oneilsh.github.io/immutables/reference/get_measures.md)
+[`measure_monoid()`](https://oneilsh.github.io/Immutables/reference/measure_monoid.md),
+[`get_measure()`](https://oneilsh.github.io/Immutables/reference/get_measure.md),
+[`get_measures()`](https://oneilsh.github.io/Immutables/reference/get_measures.md)
 
 ## Examples
 

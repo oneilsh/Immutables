@@ -4,7 +4,7 @@
 
 The demos below illustrate the types of algorithms supported by
 `immutables`, especially
-[`interval_index()`](https://oneilsh.github.io/immutables/reference/interval_index.md)
+[`interval_index()`](https://oneilsh.github.io/Immutables/reference/interval_index.md)
 as applied to problems in computational geometry. They are not intended
 as how-to guides; the underlying scripts are complex, largely AI
 generated, and mostly composed of plotting and animation machinery.
@@ -40,10 +40,10 @@ an “active” set and performing some computation on that active set.
 
 In this very basic example, a sweep line loops over all line segments in
 an
-[`interval_index()`](https://oneilsh.github.io/immutables/reference/interval_index.md).
+[`interval_index()`](https://oneilsh.github.io/Immutables/reference/interval_index.md).
 It collects all segments into an `index`, and loops over distinct
 endpoint values, using the `match_at` parameter of
-[`pop_all_point()`](https://oneilsh.github.io/immutables/reference/pop_all_point.md)
+[`pop_all_point()`](https://oneilsh.github.io/Immutables/reference/pop_all_point.md)
 to identify segments to move from the index to an active set (those that
 start at the current sweep line position) and remove from the active set
 (those end at the current sweepline position).
@@ -140,7 +140,7 @@ adjacent parabolas trace out the Voronoi edges as the sweep advances.
 
 Three structures share the work. A `priority_queue` holds events keyed
 by x and
-[`pop_min()`](https://oneilsh.github.io/immutables/reference/pop_min.md)
+[`pop_min()`](https://oneilsh.github.io/Immutables/reference/pop_min.md)
 produces the next event due. Two event types flow through it: *site
 events* (one per input point, known up front) and *circle events*
 (emerging dynamically whenever three adjacent arcs on the beach line
@@ -173,7 +173,7 @@ exploring far fewer nodes than Dijkstra’s algorithm.
 This demo runs A\* on a generated maze from a fixed start to a goal.
 Three structures share the work. A `priority_queue` keyed by f-score
 holds the frontier, and
-[`pop_min()`](https://oneilsh.github.io/immutables/reference/pop_min.md)
+[`pop_min()`](https://oneilsh.github.io/Immutables/reference/pop_min.md)
 picks the next node to expand. A separate `ordered_sequence` records
 which nodes have already been expanded with fast additions and
 membership checks (keyed on index). A `flexseq` accumulates a snapshot
@@ -211,18 +211,18 @@ the goal where the search is narrowing in.
 ## Source and rendering
 
 The full implementations live under
-[`vignettes/articles/helpers/demos/`](https://github.com/oneilsh/immutables/tree/main/vignettes/articles/helpers/demos):
+[`vignettes/articles/helpers/demos/`](https://github.com/oneilsh/Immutables/tree/main/vignettes/articles/helpers/demos):
 
-- [`demo_sweep_line_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_sweep_line_immutables.R)
-- [`demo_segment_sweep_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_segment_sweep_immutables.R)
-- [`demo_convex_hull_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_convex_hull_immutables.R)
-- [`demo_fortune_frontier_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_fortune_frontier_immutables.R)
-- [`demo_astar_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_astar_immutables.R)
-- [`demo_astar_trail_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_astar_trail_immutables.R)
+- [`demo_sweep_line_immutables.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/demos/demo_sweep_line_immutables.R)
+- [`demo_segment_sweep_immutables.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/demos/demo_segment_sweep_immutables.R)
+- [`demo_convex_hull_immutables.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/demos/demo_convex_hull_immutables.R)
+- [`demo_fortune_frontier_immutables.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/demos/demo_fortune_frontier_immutables.R)
+- [`demo_astar_immutables.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/demos/demo_astar_immutables.R)
+- [`demo_astar_trail_immutables.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/demos/demo_astar_trail_immutables.R)
 
 The vignette-side helpers (asset paths, render presets, the A\* preset
 used by the large-maze animation) are in
-[`vignettes/articles/helpers/algorithm_demos_helpers.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/algorithm_demos_helpers.R),
+[`vignettes/articles/helpers/algorithm_demos_helpers.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/algorithm_demos_helpers.R),
 and
-[`vignettes/articles/helpers/render_algorithm_demo_assets.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/render_algorithm_demo_assets.R)
+[`vignettes/articles/helpers/render_algorithm_demo_assets.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/render_algorithm_demo_assets.R)
 is the entry point for re-rendering any or all of the GIFs.

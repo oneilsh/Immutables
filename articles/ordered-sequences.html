@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Ordered Sequences • Immutables</title>
+<title>Ordered Sequences: Key-Sorted Storage with Range Queries • Immutables</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -16,7 +16,7 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Ordered Sequences">
+<meta property="og:title" content="Ordered Sequences: Key-Sorted Storage with Range Queries">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Immutables</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@
     <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
-    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarking</a></li>
     <li><a class="dropdown-item" href="../articles/gallery.html">Gallery</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Internals</h6></li>
@@ -72,7 +72,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Ordered Sequences</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Ordered Sequences: Key-Sorted Storage with Range Queries</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/oneilsh/Immutables/blob/main/vignettes/ordered-sequences.Rmd" class="external-link"><code>vignettes/ordered-sequences.Rmd</code></a></small>
@@ -302,13 +302,62 @@ minimum and maximum <em>keys</em> (not the stored elements).</p>
 <span><span class="co">#&gt; [1] 3</span></span>
 <span><span class="fu"><a href="../reference/min_key.html">min_key</a></span><span class="op">(</span><span class="fu"><a href="../reference/ordered_sequence.html">ordered_sequence</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>  <span class="co"># NULL when empty</span></span>
 <span><span class="co">#&gt; NULL</span></span></code></pre></div>
+<p>Because keys are stored in sorted order, ordered sequences also
+support the positional operators inherited from <code>flexseq</code> —
+<code><a href="../reference/peek_at.html">peek_at()</a></code>, <code><a href="../reference/pop_front.html">pop_front()</a></code>,
+<code><a href="../reference/pop_back.html">pop_back()</a></code>, and <code><a href="../reference/pop_at.html">pop_at()</a></code>. On an ordered
+sequence the pops additionally return <code>$key</code> (alongside
+<code>$value</code>/<code>$remaining</code>), and <code><a href="../reference/key_at.html">key_at()</a></code>
+reads the key at a one-based position without removing anything: the
+positional companion to <code><a href="../reference/peek_at.html">peek_at()</a></code> (which reads the value
+there) and the general form of
+<code><a href="../reference/min_key.html">min_key()</a></code>/<code><a href="../reference/max_key.html">max_key()</a></code>.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/key_at.html">key_at</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2</span><span class="op">)</span>                          <span class="co"># key at position 2</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="fu"><a href="../reference/key_at.html">key_at</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="../reference/min_key.html">min_key</a></span><span class="op">(</span><span class="va">xs</span><span class="op">)</span>           <span class="co"># first position holds the minimum key</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="fu"><a href="../reference/key_at.html">key_at</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">xs</span><span class="op">)</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="../reference/max_key.html">max_key</a></span><span class="op">(</span><span class="va">xs</span><span class="op">)</span>  <span class="co"># last position holds the maximum key</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="fu"><a href="../reference/key_at.html">key_at</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">10</span><span class="op">)</span>                         <span class="co"># NULL when out of bounds</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span></span>
+<span><span class="va">front</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_front.html">pop_front</a></span><span class="op">(</span><span class="va">xs</span><span class="op">)</span>                 <span class="co"># positional pop carries the key too</span></span>
+<span><span class="va">front</span><span class="op">$</span><span class="va">value</span></span>
+<span><span class="co">#&gt; [1] "a1"</span></span>
+<span><span class="va">front</span><span class="op">$</span><span class="va">key</span></span>
+<span><span class="co">#&gt; [1] 1</span></span></code></pre></div>
+<p><code><a href="../reference/nearest_key.html">nearest_key()</a></code> returns the existing key closest to a
+query, which then composes with <code><a href="../reference/peek_key.html">peek_key()</a></code> /
+<code><a href="../reference/pop_key.html">pop_key()</a></code> to read or remove the matching element. It
+resolves by order alone at the extremes and on an exact hit, and only
+needs a distance metric when the query falls strictly between two
+distinct keys — so it supports <code>numeric</code>, <code>Date</code>,
+and <code>POSIXct</code> keys there. An equidistant tie between two
+distinct keys is resolved by <code>ties</code> — <code>"lower"</code>
+(default), <code>"upper"</code>, or <code>"both"</code> (returns both
+keys). For <code>character</code> keys the between-case is undefined
+(“is <code>"Ben"</code> closer to <code>"Alex"</code> or
+<code>"Charlie"</code>?”) and errors; use <code><a href="../reference/lower_bound.html">lower_bound()</a></code> /
+<code><a href="../reference/peek_key.html">peek_key()</a></code> for order-based lookup instead.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/nearest_key.html">nearest_key</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2.4</span><span class="op">)</span>                    <span class="co"># between 2 and 3 -&gt; closer key (2)</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="fu"><a href="../reference/nearest_key.html">nearest_key</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">0</span><span class="op">)</span>                      <span class="co"># below all -&gt; min_key (1)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="fu"><a href="../reference/nearest_key.html">nearest_key</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2.5</span>, ties <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span>     <span class="co"># exactly between 2 and 3 -&gt; c(2, 3)</span></span>
+<span><span class="co">#&gt; [1] 2 3</span></span>
+<span></span>
+<span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nearest_key.html">nearest_key</a></span><span class="op">(</span><span class="va">xs</span>, <span class="fl">2.4</span><span class="op">)</span>               <span class="co"># locate, then act with the keyed helpers</span></span>
+<span><span class="fu"><a href="../reference/pop_key.html">pop_key</a></span><span class="op">(</span><span class="va">xs</span>, <span class="va">k</span><span class="op">)</span><span class="op">$</span><span class="va">value</span></span>
+<span><span class="co">#&gt; [1] "b1"</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="empty-sequences">Empty sequences<a class="anchor" aria-label="anchor" href="#empty-sequences"></a>
 </h2>
 <p>Key and range helpers are non-throwing on empty sequences, and
 <code><a href="https://rdrr.io/r/base/length.html" class="external-link">length()</a></code> allows for empty checking.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">empty_os</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ordered_sequence.html">ordered_sequence</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">empty_os</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0</span></span>
@@ -329,7 +378,7 @@ because index-based assignment may break the ordering invariant. Ordered
 sequences may be cast down with <code><a href="../reference/as_flexseq.html">as_flexseq()</a></code> or
 <code><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list()</a></code>. Named and unnamed elements cannot be mixed
 within one sequence.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">xs_named</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"alice"</span>, <span class="st">"bob"</span>, <span class="st">"carol"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span></span>
@@ -375,14 +424,14 @@ within one sequence.</p>
 <span><span class="co">#&gt;   `$&lt;-()` is not supported for ordered_sequence. Replacement indexing is not supported. Consider converting with as_flexseq().</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="transforming-aterating-merging">Transforming, aterating, merging<a class="anchor" aria-label="anchor" href="#transforming-aterating-merging"></a>
+<h2 id="transforming-iterating-merging">Transforming, iterating, merging<a class="anchor" aria-label="anchor" href="#transforming-iterating-merging"></a>
 </h2>
 <p><code><a href="../reference/fapply.html">fapply()</a></code> maps a function over elements while preserving
 keys and order. The function receives <code>(value, key)</code>, or
 <code>(value, key, name)</code> if it accepts a third argument. Keys and
 names are passed in read-only, and the return value replaces the stored
 element at the associated key (and name if named).</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">xs_t</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ordered_sequence.html">ordered_sequence</a></span><span class="op">(</span><span class="st">"alice"</span>, <span class="st">"bob"</span>, <span class="st">"carol"</span>, keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/fapply.html">fapply</a></span><span class="op">(</span><span class="va">xs_t</span>, <span class="kw">function</span><span class="op">(</span><span class="va">value</span>, <span class="va">key</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">toupper</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Unnamed ordered_sequence with 3 elements.</span></span>
@@ -402,7 +451,7 @@ package) walks the sequence in key-ascending order, yielding bare
 values. Keys are dropped from each yield; use <code><a href="../reference/fapply.html">fapply()</a></code> if
 your callback needs the key alongside the value, or iterate over
 <code><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list()</a></code> when you want a list keyed by name.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/loop.html">loop</a></span><span class="op">(</span><span class="kw">for</span> <span class="op">(</span><span class="va">v</span> <span class="kw">in</span> <span class="va">xs_t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "bob"</span></span>
 <span><span class="co">#&gt; [1] "carol"</span></span>
@@ -416,7 +465,7 @@ one in key order, preserving left-biased FIFO on duplicate keys (all of
 <code>x</code>’s entries at a tied key precede <code>y</code>’s). The
 general case runs in O(m + n); when the key ranges are disjoint it
 collapses to O(log(min(m, n))) via concat.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a1"</span>, <span class="st">"a2"</span>, <span class="st">"a3"</span><span class="op">)</span>, keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b1"</span>, <span class="st">"b2"</span>, <span class="st">"b3"</span><span class="op">)</span>, keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span></span>
@@ -439,6 +488,87 @@ collapses to O(log(min(m, n))) via concat.</p>
 <span><span class="co">#&gt; [1] "b3"</span></span></code></pre></div>
 <p>Both sequences must share the same key type and monoid set;
 mismatches error. Both inputs are left unmodified.</p>
+</div>
+<div class="section level2">
+<h2 id="example-scalar-matching-without-replacement">Example: scalar matching without replacement<a class="anchor" aria-label="anchor" href="#example-scalar-matching-without-replacement"></a>
+</h2>
+<p>Many potential uses for ordered sequences are handled well by named
+lists and vectors, where access-by-key is the primary functionality. In
+some cases we need to dynamically find, add, and remove elements by key,
+but as <code><a href="../articles/benchmarks.html">vignette("benchmarks", package = "Immutables")</a></code> shows
+these operations are excessively slow on large base-R structures.
+Matching without replacement is one such case, often employed for cohort
+matching purposes in observational studies using propensity scores.
+Foregoing details, “treated” patients are matched to a subset of
+distinct “control” patients with similar scores. We start by simulating
+some populations and scores, and initialize an empty
+<code>flexseq</code> to store matches. We also convert the treated and
+untreated row numbers (serving as identifiers) to ordered sequences,
+keyed by their score.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">n_patients</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
+<span><span class="va">patients</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>treated <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span>,</span>
+<span>                                        <span class="va">n_patients</span>,</span>
+<span>                                        prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.9</span><span class="op">)</span>,</span>
+<span>                                        replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>                       score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n_patients</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># row numbers act as identifiers</span></span>
+<span><span class="va">treated_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">patients</span><span class="op">$</span><span class="va">treated</span><span class="op">)</span></span>
+<span><span class="va">treated_scores</span> <span class="op">&lt;-</span> <span class="va">patients</span><span class="op">$</span><span class="va">score</span><span class="op">[</span><span class="va">patients</span><span class="op">$</span><span class="va">treated</span><span class="op">]</span></span>
+<span></span>
+<span><span class="va">untreated_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="op">!</span><span class="va">patients</span><span class="op">$</span><span class="va">treated</span><span class="op">)</span></span>
+<span><span class="va">untreated_scores</span> <span class="op">&lt;-</span> <span class="va">patients</span><span class="op">$</span><span class="va">score</span><span class="op">[</span><span class="op">!</span><span class="va">patients</span><span class="op">$</span><span class="va">treated</span><span class="op">]</span></span>
+<span></span>
+<span><span class="va">matches</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/flexseq.html">flexseq</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">treated_seq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span><span class="va">treated_rows</span>, keys <span class="op">=</span> <span class="va">treated_scores</span><span class="op">)</span></span>
+<span><span class="va">untreated_seq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_ordered_sequence.html">as_ordered_sequence</a></span><span class="op">(</span><span class="va">untreated_rows</span>, keys <span class="op">=</span> <span class="va">untreated_scores</span><span class="op">)</span></span></code></pre></div>
+<p>Matching itself is a simple greedy selection. Popping treated
+patients in order, each is matched to their nearest untreated record by
+score key, using <code><a href="../reference/nearest_key.html">nearest_key()</a></code>. That patient is popped from
+wherever it was located, and a data frame describing the match is pushed
+onto the accumulating <code>flexseq</code>. This example also
+illustrates collecting these into a single result data frame for use
+after.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">while</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">treated_seq</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># no untreated patients left to match against</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">untreated_seq</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0L</span><span class="op">)</span> <span class="kw">break</span></span>
+<span></span>
+<span>  <span class="co"># pop the first (lowest-score) treated patient</span></span>
+<span>  <span class="va">front_el</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_front.html">pop_front</a></span><span class="op">(</span><span class="va">treated_seq</span><span class="op">)</span></span>
+<span>  <span class="va">treated_seq</span> <span class="op">&lt;-</span> <span class="va">front_el</span><span class="op">$</span><span class="va">remaining</span></span>
+<span></span>
+<span>  <span class="va">treated_pt_score</span> <span class="op">&lt;-</span> <span class="va">front_el</span><span class="op">$</span><span class="va">key</span></span>
+<span>  <span class="va">treated_pt_row</span>   <span class="op">&lt;-</span> <span class="va">front_el</span><span class="op">$</span><span class="va">value</span></span>
+<span></span>
+<span>  <span class="co"># find and remove the nearest-score untreated patient</span></span>
+<span>  <span class="va">match_key</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nearest_key.html">nearest_key</a></span><span class="op">(</span><span class="va">untreated_seq</span>, <span class="va">treated_pt_score</span><span class="op">)</span></span>
+<span>  <span class="va">match_el</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_key.html">pop_key</a></span><span class="op">(</span><span class="va">untreated_seq</span>, <span class="va">match_key</span><span class="op">)</span></span>
+<span>  <span class="va">untreated_seq</span> <span class="op">&lt;-</span> <span class="va">match_el</span><span class="op">$</span><span class="va">remaining</span></span>
+<span></span>
+<span>  <span class="va">untreated_pt_score</span> <span class="op">&lt;-</span> <span class="va">match_el</span><span class="op">$</span><span class="va">key</span></span>
+<span>  <span class="va">untreated_pt_row</span>   <span class="op">&lt;-</span> <span class="va">match_el</span><span class="op">$</span><span class="va">value</span></span>
+<span></span>
+<span>  <span class="va">match_row</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">treated_pt_row</span>,</span>
+<span>                          <span class="va">treated_pt_score</span>,</span>
+<span>                          <span class="va">untreated_pt_row</span>,</span>
+<span>                          <span class="va">untreated_pt_score</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">matches</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/push_back.html">push_back</a></span><span class="op">(</span><span class="va">matches</span>, <span class="va">match_row</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">match_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">matches</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">match_df</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   treated_pt_row treated_pt_score untreated_pt_row untreated_pt_score</span></span>
+<span><span class="co">#&gt; 1             83       0.01631959              151         0.02058322</span></span>
+<span><span class="co">#&gt; 2             74       0.11503942              161         0.10753897</span></span>
+<span><span class="co">#&gt; 3             91       0.13271604               58         0.13250605</span></span>
+<span><span class="co">#&gt; 4            177       0.13878037              197         0.13886056</span></span>
+<span><span class="co">#&gt; 5            152       0.17096903               78         0.17104804</span></span>
+<span><span class="co">#&gt; 6             63       0.19755671              184         0.19731313</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

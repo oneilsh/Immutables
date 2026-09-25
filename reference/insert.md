@@ -37,10 +37,10 @@ This operation is persistent: `x` is not modified.
 
 ## See also
 
-[`priority_queue()`](https://oneilsh.github.io/immutables/reference/priority_queue.md),
-[`ordered_sequence()`](https://oneilsh.github.io/immutables/reference/ordered_sequence.md),
-[`interval_index()`](https://oneilsh.github.io/immutables/reference/interval_index.md),
-[`insert_at()`](https://oneilsh.github.io/immutables/reference/insert_at.md)
+[`priority_queue()`](https://oneilsh.github.io/Immutables/reference/priority_queue.md),
+[`ordered_sequence()`](https://oneilsh.github.io/Immutables/reference/ordered_sequence.md),
+[`interval_index()`](https://oneilsh.github.io/Immutables/reference/interval_index.md),
+[`insert_at()`](https://oneilsh.github.io/Immutables/reference/insert_at.md)
 
 ## Examples
 

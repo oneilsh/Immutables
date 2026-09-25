@@ -1,4 +1,4 @@
-# Fapply with S3 dispatch
+# Fapply with S3 Dispatch
 
 `fapply()` is an S3 generic for applying functions over immutable
 structures with type-specific dispatch.
@@ -51,10 +51,10 @@ user monoids; `FALSE` rebuilds with required structural monoids only.
 
 ## See also
 
-[`flexseq()`](https://oneilsh.github.io/immutables/reference/flexseq.md),
-[`priority_queue()`](https://oneilsh.github.io/immutables/reference/priority_queue.md),
-[`ordered_sequence()`](https://oneilsh.github.io/immutables/reference/ordered_sequence.md),
-[`interval_index()`](https://oneilsh.github.io/immutables/reference/interval_index.md)
+[`flexseq()`](https://oneilsh.github.io/Immutables/reference/flexseq.md),
+[`priority_queue()`](https://oneilsh.github.io/Immutables/reference/priority_queue.md),
+[`ordered_sequence()`](https://oneilsh.github.io/Immutables/reference/ordered_sequence.md),
+[`interval_index()`](https://oneilsh.github.io/Immutables/reference/interval_index.md)
 
 ## Examples
 

@@ -48,10 +48,10 @@ payload-only lists, so no direct record-preserving cast is provided.
 
 ## See also
 
-[`flexseq()`](https://oneilsh.github.io/immutables/reference/flexseq.md),
-[`priority_queue()`](https://oneilsh.github.io/immutables/reference/priority_queue.md),
-[`ordered_sequence()`](https://oneilsh.github.io/immutables/reference/ordered_sequence.md),
-[`interval_index()`](https://oneilsh.github.io/immutables/reference/interval_index.md)
+[`flexseq()`](https://oneilsh.github.io/Immutables/reference/flexseq.md),
+[`priority_queue()`](https://oneilsh.github.io/Immutables/reference/priority_queue.md),
+[`ordered_sequence()`](https://oneilsh.github.io/Immutables/reference/ordered_sequence.md),
+[`interval_index()`](https://oneilsh.github.io/Immutables/reference/interval_index.md)
 
 ## Examples
 

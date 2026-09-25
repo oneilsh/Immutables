@@ -1,6 +1,6 @@
-# Build graph data frames for a finger tree
+# Build Graph Data Frames for a Finger Tree
 
-Build graph data frames for a finger tree
+Build Graph Data Frames for a Finger Tree
 
 ## Usage
 

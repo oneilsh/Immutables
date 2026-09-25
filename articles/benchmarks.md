@@ -1,4 +1,4 @@
-# Benchmarking immutables Collections
+# Benchmarking Immutables Against Base R and Alternatives
 
 ## Methods
 
@@ -12,13 +12,13 @@ the large number of tests and repetitions, run serially with full
 garbage collection between each. The numbers shown below are loaded from
 cached results shipped with the package; re-running the cells in this
 document regenerates them, as does executing the script version
-`data-raw/replication/generate_publication_results.R`.
+`data-raw/replication/generate_benchmark_figs_slow.R`.
 
 ## Sequence operations
 
 ``` r
 
-sequence_sizes <- fast_sizes(2^(12 + 0:6)) # 2^12 up to 2^18 (smallest 3 in fast mode)
+sequence_sizes <- 2^(12 + 0:6) # 2^12 up to 2^18
 rows <- flexseq()
 
 for(n in sequence_sizes) {
@@ -84,13 +84,12 @@ if(!is.null(results_list$sequence)) {
     ) +
     scale_y_log10(labels = label_time, guide = "axis_logticks") +
     scale_color_manual(values = c("base R" = "#fc8d62", "flexseq" = "#66c2a5")) +
-    #scale_y_continuous(labels = label_time, trans = "log10") +
     theme_bw() +
     theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
   print(p_sequence)
   save_figure(p_sequence, "benchmarks-sequence.pdf", width = 9, height = 5)
 } else {
-  knitr::asis_output("*Benchmark results not yet generated. Run `data-raw/replication/generate_publication_results.R` to populate.*")
+  knitr::asis_output("*Benchmark results not yet generated. Run `data-raw/replication/generate_benchmark_figs_slow.R` to populate.*")
 }
 ```
 
@@ -100,7 +99,7 @@ if(!is.null(results_list$sequence)) {
 
 ``` r
 
-pq_sizes <- fast_sizes(2^(12 + 0:6))
+pq_sizes <- 2^(12 + 0:6)
 rows <- flexseq()
 
 set.seed(42)
@@ -171,7 +170,7 @@ if(!is.null(results_list$pq)) {
 
 ``` r
 
-ord_sizes <- fast_sizes(2^(14 + 0:6)) # crossover is at 2^23 for peek_key
+ord_sizes <- 2^(14 + 0:6) # crossover is at 2^23 for peek_key
 rows <- flexseq()
 
 set.seed(99)
@@ -268,7 +267,7 @@ if(!is.null(results_list$ordered)) {
 
 ``` r
 
-ivx_sizes <- fast_sizes(2^(12 + 0:6))
+ivx_sizes <- 2^(12 + 0:6)
 rows <- flexseq()
 
 set.seed(123)
@@ -311,11 +310,11 @@ for(n in ivx_sizes) {
   rows <- bench_one(rows, "interval_index", "all point matches", n, repeats, ivx_setup,
     function(st) peek_all_point(st$ix, qpt, bounds = "[]", as_list = TRUE))
   rows <- bench_one(rows, "interval_index", "overlap query", n, repeats, ivx_setup,
-    function(st) peek_all_overlaps(st$ix, qlo, qhi, bounds = "[]", as_list = TRUE))
+    function(st) peek_all_overlapping(st$ix, qlo, qhi, bounds = "[]", as_list = TRUE))
   rows <- bench_one(rows, "interval_index", "within query", n, repeats, ivx_setup,
     function(st) peek_all_within(st$ix, qlo, qhi, bounds = "[]", as_list = TRUE))
   rows <- bench_one(rows, "interval_index", "remove by overlap", n, repeats, ivx_setup,
-    function(st) pop_all_overlaps(st$ix, qlo, qhi, bounds = "[]")$remaining)
+    function(st) pop_all_overlapping(st$ix, qlo, qhi, bounds = "[]")$remaining)
 
   rows <- bench_one(rows, "base R", "insert", n, repeats, df_setup,
     function(st) list(

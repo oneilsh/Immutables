@@ -5,7 +5,7 @@ Peek First Interval Overlapping a Query Interval
 ## Usage
 
 ``` r
-peek_overlaps(x, start, end, bounds = NULL)
+peek_overlapping(x, start, end, bounds = NULL)
 ```
 
 ## Arguments
@@ -33,20 +33,20 @@ The payload value from the first match, or `NULL` on no match.
 ## Details
 
 Returns the first match in canonical interval order. Use
-[`peek_all_overlaps()`](https://oneilsh.github.io/immutables/reference/peek_all_overlaps.md)
+[`peek_all_overlapping()`](https://oneilsh.github.io/Immutables/reference/peek_all_overlapping.md)
 to retrieve all matches as an `interval_index` slice.
 
 ## Examples
 
 ``` r
 ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
-peek_overlaps(ix, 2, 3)
+peek_overlapping(ix, 2, 3)
 #> NULL
 
 # Boundary override at touching endpoints
 edge <- interval_index("a", start = 1, end = 3, default_query_bounds = "[)")
-peek_overlaps(edge, 3, 4)                # default "[)": no endpoint overlap
+peek_overlapping(edge, 3, 4)                # default "[)": no endpoint overlap
 #> NULL
-peek_overlaps(edge, 3, 4, bounds = "[]") # closed bounds: endpoint overlaps
+peek_overlapping(edge, 3, 4, bounds = "[]") # closed bounds: endpoint overlaps
 #> [1] "a"
 ```

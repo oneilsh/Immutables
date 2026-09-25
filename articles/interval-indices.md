@@ -1,4 +1,4 @@
-# Interval Indices
+# Interval Indices: Overlap and Containment Queries
 
 ## Interval index basics
 
@@ -36,7 +36,7 @@ ix
 ```
 
 The
-[`as_interval_index()`](https://oneilsh.github.io/immutables/reference/as_interval_index.md)
+[`as_interval_index()`](https://oneilsh.github.io/Immutables/reference/as_interval_index.md)
 variant builds an index from a vector or list of elements paired with
 start/end vectors, useful when endpoints are already in separate
 vectors.
@@ -65,11 +65,11 @@ interval metadata).
 
 ## Point and interval queries
 
-[`peek_point()`](https://oneilsh.github.io/immutables/reference/peek_point.md)
+[`peek_point()`](https://oneilsh.github.io/Immutables/reference/peek_point.md)
 returns the *first* element (in canonical interval order — smallest
 start, with insertion/FIFO order breaking ties among equal starts) whose
 interval contains a query point;
-[`peek_all_point()`](https://oneilsh.github.io/immutables/reference/peek_all_point.md)
+[`peek_all_point()`](https://oneilsh.github.io/Immutables/reference/peek_all_point.md)
 returns all matches as an `interval_index` slice.
 
 ``` r
@@ -88,10 +88,10 @@ peek_all_point(ix, point = 2)
 #> [1] "B"
 ```
 
-[`pop_point()`](https://oneilsh.github.io/immutables/reference/pop_point.md)
+[`pop_point()`](https://oneilsh.github.io/Immutables/reference/pop_point.md)
 removes and returns the first match as
 `$value`/`$start`/`$end`/`$remaining`. Its “all” counterpart
-[`pop_all_point()`](https://oneilsh.github.io/immutables/reference/pop_all_point.md)
+[`pop_all_point()`](https://oneilsh.github.io/Immutables/reference/pop_all_point.md)
 returns `$elements` (an interval_index of removed matches) and
 `$remaining`.
 
@@ -181,18 +181,18 @@ ix3
 #> [1] "right"
 ```
 
-[`peek_overlaps()`](https://oneilsh.github.io/immutables/reference/peek_overlaps.md)
+[`peek_overlapping()`](https://oneilsh.github.io/Immutables/reference/peek_overlapping.md)
 returns any interval that shares at least one point with the query
 range.
-[`peek_containing()`](https://oneilsh.github.io/immutables/reference/peek_containing.md)
+[`peek_containing()`](https://oneilsh.github.io/Immutables/reference/peek_containing.md)
 returns intervals that fully contain the query range.
-[`peek_within()`](https://oneilsh.github.io/immutables/reference/peek_within.md)
+[`peek_within()`](https://oneilsh.github.io/Immutables/reference/peek_within.md)
 returns intervals fully contained by the query range.
 
 ``` r
 
 # overlaps [2, 5]: any shared point
-peek_all_overlaps(ix3, start = 2, end = 5)
+peek_all_overlapping(ix3, start = 2, end = 5)
 #> Unnamed interval_index with 4 elements, default query bounds [start, end).
 #> 
 #> Elements (by interval start order):
@@ -239,9 +239,9 @@ peek_all_within(ix3, start = 1, end = 5)
 
 All relation queries have symmetric `pop_*` and `pop_all_*` variants
 following the same return contract as
-[`pop_point()`](https://oneilsh.github.io/immutables/reference/pop_point.md)
+[`pop_point()`](https://oneilsh.github.io/Immutables/reference/pop_point.md)
 and
-[`pop_all_point()`](https://oneilsh.github.io/immutables/reference/pop_all_point.md).
+[`pop_all_point()`](https://oneilsh.github.io/Immutables/reference/pop_all_point.md).
 
 ## Boundary modes
 
@@ -286,7 +286,7 @@ peek_point(pt_closed, point = 2)
 
 ## Insertion and endpoint extrema
 
-[`insert()`](https://oneilsh.github.io/immutables/reference/insert.md)
+[`insert()`](https://oneilsh.github.io/Immutables/reference/insert.md)
 adds an element preserving interval start order.
 
 ``` r
@@ -310,9 +310,9 @@ ix4
 #> [1] "C"
 ```
 
-[`min_endpoint()`](https://oneilsh.github.io/immutables/reference/min_endpoint.md)
+[`min_endpoint()`](https://oneilsh.github.io/Immutables/reference/min_endpoint.md)
 and
-[`max_endpoint()`](https://oneilsh.github.io/immutables/reference/max_endpoint.md)
+[`max_endpoint()`](https://oneilsh.github.io/Immutables/reference/max_endpoint.md)
 return the current smallest start and largest end endpoints (not the
 stored elements).
 
@@ -339,7 +339,7 @@ length(empty_ix)
 #> [1] 0
 peek_point(empty_ix, point = 1)
 #> NULL
-pop_overlaps(empty_ix, start = 1, end = 5)
+pop_overlapping(empty_ix, start = 1, end = 5)
 #> $value
 #> NULL
 #> 
@@ -356,7 +356,7 @@ pop_overlaps(empty_ix, start = 1, end = 5)
 ## Named interval indices
 
 Interval indices can carry names, set either at construction or through
-[`as_interval_index()`](https://oneilsh.github.io/immutables/reference/as_interval_index.md)
+[`as_interval_index()`](https://oneilsh.github.io/Immutables/reference/as_interval_index.md)
 on a named list. Names support read-only indexing via `[`, `[[`, and
 `$`; all replacement forms (`[<-`, `[[<-`, `$<-`) error, because
 index-based assignment may break the ordering invariant. Named and
@@ -410,7 +410,7 @@ try(ix_named$a <- "!!")
 
 ## Transforming, iterating, merging
 
-[`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+[`fapply()`](https://oneilsh.github.io/Immutables/reference/fapply.md)
 maps a function over elements while preserving intervals and order. The
 function receives `(value, start, end)`, or `(value, start, end, name)`
 if it accepts a fourth argument. Endpoints and names are passed in
@@ -434,11 +434,11 @@ fapply(ix, function(value, start, end) paste0(value, "[", start, ",", end, "]"))
 #> [1] "C[4,5]"
 ```
 
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md)
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md)
 (re-exported from the **coro** package) walks the index in interval
 start-position order, yielding bare values. Interval endpoints are
 dropped from each yield; use
-[`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+[`fapply()`](https://oneilsh.github.io/Immutables/reference/fapply.md)
 if your callback needs `(value, start, end)`.
 
 ``` r
@@ -450,10 +450,10 @@ loop(for (v in ix) print(v))
 ```
 
 Plain `for (v in ix)` (without
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md)) does
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md)) does
 *not* dispatch to the iteration protocol, it walks the underlying
 structure and yields internal nodes rather than elements. Always wrap
-with [`loop()`](https://oneilsh.github.io/immutables/reference/loop.md).
+with [`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md).
 
 `merge(x, y)` combines two interval indices into a new one in
 start-position order, preserving left-biased FIFO on tied starts. The
@@ -482,3 +482,99 @@ peek_all_point(m, 3)
 Both indices must share the same endpoint type, the same `bounds`
 convention, and the same monoid set; mismatches error. Both inputs are
 left unmodified.
+
+## Example: hospital occupancy over time
+
+Many datasets are characterized by intervals, such that we wish to query
+which intervals overlap a given point. Sweep-line algorithms do so over
+each start or end point in order. Here we illustrate this basic pattern,
+considering a hypothetical computation of hospital occupancy over time.
+Patients arrive randomly, stay for a random number of days, and are
+associated with demographic variables for age and sex. For each day, we
+wish to capture the total occupancy, average age, and percent male. We
+begin by simulating data and building an interval index storing each
+patient with their stay:
+
+``` r
+
+set.seed(100)
+
+num_days <- 365
+n_patients <- 500
+
+starts <- sample(1:num_days,
+                 size = n_patients,
+                 replace = TRUE)
+
+ends <- starts + rpois(n_patients, 2) # average stay = 2 days
+
+ages <- pmax(0, rnorm(n_patients, mean = 35, sd = 10))
+is_males <- sample(c(0, 1), n_patients, replace = TRUE)
+
+# list of patients (each a list with age and is_male)
+patients <- Map(list, age = ages, is_male = is_males)
+
+# store each patient in an interval index with their stay
+ix <- as_interval_index(patients, start = starts, end = ends)
+```
+
+Next, for each day we’ll query for overlapping patients, computing
+summary statistics. These are collected in a `flexseq`, which we later
+convert to a data frame for further analysis. This example also
+illustrates using
+[`fapply()`](https://oneilsh.github.io/Immutables/reference/fapply.md)
+to unpack the contents of an interval index containing named lists. Days
+with no patients present are recorded with an occupancy of zero and
+missing averages.
+
+``` r
+
+day_stats <- flexseq()
+
+for(day in seq_len(num_days)) {
+  present <- peek_all_point(ix, day)
+  occupancy <- length(present)
+
+  if(occupancy == 0) {
+    stats <- data.frame(day = day, occupancy = 0, mean_age = NA, pct_male = NA)
+  } else {
+    day_ages <- present |>
+      fapply(function(patient, start, end) {
+        patient$age
+      }) |>
+      unlist() # fapply returns an interval_index, convert to vector
+
+    day_males <- present |>
+      fapply(function(patient, start, end) {
+        patient$is_male
+      }) |>
+      unlist()
+
+    stats <- data.frame(day = day,
+                        occupancy = occupancy,
+                        mean_age = mean(day_ages),
+                        pct_male = 100 * mean(day_males))
+  }
+
+  day_stats <- push_back(day_stats, stats)
+}
+
+# convert the flexseq of data frames into a single data frame
+# with columns for day, occupancy, mean_age, and pct_male
+stats_df <- do.call(rbind, as.list(day_stats))
+head(stats_df)
+#>   day occupancy mean_age pct_male
+#> 1   1         2 25.35509       50
+#> 2   2         2 32.05227        0
+#> 3   3         2 25.47594       50
+#> 4   4         5 29.17300       40
+#> 5   5         4 28.38735       50
+#> 6   6         2 26.64759       50
+```
+
+This example is designed for simplicity, but is not optimally efficient.
+Real sweep-line algorithms consider only sorted used endpoints, and keep
+three indices: one with as-yet-unprocessed elements, an active set
+overlapping the virtual sweep line, and a processed set, moving elements
+through them with
+[`pop_all_point()`](https://oneilsh.github.io/Immutables/reference/pop_all_point.md).

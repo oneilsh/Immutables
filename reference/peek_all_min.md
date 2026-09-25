@@ -22,7 +22,7 @@ queue order. Returns an empty queue when `x` is empty.
 ## Details
 
 The return is another
-[`priority_queue()`](https://oneilsh.github.io/immutables/reference/priority_queue.md),
+[`priority_queue()`](https://oneilsh.github.io/Immutables/reference/priority_queue.md),
 use [`as.list()`](https://rdrr.io/r/base/list.html) to convert the
 result to a standard R list.
 

@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>flexseq • Immutables</title>
+<title>Flexible Sequences: Persistent Lists, Deques, and Slicing • Immutables</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -16,7 +16,7 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="flexseq">
+<meta property="og:title" content="Flexible Sequences: Persistent Lists, Deques, and Slicing">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Immutables</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@
     <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
-    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarking</a></li>
     <li><a class="dropdown-item" href="../articles/gallery.html">Gallery</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Internals</h6></li>
@@ -72,7 +72,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>flexseq</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Flexible Sequences: Persistent Lists, Deques, and Slicing</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/oneilsh/Immutables/blob/main/vignettes/flexseq.Rmd" class="external-link"><code>vignettes/flexseq.Rmd</code></a></small>
@@ -406,6 +406,68 @@ sequence elements. Always wrap with <code><a href="../reference/loop.html">loop(
 <span><span class="co">#&gt; 1 2 3</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 3</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="example-simulating-complex-queueing-systems">Example: simulating complex queueing systems<a class="anchor" aria-label="anchor" href="#example-simulating-complex-queueing-systems"></a>
+</h2>
+<p>Queueing systems represent one or more service queues, where arrival
+and service times are typically drawn from defined distributions such as
+the exponential. The dynamics of such systems are a common area of
+study, for example in computing average wait times. While in many cases
+closed-form solutions for these dynamics exist, simple policy choices
+such as “each request joins the currently shortest queue” can complicate
+analyses significantly. In this example we simulate such a system to
+generate an empirical wait-time distribution.</p>
+<p>We simulate <code>steps</code> time steps; at each, a new request
+arrives with probability <code>p_arrival</code> and joins the shorter of
+two queues, <code>qa</code> or <code>qb</code>. We keep track of each
+server’s next free time step, processing requests from the front of its
+queue. Each request’s wait time is calculated and collected in a running
+<code>flexseq</code>, which we convert to a vector and summarize
+after.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">steps</span> <span class="op">&lt;-</span> <span class="fl">1000</span></span>
+<span><span class="va">p_arrival</span> <span class="op">&lt;-</span> <span class="fl">0.9</span></span>
+<span><span class="va">mean_service</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="co"># service times ~ rpois(1, mean_service) + 1 (real mean 2)</span></span>
+<span></span>
+<span><span class="va">qa</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/flexseq.html">flexseq</a></span><span class="op">(</span><span class="op">)</span>; <span class="va">free_a</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
+<span><span class="va">qb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/flexseq.html">flexseq</a></span><span class="op">(</span><span class="op">)</span>; <span class="va">free_b</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
+<span><span class="va">waits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/flexseq.html">flexseq</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">for</span><span class="op">(</span><span class="va">t</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">steps</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># process new arrivals into the shorter queue</span></span>
+<span>  <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="op">&lt;</span> <span class="va">p_arrival</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">request</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>arrival <span class="op">=</span> <span class="va">t</span><span class="op">)</span></span>
+<span>    <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">qa</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">qb</span><span class="op">)</span><span class="op">)</span> <span class="va">qa</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/push_back.html">push_back</a></span><span class="op">(</span><span class="va">qa</span>, <span class="va">request</span><span class="op">)</span></span>
+<span>    <span class="kw">else</span>                         <span class="va">qb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/push_back.html">push_back</a></span><span class="op">(</span><span class="va">qb</span>, <span class="va">request</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="co"># if qa is free, process the front request and record total wait time</span></span>
+<span>  <span class="kw">if</span><span class="op">(</span><span class="va">free_a</span> <span class="op">&lt;=</span> <span class="va">t</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">qa</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">nxt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_front.html">pop_front</a></span><span class="op">(</span><span class="va">qa</span><span class="op">)</span></span>
+<span>    <span class="va">qa</span> <span class="op">&lt;-</span> <span class="va">nxt</span><span class="op">$</span><span class="va">remaining</span>    <span class="co"># overwrite queue with remaining portion</span></span>
+<span>    <span class="va">request</span> <span class="op">&lt;-</span> <span class="va">nxt</span><span class="op">$</span><span class="va">value</span></span>
+<span>    <span class="va">waits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/push_back.html">push_back</a></span><span class="op">(</span><span class="va">waits</span>, <span class="va">t</span> <span class="op">-</span> <span class="va">request</span><span class="op">$</span><span class="va">arrival</span><span class="op">)</span></span>
+<span>    <span class="va">free_a</span> <span class="op">&lt;-</span> <span class="va">t</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">mean_service</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="co"># if qb is free, process the front request and record total wait time</span></span>
+<span>  <span class="kw">if</span><span class="op">(</span><span class="va">free_b</span> <span class="op">&lt;=</span> <span class="va">t</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">qb</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">nxt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_front.html">pop_front</a></span><span class="op">(</span><span class="va">qb</span><span class="op">)</span></span>
+<span>    <span class="va">qb</span> <span class="op">&lt;-</span> <span class="va">nxt</span><span class="op">$</span><span class="va">remaining</span>    <span class="co"># overwrite queue with remaining portion</span></span>
+<span>    <span class="va">request</span> <span class="op">&lt;-</span> <span class="va">nxt</span><span class="op">$</span><span class="va">value</span></span>
+<span>    <span class="va">waits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/push_back.html">push_back</a></span><span class="op">(</span><span class="va">waits</span>, <span class="va">t</span> <span class="op">-</span> <span class="va">request</span><span class="op">$</span><span class="va">arrival</span><span class="op">)</span></span>
+<span>    <span class="va">free_b</span> <span class="op">&lt;-</span> <span class="va">t</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">mean_service</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">waits</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1.501116</span></span></code></pre></div>
+<p>This example may be extended in several ways, including tracking
+queue lengths, requests that migrate between queues (as in queueing
+networks), or other policies such as length-weighted random queue
+assignment.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

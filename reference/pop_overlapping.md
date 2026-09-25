@@ -5,7 +5,7 @@ Pop First Overlapping Interval
 ## Usage
 
 ``` r
-pop_overlaps(x, start, end, bounds = NULL)
+pop_overlapping(x, start, end, bounds = NULL)
 ```
 
 ## Arguments
@@ -35,14 +35,14 @@ A list with `value`, `start`, `end`, and `remaining`. On miss: `value`,
 
 Removes the first match in canonical interval order. On miss, returns a
 non-throwing miss object with `remaining = x`. Use
-[`pop_all_overlaps()`](https://oneilsh.github.io/immutables/reference/pop_all_overlaps.md)
+[`pop_all_overlapping()`](https://oneilsh.github.io/Immutables/reference/pop_all_overlapping.md)
 to remove all matches.
 
 ## Examples
 
 ``` r
 ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
-pop_overlaps(ix, 2, 3)
+pop_overlapping(ix, 2, 3)
 #> $value
 #> NULL
 #> 

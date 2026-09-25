@@ -1,4 +1,4 @@
-# Developer API
+# Developer API: Building Structures on Monoid-Annotated Finger Trees
 
 Every immutables structure is built on finger trees annotated with
 *monoids* — cached summaries that support O(log n) search and split.
@@ -55,7 +55,7 @@ sum_monoid <- measure_monoid(
 ```
 
 Next we attach it to a structure with
-[`add_monoids()`](https://oneilsh.github.io/immutables/reference/add_monoids.md),
+[`add_monoids()`](https://oneilsh.github.io/Immutables/reference/add_monoids.md),
 which accepts a named list of monoids. We can pass
 `show_custom_monoids = TRUE` to
 [`print()`](https://rdrr.io/r/base/print.html) to see this new
@@ -97,7 +97,7 @@ print(x, show_custom_monoids = TRUE)
 ```
 
 The
-[`plot_structure()`](https://oneilsh.github.io/immutables/reference/plot_structure.md)
+[`plot_structure()`](https://oneilsh.github.io/Immutables/reference/plot_structure.md)
 functions visualizes the internal tree layout. Passing a function to
 `node_label` lets us render both leaf values and cached structural
 measures produced by monoids:
@@ -168,7 +168,7 @@ and find the first point where a predicate transitions from `FALSE` to
 must stay `TRUE` for all subsequent accumulated values. This is what
 enables the $`O(log n)`$ search for a single split point.
 
-[`locate_by_predicate()`](https://oneilsh.github.io/immutables/reference/locate_by_predicate.md)
+[`locate_by_predicate()`](https://oneilsh.github.io/Immutables/reference/locate_by_predicate.md)
 finds the *first* element where the predicate fires, without splitting
 the tree. With `include_metadata = TRUE` it returns additional scan
 information. The predicate function is applied to accumulated measure
@@ -202,7 +202,7 @@ time where the accumulated sum is greater than 25, which we can verify
 in the plot above ($`9.2 + 9.4 + 3.6 = 22.2`$, adding in $`8.5`$ brings
 the sum to $`30.7`$).
 
-[`split_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_by_predicate.md)
+[`split_by_predicate()`](https://oneilsh.github.io/Immutables/reference/split_by_predicate.md)
 splits the structure at the predicate point, returning `$left` and
 `$right`. The matched element is the first element of `$right`:
 
@@ -242,7 +242,7 @@ s$right
 #> [1] 6
 ```
 
-[`split_around_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_around_by_predicate.md)
+[`split_around_by_predicate()`](https://oneilsh.github.io/Immutables/reference/split_around_by_predicate.md)
 is similar but extracts the matched element into a separate `$value`
 field:
 
@@ -286,7 +286,7 @@ sa$right
 
 Both split variants accept an optional `accumulator` argument to start
 scanning from a value other than the monoid identity.
-[`split_at()`](https://oneilsh.github.io/immutables/reference/split_at.md)
+[`split_at()`](https://oneilsh.github.io/Immutables/reference/split_at.md)
 is a convenience wrapper that splits by position using the built-in
 `.size` monoid (which counts nodes; each leaf node’s measure is `1` and
 it uses the `sum` operator):
@@ -343,7 +343,7 @@ this monoid + predicate pattern is remarkably flexible. The
 `priority_queue` and `ordered_sequence` types for example are not
 actually separate data structures, but monoid-annotated `flexseq`
 structures plus thin wrappers that invoke
-[`locate_by_predicate()`](https://oneilsh.github.io/immutables/reference/locate_by_predicate.md)
+[`locate_by_predicate()`](https://oneilsh.github.io/Immutables/reference/locate_by_predicate.md)
 and friends with the right predicate. The same primitives introduced
 above power every `peek_*`, `pop_*`, and bound query in the package.
 (Interval indices also follow these patterns, but are more complex than
@@ -362,7 +362,7 @@ first-in first-out for equal priorities).
 `pop_min(q)` then works in three lines of logic: read the root aggregate
 as the *target* priority, form the predicate “has the accumulated
 subtree absorbed a slot with this priority yet?”, and hand it to
-[`split_around_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_around_by_predicate.md)
+[`split_around_by_predicate()`](https://oneilsh.github.io/Immutables/reference/split_around_by_predicate.md)
 over `.pq_min`. The descent uses cached subtree aggregates to prune
 branches whose min is a different value, so the whole thing runs in
 $`O(\log n)`$ even though the leaves themselves are not in priority
@@ -378,14 +378,14 @@ Because the sequence is already key-ordered, the accumulated max-key is
 monotonically non-decreasing left-to-right, so a predicate like “is the
 running max at least my query?” transitions from `FALSE` to `TRUE`
 exactly once at the correct location. The
-[`lower_bound()`](https://oneilsh.github.io/immutables/reference/lower_bound.md)
+[`lower_bound()`](https://oneilsh.github.io/Immutables/reference/lower_bound.md)
 function wires that predicate into
-[`locate_by_predicate()`](https://oneilsh.github.io/immutables/reference/locate_by_predicate.md)
+[`locate_by_predicate()`](https://oneilsh.github.io/Immutables/reference/locate_by_predicate.md)
 on `.oms_max_key` and returns the first element with key at or above the
 target;
-[`peek_key()`](https://oneilsh.github.io/immutables/reference/peek_key.md),
-[`pop_key()`](https://oneilsh.github.io/immutables/reference/pop_key.md),
-[`count_between()`](https://oneilsh.github.io/immutables/reference/count_between.md),
+[`peek_key()`](https://oneilsh.github.io/Immutables/reference/peek_key.md),
+[`pop_key()`](https://oneilsh.github.io/Immutables/reference/pop_key.md),
+[`count_between()`](https://oneilsh.github.io/Immutables/reference/count_between.md),
 and the rest all follow the same template with different predicate
 shapes and splitting/concatenating.
 
@@ -527,7 +527,7 @@ An empty `$right` indicates no matches (all measures are less than the
 query). If it’s not empty, but the first measure in `$right` does not
 start with the query, then there again no matches (the key is between
 the left and right but doesn’t match). We can use the
-[`get_measures()`](https://oneilsh.github.io/immutables/reference/get_measures.md)
+[`get_measures()`](https://oneilsh.github.io/Immutables/reference/get_measures.md)
 function to return a `flexseq` of measure values by name and index with
 `[[1]]` to get the first measure.
 
@@ -581,10 +581,10 @@ positions
 
 ## Validation helpers
 
-[`validate_tree()`](https://oneilsh.github.io/immutables/reference/validate_tree.md)
+[`validate_tree()`](https://oneilsh.github.io/Immutables/reference/validate_tree.md)
 checks structural invariants (monoid consistency, node structure) across
 the entire tree.
-[`validate_name_state()`](https://oneilsh.github.io/immutables/reference/validate_name_state.md)
+[`validate_name_state()`](https://oneilsh.github.io/Immutables/reference/validate_name_state.md)
 verifies that a tree is either fully unnamed or fully named with unique,
 non-empty names. Both are $`O(n)`$ and intended for debugging and tests.
 

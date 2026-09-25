@@ -30,7 +30,7 @@ unlist(x, recursive = TRUE, use.names = TRUE)
 ## Value
 
 An atomic vector built from
-[`as.list.flexseq()`](https://oneilsh.github.io/immutables/reference/as.list.flexseq.md).
+[`as.list.flexseq()`](https://oneilsh.github.io/Immutables/reference/as.list.flexseq.md).
 
 ## Details
 

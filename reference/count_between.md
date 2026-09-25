@@ -37,7 +37,7 @@ Integer count of matches.
 ## Details
 
 Uses the same range semantics as
-[`elements_between()`](https://oneilsh.github.io/immutables/reference/elements_between.md)
+[`elements_between()`](https://oneilsh.github.io/Immutables/reference/elements_between.md)
 but returns only the count:
 
 - `include_from = TRUE` uses `key >= from_key`; otherwise

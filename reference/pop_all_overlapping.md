@@ -5,7 +5,7 @@ Pop All Overlapping Intervals
 ## Usage
 
 ``` r
-pop_all_overlaps(x, start, end, bounds = NULL)
+pop_all_overlapping(x, start, end, bounds = NULL)
 ```
 
 ## Arguments
@@ -39,7 +39,7 @@ Use [`as.list()`](https://rdrr.io/r/base/list.html) to convert
 
 ``` r
 ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
-out <- pop_all_overlaps(ix, 2, 5)
+out <- pop_all_overlapping(ix, 2, 5)
 as.list(out$elements)
 #> [[1]]
 #> [1] "b"

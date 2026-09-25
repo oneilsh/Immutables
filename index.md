@@ -2,10 +2,10 @@
 
 [![Lifecycle:
 experimental](https://lifecycle.r-lib.org/reference/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![R-CMD-check](https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/oneilsh/immutables/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/oneilsh/Immutables/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/oneilsh/Immutables/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/oneilsh/immutables/branch/main/graph/badge.svg)](https://app.codecov.io/gh/oneilsh/immutables)
-[![pkgdown](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/oneilsh/immutables/actions/workflows/pkgdown.yaml)
+[![pkgdown](https://github.com/oneilsh/Immutables/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/oneilsh/Immutables/actions/workflows/pkgdown.yaml)
 [![docs](https://img.shields.io/badge/docs-pkgdown-blue)](https://oneilsh.github.io/Immutables/)
 [![DOI](https://zenodo.org/badge/154557443.svg)](https://doi.org/10.5281/zenodo.19686096)
 

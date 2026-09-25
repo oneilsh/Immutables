@@ -19,7 +19,7 @@ get_measure(x, monoid_name)
 - monoid_name:
 
   Name of an attached monoid (e.g. `.size`, a custom name from
-  [`add_monoids()`](https://oneilsh.github.io/immutables/reference/add_monoids.md),
+  [`add_monoids()`](https://oneilsh.github.io/Immutables/reference/add_monoids.md),
   or a built-in like `.pq_min` / `.oms_max_key`).
 
 ## Value
@@ -36,13 +36,13 @@ split — e.g. `s <- split_by_predicate(x, p, "sum")` — call
 in O(1).
 
 For per-element measures, see
-[`get_measures()`](https://oneilsh.github.io/immutables/reference/get_measures.md).
+[`get_measures()`](https://oneilsh.github.io/Immutables/reference/get_measures.md).
 
 ## See also
 
-[`get_measures()`](https://oneilsh.github.io/immutables/reference/get_measures.md),
-[`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md),
-[`add_monoids()`](https://oneilsh.github.io/immutables/reference/add_monoids.md)
+[`get_measures()`](https://oneilsh.github.io/Immutables/reference/get_measures.md),
+[`measure_monoid()`](https://oneilsh.github.io/Immutables/reference/measure_monoid.md),
+[`add_monoids()`](https://oneilsh.github.io/Immutables/reference/add_monoids.md)
 
 ## Examples
 

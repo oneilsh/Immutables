@@ -57,7 +57,7 @@ Developer APIs are leaf-entry oriented:
 
 `measure_monoid()` only constructs the specification; it becomes active
 after being attached to a structure via
-[`add_monoids()`](https://oneilsh.github.io/immutables/reference/add_monoids.md).
+[`add_monoids()`](https://oneilsh.github.io/Immutables/reference/add_monoids.md).
 
 ## Examples
 

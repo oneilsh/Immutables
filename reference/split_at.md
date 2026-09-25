@@ -33,11 +33,11 @@ A split result with shape controlled by `pull_index`.
 ## Details
 
 `split_at(x, index, pull_index = FALSE)` is a convenience wrapper around
-[`split_around_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_around_by_predicate.md)
+[`split_around_by_predicate()`](https://oneilsh.github.io/Immutables/reference/split_around_by_predicate.md)
 using positional scanning.
 
 `split_at(x, index, pull_index = TRUE)` is the two-way variant using
-[`split_by_predicate()`](https://oneilsh.github.io/immutables/reference/split_by_predicate.md).
+[`split_by_predicate()`](https://oneilsh.github.io/Immutables/reference/split_by_predicate.md).
 
 ## Examples
 

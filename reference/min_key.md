@@ -20,7 +20,13 @@ Minimum key, or `NULL` when `x` is empty.
 
 ## Details
 
-This follows sequence key order directly.
+This follows sequence key order directly. Equivalent to `key_at(x, 1)`.
+
+## See also
+
+[`max_key()`](https://oneilsh.github.io/Immutables/reference/max_key.md),
+[`key_at()`](https://oneilsh.github.io/Immutables/reference/key_at.md),
+[`nearest_key()`](https://oneilsh.github.io/Immutables/reference/nearest_key.md)
 
 ## Examples
 

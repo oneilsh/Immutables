@@ -31,9 +31,9 @@ queue.
 If elements are named, names are preserved for name-based reads.
 
 Queue operations are exposed through
-[`insert()`](https://oneilsh.github.io/immutables/reference/insert.md),
+[`insert()`](https://oneilsh.github.io/Immutables/reference/insert.md),
 `peek_*()`, `pop_*()`, and
-[`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md).
+[`fapply()`](https://oneilsh.github.io/Immutables/reference/fapply.md).
 
 ## Examples
 

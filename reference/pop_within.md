@@ -35,7 +35,7 @@ A list with `value`, `start`, `end`, and `remaining`. On miss: `value`,
 
 Removes the first match in canonical interval order. On miss, returns a
 non-throwing miss object with `remaining = x`. Use
-[`pop_all_within()`](https://oneilsh.github.io/immutables/reference/pop_all_within.md)
+[`pop_all_within()`](https://oneilsh.github.io/Immutables/reference/pop_all_within.md)
 to remove all matches.
 
 ## Examples

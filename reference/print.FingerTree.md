@@ -1,6 +1,6 @@
-# Print a compact summary of a finger tree
+# Print a Compact Summary of a Finger Tree
 
-Print a compact summary of a finger tree
+Print a Compact Summary of a Finger Tree
 
 ## Usage
 

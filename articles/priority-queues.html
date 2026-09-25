@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Priority Queues • Immutables</title>
+<title>Priority Queues: Fast Min/Max Access by Priority • Immutables</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -16,7 +16,7 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Priority Queues">
+<meta property="og:title" content="Priority Queues: Fast Min/Max Access by Priority">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Immutables</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@
     <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
-    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarking</a></li>
     <li><a class="dropdown-item" href="../articles/gallery.html">Gallery</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Internals</h6></li>
@@ -72,7 +72,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Priority Queues</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Priority Queues: Fast Min/Max Access by Priority</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/oneilsh/Immutables/blob/main/vignettes/priority-queues.Rmd" class="external-link"><code>vignettes/priority-queues.Rmd</code></a></small>
@@ -420,6 +420,102 @@ metadata and any custom monoids are dropped. To instead obtain a
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $priority</span></span>
 <span><span class="co">#&gt; [1] "A"</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="example-best-first-feature-selection">Example: best-first feature selection<a class="anchor" aria-label="anchor" href="#example-best-first-feature-selection"></a>
+</h2>
+<p>Priority queues have many applications, but we’ll demonstrate
+applying them to the problem of feature selection in modeling: given a
+large number of features, only a few of which are informative, identify
+a small subset with good performance. We begin by constructing a matrix
+<code>X</code> with 25 potential feature columns, and an outcome
+<code>y</code> dependent only on features 3 and 7:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">2000</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fl">25</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span> <span class="op">*</span> <span class="va">p</span><span class="op">)</span>, <span class="va">n</span>, <span class="va">p</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># response depends on features 3 and 7 only</span></span>
+<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fl">3.5</span> <span class="op">*</span> <span class="va">X</span><span class="op">[</span>, <span class="fl">3</span><span class="op">]</span> <span class="op">-</span> <span class="fl">4</span> <span class="op">*</span> <span class="va">X</span><span class="op">[</span>, <span class="fl">7</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></code></pre></div>
+<p>We’ll consider linear models using only main effects, and use
+Akaike’s Information Criterion (AIC) as a measure of performance. The
+number of potential models
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>2</mn><mn>25</mn></msup><annotation encoding="application/x-tex">2^{25}</annotation></semantics></math>)
+is too large to try all possibilities. Rather than iterate feature
+combinations exhaustively, we’ll perform a best-first search: given a
+“current best” set of features, we’ll add remaining features
+individually, evaluating as we go and storing them for potential later
+expansion. By keeping feature sets in a priority queue prioritized by
+resultant AIC, we can select the best-performing set to build on at each
+iteration. We thus begin with a base model using no features, and the
+corresponding empty feature set and AIC stored in a
+<code>priority_queue</code>.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># a model using no features, initially the "best"</span></span>
+<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">best_features</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">best_aic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># store the initial model prioritized by its AIC</span></span>
+<span><span class="va">pq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priority_queue.html">priority_queue</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">pq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="va">pq</span>, <span class="va">best_features</span>, priority <span class="op">=</span> <span class="va">best_aic</span><span class="op">)</span></span></code></pre></div>
+<p>So long as there are feature sets available in the queue to expand
+on, we will do so, but limit the total number of considered models to
+approximately 200 to prevent an exhaustive search. At each iteration we
+pop the best feature set considered so far and compute the remaining
+available features. We then add each of those to the current best set in
+turn, resulting in a new model with corresponding AIC to add to the
+queue. If one of these performs better than the best so far we record
+it. Along the way we update the number of models considered.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">models_considered</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span></span>
+<span><span class="kw">while</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pq</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span> <span class="op">&amp;&amp;</span> <span class="va">models_considered</span> <span class="op">&lt;</span> <span class="fl">200</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># pop the current best-performing set of features</span></span>
+<span>  <span class="va">current_best</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pop_min.html">pop_min</a></span><span class="op">(</span><span class="va">pq</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># replace the queue with the remaining (unpopped) portion</span></span>
+<span>  <span class="va">pq</span> <span class="op">&lt;-</span> <span class="va">current_best</span><span class="op">$</span><span class="va">remaining</span></span>
+<span></span>
+<span>  <span class="co"># extract the current best features ($value) and AIC ($priority)</span></span>
+<span>  <span class="va">current_best_features</span> <span class="op">&lt;-</span> <span class="va">current_best</span><span class="op">$</span><span class="va">value</span></span>
+<span>  <span class="va">current_best_aic</span> <span class="op">&lt;-</span> <span class="va">current_best</span><span class="op">$</span><span class="va">priority</span></span>
+<span></span>
+<span>  <span class="co"># features we can add to the current best for potential improvement</span></span>
+<span>  <span class="va">available_features</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>, <span class="va">current_best_features</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="co"># add each unused feature one at a time</span></span>
+<span>  <span class="kw">for</span><span class="op">(</span><span class="va">available_feature</span> <span class="kw">in</span> <span class="va">available_features</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="co"># add it to the set of best-performing features so far</span></span>
+<span>    <span class="va">selected_features</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">current_best_features</span>, <span class="va">available_feature</span><span class="op">)</span></span>
+<span></span>
+<span>    <span class="co"># build a model with that updated set</span></span>
+<span>    <span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">X</span><span class="op">[</span> , <span class="va">selected_features</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
+<span>    <span class="co"># add the features to the queue prioritized by the AIC they deliver</span></span>
+<span>    <span class="va">pq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/insert.html">insert</a></span><span class="op">(</span><span class="va">pq</span>, <span class="va">selected_features</span>, priority <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>    <span class="co"># if the current model is better than the best so far, record it</span></span>
+<span>    <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span> <span class="op">&lt;</span> <span class="va">best_aic</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">best_features</span> <span class="op">&lt;-</span> <span class="va">selected_features</span></span>
+<span>      <span class="va">best_aic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span></span>
+<span>    <span class="va">models_considered</span> <span class="op">&lt;-</span> <span class="va">models_considered</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">best_features</span></span>
+<span><span class="co">#&gt; [1]  7  3 22 21 25  2 17  6</span></span></code></pre></div>
+<p>The best model encountered by AIC includes the two informative
+features, 7 and 3, along with several noise features that each improve
+AIC slightly. Potential improvements to this example include ordering
+features to avoid duplicated testing of feature permutations, more
+sophisticated stopping criteria based on AIC trend, and alternative
+prioritization values. The search history can also easily be inspected
+efficiently by growing a <code>flexseq</code> with intermediate
+information.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -1,4 +1,4 @@
-# Validate full tree invariants (debug/test utility)
+# Validate Full Tree Invariants (Debug/Test Utility)
 
 Performs expensive full-tree auditing of:
 

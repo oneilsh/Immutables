@@ -1,4 +1,4 @@
-# Ordered Sequences
+# Ordered Sequences: Key-Sorted Storage with Range Queries
 
 ## Ordered sequence basics
 
@@ -35,7 +35,7 @@ xs
 ```
 
 The
-[`as_ordered_sequence()`](https://oneilsh.github.io/immutables/reference/as_ordered_sequence.md)
+[`as_ordered_sequence()`](https://oneilsh.github.io/Immutables/reference/as_ordered_sequence.md)
 variant builds a sequence from a vector or list of elements paired with
 a key vector, useful when keys are already in a separate vector.
 
@@ -89,10 +89,10 @@ seq2
 #> [1] 3
 ```
 
-[`pop_key()`](https://oneilsh.github.io/immutables/reference/pop_key.md)
+[`pop_key()`](https://oneilsh.github.io/Immutables/reference/pop_key.md)
 removes and returns the first match for a key as
 `$value`/`$key`/`$remaining`. Its “all” counterpart
-[`pop_all_key()`](https://oneilsh.github.io/immutables/reference/pop_all_key.md)
+[`pop_all_key()`](https://oneilsh.github.io/Immutables/reference/pop_all_key.md)
 removes the entire tie run for that key, returning `$elements` (an
 ordered sequence of removed matches) and `$remaining`.
 
@@ -135,9 +135,9 @@ all_two$remaining
 ```
 
 Keys may be counted, and elements accessed;
-[`peek_key()`](https://oneilsh.github.io/immutables/reference/peek_key.md)
+[`peek_key()`](https://oneilsh.github.io/Immutables/reference/peek_key.md)
 returns one element, the first in insertion order.
-[`peek_all_key()`](https://oneilsh.github.io/immutables/reference/peek_all_key.md)
+[`peek_all_key()`](https://oneilsh.github.io/Immutables/reference/peek_all_key.md)
 returns an ordered sequence with all matching keys.
 
 ``` r
@@ -185,9 +185,9 @@ elements_between(seq, from_key = "b", to_key ="c", include_from = FALSE, include
 
 ## Key boundaries, and extrema
 
-[`lower_bound()`](https://oneilsh.github.io/immutables/reference/lower_bound.md)
+[`lower_bound()`](https://oneilsh.github.io/Immutables/reference/lower_bound.md)
 finds the first element with key `>=` a query key;
-[`upper_bound()`](https://oneilsh.github.io/immutables/reference/upper_bound.md)
+[`upper_bound()`](https://oneilsh.github.io/Immutables/reference/upper_bound.md)
 finds the first with key strictly `>`. Both return a list with `$found`,
 `$index`, `$value`, and `$key` (`NULL` fields when no match exists).
 Together they support successor queries (“find the nearest entry at or
@@ -212,7 +212,7 @@ upper_bound(seq, key = "d") |> str()
 ```
 
 When the query key falls between or outside existing keys,
-[`lower_bound()`](https://oneilsh.github.io/immutables/reference/lower_bound.md)
+[`lower_bound()`](https://oneilsh.github.io/Immutables/reference/lower_bound.md)
 returns the next entry at or above, useful for nearest-match lookups.
 Both return `found = FALSE` when no keys satisfy the condition.
 
@@ -235,7 +235,7 @@ upper_bound(seq, key = "g") |> str()
 
 The difference `upper_bound(x, k)$index - lower_bound(x, k)$index` gives
 the count of entries with key `k` (this is what
-[`count_key()`](https://oneilsh.github.io/immutables/reference/count_key.md)
+[`count_key()`](https://oneilsh.github.io/Immutables/reference/count_key.md)
 does internally).
 
 ``` r
@@ -246,9 +246,9 @@ count_key(seq, key = "d")
 #> [1] 2
 ```
 
-[`min_key()`](https://oneilsh.github.io/immutables/reference/min_key.md)
+[`min_key()`](https://oneilsh.github.io/Immutables/reference/min_key.md)
 and
-[`max_key()`](https://oneilsh.github.io/immutables/reference/max_key.md)
+[`max_key()`](https://oneilsh.github.io/Immutables/reference/max_key.md)
 return the current minimum and maximum *keys* (not the stored elements).
 
 ``` r
@@ -259,6 +259,72 @@ max_key(xs)
 #> [1] 3
 min_key(ordered_sequence())  # NULL when empty
 #> NULL
+```
+
+Because keys are stored in sorted order, ordered sequences also support
+the positional operators inherited from `flexseq` —
+[`peek_at()`](https://oneilsh.github.io/Immutables/reference/peek_at.md),
+[`pop_front()`](https://oneilsh.github.io/Immutables/reference/pop_front.md),
+[`pop_back()`](https://oneilsh.github.io/Immutables/reference/pop_back.md),
+and
+[`pop_at()`](https://oneilsh.github.io/Immutables/reference/pop_at.md).
+On an ordered sequence the pops additionally return `$key` (alongside
+`$value`/`$remaining`), and
+[`key_at()`](https://oneilsh.github.io/Immutables/reference/key_at.md)
+reads the key at a one-based position without removing anything: the
+positional companion to
+[`peek_at()`](https://oneilsh.github.io/Immutables/reference/peek_at.md)
+(which reads the value there) and the general form of
+[`min_key()`](https://oneilsh.github.io/Immutables/reference/min_key.md)/[`max_key()`](https://oneilsh.github.io/Immutables/reference/max_key.md).
+
+``` r
+
+key_at(xs, 2)                          # key at position 2
+#> [1] 2
+key_at(xs, 1) == min_key(xs)           # first position holds the minimum key
+#> [1] TRUE
+key_at(xs, length(xs)) == max_key(xs)  # last position holds the maximum key
+#> [1] TRUE
+key_at(xs, 10)                         # NULL when out of bounds
+#> NULL
+
+front <- pop_front(xs)                 # positional pop carries the key too
+front$value
+#> [1] "a1"
+front$key
+#> [1] 1
+```
+
+[`nearest_key()`](https://oneilsh.github.io/Immutables/reference/nearest_key.md)
+returns the existing key closest to a query, which then composes with
+[`peek_key()`](https://oneilsh.github.io/Immutables/reference/peek_key.md)
+/
+[`pop_key()`](https://oneilsh.github.io/Immutables/reference/pop_key.md)
+to read or remove the matching element. It resolves by order alone at
+the extremes and on an exact hit, and only needs a distance metric when
+the query falls strictly between two distinct keys — so it supports
+`numeric`, `Date`, and `POSIXct` keys there. An equidistant tie between
+two distinct keys is resolved by `ties` — `"lower"` (default),
+`"upper"`, or `"both"` (returns both keys). For `character` keys the
+between-case is undefined (“is `"Ben"` closer to `"Alex"` or
+`"Charlie"`?”) and errors; use
+[`lower_bound()`](https://oneilsh.github.io/Immutables/reference/lower_bound.md)
+/
+[`peek_key()`](https://oneilsh.github.io/Immutables/reference/peek_key.md)
+for order-based lookup instead.
+
+``` r
+
+nearest_key(xs, 2.4)                    # between 2 and 3 -> closer key (2)
+#> [1] 2
+nearest_key(xs, 0)                      # below all -> min_key (1)
+#> [1] 1
+nearest_key(xs, 2.5, ties = "both")     # exactly between 2 and 3 -> c(2, 3)
+#> [1] 2 3
+
+k <- nearest_key(xs, 2.4)               # locate, then act with the keyed helpers
+pop_key(xs, k)$value
+#> [1] "b1"
 ```
 
 ## Empty sequences
@@ -281,12 +347,12 @@ count_between(empty_os, 1, 5)
 ## Named ordered sequences
 
 Ordered sequences can carry names, set either at construction or through
-[`as_ordered_sequence()`](https://oneilsh.github.io/immutables/reference/as_ordered_sequence.md)
+[`as_ordered_sequence()`](https://oneilsh.github.io/Immutables/reference/as_ordered_sequence.md)
 on a named list. Names and integer positions both support read-only
 indexing via `[`, `[[`, and `$`. All replacement forms (`[<-`, `[[<-`,
 `$<-`) error, because index-based assignment may break the ordering
 invariant. Ordered sequences may be cast down with
-[`as_flexseq()`](https://oneilsh.github.io/immutables/reference/as_flexseq.md)
+[`as_flexseq()`](https://oneilsh.github.io/Immutables/reference/as_flexseq.md)
 or [`as.list()`](https://rdrr.io/r/base/list.html). Named and unnamed
 elements cannot be mixed within one sequence.
 
@@ -337,9 +403,9 @@ try(xs_named$a <- "!!")  # replacement blocked
 #>   `$<-()` is not supported for ordered_sequence. Replacement indexing is not supported. Consider converting with as_flexseq().
 ```
 
-## Transforming, aterating, merging
+## Transforming, iterating, merging
 
-[`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+[`fapply()`](https://oneilsh.github.io/Immutables/reference/fapply.md)
 maps a function over elements while preserving keys and order. The
 function receives `(value, key)`, or `(value, key, name)` if it accepts
 a third argument. Keys and names are passed in read-only, and the return
@@ -364,11 +430,11 @@ fapply(xs_t, function(value, key) toupper(value))
 #> [1] "ALICE"
 ```
 
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md)
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md)
 (re-exported from the **coro** package) walks the sequence in
 key-ascending order, yielding bare values. Keys are dropped from each
 yield; use
-[`fapply()`](https://oneilsh.github.io/immutables/reference/fapply.md)
+[`fapply()`](https://oneilsh.github.io/Immutables/reference/fapply.md)
 if your callback needs the key alongside the value, or iterate over
 [`as.list()`](https://rdrr.io/r/base/list.html) when you want a list
 keyed by name.
@@ -382,11 +448,11 @@ loop(for (v in xs_t) print(v))
 ```
 
 Plain `for (v in xs_t)` (without
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md)) does
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md)) does
 *not* dispatch to the iteration protocol, it walks the underlying
 internal structure and yields those rather than sequence elements.
 Always wrap with
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md).
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md).
 
 `merge(x, y)` combines two ordered sequences into a new one in key
 order, preserving left-biased FIFO on duplicate keys (all of `x`’s
@@ -420,3 +486,91 @@ merge(a, b)
 
 Both sequences must share the same key type and monoid set; mismatches
 error. Both inputs are left unmodified.
+
+## Example: scalar matching without replacement
+
+Many potential uses for ordered sequences are handled well by named
+lists and vectors, where access-by-key is the primary functionality. In
+some cases we need to dynamically find, add, and remove elements by key,
+but as
+[`vignette("benchmarks", package = "Immutables")`](https://oneilsh.github.io/Immutables/articles/benchmarks.md)
+shows these operations are excessively slow on large base-R structures.
+Matching without replacement is one such case, often employed for cohort
+matching purposes in observational studies using propensity scores.
+Foregoing details, “treated” patients are matched to a subset of
+distinct “control” patients with similar scores. We start by simulating
+some populations and scores, and initialize an empty `flexseq` to store
+matches. We also convert the treated and untreated row numbers (serving
+as identifiers) to ordered sequences, keyed by their score.
+
+``` r
+
+set.seed(100)
+n_patients <- 200
+patients <- data.frame(treated = sample(c(TRUE, FALSE),
+                                        n_patients,
+                                        prob = c(0.1, 0.9),
+                                        replace = TRUE),
+                       score = runif(n_patients))
+
+# row numbers act as identifiers
+treated_rows <- which(patients$treated)
+treated_scores <- patients$score[patients$treated]
+
+untreated_rows <- which(!patients$treated)
+untreated_scores <- patients$score[!patients$treated]
+
+matches <- flexseq()
+
+treated_seq <- as_ordered_sequence(treated_rows, keys = treated_scores)
+untreated_seq <- as_ordered_sequence(untreated_rows, keys = untreated_scores)
+```
+
+Matching itself is a simple greedy selection. Popping treated patients
+in order, each is matched to their nearest untreated record by score
+key, using
+[`nearest_key()`](https://oneilsh.github.io/Immutables/reference/nearest_key.md).
+That patient is popped from wherever it was located, and a data frame
+describing the match is pushed onto the accumulating `flexseq`. This
+example also illustrates collecting these into a single result data
+frame for use after.
+
+``` r
+
+while(length(treated_seq) > 0) {
+  # no untreated patients left to match against
+  if (length(untreated_seq) == 0L) break
+
+  # pop the first (lowest-score) treated patient
+  front_el <- pop_front(treated_seq)
+  treated_seq <- front_el$remaining
+
+  treated_pt_score <- front_el$key
+  treated_pt_row   <- front_el$value
+
+  # find and remove the nearest-score untreated patient
+  match_key <- nearest_key(untreated_seq, treated_pt_score)
+  match_el  <- pop_key(untreated_seq, match_key)
+  untreated_seq <- match_el$remaining
+
+  untreated_pt_score <- match_el$key
+  untreated_pt_row   <- match_el$value
+
+  match_row <- data.frame(treated_pt_row,
+                          treated_pt_score,
+                          untreated_pt_row,
+                          untreated_pt_score)
+
+  matches <- push_back(matches, match_row)
+}
+
+match_df <- do.call(rbind, as.list(matches))
+head(match_df)
+#>   treated_pt_row treated_pt_score untreated_pt_row untreated_pt_score
+#> 1             83       0.01631959              151         0.02058322
+#> 2             74       0.11503942              161         0.10753897
+#> 3             91       0.13271604               58         0.13250605
+#> 4            177       0.13878037              197         0.13886056
+#> 5            152       0.17096903               78         0.17104804
+#> 6             63       0.19755671              184         0.19731313
+```

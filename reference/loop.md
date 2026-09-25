@@ -1,4 +1,4 @@
-# Iterate over an iterator (re-exported from coro)
+# Iterate Over an Iterator (Re-exported from coro)
 
 Re-exported
 [`coro::loop()`](https://coro.r-lib.org/reference/collect.html). Enables

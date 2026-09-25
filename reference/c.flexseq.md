@@ -31,7 +31,7 @@ returns a new concatenated `flexseq`.
 For `priority_queue`, `ordered_sequence`, and `interval_index`,
 [`c()`](https://rdrr.io/r/base/c.html) is not supported because
 concatenation can violate structure-specific invariants. Cast first with
-[`as_flexseq()`](https://oneilsh.github.io/immutables/reference/as_flexseq.md)
+[`as_flexseq()`](https://oneilsh.github.io/Immutables/reference/as_flexseq.md)
 when sequence-style concatenation is intended, noting that this drops
 ordering and priority metadata.
 

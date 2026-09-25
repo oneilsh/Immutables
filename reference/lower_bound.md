@@ -38,7 +38,7 @@ or inclusive range scans.
 
 ## See also
 
-[`upper_bound()`](https://oneilsh.github.io/immutables/reference/upper_bound.md)
+[`upper_bound()`](https://oneilsh.github.io/Immutables/reference/upper_bound.md)
 
 ## Examples
 

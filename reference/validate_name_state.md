@@ -1,4 +1,4 @@
-# Validate name-state invariants only (debug/test utility)
+# Validate Name-State Invariants (Debug/Test Utility)
 
 Checks that trees are either fully unnamed or fully named with unique,
 non-empty names.

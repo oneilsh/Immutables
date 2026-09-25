@@ -36,11 +36,11 @@ A new `flexseq`.
 For ordered types (`ordered_sequence`, `interval_index`),
 [`merge()`](https://rdrr.io/r/base/merge.html) performs a proper sorted
 merge respecting keys/intervals — see
-[`merge.ordered_sequence()`](https://oneilsh.github.io/immutables/reference/merge.ordered_sequence.md)
+[`merge.ordered_sequence()`](https://oneilsh.github.io/Immutables/reference/merge.ordered_sequence.md)
 and
-[`merge.interval_index()`](https://oneilsh.github.io/immutables/reference/merge.interval_index.md).
+[`merge.interval_index()`](https://oneilsh.github.io/Immutables/reference/merge.interval_index.md).
 For `priority_queue`, see
-[`merge.priority_queue()`](https://oneilsh.github.io/immutables/reference/merge.priority_queue.md).
+[`merge.priority_queue()`](https://oneilsh.github.io/Immutables/reference/merge.priority_queue.md).
 
 ## Examples
 

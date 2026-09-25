@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Interval Indices • Immutables</title>
+<title>Interval Indices: Overlap and Containment Queries • Immutables</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -16,7 +16,7 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Interval Indices">
+<meta property="og:title" content="Interval Indices: Overlap and Containment Queries">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Immutables</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@
     <li><a class="dropdown-item" href="../articles/interval-indices.html">Interval Indices</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
-    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarks</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarking</a></li>
     <li><a class="dropdown-item" href="../articles/gallery.html">Gallery</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Internals</h6></li>
@@ -72,7 +72,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Interval Indices</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Interval Indices: Overlap and Containment Queries</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/oneilsh/Immutables/blob/main/vignettes/interval-indices.Rmd" class="external-link"><code>vignettes/interval-indices.Rmd</code></a></small>
@@ -237,14 +237,14 @@ First we’ll build a new index to query:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; [[4]] (interval 4 - 5)</span></span>
 <span><span class="co">#&gt; [1] "right"</span></span></code></pre></div>
-<p><code><a href="../reference/peek_overlaps.html">peek_overlaps()</a></code> returns any interval that shares at
+<p><code><a href="../reference/peek_overlapping.html">peek_overlapping()</a></code> returns any interval that shares at
 least one point with the query range. <code><a href="../reference/peek_containing.html">peek_containing()</a></code>
 returns intervals that fully contain the query range.
 <code><a href="../reference/peek_within.html">peek_within()</a></code> returns intervals fully contained by the
 query range.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># overlaps [2, 5]: any shared point</span></span>
-<span><span class="fu"><a href="../reference/peek_all_overlaps.html">peek_all_overlaps</a></span><span class="op">(</span><span class="va">ix3</span>, start <span class="op">=</span> <span class="fl">2</span>, end <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/peek_all_overlapping.html">peek_all_overlapping</a></span><span class="op">(</span><span class="va">ix3</span>, start <span class="op">=</span> <span class="fl">2</span>, end <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Unnamed interval_index with 4 elements, default query bounds [start, end).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Elements (by interval start order):</span></span>
@@ -372,7 +372,7 @@ elements).</p>
 <span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="fu"><a href="../reference/peek_point.html">peek_point</a></span><span class="op">(</span><span class="va">empty_ix</span>, point <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; NULL</span></span>
-<span><span class="fu"><a href="../reference/pop_overlaps.html">pop_overlaps</a></span><span class="op">(</span><span class="va">empty_ix</span>, start <span class="op">=</span> <span class="fl">1</span>, end <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/pop_overlapping.html">pop_overlapping</a></span><span class="op">(</span><span class="va">empty_ix</span>, start <span class="op">=</span> <span class="fl">1</span>, end <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $value</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -500,6 +500,92 @@ interval-relation queries work immediately on the result.</p>
 <p>Both indices must share the same endpoint type, the same
 <code>bounds</code> convention, and the same monoid set; mismatches
 error. Both inputs are left unmodified.</p>
+</div>
+<div class="section level2">
+<h2 id="example-hospital-occupancy-over-time">Example: hospital occupancy over time<a class="anchor" aria-label="anchor" href="#example-hospital-occupancy-over-time"></a>
+</h2>
+<p>Many datasets are characterized by intervals, such that we wish to
+query which intervals overlap a given point. Sweep-line algorithms do so
+over each start or end point in order. Here we illustrate this basic
+pattern, considering a hypothetical computation of hospital occupancy
+over time. Patients arrive randomly, stay for a random number of days,
+and are associated with demographic variables for age and sex. For each
+day, we wish to capture the total occupancy, average age, and percent
+male. We begin by simulating data and building an interval index storing
+each patient with their stay:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">num_days</span> <span class="op">&lt;-</span> <span class="fl">365</span></span>
+<span><span class="va">n_patients</span> <span class="op">&lt;-</span> <span class="fl">500</span></span>
+<span></span>
+<span><span class="va">starts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">num_days</span>,</span>
+<span>                 size <span class="op">=</span> <span class="va">n_patients</span>,</span>
+<span>                 replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ends</span> <span class="op">&lt;-</span> <span class="va">starts</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="va">n_patients</span>, <span class="fl">2</span><span class="op">)</span> <span class="co"># average stay = 2 days</span></span>
+<span></span>
+<span><span class="va">ages</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_patients</span>, mean <span class="op">=</span> <span class="fl">35</span>, sd <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">is_males</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, <span class="va">n_patients</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># list of patients (each a list with age and is_male)</span></span>
+<span><span class="va">patients</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/funprog.html" class="external-link">Map</a></span><span class="op">(</span><span class="va">list</span>, age <span class="op">=</span> <span class="va">ages</span>, is_male <span class="op">=</span> <span class="va">is_males</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># store each patient in an interval index with their stay</span></span>
+<span><span class="va">ix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_interval_index.html">as_interval_index</a></span><span class="op">(</span><span class="va">patients</span>, start <span class="op">=</span> <span class="va">starts</span>, end <span class="op">=</span> <span class="va">ends</span><span class="op">)</span></span></code></pre></div>
+<p>Next, for each day we’ll query for overlapping patients, computing
+summary statistics. These are collected in a <code>flexseq</code>, which
+we later convert to a data frame for further analysis. This example also
+illustrates using <code><a href="../reference/fapply.html">fapply()</a></code> to unpack the contents of an
+interval index containing named lists. Days with no patients present are
+recorded with an occupancy of zero and missing averages.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">day_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/flexseq.html">flexseq</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">for</span><span class="op">(</span><span class="va">day</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">num_days</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">present</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/peek_all_point.html">peek_all_point</a></span><span class="op">(</span><span class="va">ix</span>, <span class="va">day</span><span class="op">)</span></span>
+<span>  <span class="va">occupancy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">present</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="kw">if</span><span class="op">(</span><span class="va">occupancy</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>day <span class="op">=</span> <span class="va">day</span>, occupancy <span class="op">=</span> <span class="fl">0</span>, mean_age <span class="op">=</span> <span class="cn">NA</span>, pct_male <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span>  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>    <span class="va">day_ages</span> <span class="op">&lt;-</span> <span class="va">present</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="../reference/fapply.html">fapply</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">patient</span>, <span class="va">start</span>, <span class="va">end</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="va">patient</span><span class="op">$</span><span class="va">age</span></span>
+<span>      <span class="op">}</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># fapply returns an interval_index, convert to vector</span></span>
+<span></span>
+<span>    <span class="va">day_males</span> <span class="op">&lt;-</span> <span class="va">present</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="../reference/fapply.html">fapply</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">patient</span>, <span class="va">start</span>, <span class="va">end</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="va">patient</span><span class="op">$</span><span class="va">is_male</span></span>
+<span>      <span class="op">}</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span>    <span class="va">stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>day <span class="op">=</span> <span class="va">day</span>,</span>
+<span>                        occupancy <span class="op">=</span> <span class="va">occupancy</span>,</span>
+<span>                        mean_age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">day_ages</span><span class="op">)</span>,</span>
+<span>                        pct_male <span class="op">=</span> <span class="fl">100</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">day_males</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="va">day_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/push_back.html">push_back</a></span><span class="op">(</span><span class="va">day_stats</span>, <span class="va">stats</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># convert the flexseq of data frames into a single data frame</span></span>
+<span><span class="co"># with columns for day, occupancy, mean_age, and pct_male</span></span>
+<span><span class="va">stats_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">day_stats</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">stats_df</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   day occupancy mean_age pct_male</span></span>
+<span><span class="co">#&gt; 1   1         2 25.35509       50</span></span>
+<span><span class="co">#&gt; 2   2         2 32.05227        0</span></span>
+<span><span class="co">#&gt; 3   3         2 25.47594       50</span></span>
+<span><span class="co">#&gt; 4   4         5 29.17300       40</span></span>
+<span><span class="co">#&gt; 5   5         4 28.38735       50</span></span>
+<span><span class="co">#&gt; 6   6         2 26.64759       50</span></span></code></pre></div>
+<p>This example is designed for simplicity, but is not optimally
+efficient. Real sweep-line algorithms consider only sorted used
+endpoints, and keep three indices: one with as-yet-unprocessed elements,
+an active set overlapping the virtual sweep line, and a processed set,
+moving elements through them with <code><a href="../reference/pop_all_point.html">pop_all_point()</a></code>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

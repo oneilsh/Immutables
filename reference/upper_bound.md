@@ -38,7 +38,7 @@ finding the position immediately after a duplicate-key run.
 
 ## See also
 
-[`lower_bound()`](https://oneilsh.github.io/immutables/reference/lower_bound.md)
+[`lower_bound()`](https://oneilsh.github.io/Immutables/reference/lower_bound.md)
 
 ## Examples
 

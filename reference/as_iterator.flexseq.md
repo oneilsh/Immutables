@@ -1,7 +1,7 @@
 # Iterate over a `flexseq` (coro iterator)
 
 Returns a lazy iterator that yields payload elements left-to-right. Use
-with [`loop()`](https://oneilsh.github.io/immutables/reference/loop.md)
+with [`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md)
 as the canonical iteration form:
 
 ## Usage
@@ -37,18 +37,18 @@ Inherited by `ordered_sequence` and `interval_index`: for those
 subclasses the yielded value is the unwrapped payload (keys / interval
 endpoints dropped), in key-ascending / start-position order
 respectively. See
-[`as_iterator.priority_queue()`](https://oneilsh.github.io/immutables/reference/as_iterator.priority_queue.md)
+[`as_iterator.priority_queue()`](https://oneilsh.github.io/Immutables/reference/as_iterator.priority_queue.md)
 for the priority-order override.
 
 ## Do not use plain `for` directly
 
 Writing `for (x in s) ...` (without
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md)) will
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md)) will
 not dispatch this method. R's `for` walks the object's underlying list
 storage at the C level and bypasses S3 `length`/`[[`, so it silently
 yields raw finger-tree internals (Digit/Empty/Deep nodes) rather than
 sequence elements. Always wrap with
-[`loop()`](https://oneilsh.github.io/immutables/reference/loop.md), or
+[`loop()`](https://oneilsh.github.io/Immutables/reference/loop.md), or
 call [`as.list()`](https://rdrr.io/r/base/list.html) first for an eager
 copy.
 

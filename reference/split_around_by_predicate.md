@@ -40,9 +40,9 @@ A list with fields:
 ## Details
 
 This function generally requires the sequence be annotated with a
-[`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md);
+[`measure_monoid()`](https://oneilsh.github.io/Immutables/reference/measure_monoid.md);
 see the examples and
-[`measure_monoid()`](https://oneilsh.github.io/immutables/reference/measure_monoid.md)
+[`measure_monoid()`](https://oneilsh.github.io/Immutables/reference/measure_monoid.md)
 for more information.
 
 `value` is the matched leaf entry for the input structure:

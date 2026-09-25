@@ -5,7 +5,7 @@ Peek All Intervals Overlapping a Query Interval
 ## Usage
 
 ``` r
-peek_all_overlaps(x, start, end, bounds = NULL, as_list = FALSE)
+peek_all_overlapping(x, start, end, bounds = NULL, as_list = FALSE)
 ```
 
 ## Arguments
@@ -51,7 +51,7 @@ with [`as.list()`](https://rdrr.io/r/base/list.html).
 
 ``` r
 ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
-as.list(peek_all_overlaps(ix, 2, 5))
+as.list(peek_all_overlapping(ix, 2, 5))
 #> [[1]]
 #> [1] "b"
 #> 

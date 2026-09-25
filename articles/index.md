@@ -1,31 +1,31 @@
-# Immutables
+# Immutables: Fast, Persistent Data Structures for R
 
 ## Overview
 
 `immutables` provides four fast data structures:
 
-[`flexseq()`](https://oneilsh.github.io/immutables/articles/flexseq.md) -
+[`flexseq()`](https://oneilsh.github.io/Immutables/articles/flexseq.md) -
 Provides list-like operations including indexed and named element
 access, push/pop/peek from either end for double-ended queue behavior,
 insertion, splitting, and concatenation.
 
-[`priority_queue()`](https://oneilsh.github.io/immutables/articles/priority-queues.md) -
+[`priority_queue()`](https://oneilsh.github.io/Immutables/articles/priority-queues.md) -
 Associates items with priority values and provides min and max peek/pop
 by priority and fast insertion.
 
-[`ordered_sequence()`](https://oneilsh.github.io/immutables/articles/ordered-sequences.md) -
+[`ordered_sequence()`](https://oneilsh.github.io/Immutables/articles/ordered-sequences.md) -
 Associates items with key values and keeps the elements in sorted order
 by key. These may be similarly be inserted/popped/peeked by key value as
 well as position. Keys may be duplicated, with first-in-first-out order
 within key groups.
 
-[`interval_index()`](https://oneilsh.github.io/immutables/articles/interval-indices.md) -
+[`interval_index()`](https://oneilsh.github.io/Immutables/articles/interval-indices.md) -
 Stores items associated with interval ranges, supporting point and
 interval overlap/containment/subsumption queries. Items are kept in
 interval-start-order.
 
 A [developer
-API](https://oneilsh.github.io/immutables/articles/developer-api.md)
+API](https://oneilsh.github.io/Immutables/articles/developer-api.md)
 exposes the underlying monoid-annotated finger tree primitives (custom
 monoids, predicate-based locate/split, validation helpers) for building
 new structures and indexes.
@@ -289,7 +289,7 @@ endpoint matches via `match_at`:
 
 ``` r
 
-peek_all_overlaps(ix, start = 2, end = 5)
+peek_all_overlapping(ix, start = 2, end = 5)
 #> Unnamed interval_index with 3 elements, default query bounds [start, end).
 #> 
 #> Elements (by interval start order):

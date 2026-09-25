@@ -22,6 +22,10 @@ A list with fields:
 
 - `remaining`: the sequence after removing the last element.
 
+For an `ordered_sequence` the list additionally carries `key`: the key
+of the popped element (`NULL` on an empty-sequence miss), matching
+[`pop_key()`](https://oneilsh.github.io/Immutables/reference/pop_key.md).
+
 ## Details
 
 This operation is persistent: `x` is not modified.
