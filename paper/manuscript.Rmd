@@ -12,11 +12,11 @@ author:
       Chapel Hill, NC 27599-7264
     email: \email{shawn@tislab.org}
 title:
-  formatted: "\\pkg{Immutables}: Fast, Functional Data Structures for R"
+  formatted: "\\pkg{Immutables}: Fast, Functional Data Structures for \\proglang{R}"
   plain:     "Immutables: Fast, Functional Data Structures for R"
-  short:     "\\pkg{Immutables} for R"
+  short:     "\\pkg{Immutables} for \\proglang{R}"
 abstract: >
-  We present \pkg{Immutables}, an R package providing side-effect-free data structures
+  We present \pkg{Immutables}, an \proglang{R} package providing side-effect-free data structures
   including: catenable, indexable sequences that also serve as double-ended queues;
   priority queues; key-ordered sequences; and interval indices for range overlap and similar queries.
   Based on monoid-annotated finger trees first described by Hinze and Paterson in 2006, almost all
@@ -59,7 +59,7 @@ if(!loaded) library(Immutables)
 
 # Introduction
 
-The \proglang{R} programming language is a natural first choice for
+The \proglang{R} programming language \citep{R} is a natural first choice for
 statistical analyses, but its ever-growing popularity has diversified
 its application to domains as broad as data serialization and parsing,
 \citep{Eddelbuettel2016-iq,Ooms2014-hc}, user interfaces
@@ -109,31 +109,33 @@ bulk operations \citep{krantz2026collapse}. Keeping immutability,
 we previously published an implementation of
 efficient, persistent stack and queue structures based on functional lazy
 evaluation techniques \citep{O-Neil2015-je,Goel2019-mz}.
-In 2018 T. Barry surveyed the state of collection packages,
+\citet{Barry2018-mv} surveyed the state of collection packages,
 identifying 11 providing set, map, stack, queue, and/or
-sequence structures \citep{Barry2018-mv}. Of these, only three
+sequence structures. Of these, only three
 implemented side-effect-free structures: \pkg{rstackdeque}
 \citep{O-Neil2015-je}, \pkg{sets} \citep{Meyer2009-vu}, and
 \pkg{S4Vectors} \citep{pages2020s4vectors}. The latter two are optimized
 for bulk operations as compared to base-\proglang{R} types but, like
 \proglang{R} lists and vectors, do not support fast incremental
 insert/remove operations. Notably, \pkg{S4Vectors} is designed for
-extensibility and is widely used in the Bioconductor ecosystem,
+extensibility and is widely used in the Bioconductor ecosystem \citep{Gentleman2004-tc},
 including support for interval ranges via \pkg{IRanges}
-\citep{Lawrence2013-ly}. Barry noted a need for fast, flexible, and
+\citep{Lawrence2013-ly}. \citet{Barry2018-mv} noted a need for fast, flexible, and
 side-effect-free data structures to support advanced use cases in the
-\proglang{R} ecosystem \citep{Barry2018-mv}.
+\proglang{R} ecosystem.
 
 Here we describe \pkg{Immutables}, which implements a remarkable data
 structure known as monoid-annotated 2-3 finger trees. First described
-by Hinze and Paterson \citep{Hinze2006-jv}, these
+by \citet{Hinze2006-jv}, these
 provide persistent, amortized constant-time access to ends,
 $O(\log n)$ search/insertion/removal, and via monoid annotation can
 be purposed as other specialized structures. These form
-the basis of the built-in \code{Data.Sequence} in \proglang{Haskell}
-\citep{containers_datasequence}, and are available as libraries for 
-\proglang{Clojure} \citep{houser_datafingertree}, \proglang{OCaml}
-\citep{batteries_batfingertree}, \proglang{F\#} \citep{cantsin_fsharpfingertrees},
+the basis of the built-in \code{Data.Sequence} in 
+\proglang{Haskell} \citep{containers_datasequence}, and are available as libraries for
+\proglang{Scala} \citep{rutz_fingertree},
+\proglang{Clojure} \citep{houser_datafingertree}, 
+\proglang{OCaml} \citep{batteries_batfingertree}, 
+\proglang{F\#} \citep{cantsin_fsharpfingertrees},
 \proglang{JavaScript} \citep{xu_fingertreejs},
 \proglang{Rust} \citep{aslpavel_fingertrees}, 
 \proglang{Julia} \citep{schauer_fingertreesjl}, and
@@ -186,7 +188,7 @@ lists), and \code{print()}, mimicking \code{print.list()} but
 displaying only the first and last few elements. Native \proglang{R}
 \code{for}-loops do not support iterating over elements as a result
 of sequences' internal structure, but \code{loop()} is re-exported from
-the \pkg{coro} package to support iterative element access.
+the \pkg{coro} package \citep{coro} to support iterative element access.
 
 While \code{flexseq}s support names, these are somewhat limited
 compared to named \proglang{R} lists. If names are used, every
@@ -200,7 +202,7 @@ requiring named access, ordered sequences (discussed below) can be
 associated with character-based names as keys for guaranteed $O(\log n)$
 performance.
 
-### Example: simulating complex queueing systems
+### Example: Simulating complex queueing systems
 
 Queueing systems represent one or more service queues, where arrival and
 service times are typically drawn from defined distributions.
@@ -307,7 +309,7 @@ with identical priorities on transformed values. Finally, priority queues may be
 accessed in priority order with \code{loop()}, and they additionally 
 provide a priority-aware \code{merge()}.
 
-### Example: best-first feature selection
+### Example: Best-first feature selection
 
 Priority queues have many applications, but we'll demonstrate applying them
 to the problem of feature selection in modeling: given a large number
@@ -455,12 +457,12 @@ key to a query (undefined for keys without a simple distance metric),
 and \code{lower_bound()}, returning the first element with key greater than 
 or equal to a query key.
 
-### Example: scalar matching without replacement
+### Example: Scalar matching without replacement
 
 Many potential uses for ordered sequences are handled well by named lists and
 vectors, where access-by-key is the primary functionality. In some cases we 
 need to dynamically find, add, and remove elements by key, but as the benchmarks
-in section \ref{sec-benchmarks} show these operations are excessively slow
+in Section~\ref{sec-benchmarks} show these operations are excessively slow
 on large base-\proglang{R} structures. Matching without replacement is one
 such case, often employed for cohort matching purposes in observational studies
 using propensity scores \citep{benedetto2018statistical}. Forgoing details,
@@ -569,7 +571,7 @@ Beyond \code{fapply()}, \code{merge()}, \code{loop()}, and conversion methods, i
 can also report global minimum and maximum range endpoints.
 
 
-### Example: hospital occupancy over time
+### Example: Hospital occupancy over time
 
 Many datasets are characterized by intervals, such that we wish to query
 which intervals overlap a given point. Sweep-line algorithms do so over
@@ -657,7 +659,7 @@ with \code{pop_all_point()}.
 # Developer API
 
 Structures in \pkg{Immutables} are backed by monoid-annotated finger trees as
-originally described by Hinze and Paterson \citep{Hinze2006-jv}. They are 
+originally described by \citet{Hinze2006-jv}. They are 
 simultaneously persistent, performant, and flexible, supporting a variety
 of container types and operations. \pkg{Immutables} provides a developer API
 exposing this functionality. Here we describe the API and implement two
@@ -712,7 +714,7 @@ where node labels can be specified as a function of nodes. Each node has a \code
 set to \code{"Element"} for nodes storing user data, these also have an
 \code{$element} storing the data itself, and all nodes carry a 
 \code{$measures} storing monoid information. The following code illustrates
-our annotated tasks sequence in Figure \ref{fig:tasks-structure}.
+our annotated tasks sequence in Figure~\ref{fig:tasks-structure}.
 
 ```r
 plot_structure(tasks2, node_label = function(node) {
@@ -752,7 +754,7 @@ plot_structure(tasks2, node_label = function(node) {
 })
 ```
 
-Several features of Figure \ref{fig:tasks-structure} are notable. First, data 
+Several features of Figure~\ref{fig:tasks-structure} are notable. First, data 
 elements are stored in leaves, in the order of construction. Custom orders are
 possible via monoid-based operations; \code{ordered_sequence} implements
 these and provides a convenient key-ordered variant. Second, each leaf node
@@ -799,7 +801,7 @@ single efficient root-to-leaf traversal.
 Monotonicity of the predicate (switching from \code{FALSE} to 
 \code{TRUE} at most once) is thus necessary for correctness.
 
-## Example: subsequence search
+## Example: Subsequence search
 
 Here we'll illustrate how these components can be used to build an efficient 
 subsequence-search data structure modeled after a suffix array, a common approach
@@ -894,14 +896,14 @@ and $O(k + \log n)$ query time where $k$ is the number of matches.
 # Benchmarks {#sec-benchmarks}
 
 As discussed above, few comparable side-effect-free structures are implemented
-in \proglang{R} for comparison. Barry compared performance across several non-persistent
+in \proglang{R} for comparison. \citet{Barry2018-mv} compared performance across several non-persistent
 structures in addition to persistent, naïve implementations using
 base-\proglang{R} lists, which are less performant than vectors but support 
-complex element types \citep{Barry2018-mv}. 
+complex element types. 
 Here we benchmark \pkg{Immutables} structures against similar
 baselines, and for interval indices also compare against \pkg{IRanges}, a 
 popular persistent interval-range data structure. All operations were timed
-with \code{bench::mark()} with 10 iterations on newly initialized structures, garbage collecting with
+with \code{bench::mark()} \citep{bench} with 10 iterations on newly initialized structures, garbage collecting with
 \code{gc()} before each. Because operations dispatched through S3 methods 
 incur first-call costs (method resolution, byte-compilation) that dominate timing 
 at small $n$, we warm each operation with three untimed calls before measurement. 
@@ -915,7 +917,7 @@ and splitting (\code{split_at()}). Base-\proglang{R} sequences were implemented 
 with index-based access, removal via negative indexing (e.g. \code{l[-1]} for dequeue), 
 and concatenation and enqueue backed by \code{c()}.
 To reveal scaling dynamics we ran these tests on structures of between
-$2^{12}$ (4,096) and $2^{18}$ (262,144) elements. Results in Figure \ref{fig:benchmarks-sequence}
+$2^{12}$ (4,096) and $2^{18}$ (262,144) elements. Results in Figure~\ref{fig:benchmarks-sequence}
 reveal the $O(n)$ nature of operations on base-\proglang{R} lists. The $O(\log n)$ sequence
 operations outperform base lists at between $2^{13}$ (for enqueue/dequeue)
 and $2^{17}$ (for middle-element operations) elements.
@@ -934,7 +936,7 @@ as \code{nearest_key()}. Base-\proglang{R} element-storing lists
 were paired with an integer key vector and sorted once by key; lookups used 
 \code{match()}, and counts and range queries used logical comparisons over the key vector. All operations were
 based on the median key, a worst-case scenario for our ordered sequences.
-Results in Figure \ref{fig:benchmarks-ordered} show that base-\proglang{R} 
+Results in Figure~\ref{fig:benchmarks-ordered} show that base-\proglang{R} 
 \code{match()}-based lookup and logical indexing is highly optimized, achieving
 $\sim 200 \mu$s key lookups for $2^{18}$ elements. Nevertheless, the linear / logarithmic
 divide between implementations is evident, and ordered sequences outperform
@@ -952,7 +954,7 @@ identical performance characteristics). Base-\proglang{R} priority queues were i
 on an \proglang{R} list with corresponding numeric priority vector, using \code{which.max()}
 for index identification and negative \code{[]}-based indexing and removal. 
 Priorities were randomly generated with \code{runif()} with default parameters. 
-Figure \ref{fig:benchmarks-pq} reveals priority queues to be substantially faster
+Figure~\ref{fig:benchmarks-pq} reveals priority queues to be substantially faster
 than the naïve implementation at $2^{17}$ elements and beyond.
 
 
@@ -987,7 +989,7 @@ operations.
 knitr::include_graphics("figures/benchmarks-ivx.pdf")
 ```
 
-Results in Figure \ref{fig:benchmarks-ivx} show \pkg{IRanges} to be faster
+Results in Figure~\ref{fig:benchmarks-ivx} show \pkg{IRanges} to be faster
 than base-\proglang{R} for insertion and removal operations, but slower for 
 read-only queries. Both implementations exhibit $O(n)$ growth, and interval
 indices outperform both at between $2^{16}$ elements for read operations and 
@@ -997,7 +999,7 @@ $2^{17}$ elements for insertions and removals.
 
 \proglang{R}'s continued growth in popularity across many application domains 
 is in part due to its multi-paradigm nature. Object orientation is provided by
-multiple class systems, including \pkg{R6} which formalizes first-class support for 
+multiple class systems, including \pkg{R6} \citep{R6} which formalizes first-class support for 
 mutable data types. Loops and \code{if/then/else} constructs are familiar to those coming
 from more procedural languages. Still, \proglang{R}'s roots as a functional language
 dominate: functions are pass-by-value, and the generic-dispatch \code{S3} object system 
@@ -1021,7 +1023,7 @@ as well as a developer API for custom structures via monoid-annotation.
 \url{https://github.com/oneilsh/Immutables}, including a \code{replication_code.R}
 script in the \code{data-raw/replication} directory. User-facing
 documentation is available in package help pages and vignettes, with
-\pkg{pkgdown}-formatted documentation available at \url{https://oneilsh.github.io/Immutables}.
+\pkg{pkgdown}-formatted \citep{pkgdown} documentation available at \url{https://oneilsh.github.io/Immutables}.
 
 The results in this paper were obtained using `r R.version.string` on
 `r R.version$platform` with \pkg{Immutables}~`r packageVersion("Immutables")`
