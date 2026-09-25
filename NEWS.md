@@ -23,8 +23,10 @@
 * `ordered_sequence` key-boundary lookups now use a native C++ descent for
   `numeric`, `character`, and `logical` keys, speeding up `lower_bound()`,
   `upper_bound()`, `peek_key()`, `pop_key()`, `peek_all_key()`, `pop_all_key()`,
-  `count_key()`, `elements_between()`, and `count_between()`. Other key types
-  (e.g. `Date`, `POSIXct`) transparently use the existing R path.
+  `count_key()`, `elements_between()`, and `count_between()`.
+* The implementation now uses lazy evaluation matching the Hinze and Paterson
+  reference implementation, making amortized-constant-time end access
+  claims true when structures are used in a persistent setting.
 
 ## Documentation and fixes
 
