@@ -17,7 +17,7 @@
   }
   if(x %isa% Deep) {
     .ft_to_list_fill(.subset2(x, "prefix"), st)
-    .ft_to_list_fill(.subset2(x, "middle"), st)
+    .ft_to_list_fill(.ft_middle(x), st)
     .ft_to_list_fill(.subset2(x, "suffix"), st)
     return(invisible(NULL))
   }
@@ -266,11 +266,11 @@
       return(p)
     }
     offset <- offset + as.integer(node_measure(.subset2(x, "prefix"), ".size"))
-    p <- .ft_find_name_position_impl(.subset2(x, "middle"), target, offset)
+    p <- .ft_find_name_position_impl(.ft_middle(x), target, offset)
     if(!is.na(p)) {
       return(p)
     }
-    offset <- offset + as.integer(node_measure(.subset2(x, "middle"), ".size"))
+    offset <- offset + as.integer(node_measure(.ft_middle(x), ".size"))
     return(.ft_find_name_position_impl(.subset2(x, "suffix"), target, offset))
   }
   for(el in x) {

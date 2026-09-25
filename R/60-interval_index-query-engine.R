@@ -451,7 +451,7 @@
     }
     if(inherits(node, "Deep")) {
       walk(.subset2(node, "prefix"))
-      walk(.subset2(node, "middle"))
+      walk(.ft_middle(node))
       walk(.subset2(node, "suffix"))
       return(invisible(NULL))
     }

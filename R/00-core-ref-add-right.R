@@ -28,18 +28,27 @@ add_right(d, el, monoids) %as% {
 }
 
 # symmetric to add_left. Only new nodes get measures.
-# Runtime: O(log n) worst-case.
+# Runtime: O(1) amortized; O(log n) worst-case.
 add_right(d, el, monoids) %::% Deep : . : list : Deep
 add_right(d, el, monoids) %as% {
   if(length(.subset2(d, "suffix")) == 4) {
     new_suffix <- measured_digit(.subset2(d, "suffix")[[4]], el, monoids = monoids)
     new_middle_node <- measured_node3(.subset2(d, "suffix")[[1]], .subset2(d, "suffix")[[2]], .subset2(d, "suffix")[[3]], monoids)
-    new_middle <- add_right(.subset2(d, "middle"), new_middle_node, monoids)
+    new_middle <- lazy_add_right(.ft_middle(d), new_middle_node, monoids)
     measured_deep(prefix = .subset2(d, "prefix"), middle = new_middle, suffix = new_suffix, monoids)
   } else {
     new_suffix <- add_right(.subset2(d, "suffix"), el, monoids)
     measured_deep(prefix = .subset2(d, "prefix"), middle = .subset2(d, "middle"), suffix = new_suffix, monoids)
   }
+}
+
+# symmetric to lazy_add_left.
+# Runtime: O(1).
+lazy_add_right <- function(m, node, monoids) {
+  if(!inherits(m, "Deep") || length(.subset2(m, "suffix")) < 4L) {
+    return(add_right(m, node, monoids))
+  }
+  .ft_make_thunk(.FT_THUNK_ADD_RIGHT, m, node, list(m, node), monoids)
 }
 
 # Runtime: O(k log n), where k = length(els).

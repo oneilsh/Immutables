@@ -173,3 +173,10 @@
         as.integer(span_lo), as.integer(span_hi),
         PACKAGE = "Immutables")
 }
+
+# Runtime: O(1). Session totals of C++ work: suspended middle trees evaluated
+# ("forces") and Deep nodes built ("deeps"); used by tests to check amortized
+# bounds by counting work.
+.ft_work_counts <- function() {
+  .Call("ft_cpp_work_counts", PACKAGE = "Immutables")
+}

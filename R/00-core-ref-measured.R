@@ -170,6 +170,10 @@ combine_measures(measures, r) %as% {
 # Avoids repeated typed-wrapper dispatch in deep recursion.
 # Runtime: best-case O(1) on cached structural children; worst-case O(n_subtree).
 .measure_child_named_fast <- function(x, name, rr) {
+  if(inherits(x, "FTThunk")) {
+    # suspended middle tree: measures are cached at creation, read without forcing
+    return(attr(x, "measures", exact = TRUE)[[name]])
+  }
   if(is_structural_node(x)) {
     cached <- attr(x, "measures", exact = TRUE)
     if(!is.null(cached) && !is.null(cached[[name]])) {
@@ -320,7 +324,7 @@ rebind_tree_monoids(x, monoids, recompute_names) %as% {
 
   if(inherits(x, "Deep")) {
     pr <- rebind_tree_monoids(.subset2(x,"prefix"), monoids, recompute_names)
-    m <- rebind_tree_monoids(.subset2(x,"middle"), monoids, recompute_names)
+    m <- rebind_tree_monoids(.ft_middle(x), monoids, recompute_names)
     sf <- rebind_tree_monoids(.subset2(x,"suffix"), monoids, recompute_names)
     return(set_measure_with_reuse(Deep(pr, m, sf), x, monoids, recompute_names))
   }
@@ -388,7 +392,7 @@ assert_structural_attrs(node) %as% {
     assert_structural_attrs(.subset2(node, 1))
   } else if(node %isa% Deep) {
     assert_structural_attrs(.subset2(node,"prefix"))
-    assert_structural_attrs(.subset2(node,"middle"))
+    assert_structural_attrs(.ft_middle(node))
     assert_structural_attrs(.subset2(node,"suffix"))
   } else {
     for(el in node) {
@@ -466,7 +470,7 @@ measured_node3(x, y, z, monoids) %as% {
 # construct a Deep with cached measures
 # Runtime: O(1) with measured children.
 if(FALSE) measured_deep <- function(prefix, middle, suffix, monoids) NULL
-measured_deep(prefix, middle, suffix, monoids) %::% Digit : FingerTree : Digit : list : Deep
+measured_deep(prefix, middle, suffix, monoids) %::% Digit : . : Digit : list : Deep
 measured_deep(prefix, middle, suffix, monoids) %as% {
   t <- Deep(prefix, middle, suffix)
   set_measure(t, monoids)

@@ -83,7 +83,8 @@ get_graph_df <- function(t) {
 
       if(!is.null(names(t))) {
         for(subthing_name in names(t)) {
-          subthing <- .subset2(t, subthing_name)
+          # a Deep's middle may be suspended; plotting shows the forced tree
+          subthing <- if(subthing_name == "middle") .ft_middle(t) else .subset2(t, subthing_name)
           childid <- paste(path, subthing_name, sep = ":")
           add_edge_row(path, childid, subthing_name)
           add_edges(subthing, childid)
