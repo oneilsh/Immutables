@@ -129,8 +129,18 @@ structure known as monoid-annotated 2-3 finger trees. First described
 by Hinze and Paterson \citep{Hinze2006-jv}, these
 provide persistent, amortized constant-time access to ends,
 $O(\log n)$ search/insertion/removal, and via monoid annotation can
-be purposed as other specialized structures. We implement four such
-structures: \code{flexseq}, serving as indexable,
+be purposed as other specialized structures. These form
+the basis of the built-in \code{Data.Sequence} in \proglang{Haskell}
+\citep{containers_datasequence}, and are available as libraries for 
+\proglang{Clojure} \citep{houser_datafingertree}, \proglang{OCaml}
+\citep{batteries_batfingertree}, \proglang{F\#} \citep{cantsin_fsharpfingertrees},
+\proglang{JavaScript} \citep{xu_fingertreejs},
+\proglang{Rust} \citep{aslpavel_fingertrees}, 
+\proglang{Julia} \citep{schauer_fingertreesjl}, and
+\proglang{Go} \citep{burdick2020gofingertree}.
+
+\pkg{Immutables} implements four specialized 
+structures backed by finger trees: \code{flexseq}, serving as indexable,
 splittable, and concatenable lists with end insertion/removal for
 stack and queue operations; \code{priority_queue}, associating data elements
 with priority values for fast min/max access by priority; \code{ordered_sequence}, keeping
