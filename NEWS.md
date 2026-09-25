@@ -20,14 +20,6 @@
 
 ## Performance
 
-* End operations (`push_front()`, `push_back()`, `pop_front()`, `pop_back()`)
-  are now amortized O(1)
-  even when an older version of a structure is reused repeatedly. Previously
-  this bound held only for single-threaded use: a version whose next push or
-  pop cascaded through every level of the tree could be reused to pay
-  O(log n) each time. As in Hinze and Paterson (2006), the recursive part of
-  such a push or pop is now suspended and evaluated at most once, with the
-  result shared by every version that refers to it.
 * `ordered_sequence` key-boundary lookups now use a native C++ descent for
   `numeric`, `character`, and `logical` keys, speeding up `lower_bound()`,
   `upper_bound()`, `peek_key()`, `pop_key()`, `peek_all_key()`, `pop_all_key()`,
