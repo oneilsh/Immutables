@@ -42,8 +42,6 @@ bibliography: references.bib
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
   fig.pos = "!htb",
   out.width = "\\linewidth"
 )
@@ -54,6 +52,26 @@ loaded <- tryCatch({
   TRUE
 }, error = function(e) FALSE)
 if (!loaded) library("Immutables")
+
+# Engine for displaying one piece of an R expression split across chunks (the
+# pieces are run together via ref.label). Adds R>/+ prompts by tracking parse
+# completeness, replaying the chunk named by `continues` for the starting state.
+knitr::knit_engines$set(rpart = function(options) {
+  prev <- if (is.null(options$continues)) character() else
+    knitr::knit_code$get(options$continues)
+  complete <- function(x) tryCatch({ parse(text = x); TRUE }, error = function(e)
+    !grepl("unexpected end of input", conditionMessage(e)))
+  prompts <- character()
+  buf <- character()
+  for (line in c(prev, options$code)) {
+    prompts <- c(prompts, getOption(if (length(buf) == 0) "prompt" else "continue"))
+    buf <- c(buf, line)
+    if (complete(buf)) buf <- character()
+  }
+  prompts <- tail(prompts, length(options$code))
+  options$prompt <- FALSE
+  knitr::engine_output(options, code = paste0(prompts, options$code), out = NULL)
+})
 ```
 
 # Introduction
@@ -155,6 +173,12 @@ custom monoid annotation.
 
 ## Flexible sequences
 
+All examples below assume the package has been loaded:
+
+```{r library, eval = !loaded}
+library("Immutables")
+```
+
 At the core of \pkg{Immutables} is the \code{flexseq} structure.
 Much like \proglang{R} lists, these can store
 elements of any or mixed types, nest, be named, and be indexed with the
@@ -164,21 +188,29 @@ accessed, or removed from either end via peek/pop/push operations in
 amortized constant time for efficient double-ended queue behavior. Additionally,
 \code{flexseq}s allow concatenation, splitting by position, and
 insertions and removals by position in fast $O(\log n)$ time.
+Below we push an element onto the back of a sequence of ten letters; because
+the structure is persistent, the original \code{fs1} is unchanged. Like lists,
+sequences can store mixed types, so we can also insert a number at position 8.
 
-```r
+```{r flexseq-basics}
 fs1 <- as_flexseq(letters[1:10])
 fs2 <- push_back(fs1, "z")
-length(fs1)                    # 10
-length(fs2)                    # 11
+length(fs1)
+length(fs2)
+fs3 <- insert_at(fs2, 8, 4.2)
+length(fs3)
+```
 
-fs3 <- insert_at(fs2, 8, 4.2)  # Immutables structures can store mixed types
-length(fs3)                    # 12
+Subsetting with \code{[} returns a new \code{flexseq}, which \code{unlist()}
+converts to a vector. Pop operations return a list holding the removed
+\code{$value} and the \code{$remaining} sequence:
 
-fs4 <- fs1[1:5]                # flexseq with "a", "b", "c", "d", "e"
-
+```{r flexseq-pop}
+fs4 <- fs1[1:5]
+unlist(fs4)
 fs5 <- pop_back(fs2)
-fs5$value                      # "z"
-fs5$remaining                  # flexseq of length 10 (without "z")
+fs5$value
+fs5$remaining
 ```
 
 Other implemented methods include \code{c()}, \code{as.list()},
@@ -216,48 +248,54 @@ distribution.
 We simulate \code{steps} time steps; at each, a new request arrives with 
 probability \code{p_arrival} and joins the shorter of two queues, 
 \code{qa} or \code{qb}. We keep track of each server's next free
-time step, processing requests from the front of its queue. Each request's
-wait time is calculated and collected in a running \code{flexseq}, which
-we convert to a vector and summarize after.
+time step, processing requests from the front of its queue. Service times
+are drawn as \code{rpois(1, mean_service) + 1}, for a mean of two time steps.
 
-```r
+```{r queue-setup}
 set.seed(100)
 steps <- 5000
 p_arrival <- 0.9
-mean_service <- 1 # service times ~ rpois(1, mean_service) + 1 (real mean 2)
-
+mean_service <- 1
 qa <- flexseq(); free_a <- 0
 qb <- flexseq(); free_b <- 0
 waits <- flexseq()
+```
 
+In each time step, a new arrival (if any) joins the shorter queue. Then, for
+each server that is free, we pop the request at the front of its queue,
+replacing the queue with the \code{$remaining} portion, push the request's
+wait time onto \code{waits}, and draw the server's next free time.
+
+```{r queue-simulate}
 for (t in seq_len(steps)) {
-  # process new arrivals into the shorter queue
   if (runif(1) < p_arrival) {
     request <- list(arrival = t)
     if (length(qa) <= length(qb)) qa <- push_back(qa, request)
     else                         qb <- push_back(qb, request)
   }
-  
-  # if qa is free, process the front request and record total wait time
+
   if (free_a <= t && length(qa) > 0) {
     nxt <- pop_front(qa)
-    qa <- nxt$remaining    # overwrite queue with remaining portion
+    qa <- nxt$remaining
     request <- nxt$value
     waits <- push_back(waits, t - request$arrival)
     free_a <- t + rpois(1, mean_service) + 1
   }
-  
-  # if qb is free, process the front request and record total wait time
+
   if (free_b <= t && length(qb) > 0) {
     nxt <- pop_front(qb)
-    qb <- nxt$remaining    # overwrite queue with remaining portion
+    qb <- nxt$remaining
     request <- nxt$value
     waits <- push_back(waits, t - request$arrival)
     free_b <- t + rpois(1, mean_service) + 1
   }
 }
+```
 
-mean(unlist(waits))  # 1.487
+Finally, we convert the collected wait times to a vector and summarize them:
+
+```{r queue-summary}
+summary(unlist(waits))
 ```
 
 This example may be extended in several ways, including tracking queue lengths, 
@@ -284,16 +322,14 @@ in \code{$value}, and the rest of the priority queue in
 \code{$remaining}. Symmetric \code{_max()} operations are available with 
 the same performance characteristics.
 
-```r
+```{r pq-basics}
 pq1 <- as_priority_queue(letters[1:6], priorities = c(2, 1, 3, 1, 9, 7))
-peek_min(pq1)              # "b"
-peek_all_min(pq1)          # priority queue with "b" "d"
-
+peek_min(pq1)
+peek_all_min(pq1)
 pq2 <- insert(pq1, "z", priority = 10)
-
 pq3 <- pop_max(pq2)
-pq3$value                  # "z"
-pq3$remaining              # priority queue with 6 entries
+pq3$value
+length(pq3$remaining)
 ```
 
 Elements of priority queues are not stored in priority order; accordingly,
@@ -317,14 +353,11 @@ with good performance. We begin by constructing
 a matrix \code{X} with 25 potential feature columns, and an outcome \code{y}
 dependent only on features 3 and 7:
 
-```r
+```{r fs-data}
 set.seed(100)
-
 n <- 10000
 p <- 25
 X <- matrix(rnorm(n * p), n, p)
-
-# response depends on features 3 and 7 only
 y <- 3.5 * X[, 3] - 4 * X[, 7] + rnorm(n)
 ```
 
@@ -341,13 +374,10 @@ build on at each iteration. We thus begin with a base model using no features,
 and the corresponding empty feature set and AIC stored in a 
 \code{priority_queue}:
 
-```r
-# a model using no features, initially the "best"
+```{r fs-init}
 model <- lm(y ~ 1)
 best_features <- numeric(0)
 best_aic <- AIC(model)
-
-# store the initial model prioritized by its AIC
 pq <- priority_queue()
 pq <- insert(pq, best_features, priority = best_aic)
 ```
@@ -355,23 +385,18 @@ pq <- insert(pq, best_features, priority = best_aic)
 So long as there are feature sets available in the queue to expand on, we will
 do so, but limit the total number of considered models to approximately 1,000
 to prevent an exhaustive search. At each iteration we'll pop the best feature set
-considered so far, and compute the remaining available features.
+considered so far (\code{pop_min()} returns it in \code{$value}, with its AIC in
+\code{$priority}), replace the queue with the \code{$remaining} portion, and compute
+the features not yet in the set.
 
-```r
+```{r fs-loop-head, engine = "rpart"}
 models_considered <- 1
 
 while (length(pq) > 0 && models_considered < 1000) {
-  # pop the current best-performing set of features
   current_best <- pop_min(pq)
-  
-  # replace the queue with the remaining (unpopped) portion
   pq <- current_best$remaining
-  
-  # extract the current best features ($value) and AIC ($priority)
   current_best_features <- current_best$value
   current_best_aic <- current_best$priority
-  
-  # features we can add to the current best for potential improvement
   available_features <- setdiff(1:ncol(X), current_best_features)
 ```
 
@@ -380,29 +405,29 @@ current best set, resulting in a new model with corresponding AIC to add
 to the queue. If one of these performs better than the best so far we record it. Along the
 way we update the number of models considered.
 
-```r
-  # add each unused feature one at a time
+```{r fs-loop-body, engine = "rpart", continues = "fs-loop-head"}
   for (available_feature in available_features) {
-    # add it to the set of best-performing features so far
     selected_features <- c(current_best_features, available_feature)
-
-    # build a model with that updated set
-    model <- lm(y ~ X[ , selected_features, drop = FALSE])
-
-    # add the features to the queue prioritized by the AIC they deliver
+    model <- lm(y ~ X[, selected_features, drop = FALSE])
     pq <- insert(pq, selected_features, priority = AIC(model))
 
-    # if the current model is better than the best so far, record it
     if (AIC(model) < best_aic) {
       best_features <- selected_features
       best_aic <- AIC(model)
     }
-    
+
     models_considered <- models_considered + 1
   }
-} # close while loop
+}
+```
 
-print(best_features) # 7  3 19 24  2 21
+```{r fs-loop-run, ref.label = c("fs-loop-head", "fs-loop-body"), echo = FALSE}
+```
+
+After the search completes, we inspect the best feature set found:
+
+```{r fs-result}
+best_features
 ```
 
 In this instance the best encountered model by AIC uses features 7, 3, 19, 24, 
@@ -422,18 +447,16 @@ peek, and pop by key, with "all" versions of peek and pop for
 duplicate-key use cases. Ordered sequences also support
 key counts and range queries.
 
-```r
+```{r os-basics}
 os1 <- as_ordered_sequence(letters[1:6], keys = c(20, 10, 30, 10, 90, 70))
-peek_key(os1, 10)               # "b"
-peek_all_key(os1, 10)           # ordered sequence with "b" "d"
-count_key(os1, 10)              # 2
-elements_between(os1, 15, 85)   # ordered seq with "a" "c" "f"
-
+peek_key(os1, 10)
+unlist(peek_all_key(os1, 10))
+count_key(os1, 10)
+elements_between(os1, 15, 85)
 os2 <- insert(os1, "z", key = 100)
-
 os3 <- pop_key(os2, 100)
-os3$value                       # character "z"
-os3$remaining                   # ordered sequence with "a" through "f"
+os3$value
+unlist(os3$remaining)
 ```
 
 As with other structures, ordered sequences may be named (the same
@@ -471,9 +494,8 @@ and initialize an empty \code{flexseq} to store matches. We also
 convert the treated and untreated row numbers (serving as identifiers) 
 to ordered sequences, keyed by their score.
 
-```r
+```{r match-setup}
 set.seed(100)
-
 n_patients <- 200
 patients <- data.frame(treated = sample(c(TRUE, FALSE),
                                         n_patients,
@@ -481,55 +503,51 @@ patients <- data.frame(treated = sample(c(TRUE, FALSE),
                                         replace = TRUE),
                        score = runif(n_patients))
 
-# row numbers act as identifiers
 treated_rows <- which(patients$treated)
 treated_scores <- patients$score[patients$treated]
-
 untreated_rows <- which(!patients$treated)
 untreated_scores <- patients$score[!patients$treated]
 
 matches <- flexseq()
-
 treated_seq <- as_ordered_sequence(treated_rows, keys = treated_scores)
 untreated_seq <- as_ordered_sequence(untreated_rows, keys = untreated_scores)
 ```
 
-Matching itself is a simple greedy selection. Popping treated patients in 
-order, each is matched to their nearest remaining untreated record by score key.
+Matching itself is a simple greedy selection. Treated patients are popped in
+order from the front of their sequence (lowest score first), and each is matched
+to their nearest remaining untreated record by score key.
 That patient is popped from wherever it was located, and a data frame 
-describing the match is pushed onto the accumulating \code{flexseq}.
-This example also illustrates collecting these into a single result 
-data frame for use after.
+describing the match is pushed onto the accumulating \code{flexseq}. The loop
+stops early if no untreated patients remain to match against.
 
-```r
+```{r match-loop}
 while (length(treated_seq) > 0) {
-  # no untreated patients left to match against
   if (length(untreated_seq) == 0L) break
-  
-  # pop the first (lowest-score) treated patient
+
   front_el <- pop_front(treated_seq)
   treated_seq <- front_el$remaining
-  
   treated_pt_score <- front_el$key
   treated_pt_row   <- front_el$value
-  
-  # find and remove the nearest-score untreated patient
+
   match_key <- nearest_key(untreated_seq, treated_pt_score)
   match_el  <- pop_key(untreated_seq, match_key)
   untreated_seq <- match_el$remaining
-  
   untreated_pt_score <- match_el$key
   untreated_pt_row   <- match_el$value
-  
+
   match_row <- data.frame(treated_pt_row,
                           treated_pt_score,
                           untreated_pt_row,
                           untreated_pt_score)
-  
   matches <- push_back(matches, match_row)
 }
+```
 
+Finally, we collect the matches into a single data frame for further use:
+
+```{r match-result}
 match_df <- do.call(rbind, as.list(matches))
+head(match_df)
 ```
 
 
@@ -549,21 +567,20 @@ stored intervals. Interval endpoints are particularly important for sweep-line
 algorithms, so point-based queries can be limited to matching over the whole
 interval or only at one or both endpoints.
 
-```r
-ix1 <- as_interval_index(c("a", "b", "c"), 
-                         start = c(1, 2, 4), 
+In the following example, point 2 falls within both $[1, 3)$ and $[2, 4)$, but
+the query with \code{match_at = "start"} matches only intervals starting at 2;
+\code{match_at} may also be \code{"end"} or \code{"either"}.
+
+```{r ix-basics}
+ix1 <- as_interval_index(c("a", "b", "c"),
+                         start = c(1, 2, 4),
                          end = c(3, 4, 5))
-                         
-peek_point(ix1, 3)  # character "b"
-
-# start-only query; can also query at "end" or "either"
-peek_point(ix1, 2, match_at = "start") # character "b" only
-
+peek_point(ix1, 3)
+peek_point(ix1, 2, match_at = "start")
 ix2 <- insert(ix1, "d", start = 5, end = 6)
-
 ix3 <- pop_all_overlapping(ix2, 3, 4.5)
-ix3$elements        # interval index with "b" and "c"
-ix3$remaining       # interval index with "a" and "d"
+ix3$elements
+unlist(ix3$remaining)
 ```
 
 Beyond \code{fapply()}, \code{merge()}, \code{loop()}, and conversion methods, interval indices 
@@ -579,27 +596,24 @@ considering a hypothetical computation of hospital occupancy over time.
 Patients arrive randomly, stay for a random number of days, and are associated
 with demographic variables for age and sex. For each day, we wish to capture
 the total occupancy, average age, and percent male. We begin by simulating
-data and building an interval index storing each patient with their stay range.
+data, with stays averaging two days, representing each patient as a list with
+\code{age} and \code{is_male} entries, and building an interval index storing
+each patient with their stay range.
 
-```r
+```{r hospital-setup}
 set.seed(100)
-
 num_days <- 365
 n_patients <- 500
 
 starts <- sample(1:num_days,
                  size = n_patients,
                  replace = TRUE)
-
-ends <- starts + rpois(n_patients, 2) # average stay = 2 days
+ends <- starts + rpois(n_patients, 2)
 
 ages <- pmax(0, rnorm(n_patients, mean = 35, sd = 10))
 is_males <- sample(c(0, 1), n_patients, replace = TRUE)
-
-# list of patients (each a list with age and is_male)
 patients <- Map(list, age = ages, is_male = is_males)
 
-# store each patient in an interval index with their stay
 ix <- as_interval_index(patients, start = starts, end = ends)
 ```
 
@@ -607,9 +621,11 @@ Next, for each day we'll query for overlapping patients,
 computing summary statistics. These are collected
 in a \code{flexseq}, which we later convert to a data frame
 for further analysis. This example also illustrates using \code{fapply()} to unpack
-the contents of an interval index containing named lists.
+the contents of an interval index containing named lists: mapping each patient
+record to just its \code{age} (or \code{is_male}) value produces an interval index
+of those values, which \code{unlist()} converts to a vector.
 
-```r
+```{r hospital-sweep}
 day_stats <- flexseq()
 
 for (day in seq_len(num_days)) {
@@ -617,17 +633,15 @@ for (day in seq_len(num_days)) {
   occupancy <- length(present)
 
   if (occupancy == 0) {
-    stats <- data.frame(day = day, occupancy = 0, mean_age = NA, pct_male = NA)
+    stats <- data.frame(day = day, occupancy = 0,
+                        mean_age = NA, pct_male = NA)
   } else {
     day_ages <- present |>
       fapply(function(patient, start, end) {
         patient$age
       }) |>
-      unlist() # fapply returns an interval_index, convert to vector
+      unlist()
 
-    # use fapply() on the interval index to map each patient record
-    # (containing both $age and $is_male) to an interval_index
-    # containing just is_male values
     day_males <- present |>
       fapply(function(patient, start, end) {
         patient$is_male
@@ -642,9 +656,12 @@ for (day in seq_len(num_days)) {
 
   day_stats <- push_back(day_stats, stats)
 }
+```
 
-# convert the flexseq of data frames into a single data frame
-# with columns for day, occupancy, mean_age, and pct_male
+As before, we convert the \code{flexseq} of per-day data frames into a single
+data frame:
+
+```{r hospital-result}
 stats_df <- do.call(rbind, as.list(day_stats))
 head(stats_df)
 ```
@@ -673,10 +690,8 @@ to values operated on by a monoid. For our accumulator example, we begin
 with a base-\proglang{R} list of tasks, each with an \code{id} and estimated
 number of required hours to complete:
 
-```r
+```{r tasks}
 set.seed(42)
-
-# flexseq of lists, each with $id and $hours
 tasks <- lapply(1:11, 
                 function(i) {
                   list(id = letters[i], 
@@ -692,7 +707,7 @@ total time across any sequence of tasks. The \code{measure_monoid()}
 function collects these pieces together:
 
 
-```r
+```{r tasks-monoid}
 total_time_mm <- measure_monoid(`+`, 0, function(el) el$hours)
 ```
 
@@ -700,7 +715,7 @@ This monoid can then be attached to the \code{tasks} sequence with
 \code{add_monoids()}. Structures can be associated with multiple monoids,
 so they are provided as a named list:
 
-```r
+```{r tasks-add-monoid}
 tasks2 <- add_monoids(tasks, list(total_time = total_time_mm))
 ```
 
@@ -715,32 +730,7 @@ set to \code{"Element"} for nodes storing user data, these also have an
 \code{$measures} storing monoid information. The following code illustrates
 our annotated tasks sequence in Figure~\ref{fig:tasks-structure}.
 
-```r
-plot_structure(tasks2, node_label = function(node) {
-  if (node$type == "Element") {
-    sprintf("ID: %s, H: %d\nTotal: %d", 
-            node$element$id, 
-            node$element$hours, 
-            node$measures$total_time)
-  } else {
-    sprintf("Total: %d", node$measures$total_time)
-  }
-})
-```
-
-```{r tasks-structure, echo=FALSE, dev="pdf", fig.cap="Internal structure of a monoid-annotated finger tree. User values are stored at leaves, illustrated with \\code{ID} and \\code{H} (for Hours). Leaves and internal nodes accumulate a \\code{total\\_time} (shown as \\code{Total}) measure using the associated monoid.", fig.align="center", fig.width=8, fig.height=3.5, out.width="0.95\\textwidth"}
-set.seed(42)
-tasks <- lapply(1:11, 
-                function(i) {
-                  list(id = letters[i], 
-                  hours = rpois(n = 1, lambda = 5))
-                }) |>
-         as_flexseq()
-
-total_time_mm <- measure_monoid(`+`, 0, function(el) el$hours)
-
-tasks2 <- add_monoids(tasks, list(total_time = total_time_mm))
-
+```{r tasks-structure, dev="pdf", fig.cap="Internal structure of a monoid-annotated finger tree. User values are stored at leaves, illustrated with \\code{ID} and \\code{H} (for Hours). Leaves and internal nodes accumulate a \\code{total\\_time} (shown as \\code{Total}) measure using the associated monoid.", fig.align="center", fig.width=8, fig.height=3.5, out.width="0.95\\textwidth"}
 plot_structure(tasks2, node_label = function(node) {
   if (node$type == "Element") {
     sprintf("ID: %s, H: %d\nTotal: %d", 
@@ -780,13 +770,12 @@ tasks \code{a} through \code{f} totaling 39 hours. The following code splits
 than or equal to 40 hours (which may be empty), and a \code{$right} with the 
 remainder (which also may be empty).
 
-```r
-split_tasks <- split_by_predicate(tasks2, 
-                                  predicate = function(m) m > 40, 
+```{r tasks-split}
+split_tasks <- split_by_predicate(tasks2,
+                                  predicate = function(m) m > 40,
                                   monoid_name = "total_time")
-
-split_tasks$left  # flexseq with tasks a through f
-split_tasks$right # flexseq with tasks g through k
+sapply(as.list(split_tasks$left), function(task) task$id)
+sapply(as.list(split_tasks$right), function(task) task$id)
 ```
 
 Functionally, \code{split_by_predicate()} accumulates measure values defined
@@ -804,11 +793,12 @@ Monotonicity of the predicate (switching from \code{FALSE} to
 
 Here we'll illustrate how these components can be used to build an efficient 
 subsequence-search data structure modeled after a suffix array, a common approach
-to finding exact matches in large DNA strings. 
+to finding exact matches in large DNA strings. Our goal is to find the
+positions at which \code{query} occurs in \code{sequence}: 2, 8, and 18.
 
-```r
+```{r subseq-data}
 sequence <- "ACGCGCTCGCGCATAGTCGCGCCTG"
-query    <- "CGCGC" # goal: find indices where query occurs (2, 8, and 18)
+query    <- "CGCGC"
 ```
 
 For simplicity we assume that query strings are at most 8 characters long, and
@@ -829,15 +819,11 @@ empty ordered sequence, and then fill it with keyed values; the structure will
 ensure the custom monoid is applied as elements are added.
 
 
-```r
-# max-key monoid
+```{r subseq-build}
 max_seq <- measure_monoid(max, i = -Inf, measure = function(entry) entry$key)
-
-# add the monoid to an empty ordered sequence
 subseqs <- ordered_sequence()
 subseqs <- add_monoids(subseqs, list(max_seq = max_seq))
 
-# fill with indices keyed on length-8 substrings
 for (index in 1:nchar(sequence)) {
   subseq <- substr(sequence, index, index + 7)
   subseqs <- insert(subseqs, index, key = subseq)
@@ -851,26 +837,20 @@ first entry in it \emph{may} have a prefix that is an exact match for the query,
 indicating a hit. In this case we compute the measure of the first entry
 using \code{get_measures()}, which returns a \code{flexseq} of measure values
 given a measure name; subsetting \code{$right} to the first entry prior ensures
-this result is not large.
+this result is not large, and \code{[[1]]} extracts the single bare measure value.
 If the first entry matches, we can use a second predicate to find the first
 entry that is greater than the query and is not an exact prefix match, capturing
 in \code{$left} all exact-match locations. At the end we use \code{fapply()} to
 extract only the matching indices as a vector. 
 
-```r
+```{r subseq-query}
 matches <- ordered_sequence()
-
 first_split <- split_by_predicate(subseqs, function(m) query <= m, "max_seq")
 
 if (length(first_split$right) > 0) {
   first_entry <- first_split$right[1]
-  
-  # get_measures() returns a flexseq of measure values, [[1]] extracts
-  # the first (and only) returning a bare measure value
   first_measure <- get_measures(first_entry, "max_seq")[[1]]
 
-  # if the query is found in the first measure, we need to find the
-  # first entry with a key larger than the query that does not match it
   if (startsWith(first_measure, query)) {
     second_split <- split_by_predicate(
       first_split$right,
@@ -882,8 +862,11 @@ if (length(first_split$right) > 0) {
 }
 
 positions <- fapply(matches, function(value, key) value) |> unlist()
-positions   # reports [1] 8 18 2
+positions
 ```
+
+Because matches are kept in key order, the positions are reported in the
+lexicographic order of their subsequences rather than numerically.
 
 While this structure will not outperform optimized suffix-array 
 bioinformatics tools which can achieve linear $O(n)$ build time \citep{Puglisi2007-rk}, 
