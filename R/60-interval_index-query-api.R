@@ -220,17 +220,17 @@ pop_all_point <- function(x, point, bounds = NULL,
 #' @return The payload value from the first match, or `NULL` on no match.
 #' @details
 #' Returns the first match in canonical interval order. Use
-#' [peek_all_overlaps()] to retrieve all matches as an `interval_index` slice.
+#' [peek_all_overlapping()] to retrieve all matches as an `interval_index` slice.
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
-#' peek_overlaps(ix, 2, 3)
+#' peek_overlapping(ix, 2, 3)
 #'
 #' # Boundary override at touching endpoints
 #' edge <- interval_index("a", start = 1, end = 3, default_query_bounds = "[)")
-#' peek_overlaps(edge, 3, 4)                # default "[)": no endpoint overlap
-#' peek_overlaps(edge, 3, 4, bounds = "[]") # closed bounds: endpoint overlaps
+#' peek_overlapping(edge, 3, 4)                # default "[)": no endpoint overlap
+#' peek_overlapping(edge, 3, 4, bounds = "[]") # closed bounds: endpoint overlaps
 #' @export
-peek_overlaps <- function(x, start, end, bounds = NULL) {
+peek_overlapping <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
   et <- .ivx_endpoint_type_state(x)
@@ -261,9 +261,9 @@ peek_overlaps <- function(x, start, end, bounds = NULL) {
 #' [as.list()].
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
-#' as.list(peek_all_overlaps(ix, 2, 5))
+#' as.list(peek_all_overlapping(ix, 2, 5))
 #' @export
-peek_all_overlaps <- function(x, start, end, bounds = NULL, as_list = FALSE) {
+peek_all_overlapping <- function(x, start, end, bounds = NULL, as_list = FALSE) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
   et <- .ivx_endpoint_type_state(x)
@@ -398,12 +398,12 @@ peek_all_within <- function(x, start, end, bounds = NULL, as_list = FALSE) {
 #' @details
 #' Removes the first match in canonical interval order. On miss, returns a
 #' non-throwing miss object with `remaining = x`.
-#' Use [pop_all_overlaps()] to remove all matches.
+#' Use [pop_all_overlapping()] to remove all matches.
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
-#' pop_overlaps(ix, 2, 3)
+#' pop_overlapping(ix, 2, 3)
 #' @export
-pop_overlaps <- function(x, start, end, bounds = NULL) {
+pop_overlapping <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
   et <- .ivx_endpoint_type_state(x)
@@ -424,10 +424,10 @@ pop_overlaps <- function(x, start, end, bounds = NULL) {
 #' Use [as.list()] to convert `elements` to a standard R list.
 #' @examples
 #' ix <- interval_index("a", "b", "c", start = c(1, 3, 5), end = c(2, 4, 6))
-#' out <- pop_all_overlaps(ix, 2, 5)
+#' out <- pop_all_overlapping(ix, 2, 5)
 #' as.list(out$elements)
 #' @export
-pop_all_overlaps <- function(x, start, end, bounds = NULL) {
+pop_all_overlapping <- function(x, start, end, bounds = NULL) {
   .ivx_assert_index(x)
   b <- .ivx_resolve_bounds(x, bounds)
   et <- .ivx_endpoint_type_state(x)
