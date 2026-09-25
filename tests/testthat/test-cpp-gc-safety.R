@@ -106,7 +106,7 @@
     step("insert_interval_index", insert(x_ivx, "newer", start = 2, end = 5))
     step("peek_point_interval_index", peek_all_point(x_ivx, 2))
     step("pop_point_interval_index", pop_all_point(x_ivx, 2))
-    step("peek_overlaps_interval_index", peek_all_overlaps(x_ivx, 2, 3))
+    step("peek_overlaps_interval_index", peek_all_overlapping(x_ivx, 2, 3))
     step("peek_containing_interval_index", peek_all_containing(x_ivx, 2, 3))
     step("peek_within_interval_index", peek_all_within(x_ivx, 2, 3))
 

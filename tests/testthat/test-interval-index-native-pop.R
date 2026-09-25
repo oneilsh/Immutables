@@ -64,16 +64,16 @@ test_that("native pop matches R fallback for overlaps relation", {
       qhi <- qpt + 100L
 
       # first-hit
-      cpp_v <- .ivx_with_cpp_scan_enabled(TRUE,  pop_overlaps(pop_ix, qlo, qhi, bounds = bnd))
-      r_v   <- .ivx_with_cpp_scan_enabled(FALSE, pop_overlaps(pop_ix, qlo, qhi, bounds = bnd))
+      cpp_v <- .ivx_with_cpp_scan_enabled(TRUE,  pop_overlapping(pop_ix, qlo, qhi, bounds = bnd))
+      r_v   <- .ivx_with_cpp_scan_enabled(FALSE, pop_overlapping(pop_ix, qlo, qhi, bounds = bnd))
       expect_equal(cpp_v$value, r_v$value)
       expect_equal(cpp_v$start, r_v$start)
       expect_equal(cpp_v$end,   r_v$end)
       expect_equal(as.list(cpp_v$remaining), as.list(r_v$remaining))
 
       # all-match
-      cpp_a <- .ivx_with_cpp_scan_enabled(TRUE,  pop_all_overlaps(pop_ix, qlo, qhi, bounds = bnd))
-      r_a   <- .ivx_with_cpp_scan_enabled(FALSE, pop_all_overlaps(pop_ix, qlo, qhi, bounds = bnd))
+      cpp_a <- .ivx_with_cpp_scan_enabled(TRUE,  pop_all_overlapping(pop_ix, qlo, qhi, bounds = bnd))
+      r_a   <- .ivx_with_cpp_scan_enabled(FALSE, pop_all_overlapping(pop_ix, qlo, qhi, bounds = bnd))
       expect_equal(as.list(cpp_a$elements),  as.list(r_a$elements))
       expect_equal(as.list(cpp_a$remaining), as.list(r_a$remaining))
     }

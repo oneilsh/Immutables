@@ -83,10 +83,10 @@ test_that("queries: results identical across cpp and R backends", {
       ix <- as_interval_index(vals, start = starts, end = ends,
                               default_query_bounds = "[]")
       list(
-        ov  = peek_all_overlaps(ix, qlo, qhi, as_list = TRUE),
+        ov  = peek_all_overlapping(ix, qlo, qhi, as_list = TRUE),
         pt  = peek_all_point(ix, qpt, as_list = TRUE),
         pop = {
-          r <- pop_all_overlaps(ix, qlo, qhi)
+          r <- pop_all_overlapping(ix, qlo, qhi)
           list(elements = as.list(r$elements), remaining = as.list(r$remaining))
         }
       )
@@ -173,12 +173,12 @@ test_that("pop: splice and drain regimes match the R reference path", {
 
   # Contiguous matches -> splice path.
   qlo1 <- starts[300L]; qhi1 <- starts[304L]
-  f1 <- function(ix) pop_all_overlaps(ix, qlo1, qhi1)
+  f1 <- function(ix) pop_all_overlapping(ix, qlo1, qhi1)
   expect_identical(run(TRUE, ends_short, f1), run(FALSE, ends_short, f1))
 
   # Scattered matches over a wide window -> drain path.
   qlo2 <- starts[550L]; qhi2 <- starts[560L]
-  f2 <- function(ix) pop_all_overlaps(ix, qlo2, qhi2)
+  f2 <- function(ix) pop_all_overlapping(ix, qlo2, qhi2)
   expect_identical(run(TRUE, ends_mixed, f2), run(FALSE, ends_mixed, f2))
 
   # pop first always splices.
@@ -190,7 +190,7 @@ test_that("pop: splice and drain regimes match the R reference path", {
   expect_identical(run(TRUE, ends_mixed, f3), run(FALSE, ends_mixed, f3))
 
   # popping everything empties the index.
-  f4 <- function(ix) pop_all_overlaps(ix, min(starts), max(ends_short))
+  f4 <- function(ix) pop_all_overlapping(ix, min(starts), max(ends_short))
   expect_identical(run(TRUE, ends_short, f4), run(FALSE, ends_short, f4))
   expect_identical(length(run(TRUE, ends_short, f4)$remaining), 0L)
 })

@@ -32,7 +32,7 @@
 
   peek_fns <- list(
     point      = function(ix) peek_all_point(ix, q_pt, bounds = "[]", as_list = TRUE),
-    overlaps   = function(ix) peek_all_overlaps(ix, q_lo, q_hi, bounds = "[]", as_list = TRUE),
+    overlaps   = function(ix) peek_all_overlapping(ix, q_lo, q_hi, bounds = "[]", as_list = TRUE),
     containing = function(ix) peek_all_containing(ix, q_lo, q_hi, bounds = "[]", as_list = TRUE),
     within     = function(ix) peek_all_within(ix, q_lo, q_hi, bounds = "[]", as_list = TRUE)
   )
@@ -45,7 +45,7 @@
 
   pop_fns <- list(
     point      = function(ix) pop_all_point(ix, q_pt, bounds = "[]"),
-    overlaps   = function(ix) pop_all_overlaps(ix, q_lo, q_hi, bounds = "[]"),
+    overlaps   = function(ix) pop_all_overlapping(ix, q_lo, q_hi, bounds = "[]"),
     containing = function(ix) pop_all_containing(ix, q_lo, q_hi, bounds = "[]"),
     within     = function(ix) pop_all_within(ix, q_lo, q_hi, bounds = "[]")
   )

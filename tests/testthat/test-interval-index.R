@@ -71,8 +71,8 @@ testthat::test_that("peek overlap/contain/within queries are deterministic", {
     default_query_bounds = "[)"
   )
 
-  testthat::expect_equal(peek_overlaps(ix, 2, 3, bounds = "[)"), "B")
-  testthat::expect_equal(as.list(peek_all_overlaps(ix, 2, 3, bounds = "[]")), list("A", "B", "D", "C"))
+  testthat::expect_equal(peek_overlapping(ix, 2, 3, bounds = "[)"), "B")
+  testthat::expect_equal(as.list(peek_all_overlapping(ix, 2, 3, bounds = "[]")), list("A", "B", "D", "C"))
 
   jy <- as_interval_index(
     list("outer", "inner", "tail", "point"),
@@ -86,8 +86,8 @@ testthat::test_that("peek overlap/contain/within queries are deterministic", {
   testthat::expect_equal(peek_within(jy, 2, 3), "inner")
   testthat::expect_equal(as.list(peek_all_within(jy, 2, 3)), list("inner", "point"))
 
-  testthat::expect_null(peek_overlaps(ix, 9, 10))
-  miss <- peek_all_overlaps(ix, 9, 10)
+  testthat::expect_null(peek_overlapping(ix, 9, 10))
+  miss <- peek_all_overlapping(ix, 9, 10)
   testthat::expect_s3_class(miss, "interval_index")
   testthat::expect_identical(length(miss), 0L)
 })
@@ -167,10 +167,10 @@ testthat::test_that("relation query/pop contracts hold across all bounds tokens"
       idx = idx_point
     )
     expect_relation(
-      peek_first = peek_overlaps(ix, 2, 3, bounds = bt),
-      peek_all = peek_all_overlaps(ix, 2, 3, bounds = bt),
-      pop_first = pop_overlaps(ix, 2, 3, bounds = bt),
-      pop_all = pop_all_overlaps(ix, 2, 3, bounds = bt),
+      peek_first = peek_overlapping(ix, 2, 3, bounds = bt),
+      peek_all = peek_all_overlapping(ix, 2, 3, bounds = bt),
+      pop_first = pop_overlapping(ix, 2, 3, bounds = bt),
+      pop_all = pop_all_overlapping(ix, 2, 3, bounds = bt),
       idx = idx_over
     )
     expect_relation(
@@ -309,13 +309,13 @@ testthat::test_that("pop helpers follow first/all contracts and preserve persist
     default_query_bounds = "[]"
   )
 
-  first <- pop_overlaps(ix, 2, 3)
+  first <- pop_overlapping(ix, 2, 3)
   testthat::expect_equal(first$value, "A")
   testthat::expect_equal(first$start, 1)
   testthat::expect_equal(first$end, 2)
   testthat::expect_s3_class(first$remaining, "interval_index")
 
-  all <- pop_all_overlaps(ix, 2, 3)
+  all <- pop_all_overlapping(ix, 2, 3)
   testthat::expect_s3_class(all$elements, "interval_index")
   testthat::expect_equal(as.list(all$elements), list("A", "B", "D", "C"))
   testthat::expect_identical(length(all$remaining), 0L)
@@ -473,13 +473,13 @@ testthat::test_that("interval_index recomputes user monoids across insert, fappl
   testthat::expect_equal(node_measure(ix3, "sum_item"), 104)
   testthat::expect_equal(node_measure(ix3, "width_sum"), 8)
 
-  overlaps <- peek_all_overlaps(ix3, 2, 3, bounds = "[)")
+  overlaps <- peek_all_overlapping(ix3, 2, 3, bounds = "[)")
   testthat::expect_s3_class(overlaps, "interval_index")
   testthat::expect_equal(as.list(overlaps), as.list(c(11, 21)))
   testthat::expect_equal(node_measure(overlaps, "sum_item"), 32)
   testthat::expect_equal(node_measure(overlaps, "width_sum"), 5)
 
-  popped <- pop_all_overlaps(ix3, 2, 3, bounds = "[)")
+  popped <- pop_all_overlapping(ix3, 2, 3, bounds = "[)")
   testthat::expect_s3_class(popped$elements, "interval_index")
   testthat::expect_s3_class(popped$remaining, "interval_index")
   testthat::expect_equal(node_measure(popped$elements, "sum_item"), 32)
@@ -644,7 +644,7 @@ testthat::test_that("interval_index supports ordered-factor endpoints (exotic-en
   testthat::expect_identical(peek_point(ix, f[2]), "x")
 
   # Overlaps query: [c,d) overlaps [c,e) only (not [a,c) because end is exclusive).
-  testthat::expect_identical(peek_overlaps(ix, start = f[3], end = f[4]), "y")
+  testthat::expect_identical(peek_overlapping(ix, start = f[3], end = f[4]), "y")
 
   # Containing query: entries whose interval contains [b,c) — only [a,c).
   testthat::expect_identical(peek_containing(ix, start = f[2], end = f[3]), "x")

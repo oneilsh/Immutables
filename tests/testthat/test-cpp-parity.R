@@ -404,18 +404,18 @@ testthat::test_that("backend parity: interval_index insert and queries", {
     y <- insert(x, "d", start = 2, end = 5)
 
     p0 <- pop_point(y, 2)
-    p1 <- pop_overlaps(y, 2, 3)
+    p1 <- pop_overlapping(y, 2, 3)
     p2 <- pop_all_within(y, 2, 5)
     bounds_tokens <- c("[)", "[]", "()", "(]")
     bounds_matrix <- lapply(bounds_tokens, function(bt) {
       list(
         token = bt,
         point = as.list(peek_all_point(y, 2, bounds = bt)),
-        overlaps = as.list(peek_all_overlaps(y, 2, 3, bounds = bt)),
+        overlaps = as.list(peek_all_overlapping(y, 2, 3, bounds = bt)),
         containing = as.list(peek_all_containing(y, 2, 3, bounds = bt)),
         within = as.list(peek_all_within(y, 2, 3, bounds = bt)),
         pop_point = as.list(pop_all_point(y, 2, bounds = bt)$elements),
-        pop_overlaps = as.list(pop_all_overlaps(y, 2, 3, bounds = bt)$elements),
+        pop_overlapping = as.list(pop_all_overlapping(y, 2, 3, bounds = bt)$elements),
         pop_containing = as.list(pop_all_containing(y, 2, 3, bounds = bt)$elements),
         pop_within = as.list(pop_all_within(y, 2, 3, bounds = bt)$elements)
       )
@@ -439,8 +439,8 @@ testthat::test_that("backend parity: interval_index insert and queries", {
       match_at_matrix = match_at_matrix,
       point_first = peek_point(y, 2),
       point = as.list(peek_all_point(y, 2)),
-      overlaps_first = peek_overlaps(y, 2, 3),
-      overlaps = as.list(peek_all_overlaps(y, 2, 3)),
+      overlaps_first = peek_overlapping(y, 2, 3),
+      overlaps = as.list(peek_all_overlapping(y, 2, 3)),
       containing_first = peek_containing(y, 2, 3),
       containing = as.list(peek_all_containing(y, 2, 3)),
       within_first = peek_within(y, 2, 5),
@@ -477,8 +477,8 @@ testthat::test_that("backend parity: interval_index user monoid recomputation", 
     ), list(sum_item = sum_item, width_sum = width_sum))
     y <- insert(x, 40, start = 3, end = 4)
     z <- fapply(y, function(value, start, end, name) value + 1)
-    s <- peek_all_overlaps(z, 2, 3, bounds = "[)")
-    p <- pop_all_overlaps(z, 2, 3, bounds = "[)")
+    s <- peek_all_overlapping(z, 2, 3, bounds = "[)")
+    p <- pop_all_overlapping(z, 2, 3, bounds = "[)")
 
     list(
       base = c(sum_item = node_measure(x, "sum_item"), width_sum = node_measure(x, "width_sum")),
