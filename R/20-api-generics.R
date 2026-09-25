@@ -1,6 +1,6 @@
 #SO
 
-#' Fapply with S3 dispatch
+#' Fapply with S3 Dispatch
 #'
 #' `fapply()` is an S3 generic for applying functions over immutable
 #' structures with type-specific dispatch.

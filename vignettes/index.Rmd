@@ -1,8 +1,8 @@
 ---
-title: "Immutables"
+title: "Immutables: Fast, Persistent Data Structures for R"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{immutables}
+  %\VignetteIndexEntry{Immutables: Fast, Persistent Data Structures for R}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -132,7 +132,7 @@ peek_point(ix, 2)
 Interval-relation queries (overlap, containment), plus sweep-line endpoint matches via `match_at`:
 
 ```{r}
-peek_all_overlaps(ix, start = 2, end = 5)
+peek_all_overlapping(ix, start = 2, end = 5)
 peek_all_containing(ix, start = 2, end = 3)
 peek_all_point(ix, point = 3, match_at = "end")
 ```

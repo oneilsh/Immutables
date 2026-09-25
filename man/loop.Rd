@@ -2,7 +2,7 @@
 % Please edit documentation in R/30-api-flexseq-iter.R
 \name{loop}
 \alias{loop}
-\title{Iterate over an iterator (re-exported from coro)}
+\title{Iterate Over an Iterator (Re-exported from coro)}
 \usage{
 loop(loop)
 }

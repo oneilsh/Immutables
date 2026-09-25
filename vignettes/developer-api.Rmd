@@ -1,8 +1,8 @@
 ---
-title: "Developer API"
+title: "Developer API: Building Structures on Monoid-Annotated Finger Trees"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Developer API}
+  %\VignetteIndexEntry{Developer API: Building Structures on Monoid-Annotated Finger Trees}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

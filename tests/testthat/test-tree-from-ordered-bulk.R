@@ -8,16 +8,29 @@
 # and must (a) produce byte-identical output to the recursive primitive and
 # (b) let the pure-R reference path build at sizes the C++ path targets.
 
-test_that(".ft_measured_nodes_bulk matches recursive measured_nodes exactly", {
+.expect_bulk_matches_recursive <- function(k) {
   ms <- attr(as_flexseq(as.list(1:4)), "monoids", exact = TRUE)
-  for (k in c(2:20, 50L, 99L, 100L, 256L, 1000L)) {
-    l <- as.list(seq_len(k))
+  for (kk in k) {
+    l <- as.list(seq_len(kk))
     expect_identical(
       Immutables:::.ft_measured_nodes_bulk(l, ms),
       Immutables:::measured_nodes(l, ms),
-      info = paste("k =", k)
+      info = paste("k =", kk)
     )
   }
+}
+
+# Small/mid sizes cover every 2-3 node-grouping boundary and run everywhere.
+test_that(".ft_measured_nodes_bulk matches recursive measured_nodes exactly", {
+  .expect_bulk_matches_recursive(c(2:20, 50L, 99L, 100L))
+})
+
+# Large spot-checks are gated: the recursive reference is O(n^2) (~35s at
+# k = 1000), so run them on dev/CI only. The identity is algebraic and already
+# checked at every smaller size above.
+test_that(".ft_measured_nodes_bulk matches recursive measured_nodes at large k", {
+  skip_on_cran()
+  .expect_bulk_matches_recursive(c(256L, 1000L))
 })
 
 .with_use_cpp <- function(flag, expr) {
@@ -27,6 +40,9 @@ test_that(".ft_measured_nodes_bulk matches recursive measured_nodes exactly", {
 }
 
 test_that("pure-R reference build survives large n without C stack overflow", {
+  # Expensive scale/overflow guard (~35s+ at full n): keep at full strength on
+  # dev/CI, but skip on CRAN where it would blow the 10-minute check budget.
+  skip_on_cran()
   # n chosen well past the recursive depth that previously overflowed
   # (~21k frames at 65536). Force the R path with immutables.use_cpp = FALSE.
   n <- 65536L
@@ -39,6 +55,9 @@ test_that("pure-R reference build survives large n without C stack overflow", {
 })
 
 test_that("R-built and C++-built trees agree element-wise at scale", {
+  # Large-n R/C++ identity (~8s): element-wise agreement is already covered at
+  # small n by the k-loop above and by test-cpp-parity.R, so skip on CRAN.
+  skip_on_cran()
   n <- 20000L
   vals <- as.list(seq_len(n))
   x_cpp <- .with_use_cpp(TRUE,  as_flexseq(vals))

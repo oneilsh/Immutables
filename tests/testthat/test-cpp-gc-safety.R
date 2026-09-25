@@ -56,6 +56,10 @@
 
     options(immutables.use_cpp = TRUE)
 
+    # deep enough that pushes/pops create and force suspended middle trees
+    x_lazy <- flexseq()
+    for(i in 1:60) x_lazy <- push_front(x_lazy, i)
+
     old_torture <- gctorture2(1, inhibit_release = FALSE)
     on.exit(gctorture2(old_torture, inhibit_release = FALSE), add = TRUE)
 
@@ -83,6 +87,15 @@
       results[["ft_cpp_add_left"]] <- "skipped because ft_cpp_tree_from failed"
     }
 
+    step("suspended_middle_push_pop", {
+      y <- x_lazy
+      for(i in 61:70) y <- push_front(y, i)
+      for(i in 1:12) y <- pop_front(y)$remaining
+      for(i in 1:12) y <- pop_back(y)$remaining
+      # 70:1 with 12 dropped from each end
+      stopifnot(identical(unlist(as.list(y)), 58:13))
+    })
+
     step("ft_cpp_concat", .ft_cpp_concat(base_plain, base_plain, ms))
     step("ft_cpp_locate", .ft_cpp_locate(base_plain, function(v) v >= 4, ms, ".size", 0))
     step("ft_cpp_split_tree", .ft_cpp_split_tree(base_plain, function(v) v >= 4, ms, ".size", 0))
@@ -93,7 +106,7 @@
     step("insert_interval_index", insert(x_ivx, "newer", start = 2, end = 5))
     step("peek_point_interval_index", peek_all_point(x_ivx, 2))
     step("pop_point_interval_index", pop_all_point(x_ivx, 2))
-    step("peek_overlaps_interval_index", peek_all_overlaps(x_ivx, 2, 3))
+    step("peek_overlaps_interval_index", peek_all_overlapping(x_ivx, 2, 3))
     step("peek_containing_interval_index", peek_all_containing(x_ivx, 2, 3))
     step("peek_within_interval_index", peek_all_within(x_ivx, 2, 3))
 
@@ -160,6 +173,7 @@ testthat::test_that("C++ core tree ops survive GC torture", {
   .expect_step_ok("ft_cpp_concat")
   .expect_step_ok("ft_cpp_locate")
   .expect_step_ok("ft_cpp_split_tree")
+  .expect_step_ok("suspended_middle_push_pop")
 })
 
 testthat::test_that("C++ OMS primitives survive GC torture", {

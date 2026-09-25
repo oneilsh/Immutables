@@ -34,20 +34,34 @@ add_left(d, el, monoids) %as% {
 
 # if the prefix has 4 elements [p1, p2, p3, p4]: keep el and p1 as the
 # new 2-element prefix, pack p2, p3, p4 into a Node3 pushed into the
-# middle tree.
+# middle tree. That push is suspended when it would cascade further (see
+# lazy_add_left), so the middle is forced only as far as this level needs.
 # otherwise: simple add to the prefix digit.
-# Runtime: O(log n) worst-case.
+# Runtime: O(1) amortized, including under persistent reuse of d; O(log n)
+# worst-case.
 add_left(d, el, monoids) %::% Deep : . : list : Deep
 add_left(d, el, monoids) %as% {
   if(length(.subset2(d, "prefix")) == 4) {
     new_prefix <- measured_digit(el, .subset2(d, "prefix")[[1]], monoids = monoids)
     new_middle_node <- measured_node3(.subset2(d, "prefix")[[2]], .subset2(d, "prefix")[[3]], .subset2(d, "prefix")[[4]], monoids)
-    new_middle <- add_left(.subset2(d, "middle"), new_middle_node, monoids)
+    new_middle <- lazy_add_left(.ft_middle(d), new_middle_node, monoids)
     measured_deep(prefix = new_prefix, middle = new_middle, suffix = .subset2(d, "suffix"), monoids)
   } else {
     new_prefix <- add_left(.subset2(d, "prefix"), el, monoids)
     measured_deep(prefix = new_prefix, middle = .subset2(d, "middle"), suffix = .subset2(d, "suffix"), monoids)
   }
+}
+
+# add_left(m, node) for a forced middle tree m. A push that would cascade into
+# m's own middle (m's prefix is full) is suspended; anything else is O(1) and
+# done now. This is what keeps pushes amortized O(1) when an old version is
+# reused (Hinze & Paterson 2006, Sec. 3).
+# Runtime: O(1).
+lazy_add_left <- function(m, node, monoids) {
+  if(!inherits(m, "Deep") || length(.subset2(m, "prefix")) < 4L) {
+    return(add_left(m, node, monoids))
+  }
+  .ft_make_thunk(.FT_THUNK_ADD_LEFT, m, node, list(node, m), monoids)
 }
 
 # Runtime: O(k log n), where k = length(els).

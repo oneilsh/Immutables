@@ -23,6 +23,19 @@
   .ft_cpp_can_use(monoids) && .oms_is_cpp_key_type(key_type)
 }
 
+# Runtime: O(1).
+.ft_cpp_can_use_oms_bound <- function(monoids, key_type) {
+  .ft_cpp_can_use(monoids) && .oms_is_cpp_key_type(key_type)
+}
+
+# Runtime: O(log n). Callback-free bound-index descent over the .oms_max_key
+# measure; no R<->C++ predicate crossing. Returns the 1-based first index whose
+# key >= target (strict=FALSE) or > target (strict=TRUE), n+1 when none, or NA
+# for a non-native key type (caller falls back to the R locate path).
+.ft_cpp_oms_bound_index <- function(x, key, key_type, strict) {
+  .Call("ft_cpp_oms_bound_index", x, key, key_type, isTRUE(strict), PACKAGE = "Immutables")
+}
+
 # Runtime: O(log n) near right edge.
 .ft_cpp_add_right <- function(t, el, monoids) {
   .Call("ft_cpp_append_right", t, el, monoids, PACKAGE = "Immutables")
@@ -159,4 +172,11 @@
         isTRUE(with_unmatched), monoids, isTRUE(as_list),
         as.integer(span_lo), as.integer(span_hi),
         PACKAGE = "Immutables")
+}
+
+# Runtime: O(1). Session totals of C++ work: suspended middle trees evaluated
+# ("forces") and Deep nodes built ("deeps"); used by tests to check amortized
+# bounds by counting work.
+.ft_work_counts <- function() {
+  .Call("ft_cpp_work_counts", PACKAGE = "Immutables")
 }

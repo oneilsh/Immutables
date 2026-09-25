@@ -1,8 +1,8 @@
 ---
-title: "Ordered Sequences"
+title: "Ordered Sequences: Key-Sorted Storage with Range Queries"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Ordered Sequences}
+  %\VignetteIndexEntry{Ordered Sequences: Key-Sorted Storage with Range Queries}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -119,6 +119,30 @@ max_key(xs)
 min_key(ordered_sequence())  # NULL when empty
 ```
 
+Because keys are stored in sorted order, ordered sequences also support the positional operators inherited from `flexseq` — `peek_at()`, `pop_front()`, `pop_back()`, and `pop_at()`. On an ordered sequence the pops additionally return `$key` (alongside `$value`/`$remaining`), and `key_at()` reads the key at a one-based position without removing anything: the positional companion to `peek_at()` (which reads the value there) and the general form of `min_key()`/`max_key()`.
+
+```{r}
+key_at(xs, 2)                          # key at position 2
+key_at(xs, 1) == min_key(xs)           # first position holds the minimum key
+key_at(xs, length(xs)) == max_key(xs)  # last position holds the maximum key
+key_at(xs, 10)                         # NULL when out of bounds
+
+front <- pop_front(xs)                 # positional pop carries the key too
+front$value
+front$key
+```
+
+`nearest_key()` returns the existing key closest to a query, which then composes with `peek_key()` / `pop_key()` to read or remove the matching element. It resolves by order alone at the extremes and on an exact hit, and only needs a distance metric when the query falls strictly between two distinct keys — so it supports `numeric`, `Date`, and `POSIXct` keys there. An equidistant tie between two distinct keys is resolved by `ties` — `"lower"` (default), `"upper"`, or `"both"` (returns both keys). For `character` keys the between-case is undefined ("is `"Ben"` closer to `"Alex"` or `"Charlie"`?") and errors; use `lower_bound()` / `peek_key()` for order-based lookup instead.
+
+```{r}
+nearest_key(xs, 2.4)                    # between 2 and 3 -> closer key (2)
+nearest_key(xs, 0)                      # below all -> min_key (1)
+nearest_key(xs, 2.5, ties = "both")     # exactly between 2 and 3 -> c(2, 3)
+
+k <- nearest_key(xs, 2.4)               # locate, then act with the keyed helpers
+pop_key(xs, k)$value
+```
+
 ## Empty sequences
 
 Key and range helpers are non-throwing on empty sequences, and `length()` allows for empty checking.
@@ -149,7 +173,7 @@ xs_named[1]            # positional read also works
 try(xs_named$a <- "!!")  # replacement blocked
 ```
 
-## Transforming, aterating, merging
+## Transforming, iterating, merging
 
 `fapply()` maps a function over elements while preserving keys and order. The function receives `(value, key)`, or `(value, key, name)` if it accepts a third argument. Keys and names are passed in read-only, and the return value replaces the stored element at the associated key (and name if named).
 
@@ -175,3 +199,63 @@ merge(a, b)
 ```
 
 Both sequences must share the same key type and monoid set; mismatches error. Both inputs are left unmodified.
+
+## Example: scalar matching without replacement
+
+Many potential uses for ordered sequences are handled well by named lists and vectors, where access-by-key is the primary functionality. In some cases we need to dynamically find, add, and remove elements by key, but as `vignette("benchmarks", package = "Immutables")` shows these operations are excessively slow on large base-R structures. Matching without replacement is one such case, often employed for cohort matching purposes in observational studies using propensity scores. Foregoing details, "treated" patients are matched to a subset of distinct "control" patients with similar scores. We start by simulating some populations and scores, and initialize an empty `flexseq` to store matches. We also convert the treated and untreated row numbers (serving as identifiers) to ordered sequences, keyed by their score.
+
+```{r}
+set.seed(100)
+n_patients <- 200
+patients <- data.frame(treated = sample(c(TRUE, FALSE),
+                                        n_patients,
+                                        prob = c(0.1, 0.9),
+                                        replace = TRUE),
+                       score = runif(n_patients))
+
+# row numbers act as identifiers
+treated_rows <- which(patients$treated)
+treated_scores <- patients$score[patients$treated]
+
+untreated_rows <- which(!patients$treated)
+untreated_scores <- patients$score[!patients$treated]
+
+matches <- flexseq()
+
+treated_seq <- as_ordered_sequence(treated_rows, keys = treated_scores)
+untreated_seq <- as_ordered_sequence(untreated_rows, keys = untreated_scores)
+```
+
+Matching itself is a simple greedy selection. Popping treated patients in order, each is matched to their nearest untreated record by score key, using `nearest_key()`. That patient is popped from wherever it was located, and a data frame describing the match is pushed onto the accumulating `flexseq`. This example also illustrates collecting these into a single result data frame for use after.
+
+```{r}
+while(length(treated_seq) > 0) {
+  # no untreated patients left to match against
+  if (length(untreated_seq) == 0L) break
+
+  # pop the first (lowest-score) treated patient
+  front_el <- pop_front(treated_seq)
+  treated_seq <- front_el$remaining
+
+  treated_pt_score <- front_el$key
+  treated_pt_row   <- front_el$value
+
+  # find and remove the nearest-score untreated patient
+  match_key <- nearest_key(untreated_seq, treated_pt_score)
+  match_el  <- pop_key(untreated_seq, match_key)
+  untreated_seq <- match_el$remaining
+
+  untreated_pt_score <- match_el$key
+  untreated_pt_row   <- match_el$value
+
+  match_row <- data.frame(treated_pt_row,
+                          treated_pt_score,
+                          untreated_pt_row,
+                          untreated_pt_score)
+
+  matches <- push_back(matches, match_row)
+}
+
+match_df <- do.call(rbind, as.list(matches))
+head(match_df)
+```

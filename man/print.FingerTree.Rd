@@ -5,7 +5,7 @@
 \alias{print.Deep}
 \alias{print.Single}
 \alias{print.Empty}
-\title{Print a compact summary of a finger tree}
+\title{Print a Compact Summary of a Finger Tree}
 \usage{
 \method{print}{FingerTree}(x, max_elements = 4L, show_custom_monoids = FALSE, ...)
 
@@ -30,7 +30,7 @@ their root cached measures. Default \code{FALSE}.}
 \code{x}, invisibly.
 }
 \description{
-Print a compact summary of a finger tree
+Print a Compact Summary of a Finger Tree
 }
 \examples{
 x <- as_flexseq(setNames(as.list(1:6), letters[1:6]))

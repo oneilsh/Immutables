@@ -223,7 +223,7 @@
     }
     if(inherits(node, "Deep")) {
       fill(.subset2(node, "prefix"))
-      fill(.subset2(node, "middle"))
+      fill(.ft_middle(node))
       fill(.subset2(node, "suffix"))
       return(invisible(NULL))
     }

@@ -1,8 +1,8 @@
 ---
-title: "Interval Indices"
+title: "Interval Indices: Overlap and Containment Queries"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Interval Indices}
+  %\VignetteIndexEntry{Interval Indices: Overlap and Containment Queries}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -86,11 +86,11 @@ ix3 <- interval_index(
 ix3
 ```
 
-`peek_overlaps()` returns any interval that shares at least one point with the query range. `peek_containing()` returns intervals that fully contain the query range. `peek_within()` returns intervals fully contained by the query range.
+`peek_overlapping()` returns any interval that shares at least one point with the query range. `peek_containing()` returns intervals that fully contain the query range. `peek_within()` returns intervals fully contained by the query range.
 
 ```{r}
 # overlaps [2, 5]: any shared point
-peek_all_overlaps(ix3, start = 2, end = 5)
+peek_all_overlapping(ix3, start = 2, end = 5)
 
 # containing [3, 4]: index interval must enclose query
 peek_all_containing(ix3, start = 3, end = 4)
@@ -155,7 +155,7 @@ Query and endpoint helpers are non-throwing on empty indices, and `length()` all
 empty_ix <- interval_index()
 length(empty_ix)
 peek_point(empty_ix, point = 1)
-pop_overlaps(empty_ix, start = 1, end = 5)
+pop_overlapping(empty_ix, start = 1, end = 5)
 ```
 
 
@@ -205,3 +205,70 @@ peek_all_point(m, 3)
 ```
 
 Both indices must share the same endpoint type, the same `bounds` convention, and the same monoid set; mismatches error. Both inputs are left unmodified.
+
+## Example: hospital occupancy over time
+
+Many datasets are characterized by intervals, such that we wish to query which intervals overlap a given point. Sweep-line algorithms do so over each start or end point in order. Here we illustrate this basic pattern, considering a hypothetical computation of hospital occupancy over time. Patients arrive randomly, stay for a random number of days, and are associated with demographic variables for age and sex. For each day, we wish to capture the total occupancy, average age, and percent male. We begin by simulating data and building an interval index storing each patient with their stay:
+
+```{r}
+set.seed(100)
+
+num_days <- 365
+n_patients <- 500
+
+starts <- sample(1:num_days,
+                 size = n_patients,
+                 replace = TRUE)
+
+ends <- starts + rpois(n_patients, 2) # average stay = 2 days
+
+ages <- pmax(0, rnorm(n_patients, mean = 35, sd = 10))
+is_males <- sample(c(0, 1), n_patients, replace = TRUE)
+
+# list of patients (each a list with age and is_male)
+patients <- Map(list, age = ages, is_male = is_males)
+
+# store each patient in an interval index with their stay
+ix <- as_interval_index(patients, start = starts, end = ends)
+```
+
+Next, for each day we'll query for overlapping patients, computing summary statistics. These are collected in a `flexseq`, which we later convert to a data frame for further analysis. This example also illustrates using `fapply()` to unpack the contents of an interval index containing named lists. Days with no patients present are recorded with an occupancy of zero and missing averages.
+
+```{r}
+day_stats <- flexseq()
+
+for(day in seq_len(num_days)) {
+  present <- peek_all_point(ix, day)
+  occupancy <- length(present)
+
+  if(occupancy == 0) {
+    stats <- data.frame(day = day, occupancy = 0, mean_age = NA, pct_male = NA)
+  } else {
+    day_ages <- present |>
+      fapply(function(patient, start, end) {
+        patient$age
+      }) |>
+      unlist() # fapply returns an interval_index, convert to vector
+
+    day_males <- present |>
+      fapply(function(patient, start, end) {
+        patient$is_male
+      }) |>
+      unlist()
+
+    stats <- data.frame(day = day,
+                        occupancy = occupancy,
+                        mean_age = mean(day_ages),
+                        pct_male = 100 * mean(day_males))
+  }
+
+  day_stats <- push_back(day_stats, stats)
+}
+
+# convert the flexseq of data frames into a single data frame
+# with columns for day, occupancy, mean_age, and pct_male
+stats_df <- do.call(rbind, as.list(day_stats))
+head(stats_df)
+```
+
+This example is designed for simplicity, but is not optimally efficient. Real sweep-line algorithms consider only sorted used endpoints, and keep three indices: one with as-yet-unprocessed elements, an active set overlapping the virtual sweep line, and a processed set, moving elements through them with `pop_all_point()`.

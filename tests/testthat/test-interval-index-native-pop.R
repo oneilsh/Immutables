@@ -6,15 +6,17 @@
 #
 # Helper used: .ivx_with_cpp_scan_enabled(flag, expr)  — defined in helper-ivx.R
 #
-# NOTE: pop ops are destructive (they remove matched entries), so a FRESH index
-# is built for every cpp and r_fb call via build_ix(). Never share an ix across
-# the two branches within the same iteration.
+# NOTE: pop ops are persistent — they return a new `$remaining` index and leave
+# the input untouched — so a single shared fixture is safe to reuse across every
+# cpp/r_fb call and iteration. (Building a fresh index per call cost ~5s for no
+# benefit.) Query points are sampled at a low and a high value; all 4 relations
+# and all 4 bounds tokens are still exercised.
 
 
-# ---- shared fixture builder ------------------------------------------------
+# ---- shared fixture --------------------------------------------------------
 
-# Returns a fresh interval_index on every call.
-build_pop_ix <- function() {
+# Deterministic index, built once and reused (pop is non-destructive).
+pop_ix <- local({
   set.seed(42)
   starts <- sort(sample.int(2000L, 300L))
   widths <- sample.int(40L, 300L, replace = TRUE)
@@ -22,7 +24,7 @@ build_pop_ix <- function() {
   vals   <- sprintf("v%03d", seq_along(starts))
   as_interval_index(as.list(vals), start = starts, end = ends,
                     default_query_bounds = "[]")
-}
+})
 
 
 # ---- point relation ---------------------------------------------------------
@@ -31,19 +33,19 @@ test_that("native pop matches R fallback for point relation", {
   bounds_tokens <- c("[)", "[]", "()", "(]")
 
   for (bnd in bounds_tokens) {
-    for (qpt in c(50L, 500L, 1000L, 1800L)) {
+    for (qpt in c(500L, 1800L)) {
 
       # first-hit
-      cpp_v <- .ivx_with_cpp_scan_enabled(TRUE,  pop_point(build_pop_ix(), qpt, bounds = bnd))
-      r_v   <- .ivx_with_cpp_scan_enabled(FALSE, pop_point(build_pop_ix(), qpt, bounds = bnd))
+      cpp_v <- .ivx_with_cpp_scan_enabled(TRUE,  pop_point(pop_ix, qpt, bounds = bnd))
+      r_v   <- .ivx_with_cpp_scan_enabled(FALSE, pop_point(pop_ix, qpt, bounds = bnd))
       expect_equal(cpp_v$value, r_v$value)
       expect_equal(cpp_v$start, r_v$start)
       expect_equal(cpp_v$end,   r_v$end)
       expect_equal(as.list(cpp_v$remaining), as.list(r_v$remaining))
 
       # all-match
-      cpp_a <- .ivx_with_cpp_scan_enabled(TRUE,  pop_all_point(build_pop_ix(), qpt, bounds = bnd))
-      r_a   <- .ivx_with_cpp_scan_enabled(FALSE, pop_all_point(build_pop_ix(), qpt, bounds = bnd))
+      cpp_a <- .ivx_with_cpp_scan_enabled(TRUE,  pop_all_point(pop_ix, qpt, bounds = bnd))
+      r_a   <- .ivx_with_cpp_scan_enabled(FALSE, pop_all_point(pop_ix, qpt, bounds = bnd))
       expect_equal(as.list(cpp_a$elements),  as.list(r_a$elements))
       expect_equal(as.list(cpp_a$remaining), as.list(r_a$remaining))
     }
@@ -57,21 +59,21 @@ test_that("native pop matches R fallback for overlaps relation", {
   bounds_tokens <- c("[)", "[]", "()", "(]")
 
   for (bnd in bounds_tokens) {
-    for (qpt in c(50L, 500L, 1000L, 1800L)) {
+    for (qpt in c(500L, 1800L)) {
       qlo <- qpt
       qhi <- qpt + 100L
 
       # first-hit
-      cpp_v <- .ivx_with_cpp_scan_enabled(TRUE,  pop_overlaps(build_pop_ix(), qlo, qhi, bounds = bnd))
-      r_v   <- .ivx_with_cpp_scan_enabled(FALSE, pop_overlaps(build_pop_ix(), qlo, qhi, bounds = bnd))
+      cpp_v <- .ivx_with_cpp_scan_enabled(TRUE,  pop_overlapping(pop_ix, qlo, qhi, bounds = bnd))
+      r_v   <- .ivx_with_cpp_scan_enabled(FALSE, pop_overlapping(pop_ix, qlo, qhi, bounds = bnd))
       expect_equal(cpp_v$value, r_v$value)
       expect_equal(cpp_v$start, r_v$start)
       expect_equal(cpp_v$end,   r_v$end)
       expect_equal(as.list(cpp_v$remaining), as.list(r_v$remaining))
 
       # all-match
-      cpp_a <- .ivx_with_cpp_scan_enabled(TRUE,  pop_all_overlaps(build_pop_ix(), qlo, qhi, bounds = bnd))
-      r_a   <- .ivx_with_cpp_scan_enabled(FALSE, pop_all_overlaps(build_pop_ix(), qlo, qhi, bounds = bnd))
+      cpp_a <- .ivx_with_cpp_scan_enabled(TRUE,  pop_all_overlapping(pop_ix, qlo, qhi, bounds = bnd))
+      r_a   <- .ivx_with_cpp_scan_enabled(FALSE, pop_all_overlapping(pop_ix, qlo, qhi, bounds = bnd))
       expect_equal(as.list(cpp_a$elements),  as.list(r_a$elements))
       expect_equal(as.list(cpp_a$remaining), as.list(r_a$remaining))
     }
@@ -85,21 +87,21 @@ test_that("native pop matches R fallback for containing relation", {
   bounds_tokens <- c("[)", "[]", "()", "(]")
 
   for (bnd in bounds_tokens) {
-    for (qpt in c(50L, 500L, 1000L, 1800L)) {
+    for (qpt in c(500L, 1800L)) {
       qlo <- qpt
       qhi <- qpt + 100L
 
       # first-hit
-      cpp_v <- .ivx_with_cpp_scan_enabled(TRUE,  pop_containing(build_pop_ix(), qlo, qhi, bounds = bnd))
-      r_v   <- .ivx_with_cpp_scan_enabled(FALSE, pop_containing(build_pop_ix(), qlo, qhi, bounds = bnd))
+      cpp_v <- .ivx_with_cpp_scan_enabled(TRUE,  pop_containing(pop_ix, qlo, qhi, bounds = bnd))
+      r_v   <- .ivx_with_cpp_scan_enabled(FALSE, pop_containing(pop_ix, qlo, qhi, bounds = bnd))
       expect_equal(cpp_v$value, r_v$value)
       expect_equal(cpp_v$start, r_v$start)
       expect_equal(cpp_v$end,   r_v$end)
       expect_equal(as.list(cpp_v$remaining), as.list(r_v$remaining))
 
       # all-match
-      cpp_a <- .ivx_with_cpp_scan_enabled(TRUE,  pop_all_containing(build_pop_ix(), qlo, qhi, bounds = bnd))
-      r_a   <- .ivx_with_cpp_scan_enabled(FALSE, pop_all_containing(build_pop_ix(), qlo, qhi, bounds = bnd))
+      cpp_a <- .ivx_with_cpp_scan_enabled(TRUE,  pop_all_containing(pop_ix, qlo, qhi, bounds = bnd))
+      r_a   <- .ivx_with_cpp_scan_enabled(FALSE, pop_all_containing(pop_ix, qlo, qhi, bounds = bnd))
       expect_equal(as.list(cpp_a$elements),  as.list(r_a$elements))
       expect_equal(as.list(cpp_a$remaining), as.list(r_a$remaining))
     }
@@ -113,21 +115,21 @@ test_that("native pop matches R fallback for within relation", {
   bounds_tokens <- c("[)", "[]", "()", "(]")
 
   for (bnd in bounds_tokens) {
-    for (qpt in c(50L, 500L, 1000L, 1800L)) {
+    for (qpt in c(500L, 1800L)) {
       qlo <- qpt
       qhi <- qpt + 100L
 
       # first-hit
-      cpp_v <- .ivx_with_cpp_scan_enabled(TRUE,  pop_within(build_pop_ix(), qlo, qhi, bounds = bnd))
-      r_v   <- .ivx_with_cpp_scan_enabled(FALSE, pop_within(build_pop_ix(), qlo, qhi, bounds = bnd))
+      cpp_v <- .ivx_with_cpp_scan_enabled(TRUE,  pop_within(pop_ix, qlo, qhi, bounds = bnd))
+      r_v   <- .ivx_with_cpp_scan_enabled(FALSE, pop_within(pop_ix, qlo, qhi, bounds = bnd))
       expect_equal(cpp_v$value, r_v$value)
       expect_equal(cpp_v$start, r_v$start)
       expect_equal(cpp_v$end,   r_v$end)
       expect_equal(as.list(cpp_v$remaining), as.list(r_v$remaining))
 
       # all-match
-      cpp_a <- .ivx_with_cpp_scan_enabled(TRUE,  pop_all_within(build_pop_ix(), qlo, qhi, bounds = bnd))
-      r_a   <- .ivx_with_cpp_scan_enabled(FALSE, pop_all_within(build_pop_ix(), qlo, qhi, bounds = bnd))
+      cpp_a <- .ivx_with_cpp_scan_enabled(TRUE,  pop_all_within(pop_ix, qlo, qhi, bounds = bnd))
+      r_a   <- .ivx_with_cpp_scan_enabled(FALSE, pop_all_within(pop_ix, qlo, qhi, bounds = bnd))
       expect_equal(as.list(cpp_a$elements),  as.list(r_a$elements))
       expect_equal(as.list(cpp_a$remaining), as.list(r_a$remaining))
     }

@@ -53,13 +53,13 @@ test_that("native peek matches R fallback for overlaps relation", {
       qlo <- qpt
       qhi <- qpt + 100L
 
-      cpp_v <- .ivx_with_cpp_scan_enabled(TRUE,  peek_overlaps(ix, qlo, qhi, bounds = bnd))
-      r_v   <- .ivx_with_cpp_scan_enabled(FALSE, peek_overlaps(ix, qlo, qhi, bounds = bnd))
+      cpp_v <- .ivx_with_cpp_scan_enabled(TRUE,  peek_overlapping(ix, qlo, qhi, bounds = bnd))
+      r_v   <- .ivx_with_cpp_scan_enabled(FALSE, peek_overlapping(ix, qlo, qhi, bounds = bnd))
       expect_equal(cpp_v, r_v)
 
       for (as_list_flag in c(TRUE, FALSE)) {
-        cpp_a <- .ivx_with_cpp_scan_enabled(TRUE,  peek_all_overlaps(ix, qlo, qhi, bounds = bnd, as_list = as_list_flag))
-        r_a   <- .ivx_with_cpp_scan_enabled(FALSE, peek_all_overlaps(ix, qlo, qhi, bounds = bnd, as_list = as_list_flag))
+        cpp_a <- .ivx_with_cpp_scan_enabled(TRUE,  peek_all_overlapping(ix, qlo, qhi, bounds = bnd, as_list = as_list_flag))
+        r_a   <- .ivx_with_cpp_scan_enabled(FALSE, peek_all_overlapping(ix, qlo, qhi, bounds = bnd, as_list = as_list_flag))
         expect_equal(cpp_a, r_a)
       }
     }

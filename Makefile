@@ -29,7 +29,7 @@ help:
 	@echo "  site            - Build pkgdown site into docs/"
 	@echo "  paper           - Render paper/manuscript.Rmd to PDF"
 	@echo "  build           - Build the source tarball"
-	@echo "  supplementary   - Assemble paper/Immutables-Supplementary.zip (tarball + scripts + README)"
+	@echo "  supplementary   - Assemble paper/Immutables-Supplementary.zip (tarball + replication script + README)"
 	@echo "  install         - Install the package locally"
 	@echo "  clean           - Remove check directory, tarballs, and paper artifacts"
 
@@ -80,7 +80,9 @@ build:
 	Rscript -e 'devtools::build()'
 
 # Assemble the JStatSoft supplementary archive: a freshly built source tarball
-# plus the full and quick replication scripts and the README.
+# plus the linear replication script and the README. The figure-regeneration
+# script is not included: it needs the paper/ and data-raw/ directories, which
+# the tarball excludes, so the README points to the repository for it.
 # `R CMD build` writes the tarball into the current directory (unlike
 # devtools::build, which writes to the parent).
 supplementary:
@@ -90,9 +92,8 @@ supplementary:
 	 R CMD build . && \
 	 mkdir -p $(REPL_STAGE) && \
 	 cp $$TARBALL $(REPL_STAGE)/ && \
-	 cp data-raw/replication/generate_publication_results.R $(REPL_STAGE)/ && \
-	 cp data-raw/replication/replication-quick.R $(REPL_STAGE)/ && \
-	 sed "s/<version>/$$VERSION/g" data-raw/replication/README.txt > $(REPL_STAGE)/README.txt && \
+	 cp data-raw/replication/replication_code.R $(REPL_STAGE)/ && \
+	 sed "s/<version>/$$VERSION/g" data-raw/replication/README.md > $(REPL_STAGE)/README.md && \
 	 zip -r $(REPL_ZIP) $(REPL_STAGE) && \
 	 rm -rf $(REPL_STAGE) && \
 	 echo "" && \

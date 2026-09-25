@@ -2,7 +2,7 @@
 % Please edit documentation in R/20-api-generics.R
 \name{fapply}
 \alias{fapply}
-\title{Fapply with S3 dispatch}
+\title{Fapply with S3 Dispatch}
 \usage{
 fapply(X, FUN, ...)
 }

@@ -111,6 +111,7 @@ parity_scenarios <- c(
   "$ read",
   "$<- replacement",
   "ordered_sequence insert",
+  "ordered_sequence bound-index",
   "interval_index insert and queries",
   "print.FingerTree output",
   "get_graph_df",
@@ -128,6 +129,7 @@ cpp_wrapper_coverage <- list(
   .ft_cpp_tree_from_sorted = c("ordered_sequence insert"),
   .ft_cpp_concat = c("concat_trees", "interval_index insert and queries"),
   .ft_cpp_oms_insert = c("ordered_sequence insert"),
+  .ft_cpp_oms_bound_index = c("ordered_sequence bound-index"),
   .ft_cpp_locate = c("locate_by_predicate"),
   .ft_cpp_ivx_bound_index = c("interval_index insert and queries"),
   .ft_cpp_split_tree = c("split_around_by_predicate", "split_by_predicate", "interval_index insert and queries"),
@@ -144,7 +146,8 @@ testthat::test_that("backend parity: coverage map includes all cpp wrappers", {
   wrappers <- wrappers[startsWith(wrappers, ".ft_cpp_")]
   wrappers <- setdiff(
     wrappers,
-    c(".ft_cpp_enabled", ".ft_cpp_eligible_monoids", ".ft_cpp_can_use", ".ft_cpp_can_use_oms_insert")
+    c(".ft_cpp_enabled", ".ft_cpp_eligible_monoids", ".ft_cpp_can_use",
+      ".ft_cpp_can_use_oms_insert", ".ft_cpp_can_use_oms_bound")
   )
 
   testthat::expect_setequal(names(cpp_wrapper_coverage), wrappers)
@@ -401,18 +404,18 @@ testthat::test_that("backend parity: interval_index insert and queries", {
     y <- insert(x, "d", start = 2, end = 5)
 
     p0 <- pop_point(y, 2)
-    p1 <- pop_overlaps(y, 2, 3)
+    p1 <- pop_overlapping(y, 2, 3)
     p2 <- pop_all_within(y, 2, 5)
     bounds_tokens <- c("[)", "[]", "()", "(]")
     bounds_matrix <- lapply(bounds_tokens, function(bt) {
       list(
         token = bt,
         point = as.list(peek_all_point(y, 2, bounds = bt)),
-        overlaps = as.list(peek_all_overlaps(y, 2, 3, bounds = bt)),
+        overlaps = as.list(peek_all_overlapping(y, 2, 3, bounds = bt)),
         containing = as.list(peek_all_containing(y, 2, 3, bounds = bt)),
         within = as.list(peek_all_within(y, 2, 3, bounds = bt)),
         pop_point = as.list(pop_all_point(y, 2, bounds = bt)$elements),
-        pop_overlaps = as.list(pop_all_overlaps(y, 2, 3, bounds = bt)$elements),
+        pop_overlapping = as.list(pop_all_overlapping(y, 2, 3, bounds = bt)$elements),
         pop_containing = as.list(pop_all_containing(y, 2, 3, bounds = bt)$elements),
         pop_within = as.list(pop_all_within(y, 2, 3, bounds = bt)$elements)
       )
@@ -436,8 +439,8 @@ testthat::test_that("backend parity: interval_index insert and queries", {
       match_at_matrix = match_at_matrix,
       point_first = peek_point(y, 2),
       point = as.list(peek_all_point(y, 2)),
-      overlaps_first = peek_overlaps(y, 2, 3),
-      overlaps = as.list(peek_all_overlaps(y, 2, 3)),
+      overlaps_first = peek_overlapping(y, 2, 3),
+      overlaps = as.list(peek_all_overlapping(y, 2, 3)),
       containing_first = peek_containing(y, 2, 3),
       containing = as.list(peek_all_containing(y, 2, 3)),
       within_first = peek_within(y, 2, 5),
@@ -474,8 +477,8 @@ testthat::test_that("backend parity: interval_index user monoid recomputation", 
     ), list(sum_item = sum_item, width_sum = width_sum))
     y <- insert(x, 40, start = 3, end = 4)
     z <- fapply(y, function(value, start, end, name) value + 1)
-    s <- peek_all_overlaps(z, 2, 3, bounds = "[)")
-    p <- pop_all_overlaps(z, 2, 3, bounds = "[)")
+    s <- peek_all_overlapping(z, 2, 3, bounds = "[)")
+    p <- pop_all_overlapping(z, 2, 3, bounds = "[)")
 
     list(
       base = c(sum_item = node_measure(x, "sum_item"), width_sum = node_measure(x, "width_sum")),
@@ -522,5 +525,74 @@ testthat::test_that("backend parity: validate_name_state", {
   expect_backend_identical({
     t <- as_flexseq(setNames(as.list(letters[1:10]), LETTERS[1:10]))
     isTRUE(validate_name_state(t))
+  })
+})
+
+# --- ordered_sequence native bound-index (Part 1) -----------------------------
+# Small fixtures cover every branch (below/exact/between/above/duplicate-run x
+# strict/non-strict x numeric/character/logical); expect_backend_identical runs
+# each block under both backends, so inputs stay small to keep CRAN time down.
+
+# lower/upper_bound return index = NULL on a miss (query above all keys).
+if(!exists("%||%")) `%||%` <- function(a, b) if(is.null(a)) b else a
+
+testthat::test_that("backend parity: oms bound-index (numeric, incl. duplicate run)", {
+  expect_backend_identical({
+    xn <- as_ordered_sequence(as.list(1:6), keys = c(10, 20, 20, 20, 30, 40))
+    qs <- c(5, 10, 20, 25, 40, 99)
+    list(
+      lb = vapply(qs, function(k) lower_bound(xn, k)$index %||% NA_integer_, integer(1)),
+      ub = vapply(qs, function(k) upper_bound(xn, k)$index %||% NA_integer_, integer(1)),
+      ck = vapply(qs, function(k) count_key(xn, k), integer(1))
+    )
+  })
+})
+
+testthat::test_that("backend parity: oms bound-index (character)", {
+  expect_backend_identical({
+    xc <- as_ordered_sequence(as.list(1:4), keys = c("b", "d", "d", "f"))
+    qs <- c("a", "b", "d", "e", "f", "g")
+    list(
+      lb = vapply(qs, function(k) lower_bound(xc, k)$index %||% NA_integer_, integer(1)),
+      ub = vapply(qs, function(k) upper_bound(xc, k)$index %||% NA_integer_, integer(1)),
+      ck = vapply(qs, function(k) count_key(xc, k), integer(1))
+    )
+  })
+})
+
+testthat::test_that("backend parity: oms bound-index (logical)", {
+  expect_backend_identical({
+    xl <- as_ordered_sequence(as.list(1:3), keys = c(FALSE, FALSE, TRUE))
+    list(
+      lb = vapply(c(FALSE, TRUE), function(k) lower_bound(xl, k)$index %||% NA_integer_, integer(1)),
+      ub = vapply(c(FALSE, TRUE), function(k) upper_bound(xl, k)$index %||% NA_integer_, integer(1))
+    )
+  })
+})
+
+testthat::test_that("oms bound-index dispatches to C++ for native key types only", {
+  xn <- as_ordered_sequence(as.list(1:4), keys = c(10, 20, 20, 30))
+  expect_wrapper_dispatch(".ft_cpp_oms_bound_index",
+    with_cpp_mode(TRUE, lower_bound(xn, 20)), should_dispatch = TRUE)
+
+  # Date keys are not a native cpp key type -> R locate fallback, still correct.
+  xd <- as_ordered_sequence(as.list(1:3),
+                            keys = as.Date(c("2020-01-01", "2020-06-01", "2021-01-01")))
+  expect_wrapper_dispatch(".ft_cpp_oms_bound_index",
+    with_cpp_mode(TRUE, lower_bound(xd, as.Date("2020-03-01"))), should_dispatch = FALSE)
+  testthat::expect_equal(lower_bound(xd, as.Date("2020-03-01"))$index, 2L)
+})
+
+testthat::test_that("oms bound-index parity at depth (dev/CI only)", {
+  # The bound identity is already checked at every branch on small trees above;
+  # this only stresses descent depth, so keep it off CRAN (cf. test-tree-from-ordered-bulk).
+  testthat::skip_on_cran()
+  expect_backend_identical({
+    xn <- as_ordered_sequence(as.list(1:1000), keys = as.numeric(1:1000))
+    qs <- c(0, 1, 250, 250.5, 500, 1000, 1001)
+    list(
+      lb = vapply(qs, function(k) lower_bound(xn, k)$index %||% NA_integer_, integer(1)),
+      ub = vapply(qs, function(k) upper_bound(xn, k)$index %||% NA_integer_, integer(1))
+    )
   })
 })

@@ -11,6 +11,7 @@ extern SEXP ft_cpp_tree_from_prepared(SEXP, SEXP, SEXP);
 extern SEXP ft_cpp_tree_from_sorted(SEXP, SEXP);
 extern SEXP ft_cpp_concat(SEXP, SEXP, SEXP);
 extern SEXP ft_cpp_oms_insert(SEXP, SEXP, SEXP, SEXP);
+extern SEXP ft_cpp_oms_bound_index(SEXP, SEXP, SEXP, SEXP);
 extern SEXP ft_cpp_locate(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP ft_cpp_split_tree(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP ft_cpp_find_name_position(SEXP, SEXP);
@@ -20,6 +21,8 @@ extern SEXP ft_cpp_name_positions(SEXP);
 extern SEXP ft_cpp_split_at_index(SEXP, SEXP, SEXP);
 extern SEXP ft_cpp_ivx_native_query(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP ft_cpp_ivx_bound_index(SEXP, SEXP, SEXP);
+extern SEXP ft_cpp_force(SEXP);
+extern SEXP ft_cpp_work_counts(void);
 
 static const R_CallMethodDef CallEntries[] = {
   {"ft_cpp_append_right", (DL_FUNC) &ft_cpp_append_right, 3},
@@ -31,6 +34,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"ft_cpp_tree_from_sorted", (DL_FUNC) &ft_cpp_tree_from_sorted, 2},
   {"ft_cpp_concat", (DL_FUNC) &ft_cpp_concat, 3},
   {"ft_cpp_oms_insert", (DL_FUNC) &ft_cpp_oms_insert, 4},
+  {"ft_cpp_oms_bound_index", (DL_FUNC) &ft_cpp_oms_bound_index, 4},
   {"ft_cpp_locate", (DL_FUNC) &ft_cpp_locate, 5},
   {"ft_cpp_split_tree", (DL_FUNC) &ft_cpp_split_tree, 5},
   {"ft_cpp_find_name_position", (DL_FUNC) &ft_cpp_find_name_position, 2},
@@ -40,6 +44,8 @@ static const R_CallMethodDef CallEntries[] = {
   {"ft_cpp_split_at_index", (DL_FUNC) &ft_cpp_split_at_index, 3},
   {"ft_cpp_ivx_native_query", (DL_FUNC) &ft_cpp_ivx_native_query, 12},
   {"ft_cpp_ivx_bound_index", (DL_FUNC) &ft_cpp_ivx_bound_index, 3},
+  {"ft_cpp_force", (DL_FUNC) &ft_cpp_force, 1},
+  {"ft_cpp_work_counts", (DL_FUNC) &ft_cpp_work_counts, 0},
   {NULL, NULL, 0}
 };
 

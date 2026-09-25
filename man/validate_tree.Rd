@@ -2,7 +2,7 @@
 % Please edit documentation in R/30-api-flexseq-validate.R
 \name{validate_tree}
 \alias{validate_tree}
-\title{Validate full tree invariants (debug/test utility)}
+\title{Validate Full Tree Invariants (Debug/Test Utility)}
 \usage{
 validate_tree(t)
 }

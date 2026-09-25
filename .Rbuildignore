@@ -26,5 +26,5 @@
 ^pkgdown$
 ^cran-comments\.md$
 ^Immutables-Supplementary$
-^inst/extdata/benchmarks-.*-fast\.rds$
 ^vignettes/inst$
+^\.superpowers$

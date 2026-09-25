@@ -2,7 +2,7 @@
 % Please edit documentation in R/30-api-flexseq-validate.R
 \name{validate_name_state}
 \alias{validate_name_state}
-\title{Validate name-state invariants only (debug/test utility)}
+\title{Validate Name-State Invariants (Debug/Test Utility)}
 \usage{
 validate_name_state(t)
 }

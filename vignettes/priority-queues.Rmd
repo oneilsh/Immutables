@@ -1,8 +1,8 @@
 ---
-title: "Priority Queues"
+title: "Priority Queues: Fast Min/Max Access by Priority"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Priority Queues}
+  %\VignetteIndexEntry{Priority Queues: Fast Min/Max Access by Priority}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -158,3 +158,75 @@ y <- priority_queue() |>
 as_flexseq(y)
 as_flexseq(as.list(y))
 ```
+
+## Example: best-first feature selection
+
+Priority queues have many applications, but we'll demonstrate applying them to the problem of feature selection in modeling: given a large number of features, only a few of which are informative, identify a small subset with good performance. We begin by constructing a matrix `X` with 25 potential feature columns, and an outcome `y` dependent only on features 3 and 7:
+
+```{r}
+set.seed(100)
+n <- 2000
+p <- 25
+X <- matrix(rnorm(n * p), n, p)
+
+# response depends on features 3 and 7 only
+y <- 3.5 * X[, 3] - 4 * X[, 7] + rnorm(n)
+```
+
+We'll consider linear models using only main effects, and use Akaike's Information Criterion (AIC) as a measure of performance. The number of potential models ($2^{25}$) is too large to try all possibilities. Rather than iterate feature combinations exhaustively, we'll perform a best-first search: given a "current best" set of features, we'll add remaining features individually, evaluating as we go and storing them for potential later expansion. By keeping feature sets in a priority queue prioritized by resultant AIC, we can select the best-performing set to build on at each iteration. We thus begin with a base model using no features, and the corresponding empty feature set and AIC stored in a `priority_queue`.
+
+```{r}
+# a model using no features, initially the "best"
+model <- lm(y ~ 1)
+best_features <- numeric(0)
+best_aic <- AIC(model)
+
+# store the initial model prioritized by its AIC
+pq <- priority_queue()
+pq <- insert(pq, best_features, priority = best_aic)
+```
+
+So long as there are feature sets available in the queue to expand on, we will do so, but limit the total number of considered models to approximately 200 to prevent an exhaustive search. At each iteration we pop the best feature set considered so far and compute the remaining available features. We then add each of those to the current best set in turn, resulting in a new model with corresponding AIC to add to the queue. If one of these performs better than the best so far we record it. Along the way we update the number of models considered.
+
+```{r}
+models_considered <- 1
+
+while(length(pq) > 0 && models_considered < 200) {
+  # pop the current best-performing set of features
+  current_best <- pop_min(pq)
+
+  # replace the queue with the remaining (unpopped) portion
+  pq <- current_best$remaining
+
+  # extract the current best features ($value) and AIC ($priority)
+  current_best_features <- current_best$value
+  current_best_aic <- current_best$priority
+
+  # features we can add to the current best for potential improvement
+  available_features <- setdiff(1:ncol(X), current_best_features)
+
+  # add each unused feature one at a time
+  for(available_feature in available_features) {
+    # add it to the set of best-performing features so far
+    selected_features <- c(current_best_features, available_feature)
+
+    # build a model with that updated set
+    model <- lm(y ~ X[ , selected_features, drop = FALSE])
+
+    # add the features to the queue prioritized by the AIC they deliver
+    pq <- insert(pq, selected_features, priority = AIC(model))
+
+    # if the current model is better than the best so far, record it
+    if(AIC(model) < best_aic) {
+      best_features <- selected_features
+      best_aic <- AIC(model)
+    }
+
+    models_considered <- models_considered + 1
+  }
+}
+
+best_features
+```
+
+The best model encountered by AIC includes the two informative features, 7 and 3, along with several noise features that each improve AIC slightly. Potential improvements to this example include ordering features to avoid duplicated testing of feature permutations, more sophisticated stopping criteria based on AIC trend, and alternative prioritization values. The search history can also easily be inspected efficiently by growing a `flexseq` with intermediate information.

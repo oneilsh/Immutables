@@ -12,12 +12,12 @@ test_that("peek_all_point as_list returns parallel vectors matching peek_all_poi
   expect_equal(as_list$ends,   c(3, 2))
 })
 
-test_that("peek_all_overlaps as_list returns parallel vectors matching default", {
+test_that("peek_all_overlapping as_list returns parallel vectors matching default", {
   ix <- interval_index("a", "b", "c", "d",
                        start = c(1, 2, 4, 6),
                        end   = c(3, 2, 5, 8))
 
-  as_list <- peek_all_overlaps(ix, 2, 4, bounds = "[]", as_list = TRUE)
+  as_list <- peek_all_overlapping(ix, 2, 4, bounds = "[]", as_list = TRUE)
 
   # low=2 high=4, bounds="[]": overlapping entries are "a" (1-3), "b" (2-2), "c" (4-5)
   expect_named(as_list, c("values", "starts", "ends"), ignore.order = TRUE)
@@ -45,13 +45,13 @@ test_that("peek_all_point as_list preserves integer endpoint type", {
   expect_equal(res$ends,   c(3L, 2L))
 })
 
-test_that("peek_all_overlaps as_list preserves Date endpoint class", {
+test_that("peek_all_overlapping as_list preserves Date endpoint class", {
   ix <- interval_index("a", "b", "c",
                        start = as.Date(c("2025-01-01", "2025-01-03", "2025-01-10")),
                        end   = as.Date(c("2025-01-02", "2025-01-05", "2025-01-12")))
   qlo <- as.Date("2025-01-04")
   qhi <- as.Date("2025-01-06")
-  res <- peek_all_overlaps(ix, qlo, qhi, bounds = "[]", as_list = TRUE)
+  res <- peek_all_overlapping(ix, qlo, qhi, bounds = "[]", as_list = TRUE)
   # Date endpoints are not in the "numeric" simple domain; should fall back to list.
   expect_type(res$starts, "list")
   expect_true(all(vapply(res$starts, inherits, logical(1), "Date")))

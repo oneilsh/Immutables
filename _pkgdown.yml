@@ -1,4 +1,4 @@
-url: https://oneilsh.github.io/immutables
+url: https://oneilsh.github.io/Immutables/
 
 template:
   bootstrap: 5
@@ -32,7 +32,7 @@ navbar:
           href: articles/interval-indices.html
         - text: "---------"
         - text: "Examples"
-        - text: "Benchmarks"
+        - text: "Benchmarking"
           href: articles/benchmarks.html
         - text: "Gallery"
           href: articles/gallery.html
@@ -141,6 +141,8 @@ reference:
       - count_between
       - min_key
       - max_key
+      - key_at
+      - nearest_key
       - fapply
       - "merge.ordered_sequence"
       - "[.ordered_sequence"
@@ -161,14 +163,14 @@ reference:
       - peek_all_point
       - pop_point
       - pop_all_point
-      - peek_overlaps
-      - peek_all_overlaps
+      - peek_overlapping
+      - peek_all_overlapping
       - peek_containing
       - peek_all_containing
       - peek_within
       - peek_all_within
-      - pop_overlaps
-      - pop_all_overlaps
+      - pop_overlapping
+      - pop_all_overlapping
       - pop_containing
       - pop_all_containing
       - pop_within
@@ -196,3 +198,8 @@ reference:
       - validate_tree
       - validate_name_state
       - plot_structure
+
+  - title: "Deprecated"
+    desc: "Functions kept for backward compatibility; they warn and will be removed in a future release."
+    contents:
+      - Immutables-deprecated

@@ -278,17 +278,142 @@ testthat::test_that("pop helpers preserve ordered class", {
   pm <- pop_at(xs, 2)
 
   testthat::expect_identical(pf$value, "x1")
+  testthat::expect_identical(pf$key, 1)
   testthat::expect_s3_class(pf$remaining, "ordered_sequence")
   testthat::expect_equal(as.list(pf$remaining), list("x2", "x3"))
 
   testthat::expect_identical(pb$value, "x3")
+  testthat::expect_identical(pb$key, 3)
   testthat::expect_s3_class(pb$remaining, "ordered_sequence")
   testthat::expect_equal(as.list(pb$remaining), list("x1", "x2"))
 
   testthat::expect_identical(peek_at(xs, 2), "x2")
   testthat::expect_identical(pm$value, "x2")
+  testthat::expect_identical(pm$key, 2)
   testthat::expect_s3_class(pm$remaining, "ordered_sequence")
   testthat::expect_equal(as.list(pm$remaining), list("x1", "x3"))
+
+  # out-of-bounds pop_at miss: value/key NULL, remaining unchanged and still ordered
+  miss <- pop_at(xs, 10)
+  testthat::expect_null(miss$value)
+  testthat::expect_null(miss$key)
+  testthat::expect_s3_class(miss$remaining, "ordered_sequence")
+
+  # empty-sequence pop: key is NULL, mirroring pop_key() on a miss
+  empty <- pop_front(ordered_sequence())
+  testthat::expect_null(empty$value)
+  testthat::expect_null(empty$key)
+})
+
+testthat::test_that("key_at reads the key at a position", {
+  xs <- as_ordered_sequence(list("x1", "x2", "x3"), keys = c(10, 20, 30))
+
+  testthat::expect_identical(key_at(xs, 1), 10)
+  testthat::expect_identical(key_at(xs, 2), 20)
+  testthat::expect_identical(key_at(xs, 3), 30)
+
+  # general form of min_key()/max_key()
+  testthat::expect_identical(key_at(xs, 1), min_key(xs))
+  testthat::expect_identical(key_at(xs, length(xs)), max_key(xs))
+
+  # value at the same position comes from peek_at()
+  testthat::expect_identical(peek_at(xs, 2), "x2")
+
+  # out-of-bounds -> NULL (mirrors peek_at); empty -> NULL
+  testthat::expect_null(key_at(xs, 10))
+  testthat::expect_null(key_at(ordered_sequence(), 1))
+
+  # invalid indices error (same validation as peek_at)
+  testthat::expect_error(key_at(xs, 0))
+  testthat::expect_error(key_at(xs, NA))
+  testthat::expect_error(key_at(xs, 1.5))
+  testthat::expect_error(key_at(xs, c(1, 2)))
+
+  # not supported off the ordered-sequence axis
+  testthat::expect_error(key_at(flexseq("a", "b"), 1), "must be an ordered_sequence")
+  testthat::expect_error(
+    key_at(interval_index(1, start = 1, end = 2), 1),
+    "not supported for interval_index"
+  )
+})
+
+testthat::test_that("nearest_key resolves by order, and by distance when between", {
+  xs <- as_ordered_sequence(list("a", "b", "c", "d"), keys = c(1, 2, 4, 8))
+
+  # resolved by order alone
+  testthat::expect_identical(nearest_key(xs, 4), 4)     # exact match
+  testthat::expect_identical(nearest_key(xs, 0), 1)     # below all -> min key
+  testthat::expect_identical(nearest_key(xs, 100), 8)   # above all -> max key
+
+  # resolved by distance (strictly between two distinct keys)
+  testthat::expect_identical(nearest_key(xs, 5), 4)     # 4 (dist 1) vs 8 (dist 3)
+  testthat::expect_identical(nearest_key(xs, 7), 8)     # 8 (dist 1) vs 4 (dist 3)
+  testthat::expect_identical(nearest_key(xs, 3), 2)     # 2 and 4 equidistant -> lower
+
+  # single element and empty
+  one <- as_ordered_sequence(list("z"), keys = 5)
+  testthat::expect_identical(nearest_key(one, 999), 5)
+  testthat::expect_identical(nearest_key(one, 5), 5)
+  testthat::expect_null(nearest_key(ordered_sequence()))
+
+  # composes with the keyed helpers
+  testthat::expect_identical(pop_key(xs, nearest_key(xs, 5))$value, "c")
+})
+
+testthat::test_that("nearest_key ties argument selects lower/upper/both", {
+  xs <- as_ordered_sequence(list("a", "b", "c", "d"), keys = c(1, 2, 4, 8))
+
+  # query 3 is equidistant between keys 2 and 4
+  testthat::expect_identical(nearest_key(xs, 3, ties = "lower"), 2)
+  testthat::expect_identical(nearest_key(xs, 3, ties = "upper"), 4)
+  testthat::expect_identical(nearest_key(xs, 3, ties = "both"), c(2, 4))
+
+  # ties argument only matters on an exact tie; a unique nearest is unaffected
+  testthat::expect_identical(nearest_key(xs, 5, ties = "upper"), 4)
+  testthat::expect_identical(nearest_key(xs, 5, ties = "both"), 4)
+
+  # invalid ties value errors via match.arg
+  testthat::expect_error(nearest_key(xs, 3, ties = "middle"))
+})
+
+testthat::test_that("nearest_key supports Date and POSIXct between-cases", {
+  d <- as_ordered_sequence(
+    list("a", "b", "c"),
+    keys = as.Date(c("2020-01-01", "2020-01-10", "2020-01-20"))
+  )
+  testthat::expect_identical(nearest_key(d, as.Date("2020-01-12")), as.Date("2020-01-10"))
+
+  p <- as_ordered_sequence(
+    list("a", "b"),
+    keys = as.POSIXct(c("2020-01-01 00:00:00", "2020-01-01 01:00:00"), tz = "UTC")
+  )
+  testthat::expect_equal(
+    nearest_key(p, as.POSIXct("2020-01-01 00:10:00", tz = "UTC")),
+    as.POSIXct("2020-01-01 00:00:00", tz = "UTC")
+  )
+})
+
+testthat::test_that("nearest_key handles character by order, errors only when between", {
+  xc <- as_ordered_sequence(list("x1", "x2", "x3"), keys = c("b", "d", "f"))
+
+  testthat::expect_identical(nearest_key(xc, "d"), "d")   # exact
+  testthat::expect_identical(nearest_key(xc, "a"), "b")   # below all -> min
+  testthat::expect_identical(nearest_key(xc, "z"), "f")   # above all -> max
+
+  # strictly between two distinct character keys has no distance metric
+  testthat::expect_error(nearest_key(xc, "c"), "numeric difference")
+})
+
+testthat::test_that("nearest_key guards non-ordered inputs", {
+  testthat::expect_error(nearest_key(flexseq("a", "b"), 1), "must be an ordered_sequence")
+  testthat::expect_error(
+    nearest_key(priority_queue("a", priorities = 1), 1),
+    "must be an ordered_sequence"
+  )
+  testthat::expect_error(
+    nearest_key(interval_index(1, start = 1, end = 2), 1),
+    "not supported for interval_index"
+  )
 })
 
 testthat::test_that("fapply dispatches for ordered_sequence and no reset_ties arg", {

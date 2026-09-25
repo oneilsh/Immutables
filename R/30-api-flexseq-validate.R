@@ -1,6 +1,6 @@
 #SO
 
-#' Validate full tree invariants (debug/test utility)
+#' Validate Full Tree Invariants (Debug/Test Utility)
 #'
 #' Performs expensive full-tree auditing of:
 #' - structural attributes (`monoids`/`measures`) consistency
@@ -21,7 +21,7 @@ validate_tree <- function(t) {
   invisible(TRUE)
 }
 
-#' Validate name-state invariants only (debug/test utility)
+#' Validate Name-State Invariants (Debug/Test Utility)
 #'
 #' Checks that trees are either fully unnamed or fully named with unique,
 #' non-empty names.

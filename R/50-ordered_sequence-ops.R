@@ -11,6 +11,16 @@
     return(1L)
   }
 
+  # Native callback-free descent for cpp-eligible key types; the R predicate
+  # locate below is the fallback (Date/POSIXct and other orderable key types).
+  key_type <- .oms_key_type_state(x)
+  if(.ft_cpp_can_use_oms_bound(attr(x, "monoids", exact = TRUE), key_type)) {
+    idx <- .ft_cpp_oms_bound_index(x, key, key_type, strict)
+    if(!is.na(idx)) {
+      return(as.integer(idx))
+    }
+  }
+
   pred <- if(!isTRUE(strict)) {
     function(v) {
       isTRUE(v$has) && .oms_compare_key(v$key, key, v$key_type) >= 0L
@@ -51,11 +61,12 @@ add_monoids.ordered_sequence <- function(t, monoids, overwrite = FALSE) {
 #' @param x An `ordered_sequence`.
 #' @return Minimum key, or `NULL` when `x` is empty.
 #' @details
-#' This follows sequence key order directly.
+#' This follows sequence key order directly. Equivalent to `key_at(x, 1)`.
 #' @examples
 #' x <- ordered_sequence("a", "b", keys = c(2, 1))
 #' min_key(x)
 #' min_key(ordered_sequence())
+#' @seealso [max_key()], [key_at()], [nearest_key()]
 #' @export
 min_key <- function(x) {
   .oms_stop_interval_index(x, "min_key")
@@ -74,11 +85,12 @@ min_key <- function(x) {
 #' @param x An `ordered_sequence`.
 #' @return Maximum key, or `NULL` when `x` is empty.
 #' @details
-#' Uses cached `.oms_max_key` monoid state.
+#' Uses cached `.oms_max_key` monoid state. Equivalent to `key_at(x, length(x))`.
 #' @examples
 #' x <- ordered_sequence("a", "b", keys = c(2, 1))
 #' max_key(x)
 #' max_key(ordered_sequence())
+#' @seealso [min_key()], [key_at()], [nearest_key()]
 #' @export
 max_key <- function(x) {
   .oms_stop_interval_index(x, "max_key")
@@ -88,6 +100,39 @@ max_key <- function(x) {
     return(NULL)
   }
   m$key
+}
+
+# Runtime: O(log n).
+#' Key at a Position
+#'
+#' Returns the key of the element at a one-based position, without removing it.
+#' This is the positional companion to [peek_at()] (which returns the value at a
+#' position) and the general form of [min_key()] (`key_at(x, 1)`) and
+#' [max_key()] (`key_at(x, length(x))`).
+#'
+#' @param x An `ordered_sequence`.
+#' @param index One-based position to read.
+#' @return The key at `index`, or `NULL` when `index` is out of bounds.
+#' @details
+#' Positive integer indices beyond `length(x)` return `NULL`. Invalid indices
+#' (`NA`, non-integer, `<= 0`, or length not equal to 1) error. Pair with
+#' [peek_at()] to read the value at the same position, or use [pop_at()] when
+#' you also want the remaining sequence.
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", keys = c(10, 20, 30))
+#' key_at(x, 2)
+#' key_at(x, 10)
+#' @seealso [peek_at()], [min_key()], [max_key()], [nearest_key()], [lower_bound()], [pop_at()]
+#' @export
+key_at <- function(x, index) {
+  .oms_stop_interval_index(x, "key_at")
+  .oms_assert_set(x)
+  n <- length(x)
+  idx <- .ft_validate_scalar_position_missable(index, n)
+  if(is.null(idx)) {
+    return(NULL)
+  }
+  .ft_get_elem_at(x, idx)$key
 }
 
 # Runtime: O(log n) near locate point depth.
@@ -291,6 +336,104 @@ upper_bound <- function(x, key) {
 
   entry <- .ft_get_elem_at(x, as.integer(idx))
   list(found = TRUE, index = idx, value = entry$value, key = entry$key)
+}
+
+# Runtime: O(log n).
+#' Nearest Key to a Query
+#'
+#' Returns the existing key closest to `query`. Generalizes [min_key()] and
+#' [max_key()]: it resolves by order alone at the extremes and on an exact hit,
+#' and only needs a distance metric when `query` falls strictly between two
+#' distinct keys.
+#'
+#' @param x An `ordered_sequence`.
+#' @param query Query key.
+#' @param ties How to resolve an equidistant tie between the two distinct
+#'   neighbouring keys (the only case a tie can arise): `"lower"` (default)
+#'   returns the lower key, `"upper"` the higher key, and `"both"` returns both
+#'   as a length-2 vector.
+#' @return The nearest key, or `NULL` when `x` is empty. A length-1 key except
+#'   with `ties = "both"` on an exact tie, which returns both equidistant keys.
+#'   Feed the result to [peek_key()] / [pop_key()] to read or remove the matching
+#'   element.
+#' @details
+#' Resolution:
+#' - Exact match, or `query` below/above every key: decided by order alone, so it
+#'   works for every key type (including `character`).
+#' - `query` strictly between two distinct keys: returns the closer of the two by
+#'   `abs(query - key)`, with an equidistant tie resolved by `ties`. This case
+#'   needs a numeric difference, so it supports `numeric`, `Date`, and `POSIXct`
+#'   keys; for `character` (and other non-subtractable orderable keys) it errors,
+#'   because "closer" is undefined -- use [lower_bound()] / [peek_key()] for
+#'   order-based lookup instead.
+#'
+#' Duplicate keys are not disambiguated here: the return is a key value, and
+#' [peek_key()] / [pop_key()] select the FIFO-first element for that key.
+#' @examples
+#' x <- ordered_sequence("a", "b", "c", "d", keys = c(1, 2, 4, 8))
+#' nearest_key(x, 3)                 # 2 and 4 are equidistant -> lower key (2)
+#' nearest_key(x, 3, ties = "upper") # 4
+#' nearest_key(x, 3, ties = "both")  # c(2, 4)
+#' nearest_key(x, 5)                 # 4
+#' nearest_key(x, 100)               # 8 (above all)
+#' nearest_key(ordered_sequence())   # NULL
+#' @seealso [lower_bound()], [peek_key()], [min_key()], [max_key()], [key_at()]
+#' @export
+# Nearest existing key to a query; composes with peek_key()/pop_key().
+nearest_key <- function(x, query, ties = c("lower", "upper", "both")) {
+  ties <- match.arg(ties)
+  .oms_stop_interval_index(x, "nearest_key")
+  .oms_assert_set(x)
+  n <- length(x)
+  if(n == 0L) {
+    return(NULL)
+  }
+
+  norm <- .oms_normalize_key(query)
+  .oms_validate_key_type(.oms_key_type_state(x), norm$key_type)
+  q <- norm$key
+  key_type <- norm$key_type
+
+  idx <- .oms_bound_index_prepared(x, q, strict = FALSE)   # first key >= q, in 1..n+1
+  if(idx > n) {
+    return(key_at(x, n))                                   # above all -> max key
+  }
+  above <- key_at(x, as.integer(idx))
+  if(.oms_compare_key(above, q, key_type) == 0L) {
+    return(above)                                          # exact match
+  }
+  if(idx == 1L) {
+    return(above)                                          # below all -> min key
+  }
+
+  below <- key_at(x, as.integer(idx) - 1L)                 # below < q < above (distinct)
+  key_dist <- function(a, b) {
+    tryCatch(
+      abs(a - b),
+      error = function(e) {
+        stop(
+          "`nearest_key()` needs keys that support a numeric difference ",
+          "(numeric/Date/POSIXct); key type '", key_type, "' does not. ",
+          "Use `lower_bound()`/`peek_key()` for order-based lookup.",
+          call. = FALSE
+        )
+      }
+    )
+  }
+  d_above <- key_dist(above, q)
+  d_below <- key_dist(q, below)
+  if(d_above < d_below) {
+    return(above)
+  }
+  if(d_below < d_above) {
+    return(below)
+  }
+  # equidistant tie between two distinct keys
+  switch(ties,
+    lower = below,
+    upper = above,
+    both  = c(below, above)
+  )
 }
 
 # Runtime: O(log n).

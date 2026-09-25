@@ -46,6 +46,78 @@ bool is_structural_node_cpp(SEXP x) {
   return has_class(x, "FingerTree") || has_class(x, "Digit") || has_class(x, "Node");
 }
 
+// ---- Suspended middle trees -------------------------------------------------
+//
+// Amortized O(1) deque operations only survive persistence (reusing an old
+// version repeatedly) if the recursive part of a push/pop is suspended and its
+// result memoized, so every version sharing the suspension shares the paid-off
+// work (Hinze & Paterson 2006, Sec. 3; Okasaki 1998). A Deep node's middle slot
+// may therefore hold an "FTThunk": an environment (a reference object, so the
+// memo is shared) recording one pending one-level operation on a middle tree.
+// Thunks carry the cached measures of their eventual value, so enclosing nodes
+// are measured without forcing. Only the middle slot ever holds a thunk; read it
+// with deep_middle(), which forces, or deep_middle_raw() to pass it through.
+
+enum ThunkOp {
+  THUNK_ADD_LEFT = 1,   // add_left(t, x)
+  THUNK_ADD_RIGHT = 2,  // add_right(t, x)
+  THUNK_TAIL_LEFT = 3,  // viewL(t)$rest
+  THUNK_INIT_RIGHT = 4  // viewR(t)$rest
+};
+
+SEXP thunk_op_sym = Rf_install("op");
+SEXP thunk_t_sym = Rf_install("t");
+SEXP thunk_x_sym = Rf_install("x");
+SEXP thunk_value_sym = Rf_install("value");
+
+// Work counters exposed for tests that check the amortized bound by counting
+// work rather than timing it: suspensions evaluated, and Deep nodes built (one
+// per level a push/pop touches, strict or lazy).
+double thunk_force_count = 0.0;
+double deep_build_count = 0.0;
+
+bool is_thunk(SEXP x) {
+  return TYPEOF(x) == ENVSXP && has_class(x, "FTThunk");
+}
+
+// structural nodes and suspensions both carry a cached "measures" attribute
+bool carries_measures(SEXP x) {
+  return is_structural_node_cpp(x) || is_thunk(x);
+}
+
+SEXP env_get(SEXP env, SEXP sym) {
+#if R_VERSION >= R_Version(4, 5, 0)
+  return R_getVarEx(sym, env, FALSE, R_UnboundValue);
+#else
+  return Rf_findVarInFrame(env, sym);
+#endif
+}
+
+// Caller must protect `t`, `x` and `measures`.
+SEXP make_thunk(int op, SEXP t, SEXP x, SEXP measures, SEXP monoids) {
+  Shield<SEXP> env(R_NewEnv(R_EmptyEnv, FALSE, 0));
+  Shield<SEXP> op_v(Rf_ScalarInteger(op));
+  Rf_defineVar(thunk_op_sym, op_v, env);
+  Rf_defineVar(thunk_t_sym, t, env);
+  Rf_defineVar(thunk_x_sym, x, env);
+  Rf_setAttrib(env, measures_sym, measures);
+  Rf_setAttrib(env, monoids_sym, monoids);
+  Shield<SEXP> cls(Rf_mkString("FTThunk"));
+  Rf_setAttrib(env, R_ClassSymbol, cls);
+  return env;
+}
+
+SEXP force_thunk(SEXP th);
+
+inline SEXP deep_middle_raw(SEXP d) {
+  return VECTOR_ELT(d, 1);
+}
+
+SEXP deep_middle(SEXP d) {
+  SEXP m = VECTOR_ELT(d, 1);
+  return is_thunk(m) ? force_thunk(m) : m;
+}
+
 bool has_name_attr(SEXP x) {
   SEXP nm = Rf_getAttrib(x, ft_name_sym);
   return !Rf_isNull(nm) && XLENGTH(nm) > 0;
@@ -75,7 +147,7 @@ double compute_tree_size_fallback(SEXP x) {
   if(has_class(x, "Deep")) {
     List d(x);
     return compute_tree_size_fallback(d["prefix"]) +
-      compute_tree_size_fallback(d["middle"]) +
+      compute_tree_size_fallback(deep_middle(d)) +
       compute_tree_size_fallback(d["suffix"]);
   }
   List xs(x);
@@ -100,7 +172,7 @@ int compute_tree_named_count_fallback(SEXP x) {
   if(has_class(x, "Deep")) {
     List d(x);
     return compute_tree_named_count_fallback(d["prefix"]) +
-      compute_tree_named_count_fallback(d["middle"]) +
+      compute_tree_named_count_fallback(deep_middle(d)) +
       compute_tree_named_count_fallback(d["suffix"]);
   }
   List xs(x);
@@ -120,7 +192,7 @@ bool name_equals(SEXP x, const std::string& target) {
 }
 
 double child_size(SEXP x) {
-  if(has_class(x, "FingerTree") || has_class(x, "Digit") || has_class(x, "Node")) {
+  if(carries_measures(x)) {
     List ms = Rf_getAttrib(x, measures_sym);
     if(ms.containsElementNamed(".size")) {
       return as<double>(ms[".size"]);
@@ -131,7 +203,7 @@ double child_size(SEXP x) {
 }
 
 int child_named_count(SEXP x) {
-  if(has_class(x, "FingerTree") || has_class(x, "Digit") || has_class(x, "Node")) {
+  if(carries_measures(x)) {
     List ms = Rf_getAttrib(x, measures_sym);
     if(ms.containsElementNamed(".named_count")) {
       return as<int>(ms[".named_count"]);
@@ -158,7 +230,7 @@ int find_name_position_impl(SEXP x, const std::string& target, int offset) {
   if(has_class(x, "Deep")) {
     List d(x);
     SEXP prefix = d["prefix"];
-    SEXP middle = d["middle"];
+    SEXP middle = deep_middle(d);
     SEXP suffix = d["suffix"];
 
     int p = find_name_position_impl(prefix, target, offset);
@@ -212,7 +284,7 @@ SEXP get_by_index_impl(SEXP x, int idx) {
   if(has_class(x, "Deep")) {
     List d(x);
     SEXP prefix = d["prefix"];
-    SEXP middle = d["middle"];
+    SEXP middle = deep_middle(d);
     SEXP suffix = d["suffix"];
 
     const int npr = static_cast<int>(child_size(prefix));
@@ -270,7 +342,7 @@ void collect_names_impl(SEXP x, CharacterVector& out, int& pos) {
   if(has_class(x, "Deep")) {
     List d(x);
     collect_names_impl(d["prefix"], out, pos);
-    collect_names_impl(d["middle"], out, pos);
+    collect_names_impl(deep_middle(d), out, pos);
     collect_names_impl(d["suffix"], out, pos);
     return;
   }
@@ -880,7 +952,7 @@ int ivx_bound_search_node(SEXP node, SEXP key, ScalarKind key_kind, bool strict,
 
   if(has_class(node, "Deep")) {
     List d(node);
-    SEXP kids[3] = { d["prefix"], d["middle"], d["suffix"] };
+    SEXP kids[3] = { d["prefix"], deep_middle(d), d["suffix"] };
     int acc = 0;
     for(int i = 0; i < 3; ++i) {
       const int sz = (int) child_size(kids[i]);
@@ -1043,7 +1115,7 @@ void ivx_native_collect_leaves(SEXP node, std::vector<SEXP>& out) {
   if(has_class(node, "Deep")) {
     List d(node);
     ivx_native_collect_leaves(d["prefix"], out);
-    ivx_native_collect_leaves(d["middle"], out);
+    ivx_native_collect_leaves(deep_middle(d), out);
     ivx_native_collect_leaves(d["suffix"], out);
     return;
   }
@@ -1169,7 +1241,7 @@ bool ivx_native_walk_node(
   if(has_class(node, "Deep")) {
     List d(node);
     SEXP prefix = d["prefix"];
-    SEXP middle = d["middle"];
+    SEXP middle = deep_middle(d);
     SEXP suffix = d["suffix"];
     if(!ivx_native_walk_node(prefix, relation_kind, qlo, qhi, kind,
                              include_start, include_end,
@@ -1408,7 +1480,7 @@ List measures_from_children(const List& children, const List& monoids) {
     for(int j = 0; j < children.size(); ++j) {
       SEXP ch = children[j];
       SEXP mv = R_NilValue;
-      if(has_class(ch, "FingerTree") || has_class(ch, "Digit") || has_class(ch, "Node")) {
+      if(carries_measures(ch)) {
         List cms = Rf_getAttrib(ch, measures_sym);
         if(!Rf_isNull(cms) && i < cms.size() && !Rf_isNull(cms[i])) {
           mv = cms[i];
@@ -1487,12 +1559,38 @@ SEXP make_node2(SEXP a, SEXP b, const List& monoids) {
 }
 
 SEXP make_deep(SEXP prefix, SEXP middle, SEXP suffix, const List& monoids) {
+  deep_build_count += 1.0;
   List d = List::create(_["prefix"] = prefix, _["middle"] = middle, _["suffix"] = suffix);
   d.attr("class") = CharacterVector::create("Deep", "FingerTree", "list");
   d.attr("monoids") = monoids;
   List children = List::create(prefix, middle, suffix);
   d.attr("measures") = measures_from_children(children, monoids);
   return d;
+}
+
+SEXP add_right_cpp(SEXP t, SEXP el, const List& monoids);
+SEXP add_left_cpp(SEXP t, SEXP el, const List& monoids);
+
+bool deep_digit_full(SEXP t, const char* which) {
+  return has_class(t, "Deep") && Rf_xlength(List(t)[which]) == 4;
+}
+
+// add_left(m, node) for a middle tree `m` (already forced). A push that would
+// cascade into m's own middle is suspended; anything else is O(1) and done now.
+SEXP lazy_add_left(SEXP m, SEXP node, const List& monoids) {
+  if(!deep_digit_full(m, "prefix")) {
+    return add_left_cpp(m, node, monoids);
+  }
+  Shield<SEXP> ms(measures_from_children(List::create(node, m), monoids));
+  return make_thunk(THUNK_ADD_LEFT, m, node, ms, monoids);
+}
+
+SEXP lazy_add_right(SEXP m, SEXP node, const List& monoids) {
+  if(!deep_digit_full(m, "suffix")) {
+    return add_right_cpp(m, node, monoids);
+  }
+  Shield<SEXP> ms(measures_from_children(List::create(m, node), monoids));
+  return make_thunk(THUNK_ADD_RIGHT, m, node, ms, monoids);
 }
 
 SEXP add_right_cpp(SEXP t, SEXP el, const List& monoids) {
@@ -1519,11 +1617,11 @@ SEXP add_right_cpp(SEXP t, SEXP el, const List& monoids) {
     if(suffix.size() == 4) {
       Shield<SEXP> new_suffix(make_digit(List::create(suffix[3], el), monoids));
       Shield<SEXP> middle_node(make_node3(suffix[0], suffix[1], suffix[2], monoids));
-      Shield<SEXP> new_middle(add_right_cpp(d["middle"], middle_node, monoids));
+      Shield<SEXP> new_middle(lazy_add_right(deep_middle(d), middle_node, monoids));
       return make_deep(d["prefix"], new_middle, new_suffix, monoids);
     }
     Shield<SEXP> new_suffix(add_right_cpp(d["suffix"], el, monoids));
-    return make_deep(d["prefix"], d["middle"], new_suffix, monoids);
+    return make_deep(d["prefix"], deep_middle_raw(d), new_suffix, monoids);
   }
   stop("Unsupported node type in ft_cpp_append_right.");
 }
@@ -1552,11 +1650,11 @@ SEXP add_left_cpp(SEXP t, SEXP el, const List& monoids) {
     if(prefix.size() == 4) {
       Shield<SEXP> new_prefix(make_digit(List::create(el, prefix[0]), monoids));
       Shield<SEXP> middle_node(make_node3(prefix[1], prefix[2], prefix[3], monoids));
-      Shield<SEXP> new_middle(add_left_cpp(d["middle"], middle_node, monoids));
+      Shield<SEXP> new_middle(lazy_add_left(deep_middle(d), middle_node, monoids));
       return make_deep(new_prefix, new_middle, d["suffix"], monoids);
     }
     Shield<SEXP> new_prefix(add_left_cpp(d["prefix"], el, monoids));
-    return make_deep(new_prefix, d["middle"], d["suffix"], monoids);
+    return make_deep(new_prefix, deep_middle_raw(d), d["suffix"], monoids);
   }
   stop("Unsupported node type in ft_cpp_prepend_left.");
 }
@@ -1762,7 +1860,7 @@ SEXP app3_cpp(SEXP xs, const List& ts, SEXP ys, const List& monoids) {
     for(int i = 0; i < pry.size(); ++i) bridge[j++] = pry[i];
 
     List nts = measured_nodes_cpp(bridge, monoids);
-    Shield<SEXP> m(app3_cpp(dx["middle"], nts, dy["middle"], monoids));
+    Shield<SEXP> m(app3_cpp(deep_middle(dx), nts, deep_middle(dy), monoids));
     return make_deep(dx["prefix"], m, dy["suffix"], monoids);
   }
 
@@ -1967,7 +2065,7 @@ List locate_tree_impl_cpp(
   if(has_class(t, "Deep")) {
     List d(t);
     SEXP prefix = d["prefix"];
-    SEXP middle = d["middle"];
+    SEXP middle = deep_middle(d);
     SEXP suffix = d["suffix"];
 
     List pm = Rf_getAttrib(prefix, measures_sym);
@@ -2065,32 +2163,68 @@ SEXP node_to_digit_cpp(SEXP node, const List& monoids) {
 List viewL_cpp(SEXP t, const List& monoids);
 List viewR_cpp(SEXP t, const List& monoids);
 
+// Rebuild a Deep whose prefix has just emptied, from its middle `m` (forced,
+// non-empty) and suffix `sf`: the first node of m becomes the new prefix. When
+// removing that node from m would itself recurse (m's prefix has one node), the
+// removal is suspended.
+SEXP rot_left_cpp(SEXP m, SEXP sf, const List& monoids) {
+  if(has_class(m, "Single")) {
+    Shield<SEXP> new_pr(node_to_digit_cpp(List(m)[0], monoids));
+    Shield<SEXP> empty(make_empty(monoids));
+    return make_deep(new_pr, empty, sf, monoids);
+  }
+  List md(m);
+  List mpr = md["prefix"];
+  Shield<SEXP> new_pr(node_to_digit_cpp(mpr[0], monoids));
+  if(mpr.size() > 1) {
+    Shield<SEXP> rest(static_cast<SEXP>(viewL_cpp(m, monoids)["rest"]));
+    return make_deep(new_pr, rest, sf, monoids);
+  }
+  Shield<SEXP> ms(measures_from_children(
+    List::create(deep_middle_raw(m), md["suffix"]), monoids));
+  Shield<SEXP> rest(make_thunk(THUNK_TAIL_LEFT, m, R_NilValue, ms, monoids));
+  return make_deep(new_pr, rest, sf, monoids);
+}
+
+SEXP rot_right_cpp(SEXP pr, SEXP m, const List& monoids) {
+  if(has_class(m, "Single")) {
+    Shield<SEXP> new_sf(node_to_digit_cpp(List(m)[0], monoids));
+    Shield<SEXP> empty(make_empty(monoids));
+    return make_deep(pr, empty, new_sf, monoids);
+  }
+  List md(m);
+  List msf = md["suffix"];
+  Shield<SEXP> new_sf(node_to_digit_cpp(msf[msf.size() - 1], monoids));
+  if(msf.size() > 1) {
+    Shield<SEXP> rest(static_cast<SEXP>(viewR_cpp(m, monoids)["rest"]));
+    return make_deep(pr, rest, new_sf, monoids);
+  }
+  Shield<SEXP> ms(measures_from_children(
+    List::create(md["prefix"], deep_middle_raw(m)), monoids));
+  Shield<SEXP> rest(make_thunk(THUNK_INIT_RIGHT, m, R_NilValue, ms, monoids));
+  return make_deep(pr, rest, new_sf, monoids);
+}
+
 SEXP deepL_cpp(SEXP pr, SEXP m, SEXP sf, const List& monoids) {
   if(Rf_xlength(pr) > 0) {
     return make_deep(pr, m, sf, monoids);
   }
-  if(has_class(m, "Empty")) {
+  Shield<SEXP> mf(is_thunk(m) ? force_thunk(m) : m);
+  if(has_class(mf, "Empty")) {
     return digit_to_tree_cpp(List(sf), monoids);
   }
-  List res = viewL_cpp(m, monoids);
-  Shield<SEXP> node(static_cast<SEXP>(res["value"]));
-  Shield<SEXP> m_rest(static_cast<SEXP>(res["rest"]));
-  Shield<SEXP> new_pr(node_to_digit_cpp(node, monoids));
-  return make_deep(new_pr, m_rest, sf, monoids);
+  return rot_left_cpp(mf, sf, monoids);
 }
 
 SEXP deepR_cpp(SEXP pr, SEXP m, SEXP sf, const List& monoids) {
   if(Rf_xlength(sf) > 0) {
     return make_deep(pr, m, sf, monoids);
   }
-  if(has_class(m, "Empty")) {
+  Shield<SEXP> mf(is_thunk(m) ? force_thunk(m) : m);
+  if(has_class(mf, "Empty")) {
     return digit_to_tree_cpp(List(pr), monoids);
   }
-  List res = viewR_cpp(m, monoids);
-  Shield<SEXP> node(static_cast<SEXP>(res["value"]));
-  Shield<SEXP> m_rest(static_cast<SEXP>(res["rest"]));
-  Shield<SEXP> new_sf(node_to_digit_cpp(node, monoids));
-  return make_deep(pr, m_rest, new_sf, monoids);
+  return rot_right_cpp(pr, mf, monoids);
 }
 
 List viewL_cpp(SEXP t, const List& monoids) {
@@ -2104,27 +2238,22 @@ List viewL_cpp(SEXP t, const List& monoids) {
 
   List d(t);
   List pr = d["prefix"];
+  Shield<SEXP> head(static_cast<SEXP>(pr[0]));
   if(pr.size() > 1) {
-    Shield<SEXP> head(static_cast<SEXP>(pr[0]));
     List tail(pr.size() - 1);
     for(int i = 1; i < pr.size(); ++i) tail[i - 1] = pr[i];
     Shield<SEXP> new_pr(build_digit_cpp(tail, monoids));
     return List::create(
       _["value"] = head,
-      _["rest"] = make_deep(new_pr, d["middle"], d["suffix"], monoids)
+      _["rest"] = make_deep(new_pr, deep_middle_raw(d), d["suffix"], monoids)
     );
   }
 
-  Shield<SEXP> head(static_cast<SEXP>(pr[0]));
-  Shield<SEXP> m(static_cast<SEXP>(d["middle"]));
+  Shield<SEXP> m(deep_middle(d));
   if(has_class(m, "Empty")) {
     return List::create(_["value"] = head, _["rest"] = digit_to_tree_cpp(List(d["suffix"]), monoids));
   }
-  List res = viewL_cpp(m, monoids);
-  Shield<SEXP> node(static_cast<SEXP>(res["value"]));
-  Shield<SEXP> m_rest(static_cast<SEXP>(res["rest"]));
-  Shield<SEXP> new_pr(node_to_digit_cpp(node, monoids));
-  return List::create(_["value"] = head, _["rest"] = make_deep(new_pr, m_rest, d["suffix"], monoids));
+  return List::create(_["value"] = head, _["rest"] = rot_left_cpp(m, d["suffix"], monoids));
 }
 
 List viewR_cpp(SEXP t, const List& monoids) {
@@ -2138,27 +2267,49 @@ List viewR_cpp(SEXP t, const List& monoids) {
 
   List d(t);
   List sf = d["suffix"];
+  Shield<SEXP> head(static_cast<SEXP>(sf[sf.size() - 1]));
   if(sf.size() > 1) {
-    Shield<SEXP> head(static_cast<SEXP>(sf[sf.size() - 1]));
     List tail(sf.size() - 1);
     for(int i = 0; i < sf.size() - 1; ++i) tail[i] = sf[i];
     Shield<SEXP> new_sf(build_digit_cpp(tail, monoids));
     return List::create(
       _["value"] = head,
-      _["rest"] = make_deep(d["prefix"], d["middle"], new_sf, monoids)
+      _["rest"] = make_deep(d["prefix"], deep_middle_raw(d), new_sf, monoids)
     );
   }
 
-  Shield<SEXP> head(static_cast<SEXP>(sf[0]));
-  Shield<SEXP> m(static_cast<SEXP>(d["middle"]));
+  Shield<SEXP> m(deep_middle(d));
   if(has_class(m, "Empty")) {
     return List::create(_["value"] = head, _["rest"] = digit_to_tree_cpp(List(d["prefix"]), monoids));
   }
-  List res = viewR_cpp(m, monoids);
-  Shield<SEXP> node(static_cast<SEXP>(res["value"]));
-  Shield<SEXP> m_rest(static_cast<SEXP>(res["rest"]));
-  Shield<SEXP> new_sf(node_to_digit_cpp(node, monoids));
-  return List::create(_["value"] = head, _["rest"] = make_deep(d["prefix"], m_rest, new_sf, monoids));
+  return List::create(_["value"] = head, _["rest"] = rot_right_cpp(d["prefix"], m, monoids));
+}
+
+// Evaluate a suspension once and memoize the result in place. Each operation
+// does one level of work; any further recursion it needs is suspended again.
+SEXP force_thunk(SEXP th) {
+  SEXP done = env_get(th, thunk_value_sym);
+  if(done != R_UnboundValue) {
+    return done;
+  }
+  thunk_force_count += 1.0;
+  int op = INTEGER(env_get(th, thunk_op_sym))[0];
+  SEXP t = env_get(th, thunk_t_sym);
+  SEXP x = env_get(th, thunk_x_sym);
+  List monoids(Rf_getAttrib(th, monoids_sym));
+  ReprotectSEXP out(R_NilValue);
+  switch(op) {
+    case THUNK_ADD_LEFT: out.set(add_left_cpp(t, x, monoids)); break;
+    case THUNK_ADD_RIGHT: out.set(add_right_cpp(t, x, monoids)); break;
+    case THUNK_TAIL_LEFT: out.set(static_cast<SEXP>(viewL_cpp(t, monoids)["rest"])); break;
+    case THUNK_INIT_RIGHT: out.set(static_cast<SEXP>(viewR_cpp(t, monoids)["rest"])); break;
+    default: stop("Unknown suspension op.");
+  }
+  Rf_defineVar(thunk_value_sym, out.get(), th);
+  // drop the inputs so the suspension doesn't keep them alive
+  Rf_defineVar(thunk_t_sym, R_NilValue, th);
+  Rf_defineVar(thunk_x_sym, R_NilValue, th);
+  return out.get();
 }
 
 List split_digit_cpp(
@@ -2214,7 +2365,7 @@ List split_tree_impl_cpp(
 
   List d(t);
   SEXP prefix = d["prefix"];
-  SEXP middle = d["middle"];
+  SEXP middle = deep_middle(d);
   SEXP suffix = d["suffix"];
 
   Shield<SEXP> vpr(monoid_combine(i, node_measure_named(prefix, monoid_name), monoid_name, monoid_spec, &f));
@@ -2286,7 +2437,7 @@ List split_tree_at_index_cpp(int i, int target_idx, SEXP t, const List& monoids)
 
   List d(t);
   SEXP prefix = d["prefix"];
-  SEXP middle = d["middle"];
+  SEXP middle = deep_middle(d);
   SEXP suffix = d["suffix"];
 
   int vpr = i + (int)child_size(prefix);
@@ -2404,7 +2555,7 @@ List oms_split_tree_gt_key(
 
   List d(t);
   SEXP prefix = d["prefix"];
-  SEXP middle = d["middle"];
+  SEXP middle = deep_middle(d);
   SEXP suffix = d["suffix"];
 
   if(oms_tree_has_gt_key(prefix, key, key_type)) {
@@ -2434,6 +2585,79 @@ List oms_split_tree_gt_key(
   }
 
   stop("oms_split_tree_gt_key precondition violated: no element with key > target.");
+}
+
+// Callback-free bound search over the cached .oms_max_key measures. The tree is
+// ordered by key, so the first leaf position whose running max-key prefix
+// crosses `key` equals the first leaf whose own key crosses it. Returns the
+// count of elements strictly before the bound within `node`; if no element in
+// the subtree crosses, returns the subtree size. `strict=false` -> first key
+// >= target; `strict=true` -> first key > target. `key_type` is uniform for the
+// sequence (numeric/character/logical), so no per-node fallback is needed.
+int oms_bound_search_node(SEXP node, SEXP key, const std::string& key_type, bool strict) {
+  if(node == R_NilValue) return 0;
+
+  if(!is_structural_node_cpp(node)) {
+    const int cmp = oms_compare_keys(oms_entry_key(node), key, key_type);
+    const bool crosses = strict ? (cmp > 0) : (cmp >= 0);
+    return crosses ? 0 : 1;
+  }
+
+  if(has_class(node, "Empty")) return 0;
+
+  // Whole-subtree short-circuit via the cached .oms_max_key measure.
+  {
+    List measures = Rf_getAttrib(node, measures_sym);
+    if(Rf_isNull(measures) || !List(measures).containsElementNamed(".oms_max_key")) {
+      stop("Missing .oms_max_key measure on ordered_multiset tree.");
+    }
+    List mv = List(measures)[".oms_max_key"];
+    if(mv.size() < 2) {
+      stop("Invalid .oms_max_key measure payload.");
+    }
+    SEXP has = mv[0];
+    if(TYPEOF(has) != LGLSXP || XLENGTH(has) != 1 || LOGICAL(has)[0] == NA_LOGICAL) {
+      stop("Invalid .oms_max_key `has` flag.");
+    }
+    if(LOGICAL(has)[0] == FALSE) return 0;  // no entries in subtree
+    SEXP smax = mv[1];
+    if(Rf_isNull(smax)) {
+      stop("Invalid .oms_max_key payload: missing key.");
+    }
+    const int cmp = oms_compare_keys(smax, key, key_type);
+    const bool crosses = strict ? (cmp > 0) : (cmp >= 0);
+    if(!crosses) return (int) child_size(node);
+  }
+
+  // Crossing lies inside this subtree: scan children left-to-right.
+  if(has_class(node, "Single")) {
+    List s(node);
+    return oms_bound_search_node(s[0], key, key_type, strict);
+  }
+
+  if(has_class(node, "Deep")) {
+    List d(node);
+    SEXP kids[3] = { d["prefix"], deep_middle(d), d["suffix"] };
+    int acc = 0;
+    for(int i = 0; i < 3; ++i) {
+      const int sz = (int) child_size(kids[i]);
+      const int r = oms_bound_search_node(kids[i], key, key_type, strict);
+      acc += r;
+      if(r < sz) return acc;
+    }
+    return acc;
+  }
+
+  // Digit / Node2 / Node3
+  List xs(node);
+  int acc = 0;
+  for(R_xlen_t i = 0; i < xs.size(); ++i) {
+    const int sz = (int) child_size(xs[i]);
+    const int r = oms_bound_search_node(xs[i], key, key_type, strict);
+    acc += r;
+    if(r < sz) return acc;
+  }
+  return acc;
 }
 
 SEXP oms_insert_cpp_impl(SEXP x, SEXP entry, const List& monoids, const std::string& key_type) {
@@ -2522,6 +2746,23 @@ extern "C" SEXP ft_cpp_oms_insert(SEXP x, SEXP entry, SEXP monoids_, SEXP key_ty
   }
   List monoids(monoids_);
   return oms_insert_cpp_impl(x, entry, monoids, key_type);
+  END_RCPP
+}
+
+extern "C" SEXP ft_cpp_oms_bound_index(SEXP x, SEXP key_, SEXP key_type_, SEXP strict_) {
+  BEGIN_RCPP
+  std::string key_type = as<std::string>(key_type_);
+  // Native path covers the same key types as oms insert; anything else returns
+  // NA and the caller reverts to the R locate path.
+  if(key_type != "numeric" && key_type != "character" && key_type != "logical") {
+    return IntegerVector::create(NA_INTEGER);
+  }
+  if(Rf_isNull(key_) || XLENGTH(key_) != 1) {
+    return IntegerVector::create(NA_INTEGER);
+  }
+  const bool strict = as<bool>(strict_);
+  const int skipped = oms_bound_search_node(x, key_, key_type, strict);
+  return IntegerVector::create(skipped + 1);
   END_RCPP
 }
 
@@ -2701,5 +2942,17 @@ extern "C" SEXP ft_cpp_ivx_native_query(
     bounds_flags, endpoint_kind, which, with_unmatched, monoids_, as_list,
     span_lo, span_hi
   );
+  END_RCPP
+}
+
+extern "C" SEXP ft_cpp_force(SEXP th) {
+  BEGIN_RCPP
+  return is_thunk(th) ? force_thunk(th) : th;
+  END_RCPP
+}
+
+extern "C" SEXP ft_cpp_work_counts() {
+  BEGIN_RCPP
+  return NumericVector::create(_["forces"] = thunk_force_count, _["deeps"] = deep_build_count);
   END_RCPP
 }

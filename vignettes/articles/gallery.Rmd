@@ -221,18 +221,18 @@ knitr::include_graphics(algorithm_demo_asset("astar_trail"))
 ## Source and rendering
 
 The full implementations live under
-[`vignettes/articles/helpers/demos/`](https://github.com/oneilsh/immutables/tree/main/vignettes/articles/helpers/demos):
+[`vignettes/articles/helpers/demos/`](https://github.com/oneilsh/Immutables/tree/main/vignettes/articles/helpers/demos):
 
-- [`demo_sweep_line_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_sweep_line_immutables.R)
-- [`demo_segment_sweep_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_segment_sweep_immutables.R)
-- [`demo_convex_hull_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_convex_hull_immutables.R)
-- [`demo_fortune_frontier_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_fortune_frontier_immutables.R)
-- [`demo_astar_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_astar_immutables.R)
-- [`demo_astar_trail_immutables.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/demos/demo_astar_trail_immutables.R)
+- [`demo_sweep_line_immutables.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/demos/demo_sweep_line_immutables.R)
+- [`demo_segment_sweep_immutables.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/demos/demo_segment_sweep_immutables.R)
+- [`demo_convex_hull_immutables.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/demos/demo_convex_hull_immutables.R)
+- [`demo_fortune_frontier_immutables.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/demos/demo_fortune_frontier_immutables.R)
+- [`demo_astar_immutables.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/demos/demo_astar_immutables.R)
+- [`demo_astar_trail_immutables.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/demos/demo_astar_trail_immutables.R)
 
 The vignette-side helpers (asset paths, render presets, the A* preset used by
 the large-maze animation) are in
-[`vignettes/articles/helpers/algorithm_demos_helpers.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/algorithm_demos_helpers.R),
+[`vignettes/articles/helpers/algorithm_demos_helpers.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/algorithm_demos_helpers.R),
 and
-[`vignettes/articles/helpers/render_algorithm_demo_assets.R`](https://github.com/oneilsh/immutables/blob/main/vignettes/articles/helpers/render_algorithm_demo_assets.R)
+[`vignettes/articles/helpers/render_algorithm_demo_assets.R`](https://github.com/oneilsh/Immutables/blob/main/vignettes/articles/helpers/render_algorithm_demo_assets.R)
 is the entry point for re-rendering any or all of the GIFs.

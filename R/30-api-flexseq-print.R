@@ -136,7 +136,7 @@
   invisible(NULL)
 }
 
-#' Print a compact summary of a finger tree
+#' Print a Compact Summary of a Finger Tree
 #'
 #' @method print FingerTree
 #' @param x FingerTree.
@@ -189,7 +189,7 @@ print.FingerTree <- function(x, max_elements = 4L, show_custom_monoids = FALSE, 
   invisible(x)
 }
 
-#' Print a flexseq
+#' Print a `flexseq` Summary
 #'
 #' @name print.flexseq
 #' @method print flexseq

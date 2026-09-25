@@ -293,7 +293,7 @@ as.list.flexseq <- function(x, ...) {
   for(i in seq_len(n)) {
     el <- els[[i]]
     out[[i]] <- .ft_strip_name(el)
-    nm <- .ft_get_name(el)
+    nm <- .ft_get_name_fast(el)
     if(is.null(nm)) {
       nms[[i]] <- ""
     } else {
