@@ -1,5 +1,14 @@
 # Immutables 1.2.0
 
+## Deprecated
+
+* `peek_overlaps()`, `peek_all_overlaps()`, `pop_overlaps()`, and
+  `pop_all_overlaps()` are renamed to `peek_overlapping()`,
+  `peek_all_overlapping()`, `pop_overlapping()`, and `pop_all_overlapping()`.
+  The new names match `peek_containing()` and make clear that the non-`all`
+  versions return a single match. The old names still work but emit a
+  deprecation warning, and will be removed in a future release.
+
 ## New features
 
 * `pop_front()`, `pop_back()`, and `pop_at()` on an `ordered_sequence` now

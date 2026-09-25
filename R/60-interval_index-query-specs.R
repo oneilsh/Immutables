@@ -189,7 +189,7 @@
 # Overlap relation spec (entry overlaps query interval under current bounds).
 # **Inputs:** `q` normalized interval query list; scalar `bounds`; bounds-flag list `flags`.
 # **Outputs:** query-spec list(lower/lower_strict/upper/upper_strict/no_match_subtree/leaf_match).
-# **Used by:** peek_overlaps(), pop_overlaps().
+# **Used by:** peek_overlapping(), pop_overlapping() and their _all variants.
 .ivx_spec_overlaps <- function(q, bounds, flags, endpoint_type = NULL) {
   touching_is_overlap <- isTRUE(flags$include_start) && isTRUE(flags$include_end)
 

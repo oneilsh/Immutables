@@ -163,14 +163,14 @@ reference:
       - peek_all_point
       - pop_point
       - pop_all_point
-      - peek_overlaps
-      - peek_all_overlaps
+      - peek_overlapping
+      - peek_all_overlapping
       - peek_containing
       - peek_all_containing
       - peek_within
       - peek_all_within
-      - pop_overlaps
-      - pop_all_overlaps
+      - pop_overlapping
+      - pop_all_overlapping
       - pop_containing
       - pop_all_containing
       - pop_within
@@ -198,3 +198,8 @@ reference:
       - validate_tree
       - validate_name_state
       - plot_structure
+
+  - title: "Deprecated"
+    desc: "Functions kept for backward compatibility; they warn and will be removed in a future release."
+    contents:
+      - Immutables-deprecated
