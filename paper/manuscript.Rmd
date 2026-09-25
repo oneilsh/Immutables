@@ -528,9 +528,9 @@ Like other structures above, the \code{interval_index} type stores arbitrary
 elements with list-like semantics, but each is associated with a $[start, end)$
 range. Interval indices thus support peeking and popping by query point, as well 
 as query interval overlap, containment, and subsumption. Each of these also has
-'first' and 'all' return variants; \code{pop_overlaps(ix, start, end)} removes and 
+'first' and 'all' return variants; \code{pop_overlapping(ix, start, end)} removes and 
 returns the first (in start order, breaking ties by insertion order) overlapping range in \code{ix}, 
-while \code{pop_all_overlaps(ix, start, end)} removes and returns all. By
+while \code{pop_all_overlapping(ix, start, end)} removes and returns all. By
 default, all bounds are treated as left-closed (\code{[)}); this
 can be adjusted at initialization time, or per-query by supplying a \code{bounds}
 argument, in which case the interpretation is applied to both the query and 
@@ -550,7 +550,7 @@ peek_point(ix1, 2, match_at = "start") # character "b" only
 
 ix2 <- insert(ix1, "d", start = 5, end = 6)
 
-ix3 <- pop_all_overlaps(ix2, 3, 4.5)
+ix3 <- pop_all_overlapping(ix2, 3, 4.5)
 ix3$elements        # interval index with "b" and "c"
 ix3$remaining       # interval index with "a" and "d"
 ```

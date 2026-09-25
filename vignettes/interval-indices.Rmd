@@ -86,11 +86,11 @@ ix3 <- interval_index(
 ix3
 ```
 
-`peek_overlaps()` returns any interval that shares at least one point with the query range. `peek_containing()` returns intervals that fully contain the query range. `peek_within()` returns intervals fully contained by the query range.
+`peek_overlapping()` returns any interval that shares at least one point with the query range. `peek_containing()` returns intervals that fully contain the query range. `peek_within()` returns intervals fully contained by the query range.
 
 ```{r}
 # overlaps [2, 5]: any shared point
-peek_all_overlaps(ix3, start = 2, end = 5)
+peek_all_overlapping(ix3, start = 2, end = 5)
 
 # containing [3, 4]: index interval must enclose query
 peek_all_containing(ix3, start = 3, end = 4)
@@ -155,7 +155,7 @@ Query and endpoint helpers are non-throwing on empty indices, and `length()` all
 empty_ix <- interval_index()
 length(empty_ix)
 peek_point(empty_ix, point = 1)
-pop_overlaps(empty_ix, start = 1, end = 5)
+pop_overlapping(empty_ix, start = 1, end = 5)
 ```
 
 

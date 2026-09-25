@@ -415,11 +415,11 @@ for(n in ivx_sizes) {
   rows <- bench_one(rows, "interval_index", "all point matches", n, repeats, ivx_setup,
     function(st) peek_all_point(st$ix, qpt, bounds = "[]", as_list = TRUE))
   rows <- bench_one(rows, "interval_index", "overlap query", n, repeats, ivx_setup,
-    function(st) peek_all_overlaps(st$ix, qlo, qhi, bounds = "[]", as_list = TRUE))
+    function(st) peek_all_overlapping(st$ix, qlo, qhi, bounds = "[]", as_list = TRUE))
   rows <- bench_one(rows, "interval_index", "within query", n, repeats, ivx_setup,
     function(st) peek_all_within(st$ix, qlo, qhi, bounds = "[]", as_list = TRUE))
   rows <- bench_one(rows, "interval_index", "remove by overlap", n, repeats, ivx_setup,
-    function(st) pop_all_overlaps(st$ix, qlo, qhi, bounds = "[]")$remaining)
+    function(st) pop_all_overlapping(st$ix, qlo, qhi, bounds = "[]")$remaining)
 
   rows <- bench_one(rows, "base R", "insert", n, repeats, df_setup,
     function(st) list(

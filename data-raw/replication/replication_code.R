@@ -229,7 +229,7 @@ peek_point(ix1, 3, match_at = "start")
 
 ix2 <- insert(ix1, "d", start = 5, end = 6)
 
-ix3 <- pop_all_overlaps(ix2, 3, 4.5)
+ix3 <- pop_all_overlapping(ix2, 3, 4.5)
 ix3$elements        # interval index with "b" and "c"
 ix3$remaining       # interval index with "a" and "d"
 
@@ -703,11 +703,11 @@ for(n in ivx_sizes) {
   rows <- bench_one(rows, "interval_index", "all point matches", n, repeats, ivx_setup,
                     function(st) peek_all_point(st$ix, qpt, bounds = "[]", as_list = TRUE))
   rows <- bench_one(rows, "interval_index", "overlap query", n, repeats, ivx_setup,
-                    function(st) peek_all_overlaps(st$ix, qlo, qhi, bounds = "[]", as_list = TRUE))
+                    function(st) peek_all_overlapping(st$ix, qlo, qhi, bounds = "[]", as_list = TRUE))
   rows <- bench_one(rows, "interval_index", "within query", n, repeats, ivx_setup,
                     function(st) peek_all_within(st$ix, qlo, qhi, bounds = "[]", as_list = TRUE))
   rows <- bench_one(rows, "interval_index", "remove by overlap", n, repeats, ivx_setup,
-                    function(st) pop_all_overlaps(st$ix, qlo, qhi, bounds = "[]")$remaining)
+                    function(st) pop_all_overlapping(st$ix, qlo, qhi, bounds = "[]")$remaining)
   
   rows <- bench_one(rows, "base R", "insert", n, repeats, df_setup,
                     function(st) list(
