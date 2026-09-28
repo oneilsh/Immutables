@@ -452,6 +452,120 @@
   url    = {https://github.com/zot/go-fingertree}
 }
 
+%% Collection libraries in other statistical computing environments.
+
+@Book{van2009python,
+  title     = {\proglang{Python} 3 Reference Manual},
+  author    = {{Van Rossum}, Guido and Drake, Fred L.},
+  year      = {2009},
+  publisher = {CreateSpace},
+  address   = {Scotts Valley, CA}
+}
+
+@InProceedings{McKinney2010-pandas,
+  title     = {Data Structures for Statistical Computing in \proglang{Python}},
+  author    = {McKinney, Wes},
+  booktitle = {Proceedings of the 9th \proglang{Python} in Science Conference},
+  editor    = {{van der Walt}, St{\'e}fan and Millman, Jarrod},
+  pages     = {56--61},
+  year      = {2010},
+  doi       = {10.25080/Majora-92bf1922-00a}
+}
+
+@Manual{jenks_sortedcontainers,
+  title  = {\pkg{sortedcontainers}: Sorted Containers},
+  author = {Jenks, Grant},
+  year   = {2021},
+  note   = {\proglang{Python} package version~2.4.0},
+  url    = {https://grantjenks.com/docs/sortedcontainers/}
+}
+
+@Manual{leib_intervaltree,
+  title  = {\pkg{intervaltree}: A Mutable, Self-Balancing Interval Tree},
+  author = {Leib, Chaim},
+  year   = {2025},
+  note   = {\proglang{Python} package version~3.2.1},
+  url    = {https://github.com/chaimleib/intervaltree}
+}
+
+@Manual{gustafsson_pyrsistent,
+  title  = {\pkg{pyrsistent}: Persistent/Functional/Immutable Data Structures},
+  author = {Gustafsson, Tobias},
+  year   = {2023},
+  note   = {\proglang{Python} package version~0.20.0},
+  url    = {https://github.com/tobgu/pyrsistent}
+}
+
+@Article{Bezanson2017-julia,
+  title   = {\proglang{Julia}: A Fresh Approach to Numerical Computing},
+  author  = {Bezanson, Jeff and Edelman, Alan and Karpinski, Stefan and
+             Shah, Viral B.},
+  journal = {SIAM Review},
+  volume  = {59},
+  number  = {1},
+  pages   = {65--98},
+  year    = {2017},
+  doi     = {10.1137/141000671}
+}
+
+@Manual{datastructures_jl,
+  title  = {\pkg{DataStructures.jl}: \proglang{Julia} Implementation of Data
+            Structures},
+  author = {{JuliaCollections Contributors}},
+  year   = {2026},
+  note   = {\proglang{Julia} package version~0.19.6},
+  url    = {https://github.com/JuliaCollections/DataStructures.jl}
+}
+
+@Manual{intervaltrees_jl,
+  title  = {\pkg{IntervalTrees.jl}: A Data Structure for Efficient
+            Manipulation of Sets of Intervals},
+  author = {{BioJulia Contributors}},
+  year   = {2023},
+  note   = {\proglang{Julia} package version~1.1.0},
+  url    = {https://github.com/BioJulia/IntervalTrees.jl}
+}
+
+@Manual{functionalcollections_jl,
+  title  = {\pkg{FunctionalCollections.jl}: Functional and Persistent Data
+            Structures for \proglang{Julia}},
+  author = {{JuliaCollections Contributors}},
+  year   = {2018},
+  note   = {\proglang{Julia} package version~0.5.0},
+  url    = {https://github.com/JuliaCollections/FunctionalCollections.jl}
+}
+
+@Manual{matlab_containersmap,
+  title        = {\code{containers.Map}: Object That Maps Unique Keys to
+                  Values},
+  author       = {{The MathWorks Inc.}},
+  organization = {The MathWorks Inc.},
+  address      = {Natick, MA},
+  year         = {2026},
+  note         = {\proglang{MATLAB} documentation},
+  url          = {https://www.mathworks.com/help/matlab/ref/containers.map.html}
+}
+
+@Manual{sas_compobjref,
+  title        = {\proglang{SAS} 9.4 Component Objects: Reference, Third
+                  Edition},
+  author       = {{SAS Institute Inc.}},
+  organization = {SAS Institute Inc.},
+  address      = {Cary, NC},
+  year         = {2016},
+  url          = {https://documentation.sas.com/api/docsets/lecompobjref/9.4/content/lecompobjref.pdf}
+}
+
+@Manual{stata_mata,
+  title        = {\proglang{Stata} 19 \proglang{Mata} Reference Manual},
+  author       = {{StataCorp}},
+  organization = {Stata Press},
+  address      = {College Station, TX},
+  year         = {2025},
+  note         = {See \code{asarray()}},
+  url          = {https://www.stata.com/manuals/m-5asarray.pdf}
+}
+
 %% R and R packages. Entries follow citation() for the versions installed when
 %% the manuscript was built (checked against CRAN on 2026-09-25).
 
@@ -497,4 +611,48 @@
   year   = {2025},
   note   = {\proglang{R}~package version~2.2.0},
   url    = {https://CRAN.R-project.org/package=pkgdown}
+}
+
+@Manual{lai_collections,
+  title  = {\pkg{collections}: High Performance Container Data Types},
+  author = {Lai, Randy},
+  year   = {2026},
+  note   = {\proglang{R}~package version~0.3.12},
+  url    = {https://CRAN.R-project.org/package=collections}
+}
+
+@Manual{fastmap,
+  title  = {\pkg{fastmap}: Fast Data Structures},
+  author = {Chang, Winston},
+  year   = {2024},
+  note   = {\proglang{R}~package version~1.2.0},
+  url    = {https://CRAN.R-project.org/package=fastmap}
+}
+
+@Manual{intervals,
+  title  = {\pkg{intervals}: Tools for Working with Points and Intervals},
+  author = {Bourgon, Richard},
+  year   = {2024},
+  note   = {\proglang{R}~package version~0.15.5},
+  url    = {https://CRAN.R-project.org/package=intervals}
+}
+
+@Manual{datatable,
+  title  = {\pkg{data.table}: Extension of `\code{data.frame}'},
+  author = {Barrett, Tyson and Dowle, Matt and Srinivasan, Arun and
+            Gorecki, Jan and Chirico, Michael and Hocking, Toby and
+            Schwendinger, Benjamin and Krylov, Ivan},
+  year   = {2026},
+  note   = {\proglang{R}~package version~1.18.6.1},
+  url    = {https://CRAN.R-project.org/package=data.table}
+}
+
+@article{bohringer2013dynamic,
+  title={Dynamic Parallelization of R Functions},
+  author={Bohringer, S},
+  journal={The R journal},
+  volume={5},
+  number={2},
+  pages={89--97},
+  year={2013}
 }

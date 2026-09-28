@@ -94,7 +94,7 @@ provide fast insertion, access, and range queries
 \citep{Idreos2020-zz}; priority queues provide for efficient access by minimum or maximum
 priority value and are often used in graph algorithms 
 \citep{Borodin2010-pl}. Amongst more exotic structures,
-interval trees store sets of ranges for overlap-like queries and are commonly used in computational geometry
+interval structures store sets of ranges for overlap-like queries and are commonly used in computational geometry
 \citep{Lee1984-xw}.
 
 Data structure implementations generally fall in one of two classes:
@@ -103,43 +103,66 @@ Data structure implementations generally fall in one of two classes:
 structures allow the internal structure or contents to change.
 Operations on immutable structures, by contrast, return changed copies,
 preserving the original for further use. Purely functional languages
-like \proglang{Haskell} and \proglang{ML} endorse persistence, and while mutating data
+like \proglang{Haskell} and \proglang{Scala} endorse persistence, and while mutating data
 structures are generally easier to implement and faster, the functional
 programming community has invested significant effort in designing fast
 immutable implementations for a wide variety of applications
 \citep{Okasaki2011-lz}. This immutability is familiar to \proglang{R}
 developers, who expect pass-by-value semantics and are encouraged to develop 
-side-effect-free functions \citep{Matloff2011-fh}. Most \proglang{R} structures
+side-effect-free functions \citep{Matloff2011-fh}. Persistent structures
+are also preferred in parallel execution, where concurrent access by threads
+must be otherwise carefully managed \citep{bohringer2013dynamic}.
+Most \proglang{R} structures
 follow this paradigm, with the exception of index-assignment (e.g.,
 \code{x[2] <- 4.2}). Even in these cases, \proglang{R}'s
 assign-by-value and copy-on-modify semantics bound mutability
 (\code{x <- y; x[2] <- 4.2} modifies \code{x} while preserving the
 original data in \code{y}).
 
-Unfortunately, native \proglang{R} types do not emphasize
-performance; many operations require a full scan or copy of the
+Unfortunately, while persistent, native \proglang{R} types do not emphasize
+performance. Many operations require a full scan or copy of the
 data, making them prohibitively expensive for use in highly dynamic or
 large-data applications \citep{Gillespie2016-qx}. Attempts have been made
-to fill these gaps. One approach is to embrace mutability, taken
-for example by the \pkg{collapse} package which emphasizes performance for 
-bulk operations \citep{krantz2026collapse}. Keeping immutability,
-we previously published an implementation of
-efficient, persistent stack and queue structures based on functional lazy
-evaluation techniques \citep{O-Neil2015-je,Goel2019-mz}.
-\citet{Barry2018-mv} surveyed the state of collection packages,
+to fill these gaps. We previously published an implementation of efficient,
+persistent stack and queue structures, one of the few uses of \proglang{R}'s
+lazy evaluation features, despite its importance in functional programming
+\citep{O-Neil2015-je,Goel2019-mz,Okasaki2011-lz}. \citet{Barry2018-mv} 
+surveyed the state of collection packages,
 identifying 11 providing set, map, stack, queue, and/or
 sequence structures. Of these, only three
 implemented side-effect-free structures: \pkg{rstackdeque}
 \citep{O-Neil2015-je}, \pkg{sets} \citep{Meyer2009-vu}, and
-\pkg{S4Vectors} \citep{pages2020s4vectors}. The latter two are optimized
-for bulk operations as compared to base-\proglang{R} types but, like
-\proglang{R} lists and vectors, do not support fast incremental
-insert/remove operations. Notably, \pkg{S4Vectors} is designed for
-extensibility and is widely used in the Bioconductor ecosystem \citep{Gentleman2004-tc},
-including support for interval ranges via \pkg{IRanges}
-\citep{Lawrence2013-ly}. \citet{Barry2018-mv} noted a need for fast, flexible, and
-side-effect-free data structures to support advanced use cases in the
-\proglang{R} ecosystem.
+\pkg{S4Vectors} \citep{pages2020s4vectors}. Notably, \pkg{S4Vectors} is
+designed for extensibility and is widely used in the Bioconductor ecosystem
+\citep{Gentleman2004-tc}. Interval structures were not discussed, but are
+served in persistent form for bulk, vectorized operations by 
+\pkg{IRanges} \citep{Lawrence2013-ly}, \pkg{intervals} \citep{intervals},
+and \pkg{data.table} \citep{datatable}.
+
+Since the review of \citet{Barry2018-mv}, \proglang{R} has gained
+fast double-ended queues, priority queues, and key-ordered sequences
+in \pkg{collections} \citep{lai_collections}, maps,
+stacks, and queues in \pkg{fastmap} \citep{fastmap}, a
+built-in hash table (\code{utils::hashtab()}, \citet{R}), and faster 
+implementation of several base \proglang{R} types in \pkg{collapse} 
+\citep{krantz2026collapse}. All of these, however, are mutable, trading
+side-effect-free operation for speed. Other statistical software environments
+offer efficient collection structures, but similarly typically depend
+on mutability. The \proglang{Python} standard library
+\citep{van2009python} provides mutable double-ended queues and binary heaps, with
+third-party packages offering sorted containers \citep{jenks_sortedcontainers}
+and interval trees \citep{leib_intervaltree}. \proglang{Julia}
+\citep{Bezanson2017-julia} provides several mutable structures 
+via \pkg{DataStructures.jl}, including priority 
+queues, sets, key-ordered sequences, and others \citep{datastructures_jl}.
+Proprietary environments offer mostly hash-based key-value stores, 
+such as \proglang{MATLAB}'s \code{containers.Map} \citep{matlab_containersmap}, 
+\proglang{SAS} hash objects \citep{sas_compobjref}, and \proglang{Stata}'s 
+\code{asarray()} \citep{stata_mata}. While immutable structure packages are rarer, 
+examples include \pkg{pyrsistent} for \proglang{Python} and
+\pkg{FunctionalCollections.jl} for \proglang{Julia}, both offering
+persistent array, set, and queue collections amongst others
+\citep{gustafsson_pyrsistent, functionalcollections_jl}.
 
 Here we describe \pkg{Immutables}, which implements a remarkable data
 structure known as monoid-annotated 2-3 finger trees. First described
@@ -148,18 +171,17 @@ provide persistent, amortized constant-time access to ends,
 $O(\log n)$ search/insertion/removal, and via monoid annotation can
 be purposed as other specialized structures. These form
 the basis of the built-in \code{Data.Sequence} in 
-\proglang{Haskell} \citep{containers_datasequence}, and are available as libraries for
-\proglang{Scala} \citep{rutz_fingertree},
+\proglang{Haskell} \citep{containers_datasequence}, and are available as 
+libraries for functional languages such as \proglang{Scala} \citep{rutz_fingertree},
 \proglang{Clojure} \citep{houser_datafingertree}, 
-\proglang{OCaml} \citep{batteries_batfingertree}, 
-\proglang{F\#} \citep{cantsin_fsharpfingertrees},
+\proglang{OCaml} \citep{batteries_batfingertree}, and 
+\proglang{F\#} \citep{cantsin_fsharpfingertrees}, as well as more general purpose
+languages including 
 \proglang{JavaScript} \citep{xu_fingertreejs},
 \proglang{Rust} \citep{aslpavel_fingertrees}, 
 \proglang{Julia} \citep{schauer_fingertreesjl}, and
-\proglang{Go} \citep{burdick2020gofingertree}.
-
-\pkg{Immutables} implements four specialized 
-structures backed by finger trees: \code{flexseq}, serving as indexable,
+\proglang{Go} \citep{burdick2020gofingertree}. \pkg{Immutables} implements four specialized 
+structures backed by finger trees for \proglang{R}: \code{flexseq}, serving as indexable,
 splittable, and concatenable lists with end insertion/removal for
 stack and queue operations; \code{priority_queue}, associating data elements
 with priority values for fast min/max access by priority; \code{ordered_sequence}, keeping
@@ -216,7 +238,7 @@ fs5$remaining
 Other implemented methods include \code{c()}, \code{as.list()},
 \code{unlist()}, \code{fapply()} (analogous to \code{lapply()} for
 lists), and \code{print()}, mimicking \code{print.list()} but
-displaying only the first and last few elements. Native \proglang{R}
+displaying only the first and last few elements as illustrated above. Native \proglang{R}
 \code{for}-loops do not support iterating over elements as a result
 of sequences' internal structure, but \code{loop()} is re-exported from
 the \pkg{coro} package \citep{coro} to support iterative element access.
@@ -228,7 +250,8 @@ of names degrades worst-case performance for some operations to a
 full $O(n)$ scan (for example, when concatenating), though front/back
 access remains $O(1)$ amortized in named contexts. Otherwise, all
 operations are $O(\log n)$ worst case, or $O(k \log n)$ when
-removing or accessing $k$ elements. For performance-sensitive applications
+removing or accessing $k$ non-sequential elements. 
+For performance-sensitive applications
 requiring named access, ordered sequences (discussed below) can be
 associated with character-based names as keys for guaranteed $O(\log n)$
 performance.
@@ -249,7 +272,11 @@ We simulate \code{steps} time steps; at each, a new request arrives with
 probability \code{p_arrival} and joins the shorter of two queues, 
 \code{qa} or \code{qb}. We keep track of each server's next free
 time step, processing requests from the front of its queue. Service times
-are drawn as \code{rpois(1, mean_service) + 1}, for a mean of two time steps.
+are drawn as \code{rpois(1, mean_service) + 1}. We also initialize a \code{waits}
+\code{flexseq} to collect the empirical distribution of wait times. Because
+insertions are fast, this structure can be built incrementally without 
+pre-allocating bounded storage, a common workaround for iterative growth in 
+\proglang{R} \citep{Gillespie2016-qx}.
 
 ```{r queue-setup}
 set.seed(100)
@@ -339,10 +366,10 @@ and \code{$} by name, with the same caveats as for named \code{flexseq}s.
 Priority queues and other advanced types (below) may be 
 cast down with \code{as_flexseq()} and \code{as.list()}, optionally preserving
 priority-value metadata. Like \code{flexseq}, priority queues may be mapped
-with \code{fapply()}; in this case the called function is supplied both the 
+with \code{fapply()}. In this case the called function is supplied both the 
 stored element and associated priority, and returns a priority queue
 with identical priorities on transformed values. Finally, priority queues may be iteratively
-accessed in priority order with \code{loop()}, and they additionally 
+accessed in priority order with \code{loop()}, and they  
 provide a priority-aware \code{merge()}.
 
 ### Example: Best-first feature selection
@@ -386,8 +413,7 @@ pq <- insert(pq, best_features, priority = best_aic)
 So long as there are feature sets available in the queue to expand on, we will
 do so, but limit the total number of considered models to approximately 1,000
 to prevent an exhaustive search. At each iteration we'll pop the best feature set
-considered so far (\code{pop_min()} returns it in \code{$value}, with its AIC in
-\code{$priority}), replace the queue with the \code{$remaining} portion, and compute
+considered so far, replace the queue with the \code{$remaining} portion, and compute
 the features not yet in the set.
 
 ```{r fs-loop-head, engine = "rpart"}
@@ -433,7 +459,7 @@ best_features
 
 In this instance the best encountered model by AIC uses features 7, 3, 19, 24, 
 2, and 21. Potential improvements to this example include ordering features
-to avoid duplicated testing of permutations, more sophisticated stopping
+to avoid duplicate testing of permutations, stopping
 criteria based on AIC trend, and alternative prioritization values. The search
 history can also be inspected efficiently by growing a 
 \code{flexseq} with intermediate information.
@@ -479,7 +505,7 @@ key-order-based queries. These include \code{min_key()}, \code{max_key()},
 \code{key_at()}, \code{nearest_key()} to identify the closest existing 
 key to a query (undefined for keys without a simple distance metric),
 and \code{lower_bound()}, returning the first element with key greater than 
-or equal to a query key.
+or equal to a query key (always defined).
 
 ### Example: Scalar matching without replacement
 
@@ -526,8 +552,6 @@ stops early if no untreated patients remain to match against.
 
 ```{r match-loop}
 while (length(treated_seq) > 0) {
-  if (length(untreated_seq) == 0L) break
-
   front_el <- pop_front(treated_seq)
   treated_seq <- front_el$remaining
   treated_pt_score <- front_el$key
@@ -547,7 +571,8 @@ while (length(treated_seq) > 0) {
 }
 ```
 
-Finally, we collect the matches into a single data frame for further use:
+Finally, we collect the matches into a single data frame for further use via 
+an intermediary list conversion.
 
 ```{r match-result}
 match_df <- do.call(rbind, as.list(matches))
@@ -561,26 +586,26 @@ Like other structures above, the \code{interval_index} type stores arbitrary
 elements with list-like semantics, but each is associated with a \code{[start, end)}
 range. Interval indices thus support peeking and popping by query point, as well 
 as query interval overlap, containment, and subsumption. Each of these also has
-"first" and "all" return variants; \code{pop_overlapping(ix, start, end)} removes and 
-returns the first (in start order, breaking ties by insertion order) overlapping range in \code{ix}, 
-while \code{pop_all_overlapping(ix, start, end)} removes and returns all. By
+"first" and "all" return variants: \code{pop_overlapping(ix, start, end)} removes and 
+returns the first overlapping range in \code{ix} (in start order, breaking ties by insertion order), 
+while \code{pop_all_overlapping(ix, start, end)} returns a list of two interval indices,
+\code{$elements} containing overlapping results and \code{$remaining} with the rest. By
 default, all bounds are treated as left-closed (\code{[)}); this
 can be adjusted at initialization time, or per-query by supplying a \code{bounds}
 argument, in which case the interpretation is applied to both the query and 
 stored intervals. Interval endpoints are particularly important for sweep-line
 algorithms, so point-based queries can be limited to matching over the whole
-interval or only at one or both endpoints.
-
-In the following example, point 2 falls within both $[1, 3)$ and $[2, 4)$, but
-the query with \code{match_at = "start"} matches only intervals starting at 2;
-\code{match_at} may also be \code{"end"} or \code{"either"}.
+interval or only at one or both endpoints (ignoring bounds). In the following 
+example, point 3 falls within the first two intervals, so 
+\code{peek_all_point()} returns an interval index with two entries, which we
+call \code{unlist()} on to print compactly.
 
 ```{r ix-basics}
 ix1 <- as_interval_index(c("a", "b", "c"),
-                         start = c(1, 2, 4),
-                         end = c(3, 4, 5))
-peek_point(ix1, 3)
-peek_point(ix1, 2, match_at = "start")
+                         start = c(1, 2, 6),
+                         end = c(4, 6, 8))
+unlist(peek_all_point(ix1, 3))
+unlist(peek_all_point(ix1, 2, match_at = "start"))
 ix2 <- insert(ix1, "d", start = 5, end = 6)
 ix3 <- pop_all_overlapping(ix2, 3, 4.5)
 ix3$elements
@@ -626,7 +651,7 @@ computing summary statistics. These are collected
 in a \code{flexseq}, which we later convert to a data frame
 for further analysis. This example also illustrates using \code{fapply()} to unpack
 the contents of an interval index containing named lists: mapping each patient
-record to just its \code{age} (or \code{is_male}) value produces an interval index
+record to just their \code{age} (or \code{is_male}) value produces an interval index
 of those values, which \code{unlist()} converts to a vector.
 
 ```{r hospital-sweep}
@@ -726,7 +751,7 @@ tasks2 <- add_monoids(tasks, list(total_time = total_time_mm))
 Internally, \code{flexseq}s are tree structures with user values stored in leaf
 nodes. Their operations are supported by a set of default monoids;
 each of \code{priority_queue}, \code{ordered_sequence}, and \code{interval_index}
-subclass \code{flexseq} and add additional monoids supporting their unique 
+subclass \code{flexseq} and add additional monoids for their unique 
 operations. The \code{plot_structure()} function shows the internal structure, 
 where node labels can be specified as a function of nodes. Each node has a \code{$type}
 set to \code{"Element"} for nodes storing user data, these also have an
@@ -748,7 +773,7 @@ plot_structure(tasks2, node_label = function(node) {
 ```
 
 Several features of Figure\ \ref{fig:tasks-structure} are notable. First, data 
-elements are stored in leaves, in the order of construction. Custom orders are
+elements of a \code{flexseq} are stored in leaves, in the order of construction. Custom orders are
 possible via monoid-based operations; \code{ordered_sequence} implements
 these and provides a convenient key-ordered variant. Second, each leaf node
 also carries its measure, here the \code{$hours} value as defined in 
@@ -767,7 +792,10 @@ insertions the runtime is guaranteed $O(n)$.)
 
 The final piece of the monoid-annotation puzzle comes in the form of a binary
 \emph{predicate} function, which must be \emph{monotone over the sequence
-of accumulated measure values on leaves}. To motivate, suppose we wish to identify
+of accumulated measure values on leaves}, i.e., transition from \code{FALSE}
+to \code{TRUE} at most once.
+
+To motivate, suppose we wish to identify
 which tasks we can fully complete in a standard 40-hour work week; the answer is 
 tasks \code{a} through \code{f} totaling 39 hours. The following code splits
 \code{tasks2} into two subsequences: a \code{$left} whose tasks sum to less 
@@ -790,8 +818,7 @@ the provided predicate over these resolves to \code{TRUE}. Notice that internal
 node totals are not used in this accumulation; rather, they are used by 
 \code{split_by_predicate()} to identify the split point with a 
 single efficient root-to-leaf traversal.
-Monotonicity of the predicate (switching from \code{FALSE} to 
-\code{TRUE} at most once) is thus necessary for correctness.
+Monotonicity of the predicate is thus necessary for correctness.
 
 ## Example: Subsequence search
 
@@ -819,7 +846,7 @@ that tracks the \emph{maximum} key value, with associative function \code{max} a
 identity value \code{-Inf}. When used with an ordered sequence, the measuring
 function is passed a list containing both the stored \code{$value} (here the
 index) and a \code{$key}. To begin, we'll attach this measuring monoid to an 
-empty ordered sequence, and then fill it with keyed values; the structure will
+empty ordered sequence, and then fill it with keyed values. The structure will
 ensure the custom monoid is applied as elements are added.
 
 
@@ -841,7 +868,7 @@ we split the sequence using a predicate that triggers on the first key that is
 first entry in it \emph{may} have a prefix that is an exact match for the query,
 indicating a hit. In this case we compute the measure of the first entry
 using \code{get_measures()}, which returns a \code{flexseq} of measure values
-given a measure name; subsetting \code{$right} to the first entry prior ensures
+given a measure name. Subsetting \code{$right} to the first entry beforehand ensures
 this result is not large, and \code{[[1]]} extracts the single bare measure value.
 If the first entry matches, we can use a second predicate to find the first
 entry that is greater than the query and is not an exact prefix match, capturing
@@ -908,7 +935,7 @@ To reveal scaling dynamics we ran these tests on structures of between
 $2^{12}$ (4,096) and $2^{18}$ (262,144) elements. Results in Figure\ \ref{fig:benchmarks-sequence}
 reveal the $O(n)$ nature of operations on base-\proglang{R} lists. The $O(\log n)$ sequence
 operations outperform base lists at between $2^{13}$ (for enqueue/dequeue)
-and $2^{17}$ (for middle-element operations) elements.
+and $2^{16}$ (for middle-element operations) elements.
 
 
 ```{r benchmarks-sequence, echo=FALSE, out.width="0.95\\textwidth", fig.align="center", fig.cap="Benchmark timings for sequence operations.", fig.pos="htb"}
@@ -928,7 +955,7 @@ Results in Figure\ \ref{fig:benchmarks-ordered} show that base-\proglang{R}
 \code{match()}-based lookup and logical indexing is highly optimized, achieving
 $\sim$ 200 \textmu s key lookups for $2^{18}$ elements. Nevertheless, the linear / logarithmic
 divide between implementations is evident, and ordered sequences outperform
-base-\proglang{R} lookup at between $2^{17}$ (131K) and $2^{20}$ (1M) elements,
+base-\proglang{R} lookup at between $2^{16}$ (65K) and $2^{19}$ (512K) elements,
 with the exception of \code{peek_key()}, where ordered sequences outperform at
 $2^{23}$ (8.4M) elements (not shown).
 
@@ -940,7 +967,7 @@ For priority queues we tested simple insertion, peeking, and popping the
 maximum priority element (we did not test symmetric \code{min}-based operations which have
 identical performance characteristics). Base-\proglang{R} priority queues were implemented 
 on an \proglang{R} list with corresponding numeric priority vector, using \code{which.max()}
-for index identification and negative \code{[]}-based indexing and removal. 
+for index identification and negative \code{[]}-based indexing for removal. 
 Priorities were randomly generated with \code{runif()} with default parameters. 
 Figure\ \ref{fig:benchmarks-pq} reveals priority queues to be substantially faster
 than the naïve implementation at $2^{17}$ elements and beyond.
@@ -977,7 +1004,7 @@ operations.
 knitr::include_graphics("figures/benchmarks-ivx.pdf")
 ```
 
-Results in Figure\ \ref{fig:benchmarks-ivx} show \pkg{IRanges} to be faster
+Results in Figure\ \ref{fig:benchmarks-ivx} show \pkg{IRanges} to be generally faster
 than base-\proglang{R} for insertion and removal operations, but slower for 
 read-only queries. Both implementations exhibit $O(n)$ growth, and interval
 indices outperform both at between $2^{16}$ elements for read operations and 
@@ -991,11 +1018,11 @@ multiple class systems, including \pkg{R6} \citep{R6} which formalizes first-cla
 mutable data types. Loops and \code{if/then/else} constructs are familiar to those coming
 from more procedural languages. Still, \proglang{R}'s roots as a functional language
 dominate: functions are pass-by-value, and the generic-dispatch S3 object system 
-is most commonly used, followed by S4 in the Bioconductor community \citep{Gentleman2004-tc};
-both are typically used in a value-oriented style, where updates create new 
+is most commonly used, followed by S4 in the Bioconductor community \citep{Gentleman2004-tc}.
+Both are typically used in a value-oriented style, where updates create new 
 objects via copy-on-modify semantics rather than in-place mutation. Seasoned \proglang{R}
-programmers avoid dynamically growing or shrinking structures, which can easily 
-result in $O(n^2)$ behavior.
+programmers avoid dynamically growing or shrinking structures as a result, which can easily 
+result in $O(n^2)$ behavior \citep{Gillespie2016-qx}.
 
 The relative lack of performant, immutable collection types in \proglang{R} has been
 previously noted, and \citet{Barry2018-mv} calls specifically for their development.
