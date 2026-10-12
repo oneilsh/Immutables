@@ -9,9 +9,9 @@
 # - p(i) is FALSE and p(i <> measure(t)) is TRUE for strict split semantics
 # The public wrappers relax these preconditions (matching the paper's split).
 # Runtime: O(log n) near split point depth.
-if(FALSE) split_tree_impl <- function(p, i, t, monoids, monoid_name) NULL
-split_tree_impl(p, i, t, monoids, monoid_name) %::% Function : . : FingerTree : list : character : list
-split_tree_impl(p, i, t, monoids, monoid_name) %as% {
+# Reference:
+#   split_tree_impl(p, i, t, monoids, monoid_name) :: Function -> . -> FingerTree -> list -> character -> list
+split_tree_impl <- function(p, i, t, monoids, monoid_name) {
   ms <- monoids
   mr <- ms[[monoid_name]]
   if(is.null(mr)) {
@@ -22,11 +22,11 @@ split_tree_impl(p, i, t, monoids, monoid_name) %as% {
 
 # Runtime: O(log n) near split point depth.
 split_tree_impl_fast <- function(p, i, t, ms, mr, monoid_name) {
-  if(t %isa% Empty) {
+  if(inherits(t, "Empty")) {
     stop("split_tree_impl requires a non-empty tree")
   }
 
-  if(t %isa% Single) {
+  if(inherits(t, "Single")) {
     return(list(
       left = measured_empty(ms),
       value = .subset2(t, 1),

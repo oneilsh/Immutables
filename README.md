@@ -36,8 +36,8 @@ Backed by monoid-annotated finger trees as described by
 [Hinze and Paterson](https://doi.org/10.1017/S0956796805005769), most
 operations are constant time, amortized constant time, or $O(\log(n))$.
 Core functions are implemented in C++ (via Rcpp) for speed, with matching
-pure-R reference implementations using `lambda.r` syntax similar to the paper's
-Haskell.
+pure-R reference implementations that follow the structure and type signatures
+of the paper's Haskell.
 
 The [developer API](https://oneilsh.github.io/Immutables/articles/developer-api.html)
 supports the addition of custom structures via combinations of monoids and

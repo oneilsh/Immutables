@@ -1,7 +1,7 @@
 #SO
 
 # identify internal structural nodes (vs user elements)
-# Runtime: O(1). Plain S3-class lookup avoids lambda.r dispatcher overhead;
+# Runtime: O(1). Plain S3-class lookup;
 # called from many tree-traversal hot paths.
 is_structural_node <- function(x) {
   cls <- class(x)

@@ -1,3 +1,9 @@
+# Immutables 1.2.1
+
+## Internal changes
+
+* Removed the dependency on `lambda.r` (scheduled for CRAN archival). The pure-R reference implementations are now plain R functions, with their type signatures kept as comments. No user-visible behavior changes.
+
 # Immutables 1.2.0
 
 ## Deprecated

@@ -22,20 +22,20 @@ testthat::test_that("split_by_predicate returns left/right trees with split elem
 testthat::test_that("split_by_predicate handles empty and predicate-never-true cases", {
   e <- flexseq()
   s0 <- split_by_predicate(e, function(v) v >= 1, ".size")
-  testthat::expect_true(s0$left %isa% Empty)
-  testthat::expect_true(s0$right %isa% Empty)
+  testthat::expect_true(inherits(s0$left, "Empty"))
+  testthat::expect_true(inherits(s0$right, "Empty"))
 
   t <- as_flexseq(letters[1:4])
   s <- split_by_predicate(t, function(v) v >= 10, ".size")
   testthat::expect_identical(attr(s$left, "measures")$.size, 4)
-  testthat::expect_true(s$right %isa% Empty)
+  testthat::expect_true(inherits(s$right, "Empty"))
 })
 
 testthat::test_that("split_by_predicate boundary at first and last element", {
   t <- as_flexseq(letters[1:5])
 
   s1 <- split_by_predicate(t, function(v) v >= 1, ".size")
-  testthat::expect_true(s1$left %isa% Empty)
+  testthat::expect_true(inherits(s1$left, "Empty"))
   testthat::expect_identical(attr(s1$right, "measures")$.size, 5)
   testthat::expect_identical(tree_chars(s1$right), "abcde")
 

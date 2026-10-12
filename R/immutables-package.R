@@ -18,14 +18,13 @@
 #'   algorithms.
 #'
 #' Backed by monoid-annotated 2-3 fingertrees as described by
-#' Hinze and Paterson, most operations are constant time, amortized constant time, or $O(\\log(n))$. Core functions are implemented in C++ (via Rcpp) for speed, with matching pure-R reference implementations using `lambda.r` syntax to match the paper.
+#' Hinze and Paterson, most operations are constant time, amortized constant time, or $O(\\log(n))$. Core functions are implemented in C++ (via Rcpp) for speed, with matching pure-R reference implementations whose structure and type signatures follow the paper.
 #'
 #' Finally, the developer API supports the addition of custom structures via combinations of monoids and measures.
 #'
 #' - Hinze, R. and Paterson, R. (2006), *Finger trees: a simple general-purpose data structure*. \doi{10.1017/S0956796805005769}
 #'
 #' @keywords internal
-#' @import lambda.r
 #' @importFrom Rcpp evalCpp
 #' @useDynLib Immutables, .registration = TRUE
 "_PACKAGE"

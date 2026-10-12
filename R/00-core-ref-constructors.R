@@ -6,12 +6,10 @@
 #
 # These constructors carry the same semantics as the Haskell-style spec used
 # in the paper; the canonical signatures are preserved as comments above each
-# function. The bodies are plain R (not lambda.r) so the hot tree-build path
-# avoids per-call dispatcher overhead — the lambda.r reference layer is the
-# canonical specification, but production code does not pay for its dispatch.
+# function, as they are throughout the R/00-core-ref-*.R reference layer.
 
 # generic node type — stores arbitrary child elements in a list
-# Reference (Haskell-style, lambda.r):
+# Reference:
 #   Node(...) :: ... -> list
 # Runtime: O(k), where k is the number of constructor arguments.
 Node <- function(...) {

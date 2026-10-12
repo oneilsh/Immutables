@@ -51,7 +51,7 @@ tree_from <- function(x, monoids = NULL) {
 
     # Preserve existing behavior: when outer names are absent, derive names
     # from each element payload (ft_name attr or inline scalar names()).
-    # Fast local path avoids lambda dispatch in hot construction workloads.
+    # Fast local path avoids per-element helper-call overhead in hot construction workloads.
     derived <- vector("list", n)
     has_any <- FALSE
     has_missing <- FALSE

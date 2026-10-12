@@ -33,7 +33,7 @@
 
   for(i in seq_len(n)) {
     e <- entries[[i]]
-    # inline .ft_get_name / .ft_normalize_name to avoid lambda.r dispatch per element
+    # inline .ft_get_name / .ft_normalize_name to avoid a function call per element
     nm <- attr(e, "ft_name", exact = TRUE)
     if(!is.null(nm) && (!is.character(nm) || length(nm) != 1L || is.na(nm) || !nzchar(nm))) {
       nm <- NULL
@@ -49,7 +49,7 @@
       do.call(f, c(list(e$value, e$start, e$end), dot_args))
     }
     entry2 <- .ivx_make_entry(item2, e$start, e$end)
-    # inline .ft_set_name to avoid lambda.r dispatch per element
+    # inline .ft_set_name to avoid a function call per element
     if(!is.null(nm)) attr(entry2, "ft_name") <- nm
     out_entries[[i]] <- entry2
   }

@@ -8,14 +8,14 @@
     st$pos <- st$pos + 1L
     return(invisible(NULL))
   }
-  if(x %isa% Empty) {
+  if(inherits(x, "Empty")) {
     return(invisible(NULL))
   }
-  if(x %isa% Single) {
+  if(inherits(x, "Single")) {
     .ft_to_list_fill(.subset2(x, 1), st)
     return(invisible(NULL))
   }
-  if(x %isa% Deep) {
+  if(inherits(x, "Deep")) {
     .ft_to_list_fill(.subset2(x, "prefix"), st)
     .ft_to_list_fill(.ft_middle(x), st)
     .ft_to_list_fill(.subset2(x, "suffix"), st)
@@ -254,13 +254,13 @@
     }
     return(NA_integer_)
   }
-  if(x %isa% Empty) {
+  if(inherits(x, "Empty")) {
     return(NA_integer_)
   }
-  if(x %isa% Single) {
+  if(inherits(x, "Single")) {
     return(.ft_find_name_position_impl(.subset2(x, 1), target, offset))
   }
-  if(x %isa% Deep) {
+  if(inherits(x, "Deep")) {
     p <- .ft_find_name_position_impl(.subset2(x, "prefix"), target, offset)
     if(!is.na(p)) {
       return(p)

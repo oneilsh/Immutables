@@ -8,7 +8,7 @@ locate_by_predicate.flexseq <- function(t, predicate, monoid_name, accumulator =
   ms <- ctx$monoids
   mr <- ctx$monoid
 
-  if(t %isa% Empty) {
+  if(inherits(t, "Empty")) {
     if(!isTRUE(include_metadata)) {
       return(list(found = FALSE, value = NULL))
     }

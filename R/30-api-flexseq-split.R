@@ -8,7 +8,7 @@ split_around_by_predicate.flexseq <- function(t, predicate, monoid_name, accumul
   ms <- ctx$monoids
   mr <- ctx$monoid
 
-  if(t %isa% Empty) {
+  if(inherits(t, "Empty")) {
     stop("split_around_by_predicate requires a non-empty tree.")
   }
 
@@ -31,7 +31,7 @@ split_by_predicate.flexseq <- function(x, predicate, monoid_name) {
   ms <- ctx$monoids
   mr <- ctx$monoid
 
-  if(x %isa% Empty) {
+  if(inherits(x, "Empty")) {
     left_empty <- .ft_restore_subclass(.as_flexseq(measured_empty(ms)), x, context = "split_by_predicate()")
     right_empty <- .ft_restore_subclass(.as_flexseq(measured_empty(ms)), x, context = "split_by_predicate()")
     return(list(left = left_empty, right = right_empty))

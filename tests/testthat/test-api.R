@@ -5,7 +5,7 @@ testthat::test_that("tree construction defaults to .size monoid", {
   testthat::expect_true(!is.null(attr(t, "monoids")[[".size"]]))
 
   e <- flexseq()
-  testthat::expect_true(e %isa% Empty)
+  testthat::expect_true(inherits(e, "Empty"))
   testthat::expect_identical(attr(e, "measures")$.size, 0)
 })
 
