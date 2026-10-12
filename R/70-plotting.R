@@ -68,7 +68,7 @@ get_graph_df <- function(t) {
 # Runtime: O(n) worst-case in relevant input/subtree size.
   add_edges <- function(t, path) {
 
-    if(is_structural_node(t) && t %isa% Empty) {
+    if(is_structural_node(t) && inherits(t, "Empty")) {
       add_node_row(path, structural_class(t), "",
                    measures = attr(t, "measures", exact = TRUE))
     }

@@ -2,9 +2,9 @@
 
 # split a digit at the first point where predicate flips from FALSE to TRUE
 # Runtime: O(k), where k = digit length (<= 4 in normal tree structure).
-if(FALSE) split_digit <- function(p, i, digit, monoids, monoid_name) NULL
-split_digit(p, i, digit, monoids, monoid_name) %::% Function : . : list : list : character : list
-split_digit(p, i, digit, monoids, monoid_name) %as% {
+# Reference:
+#   split_digit(p, i, digit, monoids, monoid_name) :: Function -> . -> list -> list -> character -> list
+split_digit <- function(p, i, digit, monoids, monoid_name) {
   ms <- monoids
   mr <- ms[[monoid_name]]
   if(is.null(mr)) {

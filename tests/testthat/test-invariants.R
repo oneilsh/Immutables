@@ -10,20 +10,20 @@ validate_fingertree_invariants <- function(t) {
   }
 
   walk <- function(x) {
-    if(x %isa% Empty) {
+    if(inherits(x, "Empty")) {
       testthat::expect_true(!is.null(attr(x, "monoids")))
       testthat::expect_true(!is.null(attr(x, "measures")))
       return(invisible(TRUE))
     }
 
-    if(x %isa% Single) {
+    if(inherits(x, "Single")) {
       testthat::expect_identical(length(x), 1L)
       testthat::expect_true(!is.null(attr(x, "monoids")))
       testthat::expect_true(!is.null(attr(x, "measures")))
       return(invisible(TRUE))
     }
 
-    if(x %isa% Deep) {
+    if(inherits(x, "Deep")) {
       testthat::expect_true(length(x$prefix) >= 1 && length(x$prefix) <= 4)
       testthat::expect_true(length(x$suffix) >= 1 && length(x$suffix) <= 4)
       testthat::expect_true(is_homogeneous(x$prefix))
@@ -34,7 +34,7 @@ validate_fingertree_invariants <- function(t) {
       return(invisible(TRUE))
     }
 
-    if(x %isa% Node) {
+    if(inherits(x, "Node")) {
       testthat::expect_true(length(x) %in% c(2L, 3L))
       testthat::expect_true(is_homogeneous(x))
       testthat::expect_true(!is.null(attr(x, "monoids")))
@@ -47,7 +47,7 @@ validate_fingertree_invariants <- function(t) {
       return(invisible(TRUE))
     }
 
-    if(x %isa% Digit) {
+    if(inherits(x, "Digit")) {
       testthat::expect_true(length(x) >= 1 && length(x) <= 4)
       testthat::expect_true(is_homogeneous(x))
       testthat::expect_true(!is.null(attr(x, "monoids")))

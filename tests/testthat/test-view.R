@@ -21,8 +21,8 @@ testthat::test_that("viewL/viewR on Single produce Empty remainder", {
 
   testthat::expect_identical(vl$value, "x")
   testthat::expect_identical(vr$value, "x")
-  testthat::expect_true(vl$rest %isa% Empty)
-  testthat::expect_true(vr$rest %isa% Empty)
+  testthat::expect_true(inherits(vl$rest, "Empty"))
+  testthat::expect_true(inherits(vr$rest, "Empty"))
 })
 
 testthat::test_that("deepL/deepR collapse correctly when middle is Empty", {

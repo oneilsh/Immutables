@@ -1,7 +1,7 @@
 #SO
 
-# Fast plain-R helpers that bypass lambda.r dispatch overhead (~100-190us/call).
-# These are hot-path equivalents of lambda.r-defined functions.
+# Fast plain-R helpers for hot paths.
+# These are hot-path equivalents of the reference-layer functions.
 
 # Runtime: O(1). Fast replacement for node_measure(x, ".size").
 .ft_size <- function(x) {
@@ -13,7 +13,7 @@
   as.integer(attr(x, "measures", exact = TRUE)[[".named_count"]])
 }
 
-# Runtime: O(1). Fast replacement for .ft_get_name(el) (skips lambda.r dispatch).
+# Runtime: O(1). Fast replacement for .ft_get_name(el).
 .ft_get_name_fast <- function(el) {
   nm <- attr(el, "ft_name", exact = TRUE)
   if(is.null(nm)) return(NULL)
@@ -21,7 +21,7 @@
   nm
 }
 
-# Runtime: O(1). Fast replacement for .ft_set_name(el, name) (skips lambda.r dispatch).
+# Runtime: O(1). Fast replacement for .ft_set_name(el, name).
 # Caller must pass NULL or a validated non-empty string.
 .ft_set_name_fast <- function(el, name) {
   attr(el, "ft_name") <- name

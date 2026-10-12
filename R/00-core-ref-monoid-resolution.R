@@ -3,9 +3,9 @@
 #
 # These resolvers are pervasive in tree hot paths (called several times per
 # query); the canonical Haskell-style signatures are preserved as comments,
-# with plain R bodies to avoid lambda.r dispatcher overhead in production.
+# with plain R bodies.
 
-# Reference (Haskell-style, lambda.r):
+# Reference:
 #   resolve_tree_monoids(t, required = FALSE) :: . -> logical -> .
 # Runtime: O(1) fast-path (single attr read).
 resolve_tree_monoids <- function(t, required = FALSE) {

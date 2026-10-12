@@ -27,7 +27,7 @@ testthat::test_that("split_digit works when digit holds nodes", {
   d <- Digit(n2, n3)
 
   s <- Immutables:::split_digit(function(v) v >= 3, 0, d, ms, "count")
-  testthat::expect_true(s$value %isa% Node)
+  testthat::expect_true(inherits(s$value, "Node"))
   testthat::expect_identical(length(s$left), 1L)
   testthat::expect_identical(length(s$right), 0L)
 })

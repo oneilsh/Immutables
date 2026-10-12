@@ -3,9 +3,9 @@
 # read-only locate helpers: no reconstruction, only traversal + metadata.
 
 # Runtime: O(1) with cached measures; may recurse for unannotated structural children.
-if(FALSE) locate_child_measure <- function(x, ms, monoid_name, mr) NULL
-locate_child_measure(x, ms, monoid_name, mr) %::% . : list : character : MeasureMonoid : .
-locate_child_measure(x, ms, monoid_name, mr) %as% {
+# Reference:
+#   locate_child_measure(x, ms, monoid_name, mr) :: . -> list -> character -> MeasureMonoid -> .
+locate_child_measure <- function(x, ms, monoid_name, mr) {
   if(is_structural_node(x)) {
     cached <- attr(x, "measures", exact = TRUE)
     if(!is.null(cached) && !is.null(cached[[monoid_name]])) {
@@ -17,9 +17,9 @@ locate_child_measure(x, ms, monoid_name, mr) %as% {
 }
 
 # Runtime: O(1).
-if(FALSE) locate_child_size <- function(x, ms) NULL
-locate_child_size(x, ms) %::% . : list : integer
-locate_child_size(x, ms) %as% {
+# Reference:
+#   locate_child_size(x, ms) :: . -> list -> integer
+locate_child_size <- function(x, ms) {
   sr <- ms[[".size"]]
   if(is.null(sr)) {
     return(1L)
@@ -36,9 +36,9 @@ locate_child_size(x, ms) %as% {
 }
 
 # Runtime: O(k), where k = length(xs).
-if(FALSE) locate_sequence_measure <- function(xs, ms, monoid_name, mr) NULL
-locate_sequence_measure(xs, ms, monoid_name, mr) %::% list : list : character : MeasureMonoid : .
-locate_sequence_measure(xs, ms, monoid_name, mr) %as% {
+# Reference:
+#   locate_sequence_measure(xs, ms, monoid_name, mr) :: list -> list -> character -> MeasureMonoid -> .
+locate_sequence_measure <- function(xs, ms, monoid_name, mr) {
   if(length(xs) == 0L) {
     return(mr$i)
   }
@@ -50,9 +50,9 @@ locate_sequence_measure(xs, ms, monoid_name, mr) %as% {
 }
 
 # Runtime: O(k), where k = digit length (<= 4 in normal tree structure).
-if(FALSE) locate_digit <- function(p, i, digit, monoids, monoid_name, i_size = 0L) NULL
-locate_digit(p, i, digit, monoids, monoid_name, i_size) %::% Function : . : list : list : character : integer : list
-locate_digit(p, i, digit, monoids, monoid_name, i_size = 0L) %as% {
+# Reference:
+#   locate_digit(p, i, digit, monoids, monoid_name, i_size) :: Function -> . -> list -> list -> character -> integer -> list
+locate_digit <- function(p, i, digit, monoids, monoid_name, i_size = 0L) {
   if(length(digit) == 0) {
     stop("locate_digit called with empty digit")
   }
@@ -105,9 +105,9 @@ locate_digit_impl <- function(p, i, digit, ms, mr, monoid_name, i_size = 0L) {
 }
 
 # Runtime: O(log n) near locate point depth.
-if(FALSE) locate_tree_impl <- function(p, i, t, monoids, monoid_name, i_size = 0L) NULL
-locate_tree_impl(p, i, t, monoids, monoid_name, i_size) %::% Function : . : . : list : character : integer : list
-locate_tree_impl(p, i, t, monoids, monoid_name, i_size = 0L) %as% {
+# Reference:
+#   locate_tree_impl(p, i, t, monoids, monoid_name, i_size) :: Function -> . -> . -> list -> character -> integer -> list
+locate_tree_impl <- function(p, i, t, monoids, monoid_name, i_size = 0L) {
   ms <- monoids
   mr <- ms[[monoid_name]]
   if(is.null(mr)) {
@@ -122,15 +122,15 @@ locate_tree_impl_fast <- function(p, i, t, ms, mr, monoid_name, i_size = 0L) {
     return(locate_digit_impl(p, i, list(t), ms, mr, monoid_name, as.integer(i_size)))
   }
 
-  if(t %isa% Empty) {
+  if(inherits(t, "Empty")) {
     return(list(found = FALSE, value = NULL, left_measure = i, hit_measure = NULL, right_measure = NULL, index = NULL))
   }
 
-  if(t %isa% Single) {
+  if(inherits(t, "Single")) {
     return(locate_digit_impl(p, i, list(.subset2(t, 1)), ms, mr, monoid_name, as.integer(i_size)))
   }
 
-  if(t %isa% Deep) {
+  if(inherits(t, "Deep")) {
     # Deep(prefix, middle, suffix): use cached subtree measures to determine
     # which branch contains the first predicate flip without scanning all leaves.
     mpr <- node_measure(.subset2(t,"prefix"), monoid_name)
