@@ -95,77 +95,6 @@ if(!is.null(results_list$sequence)) {
 
 ![](benchmarks_files/figure-html/sequence-plot-1.png)
 
-## Priority queue operations
-
-``` r
-
-pq_sizes <- 2^(12 + 0:6)
-rows <- flexseq()
-
-set.seed(42)
-max_pq <- max(pq_sizes)
-all_pq_vals <- sprintf("val_%06d", seq_len(max_pq))
-all_pq_pri  <- runif(max_pq)
-
-for(n in pq_sizes) {
-  cat("Priority queue ops, size ", n, "\n")
-  pv <- as.list(all_pq_vals[seq_len(n)])
-  pw <- all_pq_pri[seq_len(n)]
-  pq_setup   <- function() list(pq = as_priority_queue(pv, priorities = pw))
-  # Values in a list (arbitrary payloads, as the priority_queue stores);
-  # priorities in a numeric vector.
-  base_setup <- function() list(v = as.list(all_pq_vals[seq_len(n)]), p = pw)
-
-  rows <- bench_one(rows, "priority_queue", "insert",   n, repeats, pq_setup,
-    function(st) insert(st$pq, "val_new", 0.5))
-  rows <- bench_one(rows, "priority_queue", "peek max", n, repeats, pq_setup,
-    function(st) peek_max(st$pq))
-  rows <- bench_one(rows, "priority_queue", "pop max",  n, repeats, pq_setup,
-    function(st) pop_max(st$pq)$remaining)
-
-  rows <- bench_one(rows, "base R", "insert",   n, repeats, base_setup,
-    function(st) list(values = c(st$v, list("val_new")), priorities = c(st$p, 0.5)))
-  rows <- bench_one(rows, "base R", "peek max", n, repeats, base_setup,
-    function(st) st$v[[which.max(st$p)]])
-  rows <- bench_one(rows, "base R", "pop max",  n, repeats, base_setup,
-    function(st) { i <- which.max(st$p); list(values = st$v[-i], priorities = st$p[-i]) })
-}
-
-results_list$pq <- do.call(rbind, as.list(rows))
-save_batch("pq")
-```
-
-``` r
-
-if(!is.null(results_list$pq)) {
-  pq_results <- results_list$pq
-  sorted_sizes <- sort(unique(pq_results$n))
-  pq_results$n_cat <- factor(pq_results$n, levels = sorted_sizes)
-
-  p_pq <- ggplot(pq_results, aes(x = n_cat, y = as.numeric(time_s), color = impl)) +
-    geom_boxplot() +
-    facet_wrap(~ op, scales = "free_y") +
-    scale_x_discrete(labels = pow2_labels) +
-    labs(
-      title = "Priority Queue Operations",
-      x = "Number of elements",
-      y = "Time",
-      color = "Implementation"
-    ) +
-    theme_bw() +
-    scale_color_manual(values = c("base R" = "#fc8d62", "priority_queue" = "#66c2a5")) +
-    scale_y_log10(labels = label_time, guide = "axis_logticks") +
-    #scale_y_continuous(labels = label_time) +
-    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
-  print(p_pq)
-  save_figure(p_pq, "benchmarks-pq.pdf", width = 9, height = 3.2)
-} else {
-  knitr::asis_output("*Benchmark results not yet generated.*")
-}
-```
-
-![](benchmarks_files/figure-html/pq-plot-1.png)
-
 ## Ordered sequence operations
 
 ``` r
@@ -262,6 +191,77 @@ if(!is.null(results_list$ordered)) {
 ```
 
 ![](benchmarks_files/figure-html/ordered-plot-1.png)
+
+## Priority queue operations
+
+``` r
+
+pq_sizes <- 2^(12 + 0:6)
+rows <- flexseq()
+
+set.seed(42)
+max_pq <- max(pq_sizes)
+all_pq_vals <- sprintf("val_%06d", seq_len(max_pq))
+all_pq_pri  <- runif(max_pq)
+
+for(n in pq_sizes) {
+  cat("Priority queue ops, size ", n, "\n")
+  pv <- as.list(all_pq_vals[seq_len(n)])
+  pw <- all_pq_pri[seq_len(n)]
+  pq_setup   <- function() list(pq = as_priority_queue(pv, priorities = pw))
+  # Values in a list (arbitrary payloads, as the priority_queue stores);
+  # priorities in a numeric vector.
+  base_setup <- function() list(v = as.list(all_pq_vals[seq_len(n)]), p = pw)
+
+  rows <- bench_one(rows, "priority_queue", "insert",   n, repeats, pq_setup,
+    function(st) insert(st$pq, "val_new", 0.5))
+  rows <- bench_one(rows, "priority_queue", "peek max", n, repeats, pq_setup,
+    function(st) peek_max(st$pq))
+  rows <- bench_one(rows, "priority_queue", "pop max",  n, repeats, pq_setup,
+    function(st) pop_max(st$pq)$remaining)
+
+  rows <- bench_one(rows, "base R", "insert",   n, repeats, base_setup,
+    function(st) list(values = c(st$v, list("val_new")), priorities = c(st$p, 0.5)))
+  rows <- bench_one(rows, "base R", "peek max", n, repeats, base_setup,
+    function(st) st$v[[which.max(st$p)]])
+  rows <- bench_one(rows, "base R", "pop max",  n, repeats, base_setup,
+    function(st) { i <- which.max(st$p); list(values = st$v[-i], priorities = st$p[-i]) })
+}
+
+results_list$pq <- do.call(rbind, as.list(rows))
+save_batch("pq")
+```
+
+``` r
+
+if(!is.null(results_list$pq)) {
+  pq_results <- results_list$pq
+  sorted_sizes <- sort(unique(pq_results$n))
+  pq_results$n_cat <- factor(pq_results$n, levels = sorted_sizes)
+
+  p_pq <- ggplot(pq_results, aes(x = n_cat, y = as.numeric(time_s), color = impl)) +
+    geom_boxplot() +
+    facet_wrap(~ op, scales = "free_y") +
+    scale_x_discrete(labels = pow2_labels) +
+    labs(
+      title = "Priority Queue Operations",
+      x = "Number of elements",
+      y = "Time",
+      color = "Implementation"
+    ) +
+    theme_bw() +
+    scale_color_manual(values = c("base R" = "#fc8d62", "priority_queue" = "#66c2a5")) +
+    scale_y_log10(labels = label_time, guide = "axis_logticks") +
+    #scale_y_continuous(labels = label_time) +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+  print(p_pq)
+  save_figure(p_pq, "benchmarks-pq.pdf", width = 9, height = 3.2)
+} else {
+  knitr::asis_output("*Benchmark results not yet generated.*")
+}
+```
+
+![](benchmarks_files/figure-html/pq-plot-1.png)
 
 ## Interval index operations
 
