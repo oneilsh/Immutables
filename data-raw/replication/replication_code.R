@@ -157,8 +157,6 @@ untreated_seq <- as_ordered_sequence(untreated_rows,
                                      keys = untreated_scores)
 
 while (length(treated_seq) > 0) {
-  if (length(untreated_seq) == 0L) break
-
   front_el <- pop_front(treated_seq)
   treated_seq <- front_el$remaining
   treated_pt_score <- front_el$key
@@ -186,10 +184,10 @@ head(match_df)
 ##################################
 
 ix1 <- as_interval_index(c("a", "b", "c"),
-                         start = c(1, 2, 4),
-                         end = c(3, 4, 5))
-peek_point(ix1, 3)
-peek_point(ix1, 2, match_at = "start")
+                         start = c(1, 2, 6),
+                         end = c(4, 6, 8))
+unlist(peek_all_point(ix1, 3))
+unlist(peek_all_point(ix1, 2, match_at = "start"))
 ix2 <- insert(ix1, "d", start = 5, end = 6)
 ix3 <- pop_all_overlapping(ix2, 3, 4.5)
 ix3$elements
@@ -332,10 +330,9 @@ positions
 ## and tested values in `sequence_sizes`, `ord_sizes`, `pq_sizes`, and 
 ## `ivx_sizes` below to produce a subset of results faster.
 
-## The figures in the manuscript are produced as part of a package vignette,
-## triggered conditionally based on an environment variable. This 
-## code removes that conditional build infrastructure and figure destination 
-## but is otherwise exactly that used to produce the benchmark figures.
+## Each benchmark figure is drawn to the active graphics device and also saved
+## to the current working directory as benchmarks-*.pdf; these saved files are
+## the figures used in the manuscript.
 
 library(microbenchmark)
 library(bench)
@@ -449,6 +446,7 @@ p_sequence <- ggplot(seq_results, aes(x = n_cat, y = as.numeric(time_s), color =
   theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
 
 plot(p_sequence)
+ggsave("benchmarks-sequence.pdf", p_sequence, width = 9, height = 5)
 
 
 ##############################
@@ -535,6 +533,7 @@ p_ordered <- ggplot(ord_results, aes(x = n_cat, y = as.numeric(time_s), color = 
   theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
 
 plot(p_ordered)
+ggsave("benchmarks-ordered.pdf", p_ordered, width = 9, height = 5)
 
 
 ##############################
@@ -596,6 +595,7 @@ p_pq <- ggplot(pq_results, aes(x = n_cat, y = as.numeric(time_s), color = impl))
   theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
 
 plot(p_pq)
+ggsave("benchmarks-pq.pdf", p_pq, width = 9, height = 3.2)
 
 
 ##############################
@@ -729,9 +729,4 @@ p_ivx <- ggplot(ivx_results, aes(x = n_cat, y = as.numeric(time_s), color = impl
   theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
 
 plot(p_ivx)
-
-
-
-
-
-
+ggsave("benchmarks-ivx.pdf", p_ivx, width = 9, height = 5)
